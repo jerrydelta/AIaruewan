@@ -1,0 +1,49 @@
+# Node modules
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Database
+db/leads.db-journal
+db/leads.db-shm
+db/leads.db-wal
+
+# Temp files
+temp/
+tmp/
+*.tmp
+
+# Automation memory (sensitive)
+.workbuddy/automations/*/memory.md
+
+# Large data files (optional - uncomment if needed)
+# db/leads.db
+# scripts/*_clues.json
+# agent_run*.json
