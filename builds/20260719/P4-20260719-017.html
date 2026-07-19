@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩文设计资产包（Framer/网站/社媒模板）</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;position:relative}
+.del{position:absolute;right:0;top:10px;background:#fff;color:var(--coral);
+  border:1px solid #FFD9D9;border-radius:8px;font-size:12px;padding:4px 10px;cursor:pointer}
+.mini{font-size:13px;color:var(--ink);background:#FAFAFA;border:1px solid var(--line);
+  border-radius:10px;padding:10px;margin-top:8px}
+.hr{height:1px;background:var(--line);border:none;margin:14px 0}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">digital_product</span><span class="tag">design_assets</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩文设计资产包（Framer/网站/社媒模板）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KR design asset packs (Framer/site/social templates)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国设计资产需求在Framer Marketplace、Creative Market、크몽增长。设计模板制作3-15小时、售价3,000-20,000韩元、月收入40-180만韩元。痛点：韩语设计资产供给不足、海外平台韩元结算弱。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>에셋 유형 (类型)</label><select id="da1"><option>Framer</option><option>웹사이트</option><option>소셜미디어</option><option>로고</option></select>
+<label>가격(원)</label><input type="number" id="da2" placeholder="8000">
+<label>월 판매추정(개)</label><input type="number" id="da3" placeholder="20">
+<label>플랫폼</label><select id="da4"><option>크몽</option><option>Framer</option><option>CreativeMarket</option></select>
+<button class="btn" onclick="addDa()">등록</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://braindetox.kr/zh/posts/side_business_trends_2026_top10.html" target="_blank" style="color:var(--coral)">Creative Market / Framer Marketplace / Etsy / 크몽</a>
+  </div>
+
+<script>
+const KEY="P4-20260719-017";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addDa(){
+ var price=+document.getElementById('da2').value||0,sale=+document.getElementById('da3').value||0;
+ items.push({type:document.getElementById('da1').value,price:price,sale:sale,plat:document.getElementById('da4').value,rev:price*sale,ts:Date.now()});
+ save();document.getElementById('da2').value='';document.getElementById('da3').value='';
+}
+function render(){
+ var el=document.getElementById('list');
+ if(!items.length){el.innerHTML='<b>🎨 디자인 에셋 (韩文)</b><p style="font-size:13px;color:var(--muted)">에셋을 등록하세요.</p>';return;}
+ var tot=0;items.forEach(function(x){tot+=x.rev;});
+ el.innerHTML='<b>🎨 디자인 에셋（'+items.length+' · 월추정 ₩'+tot.toFixed(0)+'）</b>'+items.map(function(x,i){
+  return '<div class="item"><div><b>'+x.type+'</b> · '+x.plat+'</div><div style="font-size:12px;color:var(--muted)">₩'+x.price+' · 월'+x.sale+'개 · ₩'+x.rev.toFixed(0)+'</div><button class="del" onclick="del('+i+')">삭제</button></div>';
+ }).join('');
+}
+function del(i){items.splice(i,1);save();}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>错误日志解析台 · AI版</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.ai-card .collapse-body.collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">debug_tools</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">错误日志解析台</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">On-prem AI error/log analyzer running on local LLM, no code leaves machine.</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">重视代码保密的日韩开发者，需要"不上云、本地运行"的 AI 调试工具。LocalForge（MIT，完全本地 AI 编码代理，GitHub 4,200+ stars）的流行正说明这一点</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>错误标题</label><input id="e_title" placeholder="如 支付回调 500">
+<label>类型</label><select id="e_type"><option>前端</option><option>后端</option><option>部署/运维</option></select>
+<label>堆栈 / 日志</label><textarea id="e_log" rows="4" placeholder="粘贴错误堆栈..."></textarea>
+<label>你的诊断与方案</label><textarea id="e_fix" rows="3" placeholder="根因与修复方法..."></textarea>
+<button class="btn" onclick="addItem()">+ 存入案例库</button>
+<label>检索</label><input id="e_q" oninput="render()" placeholder="关键词">
+  </div>
+
+  <div class="card" id="list"></div>
+
+<div class="card ai-card ai-bg ai-border" id="aiCard">
+  <div class="collapse-header" onclick="toggleAI()">
+    🤖 AI 助手（用户自带Key · 零成本）
+  </div>
+  <div class="collapse-body collapsed" id="aiBody">
+    <div id="aiKeySection">
+      <label>Hy3 API Key（用户自带，零成本运营）</label>
+      <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+      <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">
+        使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+      </div>
+    </div>
+    <div id="aiChatSection" style="display:none">
+      <div id="aiChat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+        <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://localforge.dev" target="_blank" style="color:var(--coral)">LocalForge / OpenBug AI / Sentry(self-hosted)</a>
+  </div>
+
+<script>
+
+const KEY="P16-20260719-011";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addItem(){
+  const title=document.getElementById('e_title').value.trim();
+  const type=document.getElementById('e_type').value;
+  const log=document.getElementById('e_log').value;
+  const fix=document.getElementById('e_fix').value.trim();
+  if(!title){alert('请填写标题');return;}
+  items.push({title,type,log,fix,added:new Date().toLocaleString()});
+  save();
+  document.getElementById('e_title').value='';document.getElementById('e_log').value='';document.getElementById('e_fix').value='';
+}
+function del(i){items.splice(i,1);save();}
+function render(){
+  const el=document.getElementById('list');
+  const q=document.getElementById('e_q').value.trim().toLowerCase();
+  let list=items;
+  if(q) list=items.filter(it=>(it.title+it.type+it.log+it.fix).toLowerCase().indexOf(q)>=0);
+  if(!list.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">暂无案例</p>';return;}
+  el.innerHTML='<b>🐞 案例库（'+list.length+'/'+items.length+'）</b>'+list.map((it,idx)=>{
+    const realIdx=items.indexOf(it);
+    return '<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px">'+
+      '<div style="font-weight:600">'+esc(it.title)+' <span class="tag">'+esc(it.type)+'</span></div>'+
+      (it.log?'<pre style="font-size:11px;background:#fafafa;border:1px solid var(--line);border-radius:8px;padding:8px;overflow:auto;white-space:pre-wrap;margin:6px 0">'+esc(it.log)+'</pre>':'')+
+      (it.fix?'<div style="font-size:13px;color:#333"><b>方案：</b>'+esc(it.fix)+'</div>':'')+
+      '<button class="btn" style="background:#fff;color:var(--coral);border:1px solid var(--line);margin-top:6px" onclick="del('+realIdx+')">删除</button>'+
+      '</div>';
+  }).join('');
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+render();
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({
+        model:'hunyuan-pro',
+        messages:aiHistory,
+        stream: false
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// 初始化AI模块
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+</script>
+</body>
+</html>

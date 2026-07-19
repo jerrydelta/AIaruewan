@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>妈妈例行+心情记录</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">parenting</span><span class="tag">parenting_diary</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">妈妈例行 + 3分钟心情记录</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Situation-triggered routine + mood journaling for overwhelmed moms</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">84% 的妈妈表示"一天连 10 分钟属于自己的时间都没有"。很多计划做不完，短暂自由时间也不知道该做什么。用"按情境触发"的例行 + 3 分钟心情记录，帮妈妈把碎片时间用起来、看清自己的情绪规律。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 例行</b>
+    <label>触发情境（不是时间点）</label>
+    <input id="sit" placeholder="如：孩子睡着后">
+    <label>这件小事</label>
+    <input id="task" placeholder="如：喝杯茶 / 拉伸 5 分钟">
+    <button class="btn" onclick="addRoutine()">加入我的例行</button>
+    <div id="routines" style="margin-top:10px"></div>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 3分钟心情</b>
+    <label>今天的心情</label>
+    <select id="mood">
+      <option value="开心">😊 开心</option>
+      <option value="还行">😐 还行</option>
+      <option value="累">😮‍💨 累</option>
+      <option value="焦虑">😟 焦虑</option>
+      <option value="难过">😢 难过</option>
+    </select>
+    <label>一句话（可选）</label>
+    <input id="moodNote" placeholder="发生了什么？">
+    <button class="btn" onclick="addMood()">记下此刻</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://prtimes.jp/main/html/rd/p/000000007.000159484.html" target="_blank" style="color:var(--coral)">MyRoutine(マイルーティン)</a>
+  </div>
+<script>
+const KEY="P6-20260719-002";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"routines":[],"moods":[]}');
+function addRoutine(){
+  const sit=document.getElementById('sit').value.trim();
+  const task=document.getElementById('task').value.trim();
+  if(!sit||!task){alert('请填完整');return;}
+  data.routines.push({sit,task,done:false,id:Date.now()});
+  document.getElementById('sit').value='';document.getElementById('task').value='';
+  save();
+}
+function toggleR(id){(data.routines.find(r=>r.id===id)).done=!(data.routines.find(r=>r.id===id)).done;save();}
+function addMood(){
+  const m=document.getElementById('mood').value;
+  const n=document.getElementById('moodNote').value.trim();
+  data.moods.unshift({m,n,t:new Date().toLocaleString('zh-CN'),id:Date.now()});
+  document.getElementById('moodNote').value='';save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function render(){
+  document.getElementById('routines').innerHTML=data.routines.map(r=>
+    '<div onclick="toggleR('+r.id+')" style="padding:8px;border:1px solid var(--line);border-radius:10px;margin-top:6px;'+(r.done?'text-decoration:line-through;opacity:.5':'')+'">'+
+    (r.done?'✅':'⬜')+' <b>'+esc(r.task)+'</b> <span style="font-size:12px;color:#999">· '+esc(r.sit)+'</span></div>').join('')||'<p style="font-size:13px;color:#999">还没有例行，先加一条。</p>';
+  const cnt={};
+  data.moods.forEach(x=>cnt[x.m]=(cnt[x.m]||0)+1);
+  const el=document.getElementById('list');
+  if(!data.moods.length){el.innerHTML='<b>📊 心情记录</b><p style="font-size:13px;color:#999">还没有记录。</p>';return;}
+  el.innerHTML='<b>📊 已记录 '+data.moods.length+' 次</b>'+
+    '<div style="font-size:13px;color:#555;margin:4px 0">分布：'+Object.keys(cnt).map(k=>k+' '+cnt[k]).join(' · ')+'</div>'+
+    data.moods.slice(0,8).map(x=>'<div style="border-top:1px solid var(--line);padding:6px 0;font-size:13px">'+x.m+' · '+(x.n?esc(x.n):'—')+' <span style="font-size:11px;color:#999">'+x.t+'</span></div>').join('');
+}
+function esc(s){return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>就活AI面接・ES自動診断（日语特化）｜日本求职ES诊断</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{display:flex;justify-content:space-between;align-items:center;
+  padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.score{font-weight:700;color:var(--coral)}
+.del{color:var(--muted);font-size:13px;cursor:pointer;border:none;background:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">career</span><span class="tag">resume_interview</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">就活AI面接・ES自動診断（日语特化）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Japan-focused AI mock-interview &amp; ES diagnosis SaaS for job hunters</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本新卒・中途就活市場でAI面接対策・ES診断ツールへの需要が急増。就活AIは2025/3/31時点で累計利用者519,861人。痛点：ES（志望動機・自己PR・ガクチカ）の書き方が迷い、客観的な自己診断ツールが不足。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · ES自動診断</b>
+    <label>企業名 / 職種</label>
+    <div class="row">
+      <input id="company" placeholder="例：Toyota">
+      <input id="role" placeholder="例：総合職">
+    </div>
+    <label>志望動機（ES本文）</label>
+    <textarea id="motivation" rows="3" placeholder="なぜこの会社なのか…"></textarea>
+    <label>自己PR</label>
+    <textarea id="pr" rows="3" placeholder="あなたの強み…"></textarea>
+    <label>ガクチカ（頑張ったこと）</label>
+    <textarea id="gakuchi" rows="3" placeholder="成果・数字…"></textarea>
+    <label>診断チェックリスト（該当にチェック）</label>
+    <div style="font-size:13px;margin-top:4px">
+      <label style="margin:2px 0"><input type="checkbox" class="chk" style="width:auto;margin:0 6px 0 0">具体エピソードがある</label>
+      <label style="margin:2px 0"><input type="checkbox" class="chk" style="width:auto;margin:0 6px 0 0">数字・成果を入れている</label>
+      <label style="margin:2px 0"><input type="checkbox" class="chk" style="width:auto;margin:0 6px 0 0">熱意・志が伝わる</label>
+      <label style="margin:2px 0"><input type="checkbox" class="chk" style="width:auto;margin:0 6px 0 0">論理構成が明確</label>
+    </div>
+    <div id="liveScore" class="h-coral" style="font-size:14px;margin-top:8px"></div>
+    <button class="btn" onclick="addES()">保存诊断结果</button>
+  </div>
+
+  <div class="card" id="list"><b>📋 已保存的ES诊断</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://sai.jaic-g.com/" target="_blank" style="color:var(--coral)">就活AI / 就活パイセン</a>
+  </div>
+
+<script>
+const KEY="P2-20260719-001";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function calcScore(){
+  const checks=document.querySelectorAll(".chk:checked").length;
+  const len=(document.getElementById("motivation").value+document.getElementById("pr").value+document.getElementById("gakuchi").value).length;
+  let s=checks*20; // 80 max
+  if(len>=300&&len<=1200) s+=20; // 文字数適正
+  document.getElementById("liveScore").textContent="当前预测诊断分："+s+"/100";
+  return s;
+}
+["motivation","pr","gakuchi"].forEach(id=>document.getElementById(id).addEventListener("input",calcScore));
+document.querySelectorAll(".chk").forEach(c=>c.addEventListener("change",calcScore));
+function addES(){
+  const company=document.getElementById("company").value.trim();
+  const role=document.getElementById("role").value.trim();
+  if(!company){alert("请输入企業名");return;}
+  const score=calcScore();
+  items.unshift({company,role,score,date:new Date().toLocaleString()});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("company").value="";document.getElementById("role").value="";
+  document.getElementById("motivation").value="";document.getElementById("pr").value="";
+  document.getElementById("gakuchi").value="";
+  document.querySelectorAll(".chk").forEach(c=>c.checked=false);
+  document.getElementById("liveScore").textContent="";
+  render();
+}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>📋 已保存的ES诊断</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>暂无记录</p>";return;}
+  box.innerHTML="<b>📋 已保存的ES诊断（"+items.length+"）</b>"+items.map((it,i)=>
+    "<div class='item'><div><div style='font-size:14px'>"+(it.company)+(it.role?" · "+it.role:"")+
+    "</div><div style='font-size:11px;color:var(--muted)'>"+it.date+"</div></div>"+
+    "<div style='text-align:right'><span class='score'>"+it.score+"</span><div><button class='del' onclick='del("+i+")'>删除</button></div></div></div>").join("");
+}
+render();
+</script>
+</body>
+</html>

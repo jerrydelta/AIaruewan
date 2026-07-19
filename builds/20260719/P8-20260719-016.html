@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩国向离线PW管理（金融连携）</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.small{font-size:12px;color:var(--muted)}
+.del{color:var(--coral);font-size:13px;cursor:pointer;float:right}
+</style>
+</head>
+<body>
+<div class="card">
+  <div><span class="tag">privacy</span><span class="tag">password_manager</span></div>
+  <h1 style="font-size:20px;margin:8px 0 4px">韩国向 离线密码管理（金融连携）</h1>
+  <p class="h-coral" style="font-size:13px;margin:0">Korea-facing offline password manager (finance integration)</p>
+</div>
+<div class="card">
+  <b>💡 痛点</b>
+  <p style="font-size:14px;color:#555;margin:6px 0 0">韩国「数据主权·离线」密码管理需求明显，Enpass 以离线优先、韩语支持、强调数据主权受欢迎。但「韩国系 OTP／金融连携·韩语优化」不足。</p>
+</div>
+<div class="card">
+  <b>🛠 工具 · 离线保险箱</b>
+  <label>服务 / 网站</label><input id="site" placeholder="kb국민은행">
+  <div class="row"><div><label>账号</label><input id="acc" placeholder="账号"></div><div><label>密码</label><input id="pw" placeholder="密码"></div></div>
+  <label><input type="checkbox" id="fin" style="width:auto;margin:0 6px 0 0">标记为金融账户（生成 OTP）</label>
+  <button class="btn" onclick="addPW()">保存到本机</button>
+  <p class="small" style="margin-top:6px">🔒 完全离线，数据仅存本机。金融项可生成演示级 30 秒 OTP。</p>
+</div>
+<div class="card" id="list"></div>
+<div class="card" style="font-size:12px;color:var(--muted)">
+  <b>来源参考</b><br>
+  <a href="https://www.enpass.io/" target="_blank" style="color:var(--coral)">Enpass（离线优先·韩语·数据主权）</a>
+</div>
+<script>
+const KEY="P8-20260719-016";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let timers={};
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function hashCode(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function otp(sec){const t=Math.floor(Date.now()/30000);return String(hashCode(sec+":"+t)%1000000).padStart(6,"0");}
+function addPW(){const s=site.value.trim(),a=acc.value.trim(),p=pw.value,fin=document.getElementById("fin").checked;if(!s||!p){alert("请填服务和密码");return;}items.unshift({s,a,p,fin});site.value=acc.value=pw.value="";document.getElementById("fin").checked=false;save();}
+function del(i){clearInterval(timers[i]);delete timers[i];items.splice(i,1);save();}
+function showOTP(i){const el=document.getElementById("otp"+i);function upd(){el.textContent=otp(items[i].pw)+" · "+(30-Math.floor(Date.now()/1000)%30)+"s";}upd();clearInterval(timers[i]);timers[i]=setInterval(upd,1000);}
+function render(){let o=`<b>🔑 保险箱（${items.length}）</b>`;if(!items.length)o+="<p class='small'>还没有条目。</p>";items.forEach((x,i)=>{o+=`<div class='item'><span class='del' onclick='del(${i})'>删除</span><b>${x.s}</b> ${x.fin?"<span class='tag'>金融</span>":""}<div class='small'>${x.a||""} · ${x.p}</div>${x.fin?`<button class='btn' style='margin-top:6px' onclick='showOTP(${i})'>获取 OTP</button><span id='otp${i}' class='small'></span>`:""}</div>`;});list.innerHTML=o;}
+render();
+</script>
+</body>
+</html>

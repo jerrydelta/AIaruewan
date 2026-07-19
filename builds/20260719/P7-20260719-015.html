@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI脉轮/能量日记+声音疗愈+可穿戴数据一体化</title>
+<style>:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;--ai-border:#7C3AED;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.card.ai{border:1px solid var(--ai-border)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.btn.ai{background:linear-gradient(135deg,#7C3AED,#FF6B6B);color:#fff}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+.tag.ai{color:#fff;background:var(--ai-border);border-color:var(--ai-border)}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.prog{height:8px;background:#EEE;border-radius:999px;margin-top:10px;overflow:hidden}
+.bar{height:100%;width:0;background:var(--coral);transition:.3s}
+.ws-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.ws-item .del{color:var(--coral);font-size:12px;cursor:pointer;margin-left:auto}
+.ws-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--muted);flex:0 0 auto;margin-top:2px;cursor:pointer}
+.ws-dot.on{background:var(--ok);border-color:var(--ok)}
+.feat{display:block;font-size:14px;color:var(--ink);margin:6px 0;cursor:pointer}
+.feat input{width:auto;margin-right:6px}
+.out{margin-top:10px;font-size:14px;color:var(--ink);background:#FFF7F7;border-radius:10px;padding:10px}
+.collapse-header{cursor:pointer}
+.collapse-body.collapsed{display:none}
+.ai-msg{background:#F6F0FF;border-radius:10px;padding:8px 10px;margin-top:8px;font-size:13px}
+.ai-msg .role{font-size:11px;color:var(--ai-border);font-weight:600}
+.loading{color:var(--muted)}
+small{color:var(--muted)}
+a{color:var(--coral)}
+</style></head>
+<body>
+  <div class="card">
+    <div><span class="tag">spirituality</span><span class="tag">energy_diary</span><span class="tag">chakra</span><span class="tag">energy</span><span class="tag">sound_healing</span><span class="tag">binaural</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI脉轮/能量日记+声音疗愈+可穿戴数据一体化</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI chakra/energy diary + sound healing + wearable data</p>
+  </div>
+
+  <div class="card"><b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">脉轮/能量疗愈是冥想之外增长快的细分。Life7集Solfeggio频率(432/528Hz)+双耳节拍+脉轮平衡+CBT+HRV;Aura用AI个性化脉轮疗愈;Chakra Meditation可点选激活各能量中心+西藏钵声;Sereze含&#x27;Chakra Light Journey&#x27;+HRV心率变异性+Gen AI睡眠洞察,年订阅$49.99;Yog Chakra将感恩日记与脉轮觉察结合。</p></div>
+
+  <div class="card">
+    <b>🛠 本地工作台</b>
+    <p style="font-size:13px;color:#555">把「AI脉轮/能量日记+声音疗愈+可穿戴数据一体化」落地成你的执行清单。数据仅存你浏览器本地。</p>
+    <label>添加条目 / 任务</label>
+    <input id="newItem" placeholder="例如：本周完成 MVP 原型">
+    <button class="btn" id="addBtn">添加到工作台</button>
+    <div id="items" style="margin-top:8px"></div>
+    <div class="prog"><div class="bar" id="bar"></div></div>
+    <small id="progTxt" style="color:var(--muted)"></small>
+  </div>
+
+  <div class="card">
+    <b>✅ 推荐功能清单（来自发现线索）</b>
+    <div id="featList" style="margin-top:6px"></div>
+  </div>
+
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源 / 参考</b><br><a href="https://appcharts.net/best-chakra-apps/" target="_blank">https://appcharts.net/best-chakra-apps/</a><br>· Life7<br>· Aura<br>· Chakra Meditation<br>· Sereze
+  </div>
+
+<script>
+
+const ID="P7-20260719-015";
+const SEED=["7/9脉轮平衡引导", "Solfeggio/双耳节拍", "能量水平日记", "HRV/可穿戴接入", "AI疗愈建议"];
+let items=JSON.parse(localStorage.getItem(ID+"_items")||"[]");
+let feats=JSON.parse(localStorage.getItem(ID+"_feats")||"null")||SEED.map(f=>({t:f,done:false}));
+function saveItems(){localStorage.setItem(ID+"_items",JSON.stringify(items));}
+function saveFeats(){localStorage.setItem(ID+"_feats",JSON.stringify(feats));}
+function esc_html(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function render(){
+  const ib=document.getElementById("items");
+  if(!items.length){ib.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">暂无条目，添加你的第一个任务。</p>';}
+  else ib.innerHTML=items.map((r,i)=>'<div class="ws-item"><span class="del" data-i="'+i+'">✕</span><span class="ws-dot '+(r.done?"on":"")+'" data-i="'+i+'"></span><div><b>'+esc_html(r.t)+'</b>'+(r.note?('<br><small>'+esc_html(r.note)+'</small>'):"")+'</div></div>').join("");
+  ib.querySelectorAll(".del").forEach(e=>e.onclick=()=>{items.splice(+e.dataset.i,1);saveItems();render();});
+  ib.querySelectorAll(".ws-dot").forEach(e=>e.onclick=()=>{items[+e.dataset.i].done=!items[+e.dataset.i].done;saveItems();render();});
+  const fb=document.getElementById("featList");
+  fb.innerHTML=feats.map((f,i)=>'<label class="feat"><input type="checkbox" data-i="'+i+'" '+(f.done?"checked":"")+'> '+esc_html(f.t)+'</label>').join("");
+  fb.querySelectorAll("input").forEach(c=>c.onchange=()=>{feats[+c.dataset.i].done=c.checked;saveFeats();updProg();});
+  updProg();
+}
+function updProg(){
+  const tot=items.length+feats.length;
+  const done=items.filter(x=>x.done).length+feats.filter(x=>x.done).length;
+  const pct=tot?Math.round(done/tot*100):0;
+  document.getElementById("bar").style.width=pct+"%";
+  document.getElementById("progTxt").textContent="完成 "+done+"/"+tot+"（"+pct+"%）";
+}
+document.getElementById("addBtn").onclick=function(){
+  const t=document.getElementById("newItem").value.trim();
+  if(!t)return;
+  items.push({t:t,note:"",done:false});
+  document.getElementById("newItem").value="";
+  saveItems();render();
+};
+render();
+
+
+
+</script>
+</body></html>

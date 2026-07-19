@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩文Canva模板双轨（Etsy出海+크몽内销）</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;position:relative}
+.del{position:absolute;right:0;top:10px;background:#fff;color:var(--coral);
+  border:1px solid #FFD9D9;border-radius:8px;font-size:12px;padding:4px 10px;cursor:pointer}
+.mini{font-size:13px;color:var(--ink);background:#FAFAFA;border:1px solid var(--line);
+  border-radius:10px;padding:10px;margin-top:8px}
+.hr{height:1px;background:var(--line);border:none;margin:14px 0}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">digital_product</span><span class="tag">canva_template</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩文Canva模板双轨（Etsy出海+크몽内销）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KR Canva templates dual-track (Etsy overseas + Kmong domestic)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Canva 1.9亿 MAU催生模板经济，韩国创作者在Etsy/크몽卖Canva模板但韩语供给不足。Etsy 9100万买家、费6.5%；Canva Pro $15/月。机会：韩语niche Canva模板上架Etsy+크몽双轨。痛点：Canva授权合规、韩语客服、交付桥。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>Niche (韩语)</label><input id="ca1" placeholder="웨딩 청첩장">
+<label>Etsy 가격($)</label><input type="number" id="ca2" placeholder="25">
+<label>크몽 가격(만원)</label><input type="number" id="ca3" placeholder="3">
+<label>월 판매추정(Etsy+크몽 합산,개)</label><input type="number" id="ca4" placeholder="50">
+<button class="btn" onclick="addCa()">등록</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.gelato.com/blog/how-to-sell-canva-templates-on-etsy" target="_blank" style="color:var(--coral)">Canva / Etsy / 크몽 / Gumroad</a>
+  </div>
+
+<script>
+const KEY="P4-20260719-020";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addCa(){
+ var n=document.getElementById('ca1').value.trim();
+ if(!n){alert('niche 입력');return;}
+ var e=+document.getElementById('ca2').value||0;
+ var km=+document.getElementById('ca3').value||0;
+ var krw=km*10000;
+ var sale=+document.getElementById('ca4').value||0;
+ var eNet=e*sale*0.935, kmRev=krw*sale, tot=eNet+kmRev;
+ items.push({niche:n,e:e,km:km,krw:krw,sale:sale,eNet:eNet,kmRev:kmRev,tot:tot,ts:Date.now()});
+ save();document.getElementById('ca1').value='';document.getElementById('ca2').value='';document.getElementById('ca3').value='';document.getElementById('ca4').value='';
+}
+function render(){
+ var el=document.getElementById('list');
+ if(!items.length){el.innerHTML='<b>🎨 Canva 듀얼트랙 (韩文双轨)</b><p style="font-size:13px;color:var(--muted)">템플릿을 등록하세요.</p>';return;}
+ var tot=0;items.forEach(function(x){tot+=x.tot;});
+ el.innerHTML='<b>🎨 Canva 듀얼트랙（'+items.length+' · 월추정 $'+(tot/1300).toFixed(0)+'）</b>'+items.map(function(x,i){
+  return '<div class="item"><div><b>'+esc(x.niche)+'</b></div><div style="font-size:12px;color:var(--muted)">Etsy $'+x.e+' · 크몽 '+x.km+'만원 · 월'+x.sale+'개 · 합₩'+x.tot.toFixed(0)+'</div><button class="del" onclick="del('+i+')">삭제</button></div>';
+ }).join('');
+}
+function del(i){items.splice(i,1);save();}
+function esc(s){return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+render();
+</script>
+</body>
+</html>

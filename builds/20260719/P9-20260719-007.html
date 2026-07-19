@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>跑腿众包司机多平台比价 · 收入汇总</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:8px}
+.stat b{color:var(--coral);font-size:18px}
+.del{color:var(--muted);font-size:12px;cursor:pointer;border:none;background:none}
+.item{border-bottom:1px dashed var(--line);padding:8px 0;font-size:14px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">gig_economy</span><span class="tag">errand</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">跑腿众包司机多平台比价 · 收入汇总</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Errand multi-platform price-compare</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">跑腿/代买代送众包司机需要"就近单池、计价透明、收入日结看板"。平台官方 App 偏派单，第三方助手做"多平台比价 + 收入汇总"有空间。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>平台</label>
+    <select id="plat"><option>闪送</option><option>UU跑腿</option><option>咻咻易达</option><option>其他</option></select>
+    <label>单笔运费（元）</label>
+    <input type="number" id="fare" placeholder="0" step="1">
+    <label>距离（km）</label>
+    <input type="number" id="km" placeholder="0" step="0.1">
+    <label>油费/成本（元）</label>
+    <input type="number" id="cost" placeholder="0" step="1">
+    <button class="btn" onclick="addOrder()">+ 记录一单</button>
+    <div class="stat" id="cmp">填写后显示平台比价</div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/search?term=%E8%B7%91%E8%85%BF%E4%BC%97%E5%8C%85" target="_blank" style="color:var(--coral)">咻咻易达 · 闪送 · UU跑腿</a>
+  </div>
+
+<script>
+const KEY="P9-20260719-007";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function fmt(n){return "¥"+Math.round(n).toLocaleString()}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render()}
+function addOrder(){
+  const plat=document.getElementById("plat").value;
+  const fare=parseFloat(document.getElementById("fare").value)||0;
+  const km=parseFloat(document.getElementById("km").value)||0;
+  const cost=parseFloat(document.getElementById("cost").value)||0;
+  if(fare<=0){alert("请输入运费");return}
+  const net=fare-cost;
+  items.push({plat,fare,km,cost,net,perkm:km?net/km:0});
+  ["fare","km","cost"].forEach(id=>document.getElementById(id).value="");
+  save();
+}
+function render(){
+  const map={};
+  items.forEach(i=>{
+    if(!map[i.plat])map[i.plat]={n:0,net:0,km:0};
+    map[i.plat].n++;map[i.plat].net+=i.net;map[i.plat].km+=i.km;
+  });
+  let best=null;
+  Object.keys(map).forEach(p=>{const e=map[p];const pk=e.km?e.net/e.km:0;if(!best||pk>best.pk)best={p,pk};});
+  let html="<b>📊 平台比价（每公里净收益）</b>";
+  if(Object.keys(map).length===0)html+="<p style='font-size:13px;color:var(--muted)'>暂无数据</p>";
+  Object.keys(map).forEach(p=>{
+    const e=map[p];
+    html+=`<div class="item">${p}：${e.n}单 · 净${fmt(e.net)} · 单均净${fmt(e.n?e.net/e.n:0)} · 每km <b class="h-coral">${fmt(e.km?e.net/e.km:0)}</b></div>`;
+  });
+  if(best)html+=`<div style="margin-top:6px;font-size:13px">🏆 当前最优：<b>${best.p}</b>（每km ${fmt(best.pk)}）</div>`;
+  document.getElementById("cmp").innerHTML=html;
+  let l="<b>📋 订单记录</b>";
+  if(items.length===0)l+="<p style='font-size:13px;color:var(--muted)'>暂无记录</p>";
+  items.slice().reverse().forEach((i,idx)=>{
+    const real=items.length-1-idx;
+    l+=`<div class="item"><div class="row"><div>${i.plat}<br>运费${fmt(i.fare)} 成本${fmt(i.cost)} → 净<b class="h-coral">${fmt(i.net)}</b></div><button class="del" onclick="del(${real})">删除</button></div></div>`;
+  });
+  document.getElementById("list").innerHTML=l;
+}
+function del(i){items.splice(i,1);save()}
+render();
+</script>
+</body>
+</html>

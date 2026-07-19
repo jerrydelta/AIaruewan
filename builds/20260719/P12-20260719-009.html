@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>한국 캠퍼스 중고 안전결제</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;
+  --ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;
+  --card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.mini{display:inline-block;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer;margin:3px 4px 0 0}
+.mini.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.mini.warn{background:var(--coral);color:#fff;border-color:var(--coral)}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600;font-size:14px}.item .meta{font-size:12px;color:var(--muted);margin:4px 0}
+.rep{font-size:11px;color:var(--ok);border:1px solid #CDEFE0;background:#F0FBF6;border-radius:999px;padding:1px 8px}
+.pay{font-size:11px;border-radius:999px;padding:1px 8px}
+.p0{background:#FFF6E5;color:#E8A33D}.p1{background:#EAF3FF;color:#3B82F6}.p2{background:#F0FBF6;color:var(--ok)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">student</span><span class="tag">campus_secondhand_kr</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">한국 캠퍼스 중고 안전결제</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Korea campus-only secondhand (school verify + BungaePay-style escrow + textbook/dorm)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">번개장터 468만 installs·당근 2125만 installs로 성숙하나 캠퍼스 특화·학교 인증 부족. 중고나라는 '사기最多' 플랫폼. 외국인/유학생은 언어장벽·사기 리스크(先转账·급처 저가 유혹)에 노출. 3월 이사철 피크, 기숙사 물건·교재 대량 거래. 학교 인증+안전결제 캠퍼스 전용 앱 기회.</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 도구 · 학교인증 + 번개페이式 안전결제</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">학교 이메일/학생증 인증 후 물건을 등록. 거래는 '결제대기→입금확인→구매확정' 안전결제 단계로 진행, 구매확정 시 판매자 신뢰점수+5.</p>
+    <label>물건名</label><input id="f_title" placeholder="예: 전공 교재 / 기숙사 냉장고">
+    <label>가격(원)</label><input id="f_price" type="number" placeholder="0">
+    <label>카테고리</label>
+    <select id="f_cat"><option>교재</option><option>기숙사물건</option><option>디지털</option><option>기타</option></select>
+    <div class="row">
+      <div><label>학교</label><input id="f_school" placeholder="예: 서울시립대"></div>
+      <div><label>판매자</label><input id="f_seller" placeholder="닉네임"></div>
+    </div>
+    <button class="btn" onclick="add()">물건 등록(학교인증)</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📦 캠퍼스 중고</b><div id="stat" style="font-size:12px;color:var(--muted);margin:6px 0"></div>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>출처</b><br>
+    <a href="https://koneed.com/how-to-use-danggeun-market-and-bungae-korean-second-hand-apps-guide" target="_blank" style="color:var(--coral)">번개장터 / 당근마켓 / 중고나라</a>
+  </div>
+
+<script>
+const KEY="P12-20260719-009";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const PAY=["결제대기","입금확인","구매확정"];
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function add(){
+  const title=f_title.value.trim(),price=+f_price.value,seller=f_seller.value.trim(),school=f_school.value.trim();
+  if(!title||!price||!seller||!school){alert("모두 입력하세요");return;}
+  items.unshift({id:Date.now(),title,price,cat:f_cat.value,school,seller,pay:0,rep:100});
+  f_title.value=f_price.value=f_seller.value=f_school.value="";save();
+}
+function advance(id){const it=items.find(x=>x.id===id);if(it){if(it.pay<2)it.pay++;if(it.pay===2)it.rep=Math.min(it.rep+5,150);save();}}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function render(){
+  const on=items.filter(x=>x.pay<2).length;
+  stat.innerHTML=`거래중 ${on} · 총 ${items.length}`;
+  const d=document.getElementById("items");
+  if(!items.length){d.innerHTML='<p style="font-size:13px;color:var(--muted)">등록된 물건 없음.</p>';return;}
+  d.innerHTML=items.map(x=>`
+    <div class="item"><div class="t">${esc(x.title)} <span class="tag">${esc(x.cat)}</span></div>
+    <div class="meta">₩${x.price} · ${esc(x.school)} · ${esc(x.seller)} <span class="rep">신뢰${x.rep}</span></div>
+    <div class="meta">결제: <span class="pay p${x.pay}">${PAY[x.pay]}</span></div>
+    <div><span class="mini ok" onclick="advance(${x.id})">${x.pay<2?'안전결제 진행':'완료'}</span>
+    <span class="mini warn" onclick="del(${x.id})">삭제</span></div></div>`).join("");
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>妈妈3分钟身心记录</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">parenting</span><span class="tag">parenting_diary</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">妈妈 3 分钟身心记录</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">3-minute mom mood/condition journal with pattern view</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">育儿+家务让妈妈难有"面对自己情绪"的时间。3 分钟短记，不写长日记，累积起来就能看见"在什么情境下最容易累"，帮情绪找回平衡。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>当下情境</label>
+    <select id="sit"><option>独自带娃</option><option>和家人一起</option><option>夜里/缺觉</option><option>出门在外</option><option>其他</option></select>
+    <label>心情</label>
+    <select id="mood"><option>开心</option><option>平静</option><option>疲惫</option><option>焦虑</option><option>低落</option></select>
+    <label>身体状态</label>
+    <select id="body"><option>不错</option><option>腰酸</option><option>涨奶/不适</option><option>头痛</option><option>很累</option></select>
+    <label>一句话（可选）</label>
+    <input id="note" placeholder="此刻的感受…">
+    <button class="btn" onclick="add()">3分钟记下</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://prtimes.jp/main/html/rd/p/000000007.000159484.html" target="_blank" style="color:var(--coral)">MyRoutine コンディション記録</a>
+  </div>
+<script>
+const KEY="P6-20260719-010";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const sit=document.getElementById('sit').value,mood=document.getElementById('mood').value,
+        body=document.getElementById('body').value,note=document.getElementById('note').value.trim();
+  items.unshift({sit,mood,body,note,t:new Date().toLocaleString('zh-CN'),id:Date.now()});
+  document.getElementById('note').value='';save();
+}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const el=document.getElementById('list');
+  if(!items.length){el.innerHTML='<b>🌿 记录</b><p style="font-size:13px;color:#999">还没有记录。</p>';return;}
+  const bySit={};items.forEach(x=>{bySit[x.sit]=(bySit[x.sit]||0)+1;});
+  const tired=items.filter(x=>x.mood==='疲惫'||x.mood==='焦虑'||x.mood==='低落').length;
+  el.innerHTML='<b>🌿 已记录 '+items.length+' 次</b>'+
+    '<div style="font-size:13px;color:#555;margin:4px 0">易累情境：'+(Object.entries(bySit).sort((a,b)=>b[1]-a[1])[0]?Object.entries(bySit).sort((a,b)=>b[1]-a[1])[0][0]+' 最多':'—')+' ｜ 负面情绪 '+tired+' 次</div>'+
+    items.slice(0,8).map(x=>'<div style="border-top:1px solid var(--line);padding:6px 0;font-size:13px">'+x.mood+' · 身体'+x.body+' · <span style="font-size:12px;color:#999">'+x.sit+'</span>'+(x.note?' ｜ '+esc(x.note):'')+' <span style="font-size:11px;color:#999">'+x.t+'</span> <button onclick="del('+x.id+')" style="background:none;border:none;color:#bbb;font-size:11px;cursor:pointer">删</button></div>').join('');
+}
+function esc(s){return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+render();
+</script>
+</body>
+</html>

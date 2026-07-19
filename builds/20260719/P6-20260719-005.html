@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>宝宝成长日记（本地隐私版）</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.entry img{width:100%;border-radius:10px;margin-top:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">parenting</span><span class="tag">parenting_diary</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">宝宝成长日记（本地隐私版）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Trust-first baby journal, local-only, transparent</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">大平台常被诟病"用你的面粉做你的面包再以精品价卖给你"、隐私过度收集。本工具照片只存在你手机（不上传服务器），无广告、无会员套路，价格全透明。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>标题</label>
+    <input id="title" placeholder="如：第一次翻身">
+    <label>照片（仅存本地）</label>
+    <input id="photo" type="file" accept="image/*">
+    <label>一句话记录</label>
+    <textarea id="note" rows="2" placeholder="今天的小瞬间…"></textarea>
+    <button class="btn" onclick="addEntry()">保存这一刻</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://new.qq.com/rain/a/20260603A09QHS00" target="_blank" style="color:var(--coral)">親宝宝 隐私争议报道</a>
+  </div>
+<script>
+const KEY="P6-20260719-005";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addEntry(){
+  const title=document.getElementById('title').value.trim();
+  const note=document.getElementById('note').value.trim();
+  const f=document.getElementById('photo').files[0];
+  if(!title&&!note&&!f){alert('写点什么或加张照片');return;}
+  const doSave=(img)=>{
+    items.unshift({title,note,img,t:new Date().toLocaleDateString('zh-CN'),id:Date.now()});
+    document.getElementById('title').value='';document.getElementById('note').value='';document.getElementById('photo').value='';
+    save();
+  };
+  if(f){const r=new FileReader();r.onload=()=>doSave(r.result);r.readAsDataURL(f);}
+  else doSave(null);
+}
+function del(id){if(!confirm('删除这条？'))return;items=items.filter(x=>x.id!==id);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const el=document.getElementById('list');
+  if(!items.length){el.innerHTML='<b>📔 日记</b><p style="font-size:13px;color:#999">还没有记录。</p>';return;}
+  el.innerHTML='<b>📔 已记录 '+items.length+' 条</b>'+items.map(x=>
+    '<div class="entry" style="border-top:1px solid var(--line);padding:10px 0">'+
+    (x.img?'<img src="'+x.img+'">':'')+
+    '<div style="font-weight:600;margin-top:4px">'+esc(x.title||'未命名')+'</div>'+
+    (x.note?'<div style="font-size:13px;color:#555">'+esc(x.note)+'</div>':'')+
+    '<div style="font-size:11px;color:#999">'+x.t+' <button onclick="del('+x.id+')" style="background:none;border:none;color:#bbb;font-size:11px;cursor:pointer">删除</button></div>'+
+    '</div>').join('');
+}
+function esc(s){return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+render();
+</script>
+</body>
+</html>

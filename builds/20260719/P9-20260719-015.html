@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>自闭症成人能量 · 倦怠追踪（Spoons）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.spoons{font-size:14px;margin:6px 0}
+.spo{font-size:22px}
+.stat{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:8px}
+.del{color:var(--muted);font-size:12px;cursor:pointer;border:none;background:none}
+.item{border-bottom:1px dashed var(--line);padding:8px 0;font-size:14px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">neurodiversity</span><span class="tag">autism_support</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">自闭症成人能量 · 倦怠追踪</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Autistic-adult energy/burnout tracker</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">成年自闭症者普遍面临"能量耗竭/倦怠"，但多数工具面向儿童。Spoons 用"能量勺"隐喻帮自闭症成人追踪社交/感官消耗并预警倦怠，订阅 $2.99/月，填补成人市场空白。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具（能量勺）</b>
+    <div class="spoons">今日剩余能量：<span class="spo" id="spo">🥄🥄🥄🥄🥄🥄🥄🥄🥄🥄🥄🥄</span> <b id="left">12</b>/12</div>
+    <label>活动</label>
+    <input type="text" id="act" placeholder="如：通勤 / 开会 / 社交">
+    <label>消耗能量勺（1-5）</label>
+    <input type="number" id="cost" placeholder="2" step="1" min="1" max="5">
+    <button class="btn" onclick="spend()">- 记录消耗</button>
+    <button class="btn" style="background:var(--ok)" onclick="rest()">+ 休息回充 2 勺</button>
+    <div class="stat" id="warn">能量充足</div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/us/search?term=Spoons%20Autism%20Energy%20Tracker" target="_blank" style="color:var(--coral)">Spoons – Autism Energy Tracker · Molehill</a>
+  </div>
+
+<script>
+const KEY="P9-20260719-015";
+let state=JSON.parse(localStorage.getItem(KEY)||'{"left":12,"log":[]}');
+const MAX=12;
+function save(){localStorage.setItem(KEY,JSON.stringify(state));render()}
+function render(){
+  state.left=Math.max(0,Math.min(MAX,state.left));
+  document.getElementById("spo").textContent="🥄".repeat(state.left)+"·".repeat(MAX-state.left);
+  document.getElementById("left").textContent=state.left;
+  let w = state.left<=2?"🔴 能量极低，立即停止并自我照顾，警惕倦怠":state.left<=5?"🟡 能量偏低，安排休息":"🟢 能量尚可";
+  document.getElementById("warn").innerHTML=w;
+  let html="<b>📋 今日消耗</b>";
+  if(state.log.length===0)html+="<p style='font-size:13px;color:var(--muted)'>暂无记录</p>";
+  state.log.slice().reverse().forEach((l,idx)=>{
+    const real=state.log.length-1-idx;
+    html+=`<div class="item"><div class="row"><div>${l.act} · -${l.cost}勺 · ${l.time}</div><button class="del" onclick="del(${real})">删除</button></div></div>`;
+  });
+  document.getElementById("list").innerHTML=html;
+}
+function spend(){
+  const act=document.getElementById("act").value.trim()||"活动";
+  const cost=Math.min(5,Math.max(1,parseInt(document.getElementById("cost").value)||1));
+  state.left-=cost;
+  state.log.push({act,cost,time:new Date().toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit"})});
+  document.getElementById("act").value="";
+  save();
+}
+function rest(){state.left+=2;save();}
+function del(i){state.log.splice(i,1);save();}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI多币种群组分账工具</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.exp{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:13px}
+.exp b{font-size:14px}
+.del{color:var(--coral);font-size:12px;float:right;cursor:pointer}
+.muted{color:var(--muted);font-size:12px}
+.settle{border:1px dashed var(--coral);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:13px;background:#FFF7F7}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">travel</span><span class="tag">cost_split</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI多币种群组分账工具</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI multi-currency group expense splitter (photo OCR + receipt translation + smart settlement)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">群组分账是旅行最痛环节：多币种、交叉付款、丢小票、回家算不清。Splitwise 支持 100+ 币种但高级功能需 PRO；Splittier 主打多币种+收据 OCR+智能最少转账结算且免费；中国“好用旅记”支持 38 种货币、微信转发好友即可记账。痛点：跨国旅行币种混杂、AI 小票翻译缺失。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 记一笔 + 智能结算</b>
+    <p class="muted" style="margin:4px 0 0">录入支出（付款人/金额/币种/参与人），自动按汇率折算人民币并算出谁该付谁多少。</p>
+    <label>付款人</label><input id="payer" placeholder="如：小明">
+    <div class="row">
+      <div><label>金额</label><input id="amt" type="number" placeholder="0"></div>
+      <div><label>币种</label>
+        <select id="cur"><option>CNY</option><option>USD</option><option>EUR</option><option>JPY</option><option>GBP</option><option>HKD</option></select>
+      </div>
+    </div>
+    <label>参与分摊人（逗号分隔，留空=仅付款人）</label>
+    <input id="parts" placeholder="小明,小红,小刚">
+    <label>用途</label><input id="desc" placeholder="如：晚餐 / 打车 / 酒店">
+    <button class="btn" onclick="add()">＋ 记一笔</button>
+    <div id="settle"></div>
+  </div>
+
+  <div class="card" id="list"><b>🧾 账单明细</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.splittier.com/en/split-trip-expenses" target="_blank" style="color:var(--coral)">Splitwise · Splittier · 好用旅记(百事AA) · Pizo</a>
+  </div>
+
+<script>
+const KEY="P7-20260719-003";
+const RATE={CNY:1,USD:7.2,EUR:7.8,JPY:0.048,GBP:9.1,HKD:0.92};
+let exps=JSON.parse(localStorage.getItem(KEY)||"[]");
+function esc(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function add(){
+  const payer=document.getElementById("payer").value.trim();
+  const amt=parseFloat(document.getElementById("amt").value);
+  if(!payer||!(amt>0)){alert("请填写付款人和有效金额");return;}
+  const cur=document.getElementById("cur").value;
+  let parts=document.getElementById("parts").value.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+  if(!parts.length)parts=[payer];
+  exps.unshift({payer,amt,cur,cny:+(amt*RATE[cur]).toFixed(2),
+    parts,desc:document.getElementById("desc").value.trim(),t:new Date().toLocaleDateString("zh-CN")});
+  document.getElementById("amt").value="";
+  document.getElementById("desc").value="";
+  save();
+}
+function del(i){exps.splice(i,1);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(exps));render();}
+function render(){
+  document.getElementById("items").innerHTML=exps.length?exps.map((x,i)=>
+    `<div class="exp"><span class="del" onclick="del(${i})">删除</span>
+     <b>${esc(x.payer)}</b> 付 ¥${x.cny} <span class="muted">(${x.amt}${x.cur})</span><br>
+     <span class="muted">${esc(x.desc||"未填")} · 分摊 ${x.parts.join("/")} · ${esc(x.t)}</span></div>`).join("")
+   :`<div class="muted" style="margin-top:8px">还没有账单。</div>`;
+  // 结算
+  const paid={},owe={};
+  exps.forEach(x=>{
+    paid[x.payer]=(paid[x.payer]||0)+x.cny;
+    const share=x.cny/x.parts.length;
+    x.parts.forEach(p=>owe[p]=(owe[p]||0)+share);
+  });
+  const names=new Set([...Object.keys(paid),...Object.keys(owe)]);
+  const net=[...names].map(n=>+((paid[n]||0)-(owe[n]||0)).toFixed(2));
+  const debtors=net.map((v,i)=>({n:[...names][i],v})).filter(x=>x.v<-0.01).sort((a,b)=>a.v-b.v);
+  const creditors=net.map((v,i)=>({n:[...names][i],v})).filter(x=>x.v>0.01).sort((a,b)=>b.v-a.v);
+  let html="";
+  let di=0,ci=0;
+  while(di<debtors.length&&ci<creditors.length){
+    const pay=Math.min(-debtors[di].v,creditors[ci].v);
+    html+=`<div class="settle">💸 ${debtors[di].n} 付给 ${creditors[ci].n} <b>¥${pay.toFixed(2)}</b></div>`;
+    debtors[di].v+=pay;creditors[ci].v-=pay;
+    if(Math.abs(debtors[di].v)<0.01)di++;
+    if(Math.abs(creditors[ci].v)<0.01)ci++;
+  }
+  document.getElementById("settle").innerHTML=html||`<div class="muted" style="margin-top:8px">记录账单后自动生成最少转账结算。</div>`;
+}
+render();
+</script>
+</body>
+</html>

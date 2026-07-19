@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>アジア特化二人専用カップル空間（記念日＋思い出）｜情侣空间</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{display:flex;justify-content:space-between;align-items:flex-start;
+  padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.del{color:var(--muted);font-size:13px;cursor:pointer;border:none;background:none}
+.dd{color:var(--coral);font-weight:700}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">relationship</span><span class="tag">anniversary_reminder</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">アジア特化二人専用カップル空間（記念日＋思い出）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Asia-focused private couples-space app (anniversary + memories)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韓国発カップル専用アプリ「Between(VCNC)」は2018年時点でグローバルダウンロード2,600万・DAU100万、2021年Krafton買収。記念日・共有カレンダー・思い出保存がコア。痛点：二人だけの場所で日数・思い出を残したい。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 二人の思い出・記念日</b>
+    <input id="name" placeholder="イベント名（例：付き合った日）">
+    <div class="row">
+      <input id="date" type="date">
+      <select id="type"><option value="記念日">記念日</option><option value="思い出">思い出</option><option value="旅行">旅行</option></select>
+    </div>
+    <textarea id="memory" rows="2" placeholder="思い出メモ（記憶の宝箱）"></textarea>
+    <button class="btn" onclick="add()">残す</button>
+  </div>
+
+  <div class="card" id="list"><b>📋 二人のタイムライン</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://between.us/" target="_blank" style="color:var(--coral)">비트윈(Between) / 오늘의연인 / 시럽</a>
+  </div>
+
+<script>
+const KEY="P2-20260719-015";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const name=document.getElementById("name").value.trim();
+  const date=document.getElementById("date").value;
+  if(!name||!date){alert("イベント名と日付を入力");return;}
+  items.unshift({name,date,type:document.getElementById("type").value,memory:document.getElementById("memory").value.trim(),added:new Date().toLocaleDateString()});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("name").value="";document.getElementById("date").value="";document.getElementById("memory").value="";
+  render();
+}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>📋 二人のタイムライン</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>暂无记录</p>";return;}
+  const today=new Date();today.setHours(0,0,0,0);
+  items.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  box.innerHTML="<b>📋 二人のタイムライン（"+items.length+"）</b>"+items.map((it,i)=>{
+    const d=new Date(it.date);const diff=Math.round((today-d)/86400000);
+    const dd=diff>=0?("D+"+diff):("D"+diff);
+    return "<div class='item'><div style='flex:1'><div style='font-size:14px'>"+it.name+
+      " <span style='font-size:11px;color:var(--muted)'>"+it.type+"</span></div>"+
+      "<div style='font-size:11px;color:var(--muted)'>"+it.date+" ・ <span class='dd'>"+dd+"</span>"+(it.memory?(" ・ 💭"+it.memory):"")+"</div></div>"+
+      "<button class='del' onclick='del("+i+")'>删除</button></div>";
+  }).join("");
+}
+render();
+</script>
+</body>
+</html>

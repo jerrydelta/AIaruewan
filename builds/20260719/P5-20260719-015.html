@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>认知训练(循证)</title>
+<style>
+:root{
+  --coral:#FF6B6B;        /* 主品牌色 */
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">elderly</span><span class="tag">dementia_cognitive_training</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">认知训练(循证)</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Evidence-based cognitive training</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">数字认知干预成痴呆预防主流。FINGER研究证实认知训练+运动+营养可改善预防。CogniFit为「#1数字认知干预」覆盖21+认知域。痛点：多数脑训练缺循证。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#666;margin:8px 0">记录各认知域训练得分，追踪认知状态变化。</p>
+<label>认知域</label><select id="f_domain"><option value="记忆">记忆</option><option value="注意力">注意力</option><option value="执行功能">执行功能</option><option value="语言">语言</option></select>
+<label>得分(0-100)</label><input type="number" id="f_score" placeholder="如 75">
+<label>时长(分钟)</label><input type="number" id="f_minutes" placeholder="如 10">
+    <button class="btn" onclick="addItem()">保存记录</button>
+    <div id="derive" style="font-size:13px;color:var(--coral);margin-top:8px"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="#" style="color:var(--coral)">CogniFit / SuperBrain(슈퍼브레인) / BrainHQ</a>
+  </div>
+
+<script>
+const KEY="P5-20260719-015";
+const FIELDS=[{"label":"认知域","key":"domain"},{"label":"得分(0-100)","key":"score"},{"label":"时长(分钟)","key":"minutes"}];
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addItem(){
+const v_domain=document.getElementById('f_domain').value;
+const v_score=document.getElementById('f_score').value;
+const v_minutes=document.getElementById('f_minutes').value;
+  const item={ ts:Date.now() , domain:v_domain, score:v_score, minutes:v_minutes };
+  items.unshift(item);
+  save();
+  document.getElementById('f_domain').value='';
+document.getElementById('f_score').value='';
+document.getElementById('f_minutes').value='';
+  const dv=derive(item);
+  document.getElementById('derive').textContent = dv?('已保存 ✓ '+dv):'已保存 ✓';
+}
+function derive(it){ const s=Number(it.score)||0; if(!s) return ''; if(s>=80) return '🧠 认知状态优秀'; if(s>=60) return '🧠 认知状态良好'; return '🧠 需加强训练'; return ''; }
+function rowHTML(it){
+  let h='<div style="font-size:12px;color:var(--muted)">'+(new Date(it.ts).toLocaleString())+'</div>';
+  FIELDS.forEach(f=>{ if(it[f.key]!==''){ h+='<div style="font-size:14px;margin:2px 0"><b>'+f.label+'：</b>'+it[f.key]+'</div>'; } });
+  const d=derive(it); if(d) h+='<div style="font-size:13px;color:var(--coral);margin-top:4px">'+d+'</div>';
+  return h;
+}
+function render(){
+  const el=document.getElementById('list');
+  if(!items.length){ el.innerHTML='<div style="font-size:13px;color:var(--muted)">暂无记录，添加第一条吧。</div>'; return; }
+  el.innerHTML='<b style="font-size:13px">📋 记录 ('+items.length+')</b>'+items.map((it,i)=>'<div style="border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px">'+rowHTML(it)+'<button class="btn" style="background:#bbb;margin-top:8px" onclick="del('+i+')">删除</button></div>').join('');
+}
+function del(i){ items.splice(i,1); save(); }
+render();
+
+</script>
+</body>
+</html>

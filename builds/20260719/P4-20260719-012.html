@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Notion模板：小红书引流+Gumroad出海双轨</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;position:relative}
+.del{position:absolute;right:0;top:10px;background:#fff;color:var(--coral);
+  border:1px solid #FFD9D9;border-radius:8px;font-size:12px;padding:4px 10px;cursor:pointer}
+.mini{font-size:13px;color:var(--ink);background:#FAFAFA;border:1px solid var(--line);
+  border-radius:10px;padding:10px;margin-top:8px}
+.hr{height:1px;background:var(--line);border:none;margin:14px 0}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">digital_product</span><span class="tag">notion_template</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">Notion模板：小红书引流+Gumroad出海双轨</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Notion templates: Xiaohongshu traffic + Gumroad overseas (niche audiences)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Notion全球超3000万用户。案例：小红书+Gumroad卖模板月入2万；Thomas Frank两份模板年卖100万美金。定价：国内首发29元→49-99元；海外$5-30。痛点：细分定位、包装、教程、双平台运营。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>模板名称</label><input id="n1" placeholder="如：一人公司工作系统">
+<label>细分人群</label><input id="n2" placeholder="如：自由职业者">
+<label>主平台</label><select id="n3"><option>小红书(¥)</option><option>Gumroad($)</option><option>双轨</option></select>
+<label>定价</label><input type="number" id="n4" placeholder="29">
+<label>预估月销(份)</label><input type="number" id="n5" placeholder="50">
+<button class="btn" onclick="addT()">添加模板</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.yeyulingfeng.com/a/679380.html" target="_blank" style="color:var(--coral)">Notion / Gumroad / 小红书店铺 / Notion Template Gallery</a>
+  </div>
+
+<script>
+const KEY="P4-20260719-012";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addT(){
+ var n=document.getElementById('n1').value.trim();
+ if(!n){alert('请输入名称');return;}
+ var price=+document.getElementById('n4').value||0,sale=+document.getElementById('n5').value||0;
+ items.push({name:n,niche:document.getElementById('n2').value,plat:document.getElementById('n3').value,price:price,sale:sale,rev:price*sale,ts:Date.now()});
+ save();document.getElementById('n1').value='';document.getElementById('n2').value='';document.getElementById('n4').value='';document.getElementById('n5').value='';
+}
+function render(){
+ var el=document.getElementById('list');
+ if(!items.length){el.innerHTML='<b>📒 Notion模板双轨</b><p style="font-size:13px;color:var(--muted)">添加你的模板。</p>';return;}
+ var tot=0;items.forEach(function(x){tot+=x.rev;});
+ el.innerHTML='<b>📒 Notion模板双轨（'+items.length+' · 预估月入¥'+tot+'）</b>'+items.map(function(x,i){
+  return '<div class="item"><div><b>'+esc(x.name)+'</b> · '+esc(x.niche)+'</div><div style="font-size:12px;color:var(--muted)">'+x.plat+' · 定价'+x.price+' · 月销'+x.sale+' · 月估¥'+x.rev+'</div><button class="del" onclick="del('+i+')">删</button></div>';
+ }).join('');
+}
+function del(i){items.splice(i,1);save();}
+function esc(s){return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+render();
+</script>
+</body>
+</html>

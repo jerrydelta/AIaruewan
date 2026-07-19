@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>夫婦・家族イベント記念日管理＋ギフト提案｜纪念日管家</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{display:flex;justify-content:space-between;align-items:center;
+  padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.del{color:var(--muted);font-size:13px;cursor:pointer;border:none;background:none}
+.soon{color:var(--coral);font-weight:700}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">relationship</span><span class="tag">anniversary_reminder</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">夫婦・家族イベント記念日管理＋ギフト提案</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Couple/family event &amp; anniversary manager + gift recommendation SaaS</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本で「夫婦・カップルの記念日・家族イベント」管理ニーズ顕在化。COUPPLYは2025年6月リリース、10,000ユーザー・65種以上家族イベント類型。痛点：記念日・誕生日を忘れ、プレゼントが直前になる。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · イベント・記念日管理</b>
+    <input id="name" placeholder="誰の・何のイベント（例：妻の誕生日）">
+    <div class="row">
+      <input id="date" type="date">
+      <select id="type">
+        <option value="誕生日">誕生日</option><option value="記念日">記念日</option>
+        <option value="結婚記念日">結婚記念日</option><option value="家族行事">家族行事</option>
+      </select>
+    </div>
+    <input id="gift" placeholder="ギフト案（任意）">
+    <button class="btn" onclick="add()">追加する</button>
+  </div>
+
+  <div class="card" id="list"><b>📋 イベント一覧</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://coupply.co.jp/" target="_blank" style="color:var(--coral)">COUPPLY / my-best / Memoryiit</a>
+  </div>
+
+<script>
+const KEY="P2-20260719-006";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const name=document.getElementById("name").value.trim();
+  const date=document.getElementById("date").value;
+  if(!name||!date){alert("请输入イベント名と日付");return;}
+  const gift=document.getElementById("gift").value.trim();
+  items.unshift({name,date,type:document.getElementById("type").value,gift,bought:false,date_added:new Date().toLocaleDateString()});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("name").value="";document.getElementById("date").value="";document.getElementById("gift").value="";
+  render();
+}
+function toggleBought(i){items[i].bought=!items[i].bought;localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>📋 イベント一覧</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>暂无记录</p>";return;}
+  const today=new Date();today.setHours(0,0,0,0);
+  items.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  box.innerHTML="<b>📋 イベント一覧（"+items.length+"）</b>"+items.map((it,i)=>{
+    const d=new Date(it.date);const diff=Math.round((d-today)/86400000);
+    const cd=diff<0?("過去 "+(-diff)+"日"):diff===0?"今日！":("あと "+diff+"日");
+    return "<div class='item'><div style='flex:1'><div style='font-size:14px'>"+it.name+
+      " <span style='font-size:11px;color:var(--muted)'>"+it.type+"</span></div>"+
+      "<div style='font-size:11px;color:var(--muted)'>"+it.date+" ・ <span class='soon'>"+cd+"</span>"+
+      (it.gift?(" ・ 🎁"+it.gift+(it.bought?"✅":"⬜")):"")+"</div></div>"+
+      "<div style='text-align:right'>"+(it.gift?"<button class='del' onclick='toggleBought("+i+")'>"+(it.bought?"取消":"購入")+"</button><br>":"")+
+      "<button class='del' onclick='del("+i+")'>删除</button></div></div>";
+  }).join("");
+}
+render();
+</script>
+</body>
+</html>

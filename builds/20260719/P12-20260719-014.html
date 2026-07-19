@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>一人公司AI经营驾驶舱</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;
+  --ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;
+  --card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.kpi .v{font-size:22px;font-weight:700}
+.kpi .l{font-size:12px;color:var(--muted)}
+.green{color:var(--ok)}.amber{color:#E8A33D}.red{color:var(--coral)}
+.badge{font-size:11px;border-radius:999px;padding:1px 8px;margin-left:6px}
+.b-green{background:#F0FBF6;color:var(--ok)}.b-amber{background:#FFF6E5;color:#E8A33D}.b-red{background:#FFEFEF;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">business</span><span class="tag">opc_boss_dashboard</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">一人公司AI经营驾驶舱</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">OPC AI boss dashboard (profit/cashflow/customer boards + anomaly alerts)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">金蝶老板参谋AI经营问答覆盖65项核心指标、平均响应6秒、决策效率提升80%；牛算盘老板仪表盘3分钟看销售额/毛利率/现金流，某餐饮王老板用后季度利润+17%。痛点：老板数据获取不及时/分散/靠经验，83%中小企业主需非办公场景处理财务。"一人公司"崛起，老板=财务+销售+运营，急需移动端经营驾驶舱。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 经营指标看板 + 异常预警</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">填入本期营收/成本/现金/客户数，自动算出利润与毛利率，并按红黄绿三色预警经营健康度。</p>
+    <div class="row">
+      <div><label>营收(元)</label><input id="f_rev" type="number" value="0"></div>
+      <div><label>成本(元)</label><input id="f_cost" type="number" value="0"></div>
+    </div>
+    <div class="row">
+      <div><label>现金余额(元)</label><input id="f_cash" type="number" value="0"></div>
+      <div><label>客户数</label><input id="f_cust" type="number" value="0"></div>
+    </div>
+    <button class="btn" onclick="addPeriod()">记录本期</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📊 经营驾驶舱</b>
+    <div id="board"></div>
+    <div id="hist" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.jdy.com/article/1993927497032404993.html" target="_blank" style="color:var(--coral)">金蝶AI星辰老板参谋 / 牛算盘 / 留财云</a>
+  </div>
+
+<script>
+const KEY="P12-20260719-014";
+let periods=JSON.parse(localStorage.getItem(KEY)||"[]");
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function save(){localStorage.setItem(KEY,JSON.stringify(periods));render();}
+function addPeriod(){
+  periods.unshift({id:Date.now(),rev:+f_rev.value||0,cost:+f_cost.value||0,cash:+f_cash.value||0,cust:+f_cust.value||0});
+  save();
+}
+function delP(id){periods=periods.filter(x=>x.id!==id);save();}
+function marginColor(m){return m>=40?"green":m>=20?"amber":"red";}
+function cashColor(c){return c>=10000?"green":c>=3000?"amber":"red";}
+function badge(cls,t){return `<span class="badge b-${cls}">${t}</span>`;}
+function render(){
+  const b=document.getElementById("board");
+  if(!periods.length){b.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有经营数据，记录第一期吧。</p>';document.getElementById("hist").innerHTML="";return;}
+  const p=periods[0];
+  const profit=p.rev-p.cost;
+  const margin=p.rev?profit/p.rev*100:0;
+  const mc=marginColor(margin),cc=cashColor(p.cash);
+  const mStat=margin>=40?"健康":margin>=20?"关注":"预警";
+  const cStat=p.cash>=10000?"充裕":p.cash>=3000?"一般":"紧张";
+  b.innerHTML=`
+    <div class="kpi"><div class="v ${mc}">¥${profit}</div><div class="l">本期利润 ${badge(mc=== 'green'?'green':mc==='amber'?'amber':'red',mStat)}</div></div>
+    <div class="kpi"><div class="v ${mc}">${margin.toFixed(1)}%</div><div class="l">毛利率 ${badge(mc==='green'?'green':mc==='amber'?'amber':'red',mStat)}</div></div>
+    <div class="kpi"><div class="v ${cc}">¥${p.cash}</div><div class="l">现金余额 ${badge(cc==='green'?'green':cc==='amber'?'amber':'red',cStat)}</div></div>
+    <div class="kpi"><div class="v">${p.cust}</div><div class="l">客户数</div></div>`;
+  document.getElementById("hist").innerHTML='<b style="font-size:13px">历史期</b>'+periods.slice(1,12).map(p=>
+    `<div style="font-size:12px;color:var(--muted);margin-top:4px">${new Date(p.id).toLocaleDateString()} · 利润¥${p.rev-p.cost} · 毛利${(p.rev?(p.rev-p.cost)/p.rev*100:0).toFixed(0)}% · 现金¥${p.cash} <span class="tag" onclick="delP(${p.id})" style="cursor:pointer">删</span></div>`).join("");
+}
+render();
+</script>
+</body>
+</html>

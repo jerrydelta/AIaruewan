@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>带AI分组的轻量宾客RSVP+二维码签到工具</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">wedding</span><span class="tag">guest_list_rsvp</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">带AI分组的轻量宾客RSVP+二维码签到工具</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Lightweight guest RSVP + QR check-in tool with AI auto-grouping</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">RSVP+宾客管理是婚礼刚需。HappyMarriage(欧洲)一次性付费、EU存储GDPR合规, 含个性化宾客门户+3个AI工具(致辞写作/座位优化/预算顾问); GuestlistOnline免费层覆盖50宾客含邮件邀请/RSVP/二维码签到, Per Event €19.99; 印度Wedd.…</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>姓名</label><input id="g3" placeholder="宾客姓名">
+<label>分组</label><select id="gr3"><option>家人</option><option>朋友</option><option>同事</option><option>亲戚</option></select>
+<label>携带 +1 人数</label><input id="p3" type="number" min="0" value="0">
+<label>饮食忌口</label><input id="dt3" placeholder="如：海鲜过敏 / 素食">
+<label>RSVP 状态</label><select id="s3"><option>未回复</option><option>出席</option><option>不出席</option></select>
+<button class="btn" onclick="addItem()">添加宾客</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://happymarriage.app/en/blog/best-wedding-planner-apps-2026" target="_blank" style="color:var(--coral)">HappyMarriage / GuestlistOnline / Wedd.ai / Zola Guest List / The Knot Guest List</a>
+  </div>
+<script>
+const KEY="P13-20260719-003";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);save();}
+function addItem(){
+  const name=document.getElementById('g3').value.trim();
+  if(!name){alert('请填姓名');return;}
+  const group=document.getElementById('gr3').value;
+  const plus=+document.getElementById('p3').value||0;
+  const diet=document.getElementById('dt3').value.trim();
+  const st=document.getElementById('s3').value;
+  const code=Math.random().toString(36).slice(2,8).toUpperCase();
+  items.push({name,group,plus,diet,st,code,att:false});
+  document.getElementById('g3').value='';
+  save();
+}
+function checkin(i){items[i].att=!items[i].att;save();}
+function render(){
+  let att=0,guests=0;
+  items.forEach(it=>{guests+=1+it.plus;if(it.att)att+=1+it.plus;});
+  let html='<b>📨 宾客 ('+items.length+' 组 / '+guests+' 人)</b><div style="font-size:13px;margin:4px 0">已签到 '+att+' 人</div>';
+  items.forEach((it,i)=>{
+    html+='<div style="border-bottom:1px solid var(--line);padding:6px 0;font-size:13px"><b>'+it.name+'</b> <span class="tag">'+it.group+'</span> +'+it.plus+' · '+it.st+(it.diet?(' · 忌口:'+it.diet):'')+'<br>签到码:'+it.code+' <button class="btn" style="background:'+(it.att?'var(--ok)':'var(--muted)')+';padding:5px;margin:3px 4px 3px 0" onclick="checkin('+i+')">'+(it.att?'已签到':'签到')+'</button> <button class="btn" style="background:var(--muted);padding:5px;margin:3px 0;display:inline-block;width:auto" onclick="del('+i+')">删</button></div>';
+  });
+  document.getElementById('list').innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

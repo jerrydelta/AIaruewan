@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>캠퍼스 열람실 실시간 예약</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;
+  --ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;
+  --card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.mini{display:inline-block;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer;margin:3px 4px 0 0}
+.mini.warn{background:var(--coral);color:#fff;border-color:var(--coral)}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;display:flex;justify-content:space-between;align-items:center}
+.item .t{font-weight:600;font-size:14px}.item .meta{font-size:12px;color:var(--muted)}
+.seat{display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:6px;font-size:12px;margin:2px;background:#EAF3FF;color:#3B82F6}
+.seat.used{background:#FFE3E3;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">student</span><span class="tag">studyroom_reservation</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">캠퍼스 열람실 실시간 예약</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Lightweight in-campus study-room / seat reservation + payment (per-university)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">한국 스터디카페/독서실 산업 성숙：티움 실시간 좌석현황·스터디룸 예약·QR출입·카카오페이 결제. 그러나 대학생 타겟의 캠퍼스 내 열람실/스터디룸 통합 예약+결제는 대학별 파편화. 경량 통합 기회 존재.</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 도구 · 실시간 좌석 예약</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">열람실을 등록하면 좌석 현황이 표시됩니다. 좌석을 선택해 예약하면 '사용중' 처리, 입실 시간을 기록합니다. (모바일 경량 MVP)</p>
+    <label>열람실/스터디룸 이름</label><input id="f_room" placeholder="예: 중앙도서관 3층">
+    <label>총 좌석 수</label><input id="f_seats" type="number" value="20">
+    <button class="btn" onclick="addRoom()">열람실 등록</button>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <div class="row">
+      <div><label>예약할 열람실</label><select id="f_sel"></select></div>
+      <div><label>좌석 번호</label><input id="f_seat" type="number" placeholder="1"></div>
+    </div>
+    <button class="btn" onclick="book()" style="background:var(--ok)">좌석 예약(QR입실)</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>🪑 좌석 현황</b>
+    <div id="rooms"></div>
+    <b style="font-size:14px;display:block;margin-top:12px">내 예약</b>
+    <div id="books"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>출처</b><br>
+    <a href="https://where2.me/" target="_blank" style="color:var(--coral)">스터디카페 티움 / NEST24 / 웨어투</a>
+  </div>
+
+<script>
+const KEY="P12-20260719-007";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"rooms":[],"books":[]}');
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function addRoom(){
+  const name=f_room.value.trim(),seats=+f_seats.value||0;
+  if(!name||!seats){alert("이름과 좌석 수를 입력하세요");return;}
+  data.rooms.push({id:Date.now(),name,seats,used:[]});
+  f_room.value="";render();
+}
+function book(){
+  const rid=+f_sel.value;const seat=+f_seat.value;
+  const r=data.rooms.find(x=>x.id===rid);if(!r){alert("열람실을 선택하세요");return;}
+  if(!seat||seat<1||seat>r.seats){alert("좌석 번호가 범위를 벗어났습니다");return;}
+  if(r.used.includes(seat)){alert("이미 사용중인 좌석입니다");return;}
+  r.used.push(seat);
+  data.books.unshift({id:Date.now(),room:r.name,seat,time:new Date().toLocaleString()});
+  save();
+}
+function release(rid,seat){const r=data.rooms.find(x=>x.id===rid);if(r)r.used=r.used.filter(s=>s!==seat);save();}
+function delRoom(rid){data.rooms=data.rooms.filter(x=>x.id!==rid);data.books=data.books.filter(b=>b.room!==data.rooms.find(r=>r.id===rid)?.name);save();}
+function render(){
+  f_sel.innerHTML=data.rooms.map(r=>`<option value="${r.id}">${esc(r.name)} (${r.used.length}/${r.seats})</option>`).join("");
+  document.getElementById("rooms").innerHTML=data.rooms.length?data.rooms.map(r=>{
+    let seats="";for(let i=1;i<=r.seats;i++)seats+=`<span class="seat ${r.used.includes(i)?'used':''}" onclick="release(${r.id},${i})">${i}</span>`;
+    return `<div class="item" style="display:block"><div class="t">${esc(r.name)} <span class="tag">${r.used.length}/${r.seats} 사용중</span></div><div>${seats}</div><span class="mini warn" onclick="delRoom(${r.id})">삭제</span></div>`;
+  }).join(""):'<p style="font-size:13px;color:var(--muted)">열람실을 등록하세요.</p>';
+  document.getElementById("books").innerHTML=data.books.length?data.books.map(b=>
+    `<div class="item"><div><div class="t">${esc(b.room)} · 좌석 ${b.seat}</div><div class="meta">${b.time}</div></div></div>`).join("")
+    :'<p style="font-size:13px;color:var(--muted)">예약 내역 없음.</p>';
+}
+render();
+</script>
+</body>
+</html>

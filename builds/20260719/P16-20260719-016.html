@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩语代码补全规约配置</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">ai_coding</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩语代码补全规约配置</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KO SMB hosted AI autocomplete on local KR-language models (Tabby-based).</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">企业因 Copilot 的代码发送担忧，寻求"自托管 AI 补全"。Tabby（OSS，用社内模型运行的 AI 补全）与 Continue.dev（OSS AI 助手）在韩国 DevOps 圈受好评，是 Copilot $10/月的替代品</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>语言</label><input id="t_lang" placeholder="Python / TypeScript">
+<label>补全偏好 / 规约（每条一行）</label><textarea id="t_rules" rows="4" placeholder="用韩语写函数注释&#10;遵循社内命名 kebab-case&#10;不自动补全密钥"></textarea>
+<button class="btn" onclick="gen()">⚙️ 生成补全配置</button>
+<label>配置 JSON 片段</label><textarea id="t_out" rows="6" readonly style="background:#fafafa"></textarea>
+<button class="btn" onclick="saveCfg()" style="background:var(--ok)">保存</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://github.com/TabbyML/tabby" target="_blank" style="color:var(--coral)">Tabby / Continue.dev / GitHub Copilot</a>
+  </div>
+
+<script>
+
+const KEY="P16-20260719-016";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let lastCfg='';
+function gen(){
+  const lang=document.getElementById('t_lang').value.trim()||'all';
+  const raw=document.getElementById('t_rules').value;
+  const rules=raw.split('\n').map(s=>s.trim()).filter(Boolean);
+  const cfg=JSON.stringify({language:lang,rules:rules,locale:'ko',privacy:'on-prem'},null,2);
+  lastCfg=cfg;
+  document.getElementById('t_out').value=cfg;
+}
+function saveCfg(){
+  if(!lastCfg){alert('请先生成配置');return;}
+  items.push({cfg:lastCfg,added:new Date().toLocaleString()});
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function render(){
+  const el=document.getElementById('list');
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">暂无配置</p>';return;}
+  el.innerHTML='<b>🤖 补全配置（'+items.length+'）</b>'+items.map((it,idx)=>
+    '<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px">'+
+    '<pre style="font-size:12px;background:#fafafa;border:1px solid var(--line);border-radius:8px;padding:8px;overflow:auto;white-space:pre-wrap;margin:0">'+esc(it.cfg)+'</pre>'+
+    '<button class="btn" style="background:#fff;color:var(--coral);border:1px solid var(--line);margin-top:6px" onclick="del('+idx+')">删除</button>'+
+    '</div>'
+  ).join('');
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+render();
+</script>
+</body>
+</html>

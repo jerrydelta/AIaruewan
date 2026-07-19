@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩文Kakao+Instagram统一客服自动回复（小商户SaaS）</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;position:relative}
+.del{position:absolute;right:0;top:10px;background:#fff;color:var(--coral);
+  border:1px solid #FFD9D9;border-radius:8px;font-size:12px;padding:4px 10px;cursor:pointer}
+.mini{font-size:13px;color:var(--ink);background:#FAFAFA;border:1px solid var(--line);
+  border-radius:10px;padding:10px;margin-top:8px}
+.hr{height:1px;background:var(--line);border:none;margin:14px 0}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">social</span><span class="tag">comment_manager</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩文Kakao+Instagram统一客服自动回复（小商户SaaS）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KR-native Kakao+Instagram unified CS auto-reply for SMBs</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">KakaoTalk 4800만 MAU是小商户核心客服渠道。kakao 2026推出AI聊天"kanana 상담매니저"。第三方填补空白。痛点：小商户不会配置、跨渠道(Kakao+Instagram+Email)分散、夜间无人。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>FAQ 자동응답 규칙 (关键词规则)</label>
+<div class="row"><input id="f1" placeholder="키워드 (如: 가격)"><input id="f2" placeholder="답변 (回复)"></div>
+<button class="btn" style="background:#3FB984" onclick="addRule()">규칙 추가</button>
+<div id="ruleList" class="mini"></div>
+<hr class="hr">
+<label>고객 문의 시뮬레이션 (客户咨询模拟)</label>
+<input id="f3" placeholder="고객이 보낸 메시지 입력">
+<button class="btn" onclick="sim()">추천 답변 생성</button>
+<div id="simOut" class="mini" style="color:var(--coral)"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.mk.co.kr/cn/society/11429041" target="_blank" style="color:var(--coral)">카카오 kanana 상담매니저 / Freshchat Kakao / CS Auto-Responder</a>
+  </div>
+
+<script>
+const KEY="P4-20260719-005";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+var KEYR='RULE_'+KEY;
+var rules=JSON.parse(localStorage.getItem(KEYR)||'[]');
+function saveRule(){localStorage.setItem(KEYR,JSON.stringify(rules));showRules();}
+function showRules(){
+ var el=document.getElementById('ruleList');
+ if(!rules.length){el.innerHTML='규칙 없음.';return;}
+ el.innerHTML='설정된 규칙：<br>'+rules.map(function(r,i){return (i+1)+'. 「'+esc(r.k)+'」 → '+esc(r.a)+' <a style="color:var(--coral);cursor:pointer" onclick="delRule('+i+')">[삭제]</a>';}).join('<br>');
+}
+function delRule(i){rules.splice(i,1);saveRule();}
+function addRule(){
+ var k=document.getElementById('f1').value.trim(),a=document.getElementById('f2').value.trim();
+ if(!k||!a){alert('키워드와 답변을 입력하세요');return;}
+ rules.push({k:k,a:a});saveRule();document.getElementById('f1').value='';document.getElementById('f2').value='';
+}
+function sim(){
+ var q=document.getElementById('f3').value.trim();
+ if(!q){alert('문의를 입력하세요');return;}
+ var hit=null;for(var i=0;i<rules.length;i++){if(q.indexOf(rules[i].k)>=0){hit=rules[i];break;}}
+ document.getElementById('simOut').innerHTML=hit?('추천 답변：'+esc(hit.a)):'매칭 규칙 없음 — AI에게 물어보세요(아래 AI 모듈)';
+}
+function render(){document.getElementById('list').innerHTML='<b>🤝 상담 규칙 요약</b><p style="font-size:13px;color:var(--muted)">위에서 FAQ 규칙을 추가하고 고객 문의를 시뮬레이션 하세요.</p>';}
+function esc(s){return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+showRules();
+render();
+</script>
+</body>
+</html>

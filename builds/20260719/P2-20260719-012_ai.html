@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韓国開発者特化リモート採用マッチング｜韩开发者招聘</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.seg{display:flex;gap:6px;margin:6px 0}
+.seg button{flex:1;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--coral);color:#fff;border-color:var(--coral)}
+.item{display:flex;justify-content:space-between;align-items:flex-start;
+  padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.del{color:var(--muted);font-size:13px;cursor:pointer;border:none;background:none}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+.collapsed{display:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">career</span><span class="tag">remote_work</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韓国開発者特化リモート採用マッチング</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Korean developer-focused remote-hiring marketplace</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韓国IT・開発者採用はJumpit(開発者290,000アクティブ・履歴書340,000件)が特化。リモート・非対面採用需要増。7%成約手数料モデル。痛点：開発者のスキルと求人のミスマッチ。</p>
+  </div>
+
+  <div class="card">
+    <div class="seg">
+      <button id="t1" class="on" onclick="tab('job')">＋求人</button>
+      <button id="t2" onclick="tab('dev')">＋開発者</button>
+      <button id="t3" onclick="tab('match')">🔍マッチ</button>
+    </div>
+    <div id="fJob">
+      <input id="jTitle" placeholder="職種（例：React開発）">
+      <input id="jSkills" placeholder="必要スキル（カンマ：React,Node）">
+      <button class="btn" onclick="addJob()">登録</button>
+    </div>
+    <div id="fDev" style="display:none">
+      <input id="dName" placeholder="開発者名">
+      <input id="dSkills" placeholder="スキル（カンマ）">
+      <button class="btn" onclick="addDev()">登録</button>
+    </div>
+    <div id="fMatch" style="display:none">
+      <select id="selDev"></select>
+      <div id="mo" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>📋 データ</b></div>
+
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+    <div class="collapse-header" onclick="toggleAI()">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody">
+      <div id="aiKeySection">
+        <label>Hy3 API Key（用户自带，零成本运营）</label>
+        <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+        <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">
+          使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+        </div>
+      </div>
+      <div id="aiChatSection" style="display:none">
+        <div id="aiChat"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+          <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://biz.jumpit.saramin.co.kr/" target="_blank" style="color:var(--coral)">점핏(Jumpit) / 원티드(Wanted) / 사람인</a>
+  </div>
+
+<script>
+const KEY="P2-20260719-012";
+let db=JSON.parse(localStorage.getItem(KEY)||'{"jobs":[],"devs":[]}');
+function tab(t){
+  document.getElementById("t1").classList.toggle("on",t==="job");
+  document.getElementById("t2").classList.toggle("on",t==="dev");
+  document.getElementById("t3").classList.toggle("on",t==="match");
+  document.getElementById("fJob").style.display=t==="job"?"block":"none";
+  document.getElementById("fDev").style.display=t==="dev"?"block":"none";
+  document.getElementById("fMatch").style.display=t==="match"?"block":"none";
+  if(t==="match"){const s=document.getElementById("selDev");s.innerHTML=db.devs.map((d,i)=>"<option value='"+i+"'>"+d.name+"</option>").join("");document.getElementById("mo").innerHTML="";}
+}
+function splitArr(s){return (s||"").split(/[,，、]/).map(x=>x.trim()).filter(Boolean);}
+function addJob(){const t=document.getElementById("jTitle").value.trim();if(!t){alert("職種を入力");return;}
+  db.jobs.unshift({title:t,skills:splitArr(document.getElementById("jSkills").value)});save();
+  document.getElementById("jTitle").value="";document.getElementById("jSkills").value="";render();}
+function addDev(){const n=document.getElementById("dName").value.trim();if(!n){alert("開発者名を入力");return;}
+  db.devs.unshift({name:n,skills:splitArr(document.getElementById("dSkills").value)});save();
+  document.getElementById("dName").value="";document.getElementById("dSkills").value="";render();}
+document.getElementById("selDev").addEventListener("change",match);
+function match(){
+  const i=document.getElementById("selDev").value;if(i===""||!db.devs[i]){return;}
+  const sk=db.devs[i].skills;
+  const res=db.jobs.map(j=>{const hit=j.skills.filter(s=>sk.includes(s)).length;return {j,score:j.skills.length?Math.round(hit/j.skills.length*100):0};}).sort((a,b)=>b.score-a.score);
+  document.getElementById("mo").innerHTML=res.map(r=>"<div class='item'><div style='flex:1'><div style='font-size:14px'>"+r.j.title+
+    "</div><div style='font-size:11px;color:var(--muted)'>"+r.j.skills.join("・")+"</div></div><span class='h-coral' style='font-weight:700'>"+r.score+"%</span></div>").join("")||"求人なし";
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));}
+function render(){
+  const box=document.getElementById("list");
+  box.innerHTML="<b>📋 求人("+db.jobs.length+")</b>"+db.jobs.map(j=>"<div class='item'><div style='flex:1;font-size:14px'>"+j.title+"</div><span style='font-size:11px;color:var(--muted)'>"+j.skills.length+"sk</span></div>").join("")+
+    "<b style='display:block;margin-top:10px'>👨‍💻 開発者("+db.devs.length+")</b>"+db.devs.map(d=>"<div class='item'><div style='flex:1;font-size:14px'>"+d.name+"</div><span style='font-size:11px;color:var(--muted)'>"+d.skills.length+"sk</span></div>").join("");
+}
+render();
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+  
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({
+        model:'hunyuan-pro',
+        messages:aiHistory,
+        stream: false
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// 初始化AI模块
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+</script>
+</body>
+</html>

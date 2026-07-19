@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩文Excel/Sheets模板（财务/库存/销售）上架크몽</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;position:relative}
+.del{position:absolute;right:0;top:10px;background:#fff;color:var(--coral);
+  border:1px solid #FFD9D9;border-radius:8px;font-size:12px;padding:4px 10px;cursor:pointer}
+.mini{font-size:13px;color:var(--ink);background:#FAFAFA;border:1px solid var(--line);
+  border-radius:10px;padding:10px;margin-top:8px}
+.hr{height:1px;background:var(--line);border:none;margin:14px 0}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">digital_product</span><span class="tag">excel_template</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩文Excel/Sheets模板（财务/库存/销售）上架크몽</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KR Excel/Sheets templates (finance/inventory/sales) on Kmong</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国电子表格模板需求强：스프레드시트模板制作10-30小时、售价10,000-50,000韩元、月收入80-350만韩元。场景：财务/库存/销售报表/家庭账本。痛点：韩语模板供给少、与韩国中小企业Excel依赖高但模板贵。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>시나리오 (场景)</label><input id="ex1" placeholder="재무결산표">
+<label>가격(원)</label><input type="number" id="ex2" placeholder="20000">
+<label>제작시간(시간)</label><input type="number" id="ex3" placeholder="15">
+<label>월 판매추정(개)</label><input type="number" id="ex4" placeholder="40">
+<button class="btn" onclick="addEx()">등록</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://braindetox.kr/zh/posts/side_business_trends_2026_top10.html" target="_blank" style="color:var(--coral)">크몽 / Taling / Gumroad / Etsy</a>
+  </div>
+
+<script>
+const KEY="P4-20260719-019";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addEx(){
+ var n=document.getElementById('ex1').value.trim();
+ if(!n){alert('시나리오 입력');return;}
+ var price=+document.getElementById('ex2').value||0,hour=+document.getElementById('ex3').value||1,sale=+document.getElementById('ex4').value||0;
+ items.push({scene:n,price:price,hour:hour,sale:sale,rev:price*sale,rate:price/hour,ts:Date.now()});
+ save();document.getElementById('ex1').value='';document.getElementById('ex2').value='';document.getElementById('ex3').value='';document.getElementById('ex4').value='';
+}
+function render(){
+ var el=document.getElementById('list');
+ if(!items.length){el.innerHTML='<b>📈 스프레드시트 템플릿 (韩文)</b><p style="font-size:13px;color:var(--muted)">템플릿을 등록하세요.</p>';return;}
+ var tot=0;items.forEach(function(x){tot+=x.rev;});
+ el.innerHTML='<b>📈 스프레드시트 템플릿（'+items.length+' · 월추정 ₩'+tot.toFixed(0)+'）</b>'+items.map(function(x,i){
+  return '<div class="item"><div><b>'+esc(x.scene)+'</b></div><div style="font-size:12px;color:var(--muted)">₩'+x.price+' · '+x.hour+'h · 시급₩'+x.rate.toFixed(0)+' · 월'+x.sale+'개</div><button class="del" onclick="del('+i+')">삭제</button></div>';
+ }).join('');
+}
+function del(i){items.splice(i,1);save();}
+function esc(s){return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+render();
+</script>
+</body>
+</html>

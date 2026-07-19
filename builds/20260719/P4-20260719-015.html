@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩国Kmong数字商品（设计/Notion模板）出海或跨境套利</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;position:relative}
+.del{position:absolute;right:0;top:10px;background:#fff;color:var(--coral);
+  border:1px solid #FFD9D9;border-radius:8px;font-size:12px;padding:4px 10px;cursor:pointer}
+.mini{font-size:13px;color:var(--ink);background:#FAFAFA;border:1px solid var(--line);
+  border-radius:10px;padding:10px;margin-top:8px}
+.hr{height:1px;background:var(--line);border:none;margin:14px 0}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">digital_product</span><span class="tag">design_assets</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩国Kmong数字商品（设计/Notion模板）出海或跨境套利</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KR Kmong digital goods (design/Notion templates) cross-border arbitrage</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Kmong是韩国最大数字服务/自由职业平台，2025扭亏为盈。数字商品：Notion模板月50-200만원、设计模板40-180만원。痛点：平台佣金、新手难出单、需韩语运营、与中国闲鱼/小红书生态割裂。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>商品명 (商品名)</label><input id="km1" placeholder="디자인 템플릿">
+<label>中国采购成本(¥)</label><input type="number" id="km2" placeholder="如：30">
+<label>Kmong售价(만원)</label><input type="number" id="km3" placeholder="如：5 (即5만원)">
+<label>월 판매추정(개)</label><input type="number" id="km4" placeholder="10">
+<button class="btn" onclick="addKm()">등록</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.cbinsights.com/company/kmong/customers" target="_blank" style="color:var(--coral)">크몽(Kmong) / Taling / Class101 / Inflearn</a>
+  </div>
+
+<script>
+const KEY="P4-20260719-015";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addKm(){
+ var n=document.getElementById('km1').value.trim();
+ if(!n){alert('상품명 입력');return;}
+ var cost=+document.getElementById('km2').value||0;
+ var man=+document.getElementById('km3').value||0;
+ var krw=man*10000;
+ var sale=+document.getElementById('km4').value||0;
+ var rev=krw*sale, profit=rev-cost*sale*180;
+ items.push({name:n,cost:cost,man:man,krw:krw,sale:sale,rev:rev,profit:profit,ts:Date.now()});
+ save();document.getElementById('km1').value='';document.getElementById('km2').value='';document.getElementById('km3').value='';document.getElementById('km4').value='';
+}
+function render(){
+ var el=document.getElementById('list');
+ if(!items.length){el.innerHTML='<b>🔁 Kmong 아비트라지 (跨境套利)</b><p style="font-size:13px;color:var(--muted)">상품을 등록하세요.</p>';return;}
+ var p=0;items.forEach(function(x){p+=x.profit;});
+ el.innerHTML='<b>🔁 Kmong 아비트라지（'+items.length+' · 추정 월이익 ₩'+p.toFixed(0)+'）</b>'+items.map(function(x,i){
+  return '<div class="item"><div><b>'+esc(x.name)+'</b></div><div style="font-size:12px;color:var(--muted)">비용¥'+x.cost+' · 판매'+x.man+'만원 · 월'+x.sale+'개 · 이익₩'+x.profit.toFixed(0)+'</div><button class="del" onclick="del('+i+')">삭제</button></div>';
+ }).join('');
+}
+function del(i){items.splice(i,1);save();}
+function esc(s){return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+render();
+</script>
+</body>
+</html>

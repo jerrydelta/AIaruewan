@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>API 请求测试台（离线集合）</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">api_manager</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">API 请求测试台（离线集合）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Domain-specific offline API client with prebuilt test templates.</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">对 Postman 强制云端登录与涨价的不满正在累积。Bruno 作为"离线、Git 友好、本地文件保存"的 API 客户端获得 GitHub 20k+ stars</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>请求名称</label><input id="r_name" placeholder="如 获取用户">
+<label>方法</label><select id="r_method"><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option></select>
+<label>URL</label><input id="r_url" placeholder="https://api.example.com/users">
+<label>请求体（JSON，POST/PUT 用）</label><textarea id="r_body" rows="3" placeholder='{"key":"value"}'></textarea>
+<button class="btn" onclick="addItem()">+ 保存到集合</button>
+<p style="font-size:12px;color:var(--muted);margin-top:10px">点击「生成 curl」可复制命令行。</p>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://github.com/usebruno/bruno" target="_blank" style="color:var(--coral)">Bruno / Postman / Insomnia / Hoppscotch</a>
+  </div>
+
+<script>
+
+const KEY="P16-20260719-003";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addItem(){
+  const name=document.getElementById('r_name').value.trim();
+  const method=document.getElementById('r_method').value;
+  const url=document.getElementById('r_url').value.trim();
+  const body=document.getElementById('r_body').value.trim();
+  if(!name||!url){alert('名称和URL必填');return;}
+  items.push({name,method,url,body,added:new Date().toLocaleString()});
+  save();
+  document.getElementById('r_name').value='';document.getElementById('r_url').value='';document.getElementById('r_body').value='';
+}
+function curl(i){
+  const it=items[i];
+  let c='curl -X '+it.method+' "'+it.url+'"';
+  if(it.body)c+=" -H \"Content-Type: application/json\" -d '"+it.body.replace(/"/g,'\"')+"'";
+  prompt('复制 curl 命令：',c);
+}
+function del(i){items.splice(i,1);save();}
+function render(){
+  const el=document.getElementById('list');
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">集合为空</p>';return;}
+  el.innerHTML='<b>📮 请求集合（'+items.length+'）</b>'+items.map((it,idx)=>
+    '<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px">'+
+    '<div style="font-weight:600">'+esc(it.name)+' <span class="tag">'+esc(it.method)+'</span></div>'+
+    '<div style="font-size:12px;color:var(--muted);word-break:break-all">'+esc(it.url)+'</div>'+
+    (it.body?'<div style="font-size:12px;color:#555;margin-top:4px">body: '+esc(it.body)+'</div>':'')+
+    '<div class="row" style="margin-top:6px"><button class="btn" style="background:var(--ok);margin:0 4px 0 0" onclick="curl('+idx+')">生成 curl</button>'+
+    '<button class="btn" style="background:#fff;color:var(--coral);border:1px solid var(--line);margin:0" onclick="del('+idx+')">删除</button></div>'+
+    '</div>'
+  ).join('');
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+render();
+</script>
+</body>
+</html>

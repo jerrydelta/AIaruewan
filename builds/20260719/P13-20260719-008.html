@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>婚礼当天运行表 + 供应商协同</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{display:flex;justify-content:space-between;align-items:flex-start;
+  padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer}
+.sum{font-size:13px;color:var(--muted)}
+.done{opacity:.5}
+.done .ev{text-decoration:line-through}
+.big{font-size:20px;font-weight:700;color:var(--coral);text-align:center;margin:4px 0}
+.bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;background:var(--ok)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">wedding</span><span class="tag">day_of_timeline</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">婚礼当天运行表 + 供应商协同</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Wedding day-of run sheet + vendor coordination + guest guide</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">婚礼当天环节多易混乱、供应商协调难。Wevowly 提供"big day hour by hour"+Live Mode，Joy 含当日日程。自助新人缺轻量当天流程工具。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具：当天逐小时日程</b>
+    <div class="row">
+      <div><label>时间</label><input type="time" id="time" value="08:00"></div>
+      <div><label>环节</label><input type="text" id="ev" placeholder="化妆"></div>
+    </div>
+    <div class="row">
+      <div><label>供应商</label><input type="text" id="vendor" placeholder="化妆师"></div>
+      <div><label>联系电话</label><input type="text" id="tel" placeholder="138..."></div>
+    </div>
+    <button class="btn" onclick="add()">＋ 添加环节</button>
+    <label>婚礼日期（倒计时）</label>
+    <input type="date" id="wdate" onchange="save()">
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/au/app/wedding-planner-wevowly/id6752774352" target="_blank" style="color:var(--coral)">Wevowly / Wedding Planner & Budget Tools / Joy</a>
+  </div>
+
+<script>
+const KEY="P13-20260719-008";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let wdate=localStorage.getItem(KEY+"_wdate")||"";
+function save(){localStorage.setItem(KEY,JSON.stringify(items));localStorage.setItem(KEY+"_wdate",wdate);render();}
+function add(){
+  const time=document.getElementById('time').value;
+  const ev=document.getElementById('ev').value.trim();
+  if(!ev){alert('请填写环节');return;}
+  items.push({time,ev,vendor:document.getElementById('vendor').value.trim(),tel:document.getElementById('tel').value.trim(),done:false});
+  document.getElementById('ev').value='';document.getElementById('vendor').value='';document.getElementById('tel').value='';
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function toggle(i){items[i].done=!items[i].done;save();}
+window.onload=function(){
+  const w=document.getElementById('wdate');w.value=wdate;
+  w.onchange=function(){wdate=this.value;save();};
+};
+function render(){
+  const list=document.getElementById('list');
+  const done=items.filter(x=>x.done).length;
+  const pct=items.length?Math.round(done/items.length*100):0;
+  let html='<b>⏱ 当天运行表</b>';
+  if(wdate){const diff=Math.ceil((new Date(wdate+'T00:00:00')-new Date())/86400000);
+    html+='<div class="big">'+(diff>0?('距婚礼 '+diff+' 天'):'🎉 今天结婚！')+'</div>';}
+  html+='<div class="sum" style="text-align:center">完成 '+done+'/'+items.length+'（'+pct+'%）</div><div class="bar"><i style="width:'+pct+'%"></i></div>';
+  items.sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  items.forEach((x,i)=>{
+    html+='<div class="item '+(x.done?'done':'')+'"><div onclick="toggle('+i+')" style="cursor:pointer"><b class="ev">'+x.time+' '+x.ev+'</b>'+
+      (x.vendor?'<br><span class="sum">'+x.vendor+(x.tel?' · '+x.tel:'')+'</span>':'')+'</div>'+
+      '<span class="del" onclick="del('+i+')">删</span></div>';
+  });
+  if(!items.length) html+='<div class="sum">添加当天环节，按时间自动排序。</div>';
+  list.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

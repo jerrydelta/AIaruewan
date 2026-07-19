@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>离线优先笔记工具</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">productivity</span><span class="tag">note_taking</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">离线优先笔记工具</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Local-first note app with E2E encryption + on-device AI search</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">隐私/离线优先（local-first）笔记成强趋势，但「本地优先 + 轻量 AI 检索」仍是交叉空白。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>笔记标题</label>
+<input id="nTitle" placeholder="例如：周会要点">
+<label>内容（支持 Markdown）</label>
+<textarea id="nBody" rows="4" placeholder="写下你的想法..."></textarea>
+<button class="btn" onclick="addNote()">保存笔记</button>
+<label>搜索</label>
+<input id="nSearch" oninput="render()" placeholder="搜索笔记...">
+  </div>
+
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://obsidian.md" target="_blank" style="color:var(--coral)">Obsidian · SiYuan(思源笔记) · inBox笔记</a>
+  </div>
+<script>
+
+const KEY='P15-20260719-001';
+let items=JSON.parse(localStorage.getItem(KEY)||'[]');
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addNote(){
+ var t=document.getElementById('nTitle').value.trim();
+ var b=document.getElementById('nBody').value.trim();
+ if(!t&&!b){alert('请输入内容');return;}
+ items.unshift({id:Date.now(),t:t,b:b,ts:new Date().toLocaleString()});
+ document.getElementById('nTitle').value='';document.getElementById('nBody').value='';
+ save();
+}
+function delNote(id){items=items.filter(x=>x.id!=id);save();}
+function render(){
+ var q=(document.getElementById('nSearch').value||'').toLowerCase();
+ var box=document.getElementById('list');
+ var f=items.filter(x=>(x.t+' '+x.b).toLowerCase().indexOf(q)>=0);
+ box.innerHTML='<b>📚 已存 '+items.length+' 条笔记</b>';
+ if(!f.length){box.innerHTML+='<p style="font-size:13px;color:#999">暂无匹配</p>';return;}
+ box.innerHTML+=f.map(x=>'<div class="card" style="margin:8px 0;padding:12px"><div style="font-weight:600">'+esc(x.t||'(无标题)')+'</div><div style="font-size:13px;color:#555;white-space:pre-wrap">'+esc(x.b)+'</div><div style="font-size:11px;color:#aaa;margin-top:6px">'+x.ts+' <a style="color:var(--coral);cursor:pointer" onclick="delNote('+x.id+')">删除</a></div></div>').join('');
+}
+function esc(s){return (s||'').replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+render();
+
+</script>
+</body>
+</html>

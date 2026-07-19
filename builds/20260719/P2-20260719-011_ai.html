@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韓国1人企業向けAI税務・還付金最適化SaaS｜韩个体税务</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.out{background:#FFF7F0;border:1px solid #FFE0CC;border-radius:10px;padding:12px;margin-top:10px;font-size:14px}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+.collapsed{display:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">career</span><span class="tag">work_efficiency</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韓国1人企業向けAI税務・還付金最適化SaaS</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Korean solo-business AI tax &amp; refund-optimization SaaS</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韓国で1人企業・個人事業者のAI税務・還付金(환급)需要急増。BizNep(G Enterprise)は370万事業者・1.6兆ウォン還付金管理実績を持つAI税務プラットフォーム。痛点：還付金を最大化する控除を見落とす。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 簡易税務・還付金診断</b>
+    <div class="row">
+      <input id="income" type="number" placeholder="年収入(원)">
+      <input id="expense" type="number" placeholder="経費(원)">
+    </div>
+    <label>還付金を最大化する控除項目（該当チェック）</label>
+    <div style="font-size:13px">
+      <label style="margin:2px 0"><input type="checkbox" class="d" style="width:auto;margin:0 6px 0 0">小規模事業者特例</label>
+      <label style="margin:2px 0"><input type="checkbox" class="d" style="width:auto;margin:0 6px 0 0">家事使用比率控除</label>
+      <label style="margin:2px 0"><input type="checkbox" class="d" style="width:auto;margin:0 6px 0 0">年金・保険料</label>
+      <label style="margin:2px 0"><input type="checkbox" class="d" style="width:auto;margin:0 6px 0 0">教育費控除</label>
+    </div>
+    <button class="btn" onclick="calc()">計算する</button>
+    <div id="out" class="out" style="display:none"></div>
+  </div>
+
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+    <div class="collapse-header" onclick="toggleAI()">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody">
+      <div id="aiKeySection">
+        <label>Hy3 API Key（用户自带，零成本运营）</label>
+        <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+        <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">
+          使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+        </div>
+      </div>
+      <div id="aiChatSection" style="display:none">
+        <div id="aiChat"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+          <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.asiae.co.kr/en/print.htm?idxno=2026011309112362844" target="_blank" style="color:var(--coral)">비즈넵(BizNep) / G Enterprise</a>
+  </div>
+
+<script>
+const KEY="P2-20260719-011";
+function calc(){
+  const income=parseFloat(document.getElementById("income").value)||0;
+  const expense=parseFloat(document.getElementById("expense").value)||0;
+  const profit=income-expense;
+  // 한국 간이：所得額×6%概算（簡易最低帯）
+  let tax=profit>0?profit*0.06:0;
+  const dc=document.querySelectorAll(".d:checked").length;
+  const estRefund=dc*income*0.01; // 控除每に還付増加（簡易）
+  const out=document.getElementById("out");out.style.display="block";
+  out.innerHTML="📊 推定所得："+Math.round(profit).toLocaleString()+"원<br>"+
+    "📊 概算所得税："+Math.round(tax).toLocaleString()+"원<br>"+
+    "💰 還付金最大化見込："+Math.round(estRefund).toLocaleString()+"원（チェック"+dc+"項目）<br>"+
+    "<span style='color:var(--muted);font-size:11px'>※簡易見積り。正確は세무사へ。</span>";
+  const hist=JSON.parse(localStorage.getItem(KEY)||"[]");
+  hist.unshift({income,expense,profit:Math.round(profit),date:new Date().toLocaleDateString()});
+  localStorage.setItem(KEY,JSON.stringify(hist.slice(0,30)));
+}
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+  
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({
+        model:'hunyuan-pro',
+        messages:aiHistory,
+        stream: false
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// 初始化AI模块
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+</script>
+</body>
+</html>

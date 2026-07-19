@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>个体户记账开票报税</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;
+  --ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;
+  --card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.mini{display:inline-block;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer;margin:3px 4px 0 0}
+.mini.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.mini.warn{background:var(--coral);color:#fff;border-color:var(--coral)}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600;font-size:14px}.item .meta{font-size:12px;color:var(--muted);margin:4px 0}
+.big{font-size:20px;font-weight:700}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">business</span><span class="tag">sole_proprietor_bookkeeping</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">个体户记账·开票·报税一体</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Sole-proprietor bookkeeping + scan-to-invoice + one-click tax filing</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">截至2023年底个体工商户1.24亿户。痛点：客户临时要发票手写/找代账平均15分钟/张；纸本记货月底盘点"货在账不在"损耗率超8%；多平台收款对账2小时→3分钟。留财云瞄准年营收百万内个体户，用友好会计几百元/年即可做账出报表。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 收支记账 + 一键开票 + 报税预估</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">登记收入/支出；点"开发票"把一笔收入转为电子发票（普票）；按利润估算应缴经营所得（简易5%-35%档，此处用核定征收示例）。</p>
+    <div class="row">
+      <div><label>类型</label><select id="f_type"><option value="in">收入</option><option value="out">支出</option></select></div>
+      <div><label>金额</label><input id="f_amt" type="number" placeholder="0"></div>
+    </div>
+    <label>摘要</label><input id="f_note" placeholder="如：客户A维修费 / 进货款">
+    <button class="btn" onclick="addRec()">记一笔</button>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <div id="summary" style="font-size:13px"></div>
+    <button class="btn" onclick="issueInvoice()" style="background:var(--ok)">选中收入 → 开电子发票</button>
+    <button class="btn" onclick="taxEstimate()">一键报税预估</button>
+    <div id="tax" style="font-size:13px;margin-top:6px"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📒 账务流水</b><div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://jiangxi.jxnews.com.cn/system/2026/04/17/031107901.shtml" target="_blank" style="color:var(--coral)">留财云 / 用友好会计 / 金蝶AI星辰</a>
+  </div>
+
+<script>
+const KEY="P12-20260719-012";
+let records=JSON.parse(localStorage.getItem(KEY)||"[]");
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function save(){localStorage.setItem(KEY,JSON.stringify(records));render();}
+function addRec(){
+  const amt=+f_amt.value;if(!amt){alert("请输入金额");return;}
+  records.unshift({id:Date.now(),type:f_type.value,amt,note:f_note.value.trim(),inv:false});
+  f_amt.value=f_note.value="";save();
+}
+function issueInvoice(){
+  const sel=prompt("输入要开票的收入记录ID（见流水序号）：");if(!sel)return;
+  const it=records.find(x=>x.id===+sel&&x.type==="in");if(!it){alert("未找到该收入记录");return;}
+  it.inv=true;save();
+}
+function delRec(id){records=records.filter(x=>x.id!==id);save();}
+function taxEstimate(){
+  const inSum=records.filter(x=>x.type==="in").reduce((s,x)=>s+x.amt,0);
+  const outSum=records.filter(x=>x.type==="out").reduce((s,x)=>s+x.amt,0);
+  const profit=inSum-outSum;
+  const tax=profit>0?+(profit*0.05).toFixed(2):0;
+  document.getElementById("tax").innerHTML=`估算利润 <b class="h-coral">¥${profit}</b> · 核定征收(5%示例)应缴约 <b>¥${tax}</b><br><span style="font-size:11px;color:var(--muted)">*仅示意，实际以税务为准</span>`;
+}
+function render(){
+  const inSum=records.filter(x=>x.type==="in").reduce((s,x)=>s+x.amt,0);
+  const outSum=records.filter(x=>x.type==="out").reduce((s,x)=>s+x.amt,0);
+  document.getElementById("summary").innerHTML=`收入 <b class="h-coral">¥${inSum}</b> · 支出 ¥${outSum} · 利润 <b>¥${inSum-outSum}</b>`;
+  const d=document.getElementById("items");
+  if(!records.length){d.innerHTML='<p style="font-size:13px;color:var(--muted)">暂无流水。</p>';return;}
+  d.innerHTML=records.slice(0,40).map(x=>`
+    <div class="item"><div class="t">${x.type==="in"?"🟢收入":"🔴支出"} ¥${x.amt} ${x.inv?'<span class="tag">已开票</span>':''}</div>
+    <div class="meta">${esc(x.note)||"无摘要"} <span class="mini warn" onclick="delRec(${x.id})">删</span></div></div>`).join("");
+}
+render();
+</script>
+</body>
+</html>

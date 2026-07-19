@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>备婚情绪协同+婚前沟通清单工具(缓解备婚焦虑)</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.ai-card .collapse-body.collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">wedding</span><span class="tag">premarital_anxiety</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">备婚情绪协同+婚前沟通清单工具(缓解备婚焦虑)</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Premarital anxiety reliever: couples emotional check-in + premarital communication checklist</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">备婚焦虑是真实高频痛点:中国夫妻开发的《婚启》定价8元(一人购买夫妻共用), 上线7个月获3000+对情侣使用, 主要靠小红书获客, 女生占比约70%; 核心功能'心情胶囊'每日心情互享+鼓励语录。美国Before Yes用100+研究背书问题做婚前准备(Solo/Couples模式, 隐私优先无账…</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>日期</label><input id="d2" type="date">
+<label>心情(1-5，5最好)</label><input id="m2" type="number" min="1" max="5" value="3">
+<label>记录人</label><select id="w2"><option>我</option><option>伴侣</option></select>
+<label>想对伴侣说的一句话</label><textarea id="n2" rows="2" placeholder="鼓励 / 期待 / 小吐槽"></textarea>
+<button class="btn" onclick="addItem()">记录心情</button>
+<div id="q2" style="font-size:12px;color:var(--coral);margin-top:8px"></div>
+<b style="display:block;margin-top:14px">💬 婚前沟通清单</b>
+<div id="cl2"></div>
+  </div>
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+  <div class="collapse-header" onclick="toggleAI()">
+    🤖 AI 助手（用户自带Key · 零成本）
+  </div>
+  <div class="collapse-body collapsed" id="aiBody">
+    <div id="aiKeySection">
+      <label>Hy3 API Key（用户自带，零成本运营）</label>
+      <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+      <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">
+        使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+      </div>
+    </div>
+    <div id="aiChatSection" style="display:none">
+      <div id="aiChat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+        <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.sohu.com/a/997583138_121019331" target="_blank" style="color:var(--coral)">婚启 / Before Yes / 壹心理(婚前焦虑)</a>
+  </div>
+<script>
+const KEY="P13-20260719-002";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);save();}
+const Q2=["财务观与债务","是否要孩子/几个","与父母同住安排","家务分工","节日去谁家","大额消费决策","宗教信仰","对婚姻的期待"];
+let cl2=JSON.parse(localStorage.getItem(KEY+':cl')||"{}");
+function renderCL(){
+  let h='';
+  Q2.forEach((q,i)=>{const ck=cl2[i]?'checked':'';h+='<label style="display:flex;gap:8px;align-items:center;margin:4px 0;color:var(--ink)"><input type="checkbox" style="width:auto;margin:0" '+ck+' onchange="togCL('+i+',this.checked)"> '+q+'</label>';});
+  document.getElementById('cl2').innerHTML=h;
+}
+function togCL(i,v){cl2[i]=v;localStorage.setItem(KEY+':cl',JSON.stringify(cl2));}
+function addItem(){
+  const d=document.getElementById('d2').value||new Date().toISOString().slice(0,10);
+  const m=+document.getElementById('m2').value||3;
+  const w=document.getElementById('w2').value;
+  const n=document.getElementById('n2').value.trim();
+  items.push({d,m,w,n});
+  document.getElementById('n2').value='';
+  const qs=['今天也要好好爱自己 💛','结婚是起点不是终点','一起面对比单打独斗强','谢谢你的耐心 🌿','慢慢来，我们比较贵'];
+  document.getElementById('q2').textContent='今日语录：'+qs[Math.floor(Math.random()*qs.length)];
+  save();
+}
+function render(){
+  let html='<b>💗 心情日志</b>';
+  let sum=0;
+  items.forEach((it,i)=>{sum+=it.m;html+='<div style="border-bottom:1px solid var(--line);padding:6px 0;font-size:13px">'+it.d+' · '+it.w+' · 心情'+it.m+'/5<br>'+(it.n?('“'+it.n+'”'):'')+'<br><button class="btn" style="background:var(--muted);padding:5px;margin:3px 0" onclick="del('+i+')">删除</button></div>';});
+  if(items.length) html+='<div style="margin-top:6px">平均心情 '+(sum/items.length).toFixed(1)+'/5</div>';
+  document.getElementById('list').innerHTML=html;
+  renderCL();
+}
+render();
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({ model:'hunyuan-pro', messages:aiHistory, stream: false })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+</script>
+</body>
+</html>

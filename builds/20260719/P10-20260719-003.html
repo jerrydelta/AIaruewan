@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>搬家任务清单管家</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">home</span><span class="tag">moving_checklist</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">搬家任务清单管家</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Free moving-specific task manager that auto-builds a checklist and arranges utility/paperwork</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">搬家从准备到完成需1个月以上，手续易漏。らくらくMOVING（2022年免费）仅10问即自动列出60+任务，游戏化推进。痛点：转居手续（转居届·生活线·打包）缺乏一体化管理。机会：搬家专用任务管理+手续统筹应用。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:0 0 6px">回答几个问题，自动生成搬家任务清单，勾选完成度。</p>
+    <label>家庭人数</label>
+    <select id="fam"><option>1人</option><option>2人</option><option>3-4人</option><option>5人以上</option></select>
+    <label>搬家距离</label>
+    <select id="dist"><option>同城</option><option>跨市</option><option>跨县/长途</option></select>
+    <label>是否有宠物</label>
+    <select id="pet"><option>无</option><option>有猫/狗</option></select>
+    <button class="btn" onclick="gen()">生成我的搬家清单</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.livero.co.jp/corporate/corp_assets/img/news/news_2025_05_16.pdf" target="_blank" style="color:var(--coral)">らくらくMOVING</a>
+  </div>
+<script>
+const KEY="P10-20260719-003";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function gen(){
+  const fam=document.getElementById('fam').value;
+  const dist=document.getElementById('dist').value;
+  const pet=document.getElementById('pet').value;
+  let t=["转居届（邮局）","电力的停止/开通手续","燃气停止/开通手续","自来水停止/开通手续",
+    "打包衣物","整理重要证件文件","预约搬家公司","通知银行/信用卡地址变更","网络/宽带迁移"];
+  if(fam!=="1人") t.push("孩子学校/托育转籍","家具拆装安排");
+  if(dist==="跨县/长途") t.push("车辆/驾照地址变更","长途行李保险");
+  if(pet==="有猫/狗") t.push("宠物检疫/托运预约","宠物在新居适应准备");
+  items=t.map(x=>({text:x,done:false}));
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function toggle(i){items[i].done=!items[i].done;save();}
+function del(i){items.splice(i,1);save();}
+function addCustom(){
+  const v=prompt('添加自定义任务：');
+  if(v&&v.trim()){items.push({text:v.trim(),done:false});save();}
+}
+function render(){
+  const list=document.getElementById('list');
+  if(!items.length){list.innerHTML='<b>📋 搬家清单</b><p style="font-size:13px;color:var(--muted)">先生成清单</p>';return;}
+  const done=items.filter(x=>x.done).length;
+  const pct=Math.round(done/items.length*100);
+  let html='<b>📋 搬家清单</b><div style="height:10px;background:var(--line);border-radius:6px;margin:8px 0;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--ok)"></div></div><div style="font-size:13px;margin-bottom:6px">完成 '+done+'/'+items.length+' （'+pct+'%）</div>';
+  items.forEach((it,i)=>{
+    html+='<div style="display:flex;align-items:center;gap:8px;font-size:14px;padding:6px 0;border-bottom:1px dashed var(--line)"><span onclick="toggle('+i+')" style="cursor:pointer;font-size:18px">'+(it.done?'✅':'⬜')+'</span><span style="flex:1;'+(it.done?'text-decoration:line-through;color:var(--muted)':'')+'">'+it.text+'</span><span onclick="del('+i+')" style="color:var(--coral);cursor:pointer">✕</span></div>';
+  });
+  html+='<button class="btn" style="background:var(--ok);margin-top:10px" onclick="addCustom()">+ 添加任务</button>';
+  list.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

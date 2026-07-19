@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>伴生种植布局规划器</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600}.item .s{font-size:13px;color:var(--muted)}
+.mini{display:inline-block;padding:6px 10px;border:none;border-radius:8px;font-size:13px;cursor:pointer;margin:6px 6px 0 0}
+.mini.ok{background:var(--ok);color:#fff}.mini.del{background:#eee;color:#999}
+.warn{color:var(--coral);font-weight:600}.good{color:var(--ok);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">plant</span><span class="tag">garden_planning</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">伴生种植布局规划器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Square-foot companion-planting planner (like Planter)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">城市小空间用户想要"极简可视化布局 + 伴生种植"，但多数规划器偏专业/年费。本工具检查同畦植物的相生相克并给出提示。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 我的菜畦</b>
+    <label>添加植物到本畦</label>
+    <select id="pPlant">
+      <option>番茄</option><option>罗勒</option><option>胡萝卜</option><option>豆类</option>
+      <option>洋葱/葱</option><option>玉米</option><option>生菜</option><option>黄瓜</option><option>薄荷</option>
+    </select>
+    <button class="btn" onclick="addPlant()">加入菜畦</button>
+    <div id="conflict" style="margin-top:10px;font-size:13px"></div>
+  </div>
+  <div class="card" id="list">
+    <b>📋 菜畦植物</b>
+    <div id="items"></div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/us/app/planter-garden-planner/id1542642210" target="_blank" style="color:var(--coral)">Planter</a>
+  </div>
+<script>
+const KEY="P11-20260719-007";
+// 相克表：key 与 value 不宜相邻
+const BAD={"番茄":["玉米","薄荷","洋葱/葱"],"洋葱/葱":["豆类","番茄"],"薄荷":["番茄","生菜"],"玉米":["番茄"],"黄瓜":["薄荷"]};
+const GOOD={"番茄":["罗勒","胡萝卜"],"胡萝卜":["豆类","生菜"],"玉米":["豆类"],"豆类":["玉米","胡萝卜"]};
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addPlant(){
+  const p=document.getElementById('pPlant').value;
+  items.push({id:Date.now(),name:p});
+  save();
+}
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function render(){
+  const box=document.getElementById('items');
+  if(!items.length){ box.innerHTML='<p style="font-size:13px;color:var(--muted)">菜畦还空着。</p>'; document.getElementById('conflict').innerHTML=''; return; }
+  box.innerHTML=items.map(it=>'<div class="item"><div class="t">'+it.name+'</div><button class="mini del" onclick="del('+it.id+')">移除</button></div>').join('');
+  const names=items.map(x=>x.name); let warns=[], goods=[];
+  names.forEach(n=>{ (BAD[n]||[]).forEach(b=>{ if(names.includes(b)) warns.push(n+' ✕ '+b); }); (GOOD[n]||[]).forEach(g=>{ if(names.includes(g)) goods.push(n+' ✓ '+g); }); });
+  let html='';
+  if(warns.length) html+='<div class="warn">⚠ 相克（不宜相邻）：'+warns.join('；')+'</div>';
+  if(goods.length) html+='<div class="good">✓ 相生（好搭配）：'+goods.join('；')+'</div>';
+  if(!warns.length&&!goods.length) html='<div class="s">暂无明显相生相克提示。</div>';
+  document.getElementById('conflict').innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

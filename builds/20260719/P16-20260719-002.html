@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>服务器资源监控面板</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">server_monitor</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">服务器资源监控面板</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KO-localized lightweight monitoring dashboard for K8s/Naver-Kakao cloud.</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">在韩国 44bits、Okky 等 DevOps 社区中，对"轻量自托管监控面板"的需求正在增长。Netdata 偏重，Uptime Kuma 专注死活监控</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>服务器名称</label><input id="s_name" placeholder="如 web-01">
+<label>环境类型</label><select id="s_env"><option>Docker</option><option>Kubernetes</option><option>Naver Cloud</option><option>Kakao Cloud</option></select>
+<label>区域</label><input id="s_zone" placeholder="如 ap-seoul-1">
+<button class="btn" onclick="addItem()">+ 添加服务器</button>
+<hr style="border:none;border-top:1px dashed var(--line);margin:14px 0">
+<label>记录资源快照 — 选择服务器</label>
+<select id="sn_idx"></select>
+<div class="row">
+  <div><label>CPU %</label><input id="sn_cpu" type="number" placeholder="0-100"></div>
+  <div><label>内存 %</label><input id="sn_mem" type="number" placeholder="0-100"></div>
+</div>
+<label>磁盘 %</label><input id="sn_disk" type="number" placeholder="0-100">
+<button class="btn" onclick="snap()">📊 记录快照</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://github.com/henrygd/beszel" target="_blank" style="color:var(--coral)">Beszel / Netdata / Uptime Kuma</a>
+  </div>
+
+<script>
+
+const KEY="P16-20260719-002";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addItem(){
+  const name=document.getElementById('s_name').value.trim();
+  const env=document.getElementById('s_env').value;
+  const zone=document.getElementById('s_zone').value.trim();
+  if(!name){alert('名称必填');return;}
+  items.push({name,env,zone,snaps:[],added:new Date().toLocaleString()});
+  save();
+  document.getElementById('s_name').value='';document.getElementById('s_zone').value='';
+}
+function snap(){
+  const i=+document.getElementById('sn_idx').value;
+  const cpu=document.getElementById('sn_cpu').value;
+  const mem=document.getElementById('sn_mem').value;
+  const disk=document.getElementById('sn_disk').value;
+  if(isNaN(i)||!items[i]){alert('请先选择服务器');return;}
+  items[i].snaps.push({cpu,mem,disk,t:new Date().toLocaleString()});
+  save();
+  document.getElementById('sn_cpu').value='';document.getElementById('sn_mem').value='';document.getElementById('sn_disk').value='';
+}
+function del(i){items.splice(i,1);save();}
+function render(){
+  const el=document.getElementById('list');
+  const sel=document.getElementById('sn_idx');
+  if(sel){sel.innerHTML=items.map((it,idx)=>'<option value="'+idx+'">'+esc(it.name)+'</option>').join('');}
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">暂无服务器</p>';return;}
+  el.innerHTML='<b>🖥 服务器（'+items.length+'）</b>'+items.map((it,idx)=>{
+    const last=it.snaps[it.snaps.length-1];
+    const lv=last?('CPU '+esc(last.cpu)+'% / 内存 '+esc(last.mem)+'% / 磁盘 '+esc(last.disk)+'%'):'尚无快照';
+    return '<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px">'+
+      '<div style="font-weight:600">'+esc(it.name)+' <span class="tag">'+esc(it.env)+'</span></div>'+
+      '<div style="font-size:12px;color:var(--muted)">'+esc(it.zone||'-')+' · 快照 '+it.snaps.length+' 次</div>'+
+      '<div style="font-size:13px;margin:6px 0" class="h-coral">最近：'+lv+'</div>'+
+      '<button class="btn" style="background:#fff;color:var(--coral);border:1px solid var(--line)" onclick="del('+idx+')">删除</button>'+
+      '</div>';
+  }).join('');
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>一人公司(OPC)全球卖的财税合规MVP——拍照记账+扫码开票+一键报税+经营看板，中韩双语可复制</title>
+<style>
+:root{
+  --coral:#FF6B6B;        /* 主品牌色 */
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.item button{background:var(--coral);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer;margin-left:8px}
+.sum-line{display:flex;justify-content:space-between;padding:5px 0;font-size:14px}
+.sum-line b{color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">business</span><span class="tag">opc_finance_cross_market</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">一人公司(OPC)全球卖的财税合规MVP——拍照记账+扫码开票+一键报税+经营看板，中韩双语可复制</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Global-sell OPC finance MVP: photo bookkeeping + scan invoice + one-click tax + dashboard, CN/KR bilingual replicable</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">中韩两地均验证'个体户/1인기업 零成本财税'刚需：中国留财云公域全免费一键报税(年营收百万内个体户)；韩国리드넘버 550만 사용자 자영업 세무장부·부가세 예상·배달앱 연동。差异：中国免费合规财税仍稀缺(多数收费SaaS)，韩国국세청 공식앱(손택스) 복잡·평점2.6。同一MVP(拍照记账+扫码开票+一键报税+经营看板)可在两地复用，并扩展至东南亚(类似BCFi)。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>类型</label><select id="f_type"><option>收入</option><option>支出</option></select><label>项目</label><input type="text" id="f_item" placeholder=""><label>金额(元)</label><input type="number" id="f_amount" placeholder=""><label>市场</label><select id="f_market"><option>中国</option><option>韩国</option><option>其他</option></select><label>日期</label><input type="date" id="f_date">
+    <button class="btn" onclick="add()">保存记录</button>
+  </div>
+  <div class="card" id="summary" style="display:none;background:#FFF0F0"></div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://jiangxi.jxnews.com.cn/system/2026/04/17/031107901.shtml" target="_blank" style="color:var(--coral)">留财云(中) / 리드넘버(韩) / BCFi(韩) / 用友好会计(中)</a>
+  </div>
+<script>
+const CONFIG = {"id":"P12-20260719-020","fields":[{"key":"type","label":"类型","type":"select","options":["收入","支出"]},{"key":"item","label":"项目","type":"text"},{"key":"amount","label":"金额(元)","type":"number"},{"key":"market","label":"市场","type":"select","options":["中国","韩国","其他"]},{"key":"date","label":"日期","type":"date"}],"summary":[{"kind":"sumByType","typeField":"type","value":"收入","amountField":"amount","label":"总收入(元)"},{"kind":"sumByType","typeField":"type","value":"支出","amountField":"amount","label":"总支出(元)"},{"kind":"net","typeField":"type","inVal":"收入","outVal":"支出","amountField":"amount","label":"结余(元)"}]};
+
+const KEY = CONFIG.id;
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function fmtTime(t){ var d=new Date(t); return (d.getMonth()+1)+"/"+d.getDate()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2); }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+function val(it,f){ return Number(it[f])||0; }
+function render(){
+  var list=document.getElementById("list");
+  if(items.length===0){ list.innerHTML='<p style="color:var(--muted);font-size:13px;margin:0">暂无记录，添加一条试试 ✦</p>'; }
+  else {
+    var h='<b style="font-size:14px">📋 我的记录（'+items.length+'）</b>';
+    for(var i=0;i<items.length;i++){
+      var it=items[i]; var parts=[];
+      for(var j=0;j<CONFIG.fields.length;j++){ var f=CONFIG.fields[j]; if(it[f.key]!=="" && it[f.key]!=null) parts.push(esc(it[f.key])); }
+      h+='<div class="item"><span>'+parts.join(" · ")+' <small style="color:var(--muted)">'+fmtTime(it.t)+'</small></span><button onclick="del('+i+')">删</button></div>';
+    }
+    list.innerHTML=h;
+  }
+  renderSummary();
+}
+function renderSummary(){
+  var s=document.getElementById("summary");
+  if(!CONFIG.summary||!CONFIG.summary.length){ s.style.display="none"; return; }
+  s.style.display="block";
+  var h='<b style="font-size:14px">📊 数据概览</b>';
+  for(var k=0;k<CONFIG.summary.length;k++){
+    var d=CONFIG.summary[k]; var v=0;
+    if(d.kind==="count") v=items.length;
+    else if(d.kind==="sum"){ for(var i=0;i<items.length;i++) v+=val(items[i],d.field); }
+    else if(d.kind==="sumByType"){ for(var i=0;i<items.length;i++) if(items[i][d.typeField]===d.value) v+=val(items[i],d.amountField); }
+    else if(d.kind==="net"){ var inc=0,out=0; for(var i=0;i<items.length;i++){ if(items[i][d.typeField]===d.inVal) inc+=val(items[i],d.amountField); else if(items[i][d.typeField]===d.outVal) out+=val(items[i],d.amountField);} v=inc-out; }
+    else if(d.kind==="low"){ for(var i=0;i<items.length;i++) if(val(items[i],d.field) < val(items[i],d.min)) v++; }
+    else if(d.kind==="invValue"){ for(var i=0;i<items.length;i++) v+=val(items[i],d.field)*val(items[i],d.price); }
+    else if(d.kind==="profitSimple"){ var r=0,c=0; for(var i=0;i<items.length;i++){ r+=val(items[i],d.revenue); c+=val(items[i],d.cost);} v=r-c; }
+    else if(d.kind==="profit"){ for(var i=0;i<items.length;i++) v+=(val(items[i],d.price)-val(items[i],d.cost))*val(items[i],d.qty); }
+    else if(d.kind==="avg"){ if(items.length){ var s2=0; for(var i=0;i<items.length;i++) s2+=val(items[i],d.field); v=(s2/items.length).toFixed(1);} else v=0; }
+    h+='<div class="sum-line"><span>'+d.label+'</span><b>'+v+'</b></div>';
+  }
+  s.innerHTML=h;
+}
+function add(){
+  var it={t:Date.now()};
+  for(var i=0;i<CONFIG.fields.length;i++){ var f=CONFIG.fields[i]; var el=document.getElementById("f_"+f.key); it[f.key]= (f.type==="number") ? (el.value===""?"":el.value) : el.value; }
+  if(!it[CONFIG.fields[0].key]){ alert("请填写"+CONFIG.fields[0].label); return; }
+  items.unshift(it); save();
+  for(var i=0;i<CONFIG.fields.length;i++){ document.getElementById("f_"+CONFIG.fields[i].key).value=""; }
+}
+function del(i){ items.splice(i,1); save(); }
+render();
+
+
+</script>
+</body>
+</html>

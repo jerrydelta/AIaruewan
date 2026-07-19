@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>零工专属季度预缴税估算 + 缴款日历</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.small{font-size:12px;color:var(--muted)}
+.stat{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.stat b{color:var(--coral)}
+.q{display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:8px;font-size:14px}
+.q.done{background:#EAFaf3;border-color:var(--ok)}
+.q .pill{font-size:12px;padding:3px 10px;border-radius:999px;background:var(--coral);color:#fff}
+.q.done .pill{background:var(--ok)}
+.warn{background:#FFEFEF;border:1px solid #FFC9C9;border-radius:10px;padding:10px;font-size:13px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">gig_economy</span><span class="tag">income_tracker</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">零工专属季度预缴税估算 + 缴款日历</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Gig quarterly estimated-tax calculator with calendar</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">美国 1099 零工需按季度（4/15、6/15、9/15、1/15）预缴税，逾期罚款。现有工具要么贵要么不专为零工设计。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 估算年度税</b>
+    <label>预计全年自雇净收入（扣除成本后，$）</label>
+    <input type="number" id="net" placeholder="如 50000">
+    <button class="btn" onclick="calc()">估算季度税</button>
+    <div class="small" style="margin-top:8px">含自雇税(SE 15.3%)+ 个税；按单身标准扣除估算，结果仅供参考。</div>
+  </div>
+
+  <div class="card">
+    <b>📅 缴款日历</b>
+    <div id="summary"></div>
+    <div id="cal"></div>
+    <div id="alert"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.irs.gov/businesses/independent-contractor-self-employed-gig-worker" target="_blank" style="color:var(--coral)">IRS Gig Worker / WBB Gig Taxes / Bonsai Tax</a>
+  </div>
+
+<script>
+const KEY="P9-20260719-006";
+let paid=JSON.parse(localStorage.getItem(KEY+"_paid")||'[false,false,false,false]');
+function incTax(t){
+  if(t<=0)return 0;
+  const b=[[11600,0.10,0],[47150,0.12,1160],[100525,0.22,6080],[191950,0.24,18310],[383925,0.32,46728],[487450,0.35,104778],[1e12,0.37,186281]];
+  for(const [cap,r,q] of b){if(t<=cap)return t*r-q;}
+  return 0;
+}
+function calc(){
+  const net=parseFloat(document.getElementById("net").value)||0;
+  const se=net*0.9235*0.153;
+  const inc=net-se/2-14600;
+  const tax=se+incTax(inc);
+  const q=Math.max(0,tax/4);
+  const sum=document.getElementById("summary");
+  sum.innerHTML='<div class="stat"><span>预估年税总额</span><b>$'+Math.round(tax).toLocaleString()+'</b></div>'+
+    '<div class="stat"><span>每季应缴</span><b>$'+Math.round(q).toLocaleString()+'</b></div>'+
+    '<div class="stat"><span>已缴</span><span>$'+Math.round(q*paid.filter(Boolean).length).toLocaleString()+'</span></div>';
+  renderCal(q);
+}
+function renderCal(q){
+  const dates=["4/15","6/15","9/15","次年1/15"];
+  const cal=document.getElementById("cal");
+  cal.innerHTML=dates.map((d,i)=>'<div class="q '+(paid[i]?'done':'')+'" onclick="mark('+i+')"><span>Q'+(i+1)+' · 截止 '+d+'<br><span class="small">应缴 $'+Math.round(q).toLocaleString()+'</span></span><span class="pill">'+(paid[i]?'已缴 ✓':'待缴')+'</span></div>').join("");
+  const due=paid.filter(x=>!x).length;
+  document.getElementById("alert").innerHTML=due?'<div class="warn">⚠️ 还有 '+due+' 期未缴，逾期可能产生罚款与利息。点上方卡片标记已缴。</div>':'<div class="small ok" style="color:var(--ok);margin-top:8px">✅ 全年已缴清</div>';
+}
+function mark(i){paid[i]=!paid[i];localStorage.setItem(KEY+"_paid",JSON.stringify(paid));
+  const net=parseFloat(document.getElementById("net").value)||0;
+  const se=net*0.9235*0.153;const inc=net-se/2-14600;const tax=se+incTax(inc);renderCal(Math.max(0,tax/4));
+  // 更新已缴显示
+  const sum=document.getElementById("summary");
+  if(net>0){sum.innerHTML='<div class="stat"><span>预估年税总额</span><b>$'+Math.round(tax).toLocaleString()+'</b></div>'+
+    '<div class="stat"><span>每季应缴</span><b>$'+Math.round(tax/4).toLocaleString()+'</b></div>'+
+    '<div class="stat"><span>已缴</span><span>$'+Math.round(tax/4*paid.filter(Boolean).length).toLocaleString()+'</span></div>';}
+}
+calc();
+</script>
+</body>
+</html>

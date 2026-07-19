@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>更年期症状+可穿戴体温同步的追踪器(医生可读报告)</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">health</span><span class="tag">menopause_wearable_sync</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">更年期症状+可穿戴体温同步的追踪器(医生可读报告)</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Menopause symptom tracker with wearable temperature sync + clinician-ready report</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Oura 2026年5月推出Menopause Insights:基于自研Menopause Impact Scale(MIS, 22症状临床问卷)评估睡眠/情绪/认知/日常功能影响, 关联体温/睡眠/恢复生物数据; 全球超10亿女性处于围绝经期/更年期, 长期被医疗忽视。与Midi/Evernow…</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>日期</label><input id="t11d" type="date">
+<label>潮热次数</label><input id="t11hf" type="number" min="0" value="0">
+<label>睡眠评分(1-10)</label><input id="t11sl" type="number" min="1" max="10" value="7">
+<label>情绪(1-5)</label><input id="t11mo" type="number" min="1" max="5" value="3">
+<label>基础体温(℃)</label><input id="t11tp" type="number" step="0.1" placeholder="36.5">
+<button class="btn" onclick="addItem()">记录</button>
+<button class="btn" onclick="exportRep()" style="background:var(--ok)">导出医生报告</button>
+<textarea id="rep11" rows="4" style="display:none;margin-top:8px"></textarea>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://ouraring.com/blog/nl/hormonal-health-features/" target="_blank" style="color:var(--coral)">Oura / Midi Health / Evernow</a>
+  </div>
+<script>
+const KEY="P13-20260719-011";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);save();}
+function addItem(){
+  const d=document.getElementById('t11d').value||new Date().toISOString().slice(0,10);
+  const hf=+document.getElementById('t11hf').value||0;
+  const sl=+document.getElementById('t11sl').value||7;
+  const mo=+document.getElementById('t11mo').value||3;
+  const tp=document.getElementById('t11tp').value;
+  items.push({d,hf,sl,mo,tp});
+  document.getElementById('t11tp').value='';
+  save();
+}
+function exportRep(){
+  let s='===== 更年期症状报告 =====\n';
+  items.forEach(it=>{s+=it.d+' 潮热'+it.hf+' 睡眠'+it.sl+' 情绪'+it.mo+' 体温'+(it.tp||'-')+'\n';});
+  const r=document.getElementById('rep11');r.style.display='block';r.value=s;
+  r.select();
+}
+function render(){
+  let html='<b>🌡 更年期记录</b>';
+  let avg=0;
+  items.forEach((it,i)=>{avg+=it.sl;html+='<div style="border-bottom:1px solid var(--line);padding:6px 0;font-size:13px">'+it.d+' · 潮热'+it.hf+' · 睡眠'+it.sl+' · 情绪'+it.mo+(it.tp?(' · 体温'+it.tp):'')+'<br><button class="btn" style="background:var(--muted);padding:5px;margin:3px 0;width:auto;display:inline-block" onclick="del('+i+')">删</button></div>';});
+  if(items.length)html+='<div style="margin-top:6px">平均睡眠 '+ (avg/items.length).toFixed(1)+'/10</div>';
+  document.getElementById('list').innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

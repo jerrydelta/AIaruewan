@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>护照/证件到期管理（AI版）</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.small{font-size:12px;color:var(--muted)}
+.del{color:var(--coral);font-size:12px;cursor:pointer;float:right;margin-left:8px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.warn{color:#E8913B}
+.over{color:var(--coral)}
+.ok{color:var(--ok)}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+.collapsed{display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div><span class="tag">lifestyle</span><span class="tag">document_manager</span></div>
+  <h1 style="font-size:20px;margin:8px 0 4px">护照 / 证件到期管理</h1>
+  <p class="h-coral" style="font-size:13px;margin:0">Passport &amp; document-expiry manager with renewal alerts</p>
+</div>
+<div class="card">
+  <b>💡 痛点</b>
+  <p style="font-size:14px;color:#555;margin:6px 0 0">护照/证件到期管理市场分散，Passport.app、ExpireMate 及中文"证宝宝/到期清单"显示真实需求。缺口在于：统一管理护照、签证、驾照、保险并在到期前主动提醒的工具仍供小于求。</p>
+</div>
+<div class="card">
+  <b>🛠 工具 · 我的证件库</b>
+  <label>证件名称</label><input id="dName" placeholder="如：护照 / 驾照">
+  <div class="row">
+    <div><label>到期日</label><input type="date" id="dExpire"></div>
+    <div><label>提前提醒(天)</label><input type="number" id="dAdv" value="30" min="1"></div>
+  </div>
+  <button class="btn" onclick="addDoc()">+ 添加证件</button>
+</div>
+<div class="card" id="list"><b>📄 证件清单</b><div id="docs"></div></div>
+<div class="card ai-card ai-bg ai-border" id="aiCard">
+  <div class="collapse-header" onclick="toggleAI()">🤖 AI 助手（用户自带Key · 零成本）</div>
+  <div class="collapse-body collapsed" id="aiBody">
+    <div id="aiKeySection">
+      <label>Hy3 API Key（用户自带，零成本运营）</label>
+      <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+      <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+      <div class="small">使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。</div>
+    </div>
+    <div id="aiChatSection" style="display:none">
+      <div id="aiChat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="text" id="aiInput" placeholder="问AI，如：护照过期怎么续？" style="flex:1">
+        <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card" style="font-size:12px;color:var(--muted)">
+  <b>来源参考</b><br>
+  <a href="https://apps.apple.com/us/app/expiremate/id1603388196" target="_blank" style="color:var(--coral)">ExpireMate / Passport.app / 证宝宝</a>
+</div>
+<script>
+const KEY="P3-20260719-004";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addDoc(){const name=dName.value.trim();const exp=dExpire.value;const adv=+dAdv.value||30;
+  if(!name||!exp){alert('请填名称和到期日');return;}
+  items.push({name,exp,adv,t:Date.now()});dName.value='';dExpire.value='';save();}
+function del(i){items.splice(i,1);save();}
+function left(exp){const t=new Date(exp+'T00:00:00');const n=new Date();n.setHours(0,0,0,0);
+  return Math.round((t-n)/86400000);}
+function render(){const sorted=[...items].sort((a,b)=>left(a.exp)-left(b.exp));
+  docs.innerHTML=sorted.length?sorted.map(x=>{const d=left(x.exp);const adv=x.adv;
+    let cls='ok',txt=`还有 ${d} 天`,note='';
+    if(d<0){cls='over';txt=`已过期 ${-d} 天`;}
+    else if(d<=adv){cls='warn';txt=`仅剩 ${d} 天`;note=' · 该续期/准备了';}
+    const gi=items.indexOf(x);
+    return `<div class="item"><div><b>${x.name}</b><br><span class="small">到期 ${x.exp}</span></div><div style="text-align:right"><div class="${cls}" style="font-weight:600">${txt}${note}</div><span class="del" onclick="del(${gi})">删除</span></div></div>`;}).join(''):'<p class="small">还没有证件，先添加一个吧。</p>';}
+render();
+let aiKey=localStorage.getItem('hy3_key')||'';
+let aiHistory=[];
+function toggleAI(){document.getElementById('aiBody').classList.toggle('collapsed');}
+function saveKey(){aiKey=document.getElementById('aiKey').value.trim();if(!aiKey){alert('请输入API Key');return;}
+  localStorage.setItem('hy3_key',aiKey);document.getElementById('aiKeySection').style.display='none';document.getElementById('aiChatSection').style.display='block';
+  addAIMessage('assistant','Key已保存！我是你的证件/出行助手，可解答续签、材料准备等问题。');}
+async function sendAI(){if(!aiKey){alert('请先保存API Key');return;}
+  const input=document.getElementById('aiInput');const msg=input.value.trim();if(!msg)return;
+  addAIMessage('user',msg);input.value='';aiHistory.push({role:'user',content:msg});
+  try{const res=await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},body:JSON.stringify({model:'hunyuan-pro',messages:aiHistory,stream:false})});
+    const data=await res.json();const reply=data.choices?.[0]?.message?.content||'AI响应失败';
+    aiHistory.push({role:'assistant',content:reply});addAIMessage('assistant',reply);}catch(e){addAIMessage('assistant','调用失败：'+e.message);}}
+function addAIMessage(role,content){const chat=document.getElementById('aiChat');const div=document.createElement('div');div.className='ai-msg '+role;div.textContent=content;chat.appendChild(div);chat.scrollTop=chat.scrollHeight;}
+if(aiKey){document.getElementById('aiKeySection').style.display='none';document.getElementById('aiChatSection').style.display='block';}
+</script>
+</body>
+</html>

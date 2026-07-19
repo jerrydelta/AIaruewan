@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>手冲咖啡冲煮日志</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.cnt{background:#FFF7F7;border-radius:10px;padding:8px 10px;margin-top:8px;font-size:13px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">food</span><span class="tag">coffee_tasting</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">手冲咖啡冲煮日志</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Pour-over coffee brew journal with bean library</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">精品咖啡家用冲煮激增，但无主导的手冲日志应用。2025年一波独立上线：My Beans、BeanBook、Mamenote（v1.2加日语）、BrewBuddy、中国咖啡猎人。都体量小、属早期未整合品类。核心需求：记录豆子/产地/烘焙、冲煮方式、比例（V60约1:15-17）、研磨、温度、风味评分，含存量提醒与分析。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 豆库</b>
+    <label>豆名</label><input id="bName" placeholder="如：耶加雪菲 G1">
+    <div class="row">
+      <div><label>产地</label><input id="bOrigin" placeholder="Ethiopia"></div>
+      <div><label>烘焙度</label><select id="bRoast"><option>浅</option><option>中浅</option><option>中</option><option>中深</option><option>深</option></select></div>
+    </div>
+    <label>存量(g)</label><input id="bStock" type="number" value="250">
+    <button class="btn" onclick="addBean()">＋ 加入豆库</button>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 冲煮记录</b>
+    <label>选用豆</label><select id="brewBean"></select>
+    <div class="row">
+      <div><label>粉水比</label><input id="ratio" placeholder="1:16"></div>
+      <div><label>水温℃</label><input id="temp" type="number" value="92"></div>
+    </div>
+    <div class="row">
+      <div><label>研磨</label><input id="grind" placeholder="中细"></div>
+      <div><label>评分(1-5)</label><input id="rate" type="number" min="1" max="5" value="4"></div>
+    </div>
+    <label>风味笔记</label><input id="taste" placeholder="如：柑橘、花香、回甘">
+    <button class="btn ok" onclick="addBrew()">＋ 记录冲煮</button>
+  </div>
+
+  <div class="card" id="list"><b>☕ 豆库 & 冲煮</b>
+    <div id="beans"></div><div id="brews"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/hk/app/mamenote/id6746975755" target="_blank" style="color:var(--coral)">My Beans · BeanBook · Mamenote · BrewBuddy</a>
+  </div>
+
+<script>
+const KEY="P3-20260719-015";
+let beans=JSON.parse(localStorage.getItem(KEY+"_b")||"[]");
+let brews=JSON.parse(localStorage.getItem(KEY+"_w")||"[]");
+function addBean(){
+  const name=document.getElementById('bName').value.trim();
+  if(!name){alert('请输入豆名');return;}
+  beans.push({id:Date.now(),name,origin:document.getElementById('bOrigin').value.trim(),
+    roast:document.getElementById('bRoast').value,stock:+document.getElementById('bStock').value||0});
+  document.getElementById('bName').value='';document.getElementById('bOrigin').value='';save();
+}
+function addBrew(){
+  const bid=+document.getElementById('brewBean').value;
+  if(!bid){alert('请先添加并选择豆子');return;}
+  const bean=beans.find(b=>b.id==bid);
+  brews.push({id:Date.now(),date:new Date().toLocaleDateString(),bean:bean.name,
+    ratio:document.getElementById('ratio').value,grind:document.getElementById('grind').value,
+    temp:document.getElementById('temp').value,rate:+document.getElementById('rate').value,
+    taste:document.getElementById('taste').value.trim()});
+  bean.stock=Math.max(0,bean.stock-15);
+  document.getElementById('taste').value='';document.getElementById('grind').value='';save();
+}
+function render(){
+  const sel=document.getElementById('brewBean');
+  sel.innerHTML=beans.length?beans.map(b=>`<option value="${b.id}">${b.name}（${b.stock}g）</option>`).join(''):'<option value="">无豆，先加豆</option>';
+  document.getElementById('beans').innerHTML='<b style="font-size:13px">豆库</b>'+(beans.length?beans.map(b=>{
+    const low=b.stock<60?'<span style="color:#E85555"> ⚠存量低</span>':'';
+    return `<div class="item"><span>${b.name} <span style="color:var(--muted);font-size:12px">${b.origin}·${b.roast}</span></span><span>${b.stock}g${low}</span></div>`;
+  }).join(''):'<p style="color:var(--muted);font-size:13px">空</p>');
+  document.getElementById('brews').innerHTML='<b style="font-size:13px">冲煮记录</b>'+(brews.length?[...brews].reverse().map(w=>
+    `<div class="item"><div><div>${w.bean} · ★${w.rate}</div><div style="font-size:12px;color:var(--muted)">${w.date} · ${w.ratio} · ${w.temp}℃ · ${w.grind}</div>${w.taste?`<div style="font-size:13px">${w.taste}</div>`:''}</div></div>`).join(''):'<p style="color:var(--muted);font-size:13px">空</p>');
+}
+function del(id){beans=beans.filter(b=>b.id!=id);brews=brews.filter(w=>w.beanId!=id);save();}
+function save(){localStorage.setItem(KEY+"_b",JSON.stringify(beans));localStorage.setItem(KEY+"_w",JSON.stringify(brews));render();}
+render();
+</script>
+</body>
+</html>

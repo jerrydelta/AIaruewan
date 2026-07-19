@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>宝宝记录+成长曲线（中文版）</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">parenting</span><span class="tag">newborn_record</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">宝宝记录 + 成长曲线（中文透明版）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Localized baby-tracker with clear pricing & growth curve</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">海外育儿记录 App 进中国常"年费太贵""想要中文版"。本工具把喂养/睡眠/尿布记录 + 成长曲线全部本地化、零订阅费，数据只存你手机，价格透明。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 日常记录</b>
+    <div class="row">
+      <button class="btn" style="margin:8px 4px 0 0" onclick="log('feed')">🍼 喂奶</button>
+      <button class="btn" style="margin:8px 4px 0 0" onclick="log('sleep')">😴 睡眠</button>
+      <button class="btn" style="margin:8px 4px 0 0" onclick="log('diaper')">💧 尿布</button>
+    </div>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 成长曲线</b>
+    <div class="row">
+      <div><label>日期</label><input id="gd" type="date"></div>
+      <div><label>体重(kg)</label><input id="gw" type="number" step="0.01" placeholder="6.8"></div>
+      <div><label>身高(cm)</label><input id="gh" type="number" step="0.1" placeholder="65"></div>
+    </div>
+    <button class="btn" onclick="addGrowth()">记录生长点</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/app/%E5%AE%9D%E5%AE%9D%E7%94%9F%E6%B4%BB%E8%AE%B0%E5%BD%95-%E5%85%B1%E4%B9%90%E5%AD%95/id1077177456" target="_blank" style="color:var(--coral)">Glow Baby(共乐孕)</a>
+  </div>
+<script>
+const KEY="P6-20260719-004";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"logs":[],"growth":[]}');
+function log(t){data.logs.unshift({t,time:new Date().toLocaleString('zh-CN'),id:Date.now()});save();}
+function addGrowth(){
+  const d=document.getElementById('gd').value, w=document.getElementById('gw').value, h=document.getElementById('gh').value;
+  if(!d){alert('选日期');return;}
+  data.growth.push({d,w:w?+w:null,h:h?+h:null,id:Date.now()});
+  data.growth.sort((a,b)=>a.d<b.d?-1:1);
+  document.getElementById('gd').value='';document.getElementById('gw').value='';document.getElementById('gh').value='';save();
+}
+function delG(id){data.growth=data.growth.filter(x=>x.id!==id);save();}
+function delL(id){data.logs=data.logs.filter(x=>x.id!==id);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function render(){
+  const c={feed:'🍼 喂奶',sleep:'😴 睡眠',diaper:'💧 尿布'};
+  let html='<b>📋 日常 '+data.logs.length+' 条</b>';
+  html+=data.logs.slice(0,6).map(x=>'<div style="border-top:1px solid var(--line);padding:6px 0;font-size:13px">'+c[x.t]+' <span style="font-size:11px;color:#999">'+x.time+'</span> <button onclick="delL('+x.id+')" style="background:none;border:none;color:#bbb;font-size:11px;cursor:pointer">删</button></div>').join('')||'<p style="font-size:13px;color:#999">暂无</p>';
+  html+='<hr style="border:none;border-top:1px dashed var(--line);margin:10px 0"><b>📈 生长点 '+data.growth.length+' 个</b>';
+  if(data.growth.length){
+    const ws=data.growth.filter(x=>x.w).map(x=>x.w), hs=data.growth.filter(x=>x.h).map(x=>x.h);
+    html+='<div style="font-size:13px;color:#555">体重范围 '+Math.min(...ws)+'~'+Math.max(...ws)+'kg ｜ 身高范围 '+Math.min(...hs)+'~'+Math.max(...hs)+'cm</div>';
+  }
+  html+=data.growth.map(x=>'<div style="border-top:1px solid var(--line);padding:5px 0;font-size:13px">'+x.d+' ｜ 体重 '+(x.w||'—')+'kg ｜ 身高 '+(x.h||'—')+'cm <button onclick="delG('+x.id+')" style="background:none;border:none;color:#bbb;font-size:11px;cursor:pointer">删</button></div>').join('')||'<p style="font-size:13px;color:#999">暂无</p>';
+  document.getElementById('list').innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

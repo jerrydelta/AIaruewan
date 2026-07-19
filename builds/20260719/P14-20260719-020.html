@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>用户激活检查表</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .meta{font-size:11px;color:var(--muted)}
+.mini{display:inline-block;padding:6px 10px;border:none;border-radius:8px;font-size:12px;cursor:pointer;background:#FFF0F0;color:var(--coral);margin:4px 4px 0 0}
+.mini.del{background:#FDECEC;color:#E85555}
+pre{white-space:pre-wrap;word-break:break-all;font-size:13px;background:#fafafa;border:1px solid var(--line);border-radius:8px;padding:8px;margin:6px 0 0}
+.step{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.step.done{background:#E8F7F0;border-color:#bfe9d4}
+.step input[type=checkbox]{width:auto;margin:0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">micro_saas</span><span class="tag">onboarding</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">用户激活检查表</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Lightweight onboarding / activation-checklist component</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">欧美强调"onboarding>获客"且重型工具贵；中日独立开发者多无引导或手写，缺可嵌入的开源/低价"激活检查表+进度持久化"组件——可手搓并开源引流。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>新增引导步骤</label>
+    <input id="step" placeholder="如：完成首次项目创建">
+    <button class="btn" onclick="add()">添加步骤</button>
+    <div id="steps" style="margin-top:10px"></div>
+    <div id="bar" style="height:10px;background:var(--line);border-radius:6px;margin-top:12px;overflow:hidden"><div id="fill" style="height:100%;width:0;background:var(--ok)"></div></div>
+    <div id="pct" style="font-size:13px;color:var(--muted);margin-top:6px"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>🚀 我的引导流程</b>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://saasranger.com/blog/saas-onboarding-checklist" target="_blank" style="color:var(--coral)">SaaS Onboarding Checklist</a>
+  </div>
+
+<script>
+const KEY="P14-20260719-020";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function add(){
+  const t=document.getElementById('step').value.trim();
+  if(!t){alert('请填写步骤');return;}
+  items.push({t,done:false});
+  document.getElementById('step').value='';
+  save();
+}
+function toggle(i){items[i].done=!items[i].done;save();}
+function del(i){items.splice(i,1);save();}
+function render(){
+  const box=document.getElementById('steps');
+  if(!items.length){box.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有步骤，先添加一个吧。</p>';}
+  else box.innerHTML=items.map((it,i)=>`<div class="step ${it.done?'done':''}"><input type="checkbox" ${it.done?'checked':''} onchange="toggle(${i})"><span style="flex:1">${esc(it.t)}</span><button class="mini del" onclick="del(${i})">删除</button></div>`).join('');
+  const done=items.filter(x=>x.done).length;
+  const p=items.length?Math.round(done/items.length*100):0;
+  document.getElementById('fill').style.width=p+'%';
+  document.getElementById('pct').textContent=`激活进度 ${p}% （${done}/${items.length}）`;
+  const lib=document.getElementById('items');
+  lib.innerHTML=items.length?items.map((it,i)=>`<div class="item">${it.done?'✅':'⬜'} ${esc(it.t)}</div>`).join(''):'<p style="font-size:13px;color:var(--muted)">还没有保存的引导流程。</p>';
+}
+function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+render();
+</script>
+</body>
+</html>

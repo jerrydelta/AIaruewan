@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>盆栽造型追踪 + 展示</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600}.item .s{font-size:13px;color:var(--muted)}
+.mini{display:inline-block;padding:6px 10px;border:none;border-radius:8px;font-size:13px;cursor:pointer;margin:6px 6px 0 0}
+.mini.ok{background:var(--ok);color:#fff}.mini.del{background:#eee;color:#999}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">plant</span><span class="tag">bonsai_design</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">盆栽造型追踪 + 展示</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Bonsai multi-year styling tracker + showcase</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">盆栽是"数年为单位"的慢艺术，通用 app 只做浇水。现有盆栽 app 多为记录，缺"造型进度 + 铝丝绑扎 + 展示分享"闭环。本工具按株记录多年修剪/铝丝/换盆时间轴。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 记录一次造型动作</b>
+    <label>树种</label>
+    <input id="bSpecies" placeholder="如：真柏 / 榕 / 黒松">
+    <label>动作类型</label>
+    <select id="bAct"><option>修剪</option><option>铝丝绑扎</option><option>换盆</option><option>施肥</option><option>治療</option></select>
+    <label>日期</label>
+    <input id="bDate" type="date">
+    <label>造型笔记 / 前后对比</label>
+    <textarea id="bNote" placeholder="如：左枝拿弯，目标三角构图"></textarea>
+    <button class="btn" onclick="addBonsai()">记录</button>
+  </div>
+  <div class="card" id="list">
+    <b>📋 造型时间轴</b>
+    <div id="items"></div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://elevenapril.com/bonsai" target="_blank" style="color:var(--coral)">Bonsai (elevenapril) / Appy Bonsai</a>
+  </div>
+<script>
+const KEY="P11-20260719-006";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addBonsai(){
+  const species=document.getElementById('bSpecies').value.trim();
+  if(!species){ alert('请输入树种'); return; }
+  const act=document.getElementById('bAct').value;
+  const date=document.getElementById('bDate').value;
+  const note=document.getElementById('bNote').value.trim();
+  items.push({id:Date.now(),species,act,date,note});
+  document.getElementById('bSpecies').value='';document.getElementById('bNote').value='';
+  save();
+}
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function render(){
+  const box=document.getElementById('items');
+  if(!items.length){ box.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有记录。</p>'; return; }
+  box.innerHTML=[...items].reverse().map(it=>
+    '<div class="item"><div class="t">'+it.species+' · '+it.act+'</div>'+
+    '<div class="s">'+(it.date||'—')+' '+(it.note?('· '+it.note):'')+'</div>'+
+    '<button class="mini del" onclick="del('+it.id+')">删除</button></div>'
+  ).join('');
+}
+render();
+</script>
+</body>
+</html>

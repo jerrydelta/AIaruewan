@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>隐私优先启动器</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.cmd{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px;cursor:pointer}
+.cmd .u{font-size:11px;color:var(--muted)}
+.mini{font-size:12px;padding:6px 10px;margin-top:6px}
+.prompt{font-family:ui-monospace,Menlo,Consolas,monospace}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">productivity</span><span class="tag">automation</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">隐私优先启动器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Privacy-first launcher (AI command palette, local)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Mac 启动器/菜单栏效率中心竞争激烈但需求坚挺。Raycast $8/月（含 AI）、Alfred 买断 £34；Monarch Launcher 主打隐私优先、Sol 开源。「隐私优先/开源 + AI 命令面板」仍有细分机会，尤其 Windows/Linux 侧更薄弱。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:4px 0 0">建本地命令（名称 + 链接/动作）→ 命令面板模糊搜索 → 一键打开。Ctrl+K 聚焦。数据全本地。</p>
+    <div class="row">
+      <input id="cName" placeholder="命令名（如：打开邮箱）">
+      <input id="cUrl" placeholder="URL（如 https://mail.com）">
+    </div>
+    <button class="btn" onclick="addC()">+ 添加命令</button>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <input id="q" class="prompt" placeholder="⌨ 输入命令…（Ctrl+K 聚焦）" oninput="render()">
+    <div id="list"></div>
+  </div>
+  <div class="card" id="dataList"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.raycast.com" target="_blank" style="color:var(--coral)">Raycast</a> ·
+    <a href="https://www.alfredapp.com" target="_blank" style="color:var(--coral)">Alfred</a> ·
+    <a href="https://solcode.app" target="_blank" style="color:var(--coral)">Sol (开源)</a>
+  </div>
+<script>
+const KEY="P15-20260719-011";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addC(){
+  const n=document.getElementById('cName').value.trim();
+  const u=document.getElementById('cUrl').value.trim();
+  if(!n){alert('填命令名');return;}
+  items.unshift({id:Date.now(),name:n,url:u});
+  document.getElementById('cName').value='';document.getElementById('cUrl').value='';
+  save();
+}
+function open(id){
+  const c=items.find(x=>x.id===id);
+  if(c.url){window.open(c.url,'_blank');}else{alert('该命令没有链接，仅本地记录');}
+}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key.toLowerCase()==='k'){e.preventDefault();document.getElementById('q').focus();}});
+function render(){
+  const q=(document.getElementById('q').value||'').toLowerCase();
+  const f=items.filter(x=>x.name.toLowerCase().includes(q)||x.url.toLowerCase().includes(q));
+  document.getElementById('list').innerHTML=f.map(c=>`<div class="cmd" onclick="open(${c.id})"><b>${escapeHtml(c.name)}</b>
+    <div class="u">${escapeHtml(c.url)||'(无链接)'}</div>
+    <button class="btn mini" style="background:#bbb;margin-top:2px" onclick="event.stopPropagation();del(${c.id})">删除</button></div>`).join('')||'<p style="font-size:13px;color:var(--muted)">没有匹配命令</p>';
+  document.getElementById('dataList').innerHTML='<b>⚡ 本地命令库（'+items.length+' 条）</b>';
+}
+function escapeHtml(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>场景化Excel/PPT模板（财务/项目管理/述职）自动发货</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;position:relative}
+.del{position:absolute;right:0;top:10px;background:#fff;color:var(--coral);
+  border:1px solid #FFD9D9;border-radius:8px;font-size:12px;padding:4px 10px;cursor:pointer}
+.mini{font-size:13px;color:var(--ink);background:#FAFAFA;border:1px solid var(--line);
+  border-radius:10px;padding:10px;margin-top:8px}
+.hr{height:1px;background:var(--line);border:none;margin:14px 0}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.ai-card .collapse-body.collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px;white-space:pre-wrap}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">digital_product</span><span class="tag">excel_template</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">场景化Excel/PPT模板（财务/项目管理/述职）自动发货</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Scenario-based Excel/PPT templates (finance/PM/review) auto-delivery</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Excel/PPT模板是国内高频数字商品：财务记账9.9-49元、项目管理甘特图。案例：Excel财务模板29.9元日均3份=月入2691元。痛点：同质化、盗版、需教程降退单、平台抽成。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>场景</label><input id="x1" placeholder="如：财务记账表">
+<label>渠道</label><select id="x2"><option>闲鱼</option><option>小红书</option><option>千图网</option></select>
+<label>定价(元)</label><input type="number" id="x3" placeholder="29.9">
+<label>日均单量</label><input type="number" id="x4" placeholder="3">
+<button class="btn" onclick="addX()">上架</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+  <div class="collapse-header" onclick="toggleAI()">
+    🤖 AI 助手（用户自带Key · 零成本）
+  </div>
+  <div class="collapse-body collapsed" id="aiBody">
+    <div id="aiKeySection">
+      <label>Hy3 API Key（用户自带，零成本运营）</label>
+      <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+      <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">
+        使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+      </div>
+    </div>
+    <div id="aiChatSection" style="display:none">
+      <div id="aiChat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+        <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.toutiao.com/article/7648818472465613321" target="_blank" style="color:var(--coral)">千图网 / 包图网 / 猪八戒 / 创客贴 / 闲鱼</a>
+  </div>
+
+<script>
+const KEY="P4-20260719-014";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addX(){
+ var n=document.getElementById('x1').value.trim();
+ if(!n){alert('输入场景');return;}
+ var price=+document.getElementById('x3').value||0,day=+document.getElementById('x4').value||0;
+ items.push({scene:n,ch:document.getElementById('x2').value,price:price,day:day,month:price*day*30,ts:Date.now()});
+ save();document.getElementById('x1').value='';document.getElementById('x3').value='';document.getElementById('x4').value='';
+}
+function render(){
+ var el=document.getElementById('list');
+ if(!items.length){el.innerHTML='<b>📊 Excel/PPT模板</b><p style="font-size:13px;color:var(--muted)">上架模板。</p>';return;}
+ var tot=0;items.forEach(function(x){tot+=x.month;});
+ el.innerHTML='<b>📊 Excel/PPT模板（'+items.length+' · 月估¥'+tot+'）</b>'+items.map(function(x,i){
+  return '<div class="item"><div><b>'+esc(x.scene)+'</b> · '+x.ch+'</div><div style="font-size:12px;color:var(--muted)">¥'+x.price+' · 日'+x.day+'单 · 月估¥'+x.month+'</div><button class="del" onclick="del('+i+')">下架</button></div>';
+ }).join('');
+}
+function del(i){items.splice(i,1);save();}
+function esc(s){return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+render();
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({
+        model:'hunyuan-pro',
+        messages:aiHistory,
+        stream: false
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+</script>
+</body>
+</html>

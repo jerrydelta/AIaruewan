@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>戒赌自助 · 诊断+日誌</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.big{font-size:26px;font-weight:700;color:var(--coral)}
+.muted{color:var(--muted);font-size:13px}
+.del{color:var(--coral);font-size:12px;cursor:pointer;float:right}
+.q{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">addiction_recovery</span><span class="tag">quit_gambling</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">戒赌自助 · 诊断 + 日誌</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Gambling-addiction support (diagnosis + diary + self-care)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本大阪府官方下场做戒赌 App，验证"诊断 + 资金/时间日誌 + 自助"模型有效。中国缺乏权威统一的数字戒赌工具。本 MVP 提供简易自评、每日赌博时间/金额记录与自助提示。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <b>① 简易自评（近1年是否符合）</b>
+    <div id="qs"></div>
+    <button class="btn" onclick="calcDiag()">算自评分</button>
+    <div style="text-align:center;margin-top:8px" class="big" id="diagScore">—</div>
+    <div class="muted" id="diagTip" style="text-align:center"></div>
+
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <b>② 每日日誌</b>
+    <div class="row">
+      <div><label>今日赌博时长(分)</label><input type="number" id="mins" placeholder="0"></div>
+      <div><label>今日金额(元)</label><input type="number" id="amt" placeholder="0"></div>
+    </div>
+    <label>心情 / 触发</label>
+    <input id="mood" placeholder="如 输了想翻本">
+    <button class="btn" onclick="addLog()">记录今日</button>
+  </div>
+
+  <div class="card" id="list"><b>📔 戒赌日誌</b><div id="listBody" style="margin-top:8px"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cm/app/day-see-%E3%82%AE%E3%83%A3%E3%83%B3%E3%83%96%E3%83%AB%E7%AD%89%E4%BE%9D%E5%AD%98%E7%97%87%E7%9B%B8%E8%AB%87%E6%94%AF%E6%8F%B4%E3%82%A2%E3%83%97%E3%83%AA/id6446186680" target="_blank" style="color:var(--coral)">Day-See 官方戒赌App</a>
+  </div>
+
+<script>
+const KEY="P14-20260719-005";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"diag":[],"logs":[]}');
+const QUESTIONS=["为赌博撒谎","曾试图戒但失败","赌输了想翻本","因赌博影响工作/家庭","借钱或变卖来赌"];
+const qsEl=document.getElementById('qs');
+QUESTIONS.forEach((q,i)=>{
+  qsEl.innerHTML+='<div class="q">'+q+'<div class="row" style="margin-top:6px">'+
+    '<button onclick="setQ('+i+',true)" id="y'+i+'" style="flex:1;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff">是</button>'+
+    '<button onclick="setQ('+i+',false)" id="n'+i+'" style="flex:1;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff">否</button></div></div>';
+});
+function setQ(i,v){data.diag[i]=v;
+  document.getElementById('y'+i).style.background=v?'var(--coral)':'#fff';
+  document.getElementById('y'+i).style.color=v?'#fff':'var(--ink)';
+  document.getElementById('n'+i).style.background=!v?'var(--ok)':'#fff';
+  document.getElementById('n'+i).style.color=!v?'#fff':'var(--ink)';
+}
+function calcDiag(){
+  const s=data.diag.filter(Boolean).length;
+  document.getElementById('diagScore').textContent=s+' / '+QUESTIONS.length;
+  document.getElementById('diagTip').textContent=s>=3?'⚠️ 多项符合，建议寻求专业帮助":"趋势良好，继续觉察";
+}
+function addLog(){
+  const rec={date:new Date().toLocaleDateString('zh-CN'),
+    mins:+document.getElementById('mins').value||0,amt:+document.getElementById('amt').value||0,
+    mood:document.getElementById('mood').value.trim()};
+  data.logs.push(rec);save();
+}
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(data));render();
+}
+function render(){
+  const body=document.getElementById('listBody');
+  if(!data.logs.length){body.innerHTML='<div class="muted">暂无记录</div>';return;}
+  body.innerHTML=data.logs.slice().reverse().map((l,i)=>
+    '<div style="padding:6px 0;border-bottom:1px solid var(--line)">'+l.date+
+    ' · '+l.mins+'分 · ¥'+l.amt+(l.mood?' · '+l.mood:'')+
+    ' <span class="del" onclick="del('+i+')">删除</span></div>').join('');
+}
+function del(i){data.logs.splice(i,1);save();}
+save();
+</script>
+</body>
+</html>

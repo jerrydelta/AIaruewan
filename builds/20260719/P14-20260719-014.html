@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI着陆页生成器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.muted{color:var(--muted);font-size:13px}
+.del{color:var(--coral);font-size:12px;cursor:pointer;float:right}
+iframe{width:100%;height:200px;border:1px solid var(--line);border-radius:10px;margin-top:8px;background:#fff}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">micro_saas</span><span class="tag">landing_page</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI 着陆页生成器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI landing-page generator (prompt-to-design + code export)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Carrd/LandingHero 验证"单页建站"需求巨大；中国独立开发者出海需要英文着陆页却常用国外工具，缺"中文提示 → 出海英文页"的本地化生成器。本 MVP 输入产品信息，一键生成可预览、可复制的单页 HTML。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>产品名</label>
+    <input id="pname" placeholder="如 NihaoCRM">
+    <label>一句话卖点</label>
+    <input id="pitch" placeholder="如 给自由职业者的一体化客户门户">
+    <label>3 个核心功能（每行一个）</label>
+    <textarea id="feats" rows="3" placeholder="客户管理&#10;发票收款&#10;进度看板"></textarea>
+    <label>行动号召（CTA）</label>
+    <input id="cta" placeholder="如 免费开始" value="免费开始">
+    <label>语言</label>
+    <select id="lang"><option value="zh">中文</option><option value="en">英文（出海）</option></select>
+    <button class="btn" onclick="gen()">⚡ 生成着陆页</button>
+    <iframe id="preview"></iframe>
+    <button class="btn" onclick="copyCode()" style="background:var(--ok)">📋 复制 HTML 代码</button>
+    <textarea id="code" rows="4" readonly style="margin-top:6px;font-size:12px"></textarea>
+  </div>
+
+  <div class="card" id="list"><b>📦 我的页面</b><div id="listBody" style="margin-top:8px"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://agenthunt.io/tw/agent/detail/carrd-co" target="_blank" style="color:var(--coral)">Carrd</a> ·
+    <a href="https://aipure.ai/cn/products/landinghero-ai-2" target="_blank" style="color:var(--coral)">LandingHero AI</a>
+  </div>
+
+<script>
+const KEY="P14-20260719-014";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"pages":[]}');
+let curCode="";
+function gen(){
+  const name=document.getElementById('pname').value.trim()||'我的产品';
+  const pitch=document.getElementById('pitch').value.trim()||'一句话说清价值';
+  const feats=document.getElementById('feats').value.split('\n').filter(x=>x.trim());
+  const cta=document.getElementById('cta').value.trim()||'免费开始';
+  const L=document.getElementById('lang').value;
+  const T={zh:{hero:'开始使用',sub:'立即体验'},en:{hero:'Get Started',sub:'Try it now'}}[L];
+  const items=feats.map(f=>'<li>'+f.trim()+'</li>').join('');
+  curCode='<!DOCTYPE html><html lang="'+L+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+name+'</title><style>body{font-family:sans-serif;margin:0;background:#FFF7F7;color:#2D2D2D;text-align:center;padding:48px 16px}h1{font-size:32px;color:#FF6B6B;margin:0 0 8px}.pitch{font-size:18px;color:#555;margin-bottom:24px}ul{list-style:none;padding:0;max-width:320px;margin:0 auto 24px}li{padding:10px;margin:6px 0;background:#fff;border:1px solid #FFD9D9;border-radius:10px}.cta{display:inline-block;background:#FF6B6B;color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:700}</style></head><body><h1>'+name+'</h1><p class="pitch">'+pitch+'</p><ul>'+items+'</ul><a class="cta" href="#">'+cta+'</a></body></html>';
+  document.getElementById('code').value=curCode;
+  document.getElementById('preview').srcdoc=curCode;
+  data.pages.push({name,date:new Date().toLocaleString('zh-CN'),code:curCode});
+  save();
+}
+function copyCode(){if(!curCode){alert("先生成");return;}navigator.clipboard.writeText(curCode);alert("已复制");}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function render(){
+  const body=document.getElementById('listBody');
+  body.innerHTML=data.pages.length?data.pages.slice().reverse().map((p,i)=>
+    '<div style="padding:6px 0;border-bottom:1px solid var(--line)">'+p.date+' · '+p.name+
+    ' <span class="del" onclick="del('+i+')">删除</span></div>').join(''):'<div class="muted">还没有生成页面</div>';
+}
+function del(i){data.pages.splice(i,1);save();}
+save();
+</script>
+</body>
+</html>

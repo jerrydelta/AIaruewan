@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>零工经济赛道观察 · 选品笔记</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.del{color:var(--muted);font-size:12px;cursor:pointer;border:none;background:none}
+.item{border-bottom:1px dashed var(--line);padding:8px 0;font-size:14px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">gig_economy</span><span class="tag">market_track</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">零工经济赛道观察 · 选品笔记</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">(Market-level) Gig-economy tooling opportunity</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">零工经济整体赛道高速增长，工具层（记账/报税/调度）随之受益。做垂直窄人群工具可借赛道红利。本工具帮你记录各区域市场观察，沉淀选品判断。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具（赛道观察笔记）</b>
+    <label>区域市场</label>
+    <select id="region"><option>US 美国</option><option>CN 中国</option><option>JP 日本</option><option>KR 韩国</option><option>global 全球</option></select>
+    <label>观察 / 选品判断</label>
+    <textarea id="note" placeholder="记录该区域零工工具层的空白、付费意愿、竞品情况…"></textarea>
+    <label>机会评分（1-10）</label>
+    <input type="number" id="score" placeholder="7" step="1" min="1" max="10">
+    <button class="btn" onclick="addNote()">+ 保存观察</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.precedenceresearch.com/gig-economy-market" target="_blank" style="color:var(--coral)">Precedence Research · Gig Economy Market</a>
+  </div>
+
+<script>
+const KEY="P9-20260719-010";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render()}
+function addNote(){
+  const region=document.getElementById("region").value;
+  const note=document.getElementById("note").value.trim();
+  const score=Math.min(10,Math.max(1,parseInt(document.getElementById("score").value)||5));
+  if(!note){alert("请输入观察内容");return}
+  items.push({region,note,score,date:new Date().toISOString().slice(0,10)});
+  document.getElementById("note").value="";
+  save();
+}
+function render(){
+  let html="<b>📋 赛道观察（共 "+items.length+" 条）</b>";
+  if(items.length===0)html+="<p style='font-size:13px;color:var(--muted)'>暂无记录</p>";
+  items.slice().reverse().forEach((i,idx)=>{
+    const real=items.length-1-idx;
+    html+=`<div class="item"><span class="tag">${i.region}</span> 机会 <b class="h-coral">${i.score}</b>/10 · ${i.date}<br>${i.note}<br><button class="del" onclick="del(${real})">删除</button></div>`;
+  });
+  document.getElementById("list").innerHTML=html;
+}
+function del(i){items.splice(i,1);save()}
+render();
+</script>
+</body>
+</html>

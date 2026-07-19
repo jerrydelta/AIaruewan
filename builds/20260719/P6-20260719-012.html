@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>钓鱼战果记录</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">hobby</span><span class="tag">fishing</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">钓鱼战果记录（标点地图）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Fishing log with catch heatmap by spot</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">新手最怕"不知道哪里能钓到"。记下拉竿的标点、鱼种、数量，长期积累出自己的"爆护热力图"，也能和钓友共享好点位。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>钓点</label>
+    <input id="spot" placeholder="如：东江二桥下">
+    <div class="row">
+      <div><label>鱼种</label><input id="fish" placeholder="鲫鱼"></div>
+      <div><label>数量</label><input id="cnt" type="number" value="1"></div>
+    </div>
+    <label>天气/备注</label>
+    <input id="weather" placeholder="晴 微风">
+    <button class="btn" onclick="add()">记录这一竿</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://prtimes.jp/main/html/rd/p/000000080.000019379.html" target="_blank" style="color:var(--coral)">ANGLERS</a>
+  </div>
+<script>
+const KEY="P6-20260719-012";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const spot=document.getElementById('spot').value.trim();
+  const fish=document.getElementById('fish').value.trim();
+  const cnt=+document.getElementById('cnt').value||1;
+  const weather=document.getElementById('weather').value.trim();
+  if(!spot||!fish){alert('填钓点和鱼种');return;}
+  items.unshift({spot,fish,cnt,weather,t:new Date().toLocaleDateString('zh-CN'),id:Date.now()});
+  document.getElementById('spot').value='';document.getElementById('fish').value='';document.getElementById('weather').value='';save();
+}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const el=document.getElementById('list');
+  if(!items.length){el.innerHTML='<b>🎣 记录</b><p style="font-size:13px;color:#999">还没有记录。</p>';return;}
+  const bySpot={};let total=0;
+  items.forEach(x=>{bySpot[x.spot]=(bySpot[x.spot]||0)+x.cnt;total+=x.cnt;});
+  const max=Math.max(...Object.values(bySpot));
+  el.innerHTML='<b>🎣 共 '+items.length+' 次 ｜ 总渔获 '+total+' 条</b>'+
+    '<div style="font-size:13px;color:#555;margin:6px 0">📊 标点热力（条数）：</div>'+
+    Object.entries(bySpot).sort((a,b)=>b[1]-a[1]).map(([s,c])=>
+      '<div style="margin:4px 0;font-size:13px">'+esc(s)+' <div style="height:10px;background:var(--coral);border-radius:6px;width:'+Math.round(c/max*100)+'%;margin-top:2px"></div><span style="font-size:11px;color:#999">'+c+' 条</span></div>').join('')+
+    '<hr style="border:none;border-top:1px dashed var(--line);margin:10px 0"><b>明细</b>'+
+    items.slice(0,8).map(x=>'<div style="border-top:1px solid var(--line);padding:5px 0;font-size:13px">'+esc(x.spot)+' · '+esc(x.fish)+' ×'+x.cnt+(x.weather?' · '+esc(x.weather):'')+' <span style="font-size:11px;color:#999">'+x.t+'</span> <button onclick="del('+x.id+')" style="background:none;border:none;color:#bbb;font-size:11px;cursor:pointer">删</button></div>').join('');
+}
+function esc(s){return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+render();
+</script>
+</body>
+</html>

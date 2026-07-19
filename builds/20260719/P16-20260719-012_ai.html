@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>第三方 API SLA 监控 · AI版</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.ai-card .collapse-body.collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">debug_tools</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">第三方 API SLA 监控</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KO micro-SaaS monitoring SLA of local payment/logistics APIs.</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">第三方 API 的可用性监控与 SLA 合规仍是一个未被满足的细分市场。有实际个人开发者案例做到 $22,000 MRR（约 180 家客户、$120/月）</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>API 名称</label><input id="a_name" placeholder="如 Kakao Pay">
+<label>类型</label><select id="a_type"><option>支付</option><option>配送</option><option>认证</option><option>其他</option></select>
+<label>服务商</label><input id="a_prov" placeholder="Kakao / Coupang">
+<label>SLA 目标（%，如 99.9）</label><input id="a_sla" type="number" step="0.1" value="99.9">
+<button class="btn" onclick="addAPI()">+ 添加监控对象</button>
+<hr style="border:none;border-top:1px dashed var(--line);margin:14px 0">
+<label>探测记录 — 选择 API</label><select id="a_sel"></select>
+<div class="row">
+  <div><label>延迟(ms)</label><input id="a_ms" type="number" placeholder="120"></div>
+  <div><label>状态</label><select id="a_st"><option value="1">正常</option><option value="0">异常</option></select></div>
+</div>
+<button class="btn" onclick="probe()">📡 记录探测</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+<div class="card ai-card ai-bg ai-border" id="aiCard">
+  <div class="collapse-header" onclick="toggleAI()">
+    🤖 AI 助手（用户自带Key · 零成本）
+  </div>
+  <div class="collapse-body collapsed" id="aiBody">
+    <div id="aiKeySection">
+      <label>Hy3 API Key（用户自带，零成本运营）</label>
+      <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+      <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">
+        使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+      </div>
+    </div>
+    <div id="aiChatSection" style="display:none">
+      <div id="aiChat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+        <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://udit.co/blog/micro-saas-profitable-business" target="_blank" style="color:var(--coral)">API monitoring micro-SaaS / Datadog / New Relic</a>
+  </div>
+
+<script>
+
+const KEY="P16-20260719-012";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addAPI(){
+  const name=document.getElementById('a_name').value.trim();
+  const type=document.getElementById('a_type').value;
+  const prov=document.getElementById('a_prov').value.trim();
+  const sla=document.getElementById('a_sla').value||'99.9';
+  if(!name){alert('请填写名称');return;}
+  items.push({name,type,prov,sla,probes:[],added:new Date().toLocaleString()});
+  save();
+  document.getElementById('a_name').value='';document.getElementById('a_prov').value='';
+}
+function probe(){
+  const i=+document.getElementById('a_sel').value;
+  const ms=document.getElementById('a_ms').value;
+  const ok=document.getElementById('a_st').value==='1';
+  if(isNaN(i)||!items[i]){alert('请选择 API');return;}
+  items[i].probes.push({ms,ok,t:new Date().toLocaleString()});
+  save();
+  document.getElementById('a_ms').value='';
+}
+function del(i){items.splice(i,1);save();}
+function render(){
+  const el=document.getElementById('list');
+  const sel=document.getElementById('a_sel');
+  if(sel){sel.innerHTML=items.map((it,idx)=>'<option value="'+idx+'">'+esc(it.name)+'</option>').join('');}
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">暂无监控对象</p>';return;}
+  el.innerHTML='<b>📈 SLA 监控（'+items.length+'）</b>'+items.map((it,idx)=>{
+    const tot=it.probes.length;
+    const up=it.probes.filter(p=>p.ok).length;
+    const rate=tot?Math.round(up/tot*1000)/10:0;
+    const ok2=rate>=parseFloat(it.sla);
+    return '<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px">'+
+      '<div style="font-weight:600">'+esc(it.name)+' <span class="tag">'+esc(it.type)+'</span></div>'+
+      '<div style="font-size:12px;color:var(--muted)">'+esc(it.prov||'-')+' · 目标 '+esc(it.sla)+'%</div>'+
+      '<div style="font-size:13px;margin:6px 0">达成率 <b class="h-coral">'+rate+'%</b> '+(ok2?'✅':'⚠️ 未达标')+'（'+up+'/'+tot+' 次）</div>'+
+      '<button class="btn" style="background:#fff;color:var(--coral);border:1px solid var(--line)" onclick="del('+idx+')">删除</button>'+
+      '</div>';
+  }).join('');
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+render();
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({
+        model:'hunyuan-pro',
+        messages:aiHistory,
+        stream: false
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// 初始化AI模块
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+</script>
+</body>
+</html>

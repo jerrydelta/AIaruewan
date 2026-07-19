@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>네이버 스마트스토어 판매자용 초경량 분석/노출최적화 도구（키워드·리뷰·경쟁가）, 저가 구독</title>
+<style>
+:root{
+  --coral:#FF6B6B;        /* 主品牌色 */
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.item button{background:var(--coral);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer;margin-left:8px}
+.sum-line{display:flex;justify-content:space-between;padding:5px 0;font-size:14px}
+.sum-line b{color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">business</span><span class="tag">smartstore_seller_tools</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">네이버 스마트스토어 판매자용 초경량 분석/노출최적화 도구（키워드·리뷰·경쟁가）, 저가 구독</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Lightweight Naver SmartStore seller tool (keyword/review/competitor analysis + exposure optimization), low subscription</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Naver Biz Advisor가 스마트스토어 매출 최대 54% 향상 입증(가전+54%/여성의류+43%/농수산+34%); 55만 스마트스토어, GMV CAGR 72%(2015-2021)。매모판은 링크만 입력해 상품등록·순위·경쟁·리뷰·키워드 분석 무료 제공; 셀러라이프 크롬 확장은 7만 유저(키워드/상품 분석·번역)。스마트스토어 생태계 툴링仍 부족, 초경량 노출최적화 도구 수요。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>商品</label><input type="text" id="f_name" placeholder=""><label>排名</label><input type="number" id="f_rank" placeholder=""><label>曝光</label><input type="number" id="f_views" placeholder=""><label>备注</label><input type="text" id="f_note" placeholder="">
+    <button class="btn" onclick="add()">保存记录</button>
+  </div>
+  <div class="card" id="summary" style="display:none;background:#FFF0F0"></div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.amzmm.com/51307.html" target="_blank" style="color:var(--coral)">Naver Biz Advisor / 매모판 / 셀러라이프 / 클로바 AI</a>
+  </div>
+<script>
+const CONFIG = {"id":"P12-20260719-019","fields":[{"key":"name","label":"商品","type":"text"},{"key":"rank","label":"排名","type":"number"},{"key":"views","label":"曝光","type":"number"},{"key":"note","label":"备注","type":"text"}],"summary":[{"kind":"count","label":"상품수"},{"kind":"avg","field":"rank","label":"평균 순위"}]};
+
+const KEY = CONFIG.id;
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function fmtTime(t){ var d=new Date(t); return (d.getMonth()+1)+"/"+d.getDate()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2); }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+function val(it,f){ return Number(it[f])||0; }
+function render(){
+  var list=document.getElementById("list");
+  if(items.length===0){ list.innerHTML='<p style="color:var(--muted);font-size:13px;margin:0">暂无记录，添加一条试试 ✦</p>'; }
+  else {
+    var h='<b style="font-size:14px">📋 我的记录（'+items.length+'）</b>';
+    for(var i=0;i<items.length;i++){
+      var it=items[i]; var parts=[];
+      for(var j=0;j<CONFIG.fields.length;j++){ var f=CONFIG.fields[j]; if(it[f.key]!=="" && it[f.key]!=null) parts.push(esc(it[f.key])); }
+      h+='<div class="item"><span>'+parts.join(" · ")+' <small style="color:var(--muted)">'+fmtTime(it.t)+'</small></span><button onclick="del('+i+')">删</button></div>';
+    }
+    list.innerHTML=h;
+  }
+  renderSummary();
+}
+function renderSummary(){
+  var s=document.getElementById("summary");
+  if(!CONFIG.summary||!CONFIG.summary.length){ s.style.display="none"; return; }
+  s.style.display="block";
+  var h='<b style="font-size:14px">📊 数据概览</b>';
+  for(var k=0;k<CONFIG.summary.length;k++){
+    var d=CONFIG.summary[k]; var v=0;
+    if(d.kind==="count") v=items.length;
+    else if(d.kind==="sum"){ for(var i=0;i<items.length;i++) v+=val(items[i],d.field); }
+    else if(d.kind==="sumByType"){ for(var i=0;i<items.length;i++) if(items[i][d.typeField]===d.value) v+=val(items[i],d.amountField); }
+    else if(d.kind==="net"){ var inc=0,out=0; for(var i=0;i<items.length;i++){ if(items[i][d.typeField]===d.inVal) inc+=val(items[i],d.amountField); else if(items[i][d.typeField]===d.outVal) out+=val(items[i],d.amountField);} v=inc-out; }
+    else if(d.kind==="low"){ for(var i=0;i<items.length;i++) if(val(items[i],d.field) < val(items[i],d.min)) v++; }
+    else if(d.kind==="invValue"){ for(var i=0;i<items.length;i++) v+=val(items[i],d.field)*val(items[i],d.price); }
+    else if(d.kind==="profitSimple"){ var r=0,c=0; for(var i=0;i<items.length;i++){ r+=val(items[i],d.revenue); c+=val(items[i],d.cost);} v=r-c; }
+    else if(d.kind==="profit"){ for(var i=0;i<items.length;i++) v+=(val(items[i],d.price)-val(items[i],d.cost))*val(items[i],d.qty); }
+    else if(d.kind==="avg"){ if(items.length){ var s2=0; for(var i=0;i<items.length;i++) s2+=val(items[i],d.field); v=(s2/items.length).toFixed(1);} else v=0; }
+    h+='<div class="sum-line"><span>'+d.label+'</span><b>'+v+'</b></div>';
+  }
+  s.innerHTML=h;
+}
+function add(){
+  var it={t:Date.now()};
+  for(var i=0;i<CONFIG.fields.length;i++){ var f=CONFIG.fields[i]; var el=document.getElementById("f_"+f.key); it[f.key]= (f.type==="number") ? (el.value===""?"":el.value) : el.value; }
+  if(!it[CONFIG.fields[0].key]){ alert("请填写"+CONFIG.fields[0].label); return; }
+  items.unshift(it); save();
+  for(var i=0;i<CONFIG.fields.length;i++){ document.getElementById("f_"+CONFIG.fields[i].key).value=""; }
+}
+function del(i){ items.splice(i,1); save(); }
+render();
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI读书习惯形成（短时间+摘要+连续记录）韩国</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.small{font-size:12px;color:var(--muted)}
+.del{color:var(--coral);font-size:13px;cursor:pointer;float:right}
+.streak{font-size:30px;font-weight:700;color:var(--coral)}
+</style>
+</head>
+<body>
+<div class="card">
+  <div><span class="tag">education</span><span class="tag">reading_management</span></div>
+  <h1 style="font-size:20px;margin:8px 0 4px">AI 读书习惯形成（短读＋摘要）</h1>
+  <p class="h-coral" style="font-size:13px;margin:0">AI reading-habit app (micro-reading + summary + streaks)</p>
+</div>
+<div class="card">
+  <b>💡 痛点</b>
+  <p style="font-size:14px;color:#555;margin:6px 0 0">韩国成人综合读书率降至 38.5%（历史最低），年均仅 2.4 本。Bookmory 等「读书记录＋提醒＋统计」App 受欢迎，习惯重建需求明确。</p>
+</div>
+<div class="card">
+  <b>🛠 工具 · 微阅读打卡</b>
+  <label>书名</label><input id="title" placeholder="如：素食者">
+  <div class="row"><div><label>阅读分钟</label><input id="min" type="number" placeholder="15"></div><div><label>日期</label><input id="date" type="date"></div></div>
+  <label>一句话摘要 / 感想</label><input id="sum" placeholder="今天读懂了主角的孤独">
+  <button class="btn" onclick="addRead()">记录今日阅读</button>
+</div>
+<div class="card" id="list"></div>
+<div class="card" style="font-size:12px;color:var(--muted)">
+  <b>来源参考</b><br>
+  <a href="https://en.sedaily.com/culture/2026/03/06/south-korea-adult-readership-falls-below-40-percent-in-2024" target="_blank" style="color:var(--coral)">韩国读书率危机报道 / Bookmory</a>
+</div>
+<script>
+const KEY="P8-20260719-010";
+let recs=JSON.parse(localStorage.getItem(KEY)||"[]");
+date.value=new Date().toISOString().slice(0,10);
+function save(){localStorage.setItem(KEY,JSON.stringify(recs));render();}
+function addRead(){const t=title.value.trim(),m=+min.value,d=date.value,s=sum.value.trim();if(!t||!m||!d){alert("请填书名、分钟、日期");return;}recs.push({t,m,d,s});title.value=min.value=sum.value="";save();}
+function del(i){recs.splice(i,1);save();}
+function streak(){const days=[...new Set(recs.map(r=>r.d))].sort();let s=0;const today=new Date();for(let i=0;;i++){const dd=new Date(today);dd.setDate(dd.getDate()-i);const ks=dd.toISOString().slice(0,10);if(days.includes(ks))s++;else if(i===0){continue;}else break;}return s;}
+function render(){const st=streak();const total=recs.reduce((a,r)=>a+r.m,0);let o=`<div class='item'><b>🔥 连续打卡</b><div class='streak'>${st} 天</div><div class='small'>累计阅读 ${total} 分钟 · ${recs.length} 次</div></div>`;
+const badge=st>=7?"🥈 一周达人":st>=3?"🥉 起步达人":st>=1?"🌱 已起步":"开始第一天吧";o+=`<div class='item'>徽章：<b>${badge}</b></div>`;
+o+="<hr style='border:none;border-top:1px solid var(--line);margin:14px 0'><b>📖 阅读记录</b>";if(!recs.length)o+="<p class='small'>还没有记录。</p>";recs.slice().reverse().forEach((x,i)=>{const idx=recs.length-1-i;o+=`<div class='item'><span class='del' onclick='del(${idx})'>删除</span><b>${x.t}</b> <span class='tag'>${x.m}分</span> <span class='small'>${x.d}</span><div class='small' style='margin-top:4px'>${x.s||""}</div></div>`;});list.innerHTML=o;}
+render();
+</script>
+</body>
+</html>

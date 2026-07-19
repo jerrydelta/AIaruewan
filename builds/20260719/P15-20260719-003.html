@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>身体加倍专注平台</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">productivity</span><span class="tag">pomodoro_focus</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">身体加倍专注平台</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Body-doubling focus platform (async/sync co-working for ADHD & remote workers)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">「身体加倍」与他人同屏专注是 ADHD 公认有效方式，但产品体验与留存有优化空间。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>本次要专注的事</label>
+<input id="fTask" placeholder="例如：写周报">
+<div class="row">
+ <input id="fMin" type="number" value="25" placeholder="分钟">
+ <button class="btn" onclick="startFocus()" style="width:auto">开始专注</button>
+</div>
+<div id="timer" style="font-size:32px;text-align:center;margin:10px 0;font-weight:700">--:--</div>
+<div style="font-size:13px;color:#555;text-align:center">💡 身体加倍：打开此页，与虚拟伙伴一起专注。</div>
+  </div>
+
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.focusmate.com" target="_blank" style="color:var(--coral)">Focusmate · Flow Club · Cofocus</a>
+  </div>
+<script>
+
+const KEY='P15-20260719-003';
+let items=JSON.parse(localStorage.getItem(KEY)||'[]');
+let timerId=null;
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function startFocus(){
+ var t=document.getElementById('fTask').value.trim();
+ var m=Number(document.getElementById('fMin').value)||25;
+ if(!t){alert('写点要专注的事');return;}
+ var left=m*60;
+ var el=document.getElementById('timer');
+ clearInterval(timerId);
+ timerId=setInterval(function(){
+   left--;
+   var mm=String(Math.floor(left/60)).padStart(2,'0');
+   var ss=String(left%60).padStart(2,'0');
+   el.textContent=mm+':'+ss;
+   if(left<=0){clearInterval(timerId);el.textContent='✅ 完成';items.unshift({id:Date.now(),t:t,min:m,ts:new Date().toLocaleString()});document.getElementById('fTask').value='';save();}
+ },1000);
+ el.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');
+}
+function render(){
+ var box=document.getElementById('list');
+ box.innerHTML='<b>🏁 已完成专注 ('+items.length+')</b>'+(items.length?'':'<p style="font-size:13px;color:#999">还没有完成的专注</p>');
+ box.innerHTML+=items.map(i=>'<div class="card" style="margin:6px 0;padding:10px"><div style="font-weight:600">'+esc(i.t)+'</div><div style="font-size:12px;color:#999">'+i.min+'分钟 · '+i.ts+'</div></div>').join('');
+}
+function esc(s){return (s||'').replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+render();
+
+</script>
+</body>
+</html>

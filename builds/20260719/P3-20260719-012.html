@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>间歇性断食追踪</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.ok{background:var(--ok)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.big{font-size:22px;font-weight:700;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">food</span><span class="tag">diet_meal_plan</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">间歇性断食追踪</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Intermittent fasting with circadian & women's modes</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">断食应用是庞大且被验证的市场：2025年全球约18.4亿美元，预计2033年达52.7亿（CAGR 14.2%）。Zero、BodyFast、Fastic 靠订阅变现；中国Fastin单人开发者月入约$7K。缺口：断食+昼夜节律/倒班排程、女性荷尔蒙模式供给不足。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>方案 / Protocol</label>
+    <select id="proto"><option>16:8</option><option>18:6</option><option>20:4</option><option>5:2</option><option>14:10（女性/温和）</option></select>
+    <div class="row">
+      <div><label>开始进食</label><input id="fst" type="time" value="12:00"></div>
+      <div><label>结束进食</label><input id="fet" type="time" value="20:00"></div>
+    </div>
+    <label>模式</label>
+    <select id="mode"><option>标准</option><option>昼夜节律（早段进食）</option><option>倒班/Shift</option><option>女性荷尔蒙</option></select>
+    <button class="btn" onclick="startFast()">▶ 开始一次断食</button>
+  </div>
+
+  <div class="card" id="list"><b>⏱ 断食记录</b>
+    <div id="now" style="margin-bottom:8px"></div>
+    <div id="hist"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/us/app/zero-fasting-health-tracker/id1168348542" target="_blank" style="color:var(--coral)">Zero · BodyFast · Fastic · 轻断食</a>
+  </div>
+
+<script>
+const KEY="P3-20260719-012";
+let fasts=JSON.parse(localStorage.getItem(KEY)||"[]");
+function startFast(){
+  const win=(()=>{const[a,b]=document.getElementById('proto').value.split(':');return (+a)+(+b);})();
+  fasts.push({id:Date.now(),date:new Date().toLocaleDateString(),proto:document.getElementById('proto').value,
+    st:document.getElementById('fst').value,et:document.getElementById('fet').value,
+    mode:document.getElementById('mode').value,win});
+  save();
+}
+function render(){
+  const now=document.getElementById('now');
+  const today=fasts.filter(f=>f.date==new Date().toLocaleDateString());
+  if(today.length){
+    const f=today[today.length-1];
+    now.innerHTML=`<div style="padding:10px;background:#FFF7F7;border-radius:10px">
+      <div>今日方案 <b>${f.proto}</b> · ${f.mode}</div>
+      <div style="font-size:12px;color:var(--muted)">进食窗 ${f.st}–${f.et}（约${f.win}h断食）</div></div>`;
+  } else now.innerHTML='<p style="color:var(--muted);font-size:13px">今天还没开始断食。</p>';
+  document.getElementById('hist').innerHTML=fasts.length?[...fasts].reverse().slice(0,15).map(f=>
+    `<div class="item"><span>${f.date} · ${f.proto}</span><span>${f.mode}</span></div>`).join(''):'';
+}
+function del(id){fasts=fasts.filter(f=>f.id!=id);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(fasts));render();}
+render();
+</script>
+</body>
+</html>

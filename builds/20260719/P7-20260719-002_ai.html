@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>对话式AI行程规划助手（AI版）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.plan{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px}
+.plan h3{margin:0 0 6px;font-size:15px;color:var(--coral)}
+.plan .slot{font-size:13px;margin:3px 0}
+.del{color:var(--coral);font-size:12px;float:right;cursor:pointer}
+.muted{color:var(--muted);font-size:12px}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.ai-card .collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">travel</span><span class="tag">itinerary_planning</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">对话式AI行程规划助手 · AI版</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Conversational AI trip-planning assistant (real-time recs + group collab + affiliate booking)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">AI 行程规划 2025 爆发：Wanderboat 月活达 670 万、Travel-Rizz 月处理 $200k 联盟预订佣金。但穷游行程助手信息过时（连上海迪士尼都没有）、90% AI 行程至少含 1 处错误。痛点：从“生成行程”走向 agentic 自动调整，用户需要按偏好即时生成可保存的行程。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 一键生成每日行程</b>
+    <p class="muted" style="margin:4px 0 0">输入目的地、天数与主题，按内置景点/餐饮库生成每日早中晚行程，可保存。</p>
+    <label>目的地城市</label>
+    <input id="city" placeholder="如：东京 / 北京 / 曼谷 / 巴黎 / 纽约">
+    <div class="row">
+      <div><label>天数</label><input id="days" type="number" min="1" max="14" value="3"></div>
+      <div><label>主题</label>
+        <select id="theme"><option>美食</option><option>亲子</option><option>研学</option><option>休闲</option><option>购物</option></select>
+      </div>
+    </div>
+    <button class="btn" onclick="gen()">✨ 生成行程</button>
+    <div id="out"></div>
+  </div>
+
+  <div class="card" id="list"><b>🗂 我的行程库</b><div id="items"></div></div>
+
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+    <div class="collapse-header" onclick="toggleAI()">🤖 AI 助手（用户自带Key · 零成本）</div>
+    <div class="collapse-body collapsed" id="aiBody">
+      <div id="aiKeySection">
+        <label>Hy3 API Key（用户自带，零成本运营）</label>
+        <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+        <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。</div>
+      </div>
+      <div id="aiChatSection" style="display:none">
+        <div id="aiChat"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="aiInput" placeholder="问AI：帮我调整第2天行程" style="flex:1">
+          <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://ai.fly63.com/wanderboat" target="_blank" style="color:var(--coral)">Wanderboat · Travo · Travel-Rizz · 马蜂窝AI路书 · 四海轻旅</a>
+  </div>
+
+<script>
+const KEY="P7-20260719-002";
+const DB={
+  "东京":{美食:["筑地场外市场","一兰拉面本店","浅草小吃街","新宿黄金街居酒屋"],亲子:["东京迪士尼","teamLab无界","上野动物园","富士急乐园"],研学:["东京国立博物馆","明治神宫","秋叶原动漫文化","皇居历史散步"],休闲:["上野公园","隅田川游船","六本木观景台","温泉日归"],购物:["银座","新宿伊势丹","涩谷PARCO","秋叶原电器街"]},
+  "北京":{美食:["簋街麻辣小龙虾","全聚德烤鸭","牛街小吃","三里屯网红餐"],亲子:["北京动物园","中国科技馆","欢乐谷","海洋馆"],研学:["故宫博物院","颐和园","国家博物馆","长城"],休闲:["什刹海","奥林匹克公园","景山公园","胡同骑行"],购物:["三里屯太古里","西单大悦城","SKP","王府井"]},
+  "曼谷":{美食:["乍都乍周末市场","船面小巷","唐人街大排档","河滨夜市"],亲子:["大象保育营","暹罗海洋世界","儿童探索博物馆"],研学:["大皇宫玉佛寺","卧佛寺","郑王庙","泰国文化中心"],休闲:["仑披尼公园","泰式按摩","湄南河游船"],购物:["MBK","赛万那普机场免税","恰图恰","ICONSIAM"]},
+  "巴黎":{美食:["拉丁区咖啡馆","可颂老店","塞纳河左岸餐厅"],亲子:["迪士尼乐园","科学与工业城","植物园"],研学:["卢浮宫","奥赛博物馆","凡尔赛宫","先贤祠"],休闲:["塞纳河漫步","蒙马特高地","香榭丽舍"],购物:["老佛爷","春天百货","玛黑区"]},
+  "纽约":{美食:["小意大利","切尔西市场","唐人街","汉堡名店"],亲子:["自然历史博物馆","中央公园动物园","帝国大厦"],研学:["大都会博物馆","自由女神","9/11纪念馆","联合国"],休闲:["中央公园","布鲁克林大桥","高线公园"],购物:["第五大道","SOHO","奥特莱斯"]}
+};
+const FALLBACK={美食:["老城区特色餐厅","本地夜市","街角咖啡馆","人气小吃街"],亲子:["城市动物园","儿童乐园","科学馆","公园"],研学:["市立博物馆","历史老街","大学城","地标建筑"],休闲:["中央公园","河滨步道","观景台","温泉"],购物:["市中心商圈","特色市集","免税店","文创街区"]};
+let saved=JSON.parse(localStorage.getItem(KEY)||"[]");
+function esc(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function gen(){
+  const city=document.getElementById("city").value.trim();
+  const days=Math.min(14,Math.max(1,parseInt(document.getElementById("days").value)||3));
+  const theme=document.getElementById("theme").value;
+  if(!city){alert("请填写目的地城市");return;}
+  const pool=(DB[city]&&DB[city][theme])?DB[city][theme]:(FALLBACK[theme]||FALLBACK["休闲"]);
+  let html=`<div class="plan"><h3>${esc(city)} · ${days}天 · ${theme}主题</h3>`;
+  const slots=["🌅 上午","🍱 中午","🌆 下午","🌙 晚上"];
+  for(let d=1;d<=days;d++){
+    html+=`<div class="slot"><b>第${d}天</b></div>`;
+    for(let s=0;s<4;s++){
+      const item=pool[(d*4+s)%pool.length];
+      html+=`<div class="slot" style="padding-left:10px">${slots[s]}：${esc(item)}</div>`;
+    }
+  }
+  html+=`</div><button class="btn" onclick="keep('${esc(city)}',${days},'${theme}')">💾 保存到行程库</button>`;
+  document.getElementById("out").innerHTML=html;
+}
+function keep(city,days,theme){
+  saved.unshift({city,days,theme,t:new Date().toLocaleDateString("zh-CN")});
+  localStorage.setItem(KEY,JSON.stringify(saved));render();
+  alert("已保存："+city+" "+days+"天");
+}
+function del(i){saved.splice(i,1);localStorage.setItem(KEY,JSON.stringify(saved));render();}
+function render(){
+  document.getElementById("items").innerHTML=saved.length?saved.map((x,i)=>
+    `<div class="plan"><span class="del" onclick="del(${i})">删除</span>
+     <b>${esc(x.city)} · ${x.days}天 · ${x.theme}</b>
+     <div class="muted">保存于 ${esc(x.t)}</div></div>`).join("")
+   :`<div class="muted" style="margin-top:8px">还没有保存的行程。</div>`;
+}
+render();
+
+// AI助手模块
+let aiKey=localStorage.getItem('hy3_key')||'';
+let aiHistory=[];
+function toggleAI(){document.getElementById('aiBody').classList.toggle('collapsed');}
+function saveKey(){
+  aiKey=document.getElementById('aiKey').value.trim();
+  if(!aiKey){alert('请输入API Key');return;}
+  localStorage.setItem('hy3_key',aiKey);
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+  addAIMessage('assistant','Key已保存！我是你的AI行程师，可以帮你调整行程、推荐小众点、估算预算。');
+}
+async function sendAI(){
+  if(!aiKey){alert('请先保存API Key');return;}
+  const input=document.getElementById('aiInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  addAIMessage('user',msg);input.value='';
+  aiHistory.push({role:'user',content:msg});
+  try{
+    const res=await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions',{
+      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body:JSON.stringify({model:'hunyuan-pro',messages:aiHistory,stream:false})});
+    const data=await res.json();
+    const reply=data.choices?.[0]?.message?.content||'AI响应失败';
+    aiHistory.push({role:'assistant',content:reply});
+    addAIMessage('assistant',reply);
+  }catch(e){addAIMessage('assistant','调用失败：'+e.message);}
+}
+function addAIMessage(role,content){
+  const chat=document.getElementById('aiChat');
+  const div=document.createElement('div');
+  div.className='ai-msg '+role;div.textContent=content;
+  chat.appendChild(div);chat.scrollTop=chat.scrollHeight;
+}
+if(aiKey){document.getElementById('aiKeySection').style.display='none';document.getElementById('aiChatSection').style.display='block';}
+</script>
+</body>
+</html>

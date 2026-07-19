@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>孕产分阶段女性健身</title>
+<style>
+:root{
+  --coral:#FF6B6B;        /* 主品牌色 */
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">fitness</span><span class="tag">prenatal_postnatal_fitness</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">孕产分阶段女性健身</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Stage-phased prenatal & postnatal fitness</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">NicheMetric将「孕产前后健身」列为开发不足的高机会细分。居家健身大盘2026达$22.8B，孕产女性是高频高黏性付费人群却被忽视。需循证、分阶段(孕中/产后/腹直肌分离修复)。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#666;margin:8px 0">按孕产阶段记录训练并给出对应安全提示。</p>
+<label>阶段</label><select id="f_stage"><option value="孕中期">孕中期</option><option value="孕晚期">孕晚期</option><option value="产后0-6周">产后0-6周</option><option value="产后6周+">产后6周+</option><option value="腹直肌分离修复">腹直肌分离修复</option></select>
+<label>动作</label><input type="text" id="f_exercise" placeholder="如 骨盆底肌训练">
+<label>时长(分钟)</label><input type="number" id="f_minutes" placeholder="如 15">
+<label>身体反馈</label><textarea id="f_symptoms" rows="2" placeholder="如 无不适"></textarea>
+    <button class="btn" onclick="addItem()">保存记录</button>
+    <div id="derive" style="font-size:13px;color:var(--coral);margin-top:8px"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="#" style="color:var(--coral)">Sweat / FitOn / Nike Training Club</a>
+  </div>
+
+<script>
+const KEY="P5-20260719-005";
+const FIELDS=[{"label":"阶段","key":"stage"},{"label":"动作","key":"exercise"},{"label":"时长(分钟)","key":"minutes"},{"label":"身体反馈","key":"symptoms"}];
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addItem(){
+const v_stage=document.getElementById('f_stage').value;
+const v_exercise=document.getElementById('f_exercise').value;
+const v_minutes=document.getElementById('f_minutes').value;
+const v_symptoms=document.getElementById('f_symptoms').value;
+  const item={ ts:Date.now() , stage:v_stage, exercise:v_exercise, minutes:v_minutes, symptoms:v_symptoms };
+  items.unshift(item);
+  save();
+  document.getElementById('f_stage').value='';
+document.getElementById('f_exercise').value='';
+document.getElementById('f_minutes').value='';
+document.getElementById('f_symptoms').value='';
+  const dv=derive(item);
+  document.getElementById('derive').textContent = dv?('已保存 ✓ '+dv):'已保存 ✓';
+}
+function derive(it){ if(it.stage&&it.stage.indexOf('腹直肌')>=0) return '🩹 腹直肌修复期：避免卷腹类动作'; if(it.stage==='孕中期'||it.stage==='孕晚期') return '🤰 孕期内：避免仰卧与高强度'; return '👶 产后：循序渐进恢复核心'; return ''; }
+function rowHTML(it){
+  let h='<div style="font-size:12px;color:var(--muted)">'+(new Date(it.ts).toLocaleString())+'</div>';
+  FIELDS.forEach(f=>{ if(it[f.key]!==''){ h+='<div style="font-size:14px;margin:2px 0"><b>'+f.label+'：</b>'+it[f.key]+'</div>'; } });
+  const d=derive(it); if(d) h+='<div style="font-size:13px;color:var(--coral);margin-top:4px">'+d+'</div>';
+  return h;
+}
+function render(){
+  const el=document.getElementById('list');
+  if(!items.length){ el.innerHTML='<div style="font-size:13px;color:var(--muted)">暂无记录，添加第一条吧。</div>'; return; }
+  el.innerHTML='<b style="font-size:13px">📋 记录 ('+items.length+')</b>'+items.map((it,i)=>'<div style="border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px">'+rowHTML(it)+'<button class="btn" style="background:#bbb;margin-top:8px" onclick="del('+i+')">删除</button></div>').join('');
+}
+function del(i){ items.splice(i,1); save(); }
+render();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI 任务拆解 · 执行功能辅助（魔法待办）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:8px}
+.del{color:var(--muted);font-size:12px;cursor:pointer;border:none;background:none}
+.item{border-bottom:1px dashed var(--line);padding:8px 0;font-size:14px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">neurodiversity</span><span class="tag">adhd_tools</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI 任务拆解 · 执行功能辅助</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI task-breakdown & executive-function aid</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Goblin Tools 用 AI 把模糊任务拆解成步骤，专为神经多样性人群设计，免费无广告、移动端低价。验证了"任务启动困难"这一 ADHD 核心痛点的庞大需求。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具（魔法待办）</b>
+    <label>一个模糊的大任务</label>
+    <input type="text" id="task" placeholder="如：准备下周出差">
+    <button class="btn" onclick="addTask()">+ 添加任务</button>
+    <div id="tasks"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://goblin.tools/" target="_blank" style="color:var(--coral)">Goblin Tools · Magic ToDo</a>
+  </div>
+
+<script>
+const KEY="P9-20260719-011";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render()}
+function addTask(){
+  const task=document.getElementById("task").value.trim();
+  if(!task){alert("请输入任务");return}
+  items.push({task,subs:[],done:false,date:new Date().toISOString().slice(0,10)});
+  document.getElementById("task").value="";
+  save();
+}
+function addSub(ti){
+  const v=prompt("拆解这个任务的一个子步骤：");
+  if(!v)return;
+  const mins=prompt("预计需要几分钟？（可留空）","");
+  items[ti].subs.push({text:v,min:mins?parseInt(mins):0,done:false});
+  save();
+}
+function toggleSub(ti,si){items[ti].subs[si].done=!items[ti].subs[si].done;save()}
+function toggleTask(ti){items[ti].done=!items[ti].done;save()}
+function render(){
+  let t="";
+  items.forEach((it,ti)=>{
+    const subMin=it.subs.reduce((s,x)=>s+x.min,0);
+    let subs="";
+    it.subs.forEach((s,si)=>{
+      subs+=`<div style="margin:4px 0 4px 18px;font-size:13px"><input type="checkbox" ${s.done?'checked':''} onchange="toggleSub(${ti},${si})"> ${s.text} ${s.min?`· ~${s.min}min`:''}</div>`;
+    });
+    t+=`<div class="item"><div class="row"><div><b style="${it.done?'text-decoration:line-through;color:var(--muted)':''}">${it.task}</b> ${it.date}${subMin?` · 总~${subMin}min`:''}</div><button class="del" onclick="delTask(${ti})">删除</button></div>
+      ${subs}
+      <button class="del" onclick="addSub(${ti})">+ 拆解子步骤</button>
+      <button class="del" onclick="toggleTask(${ti})">${it.done?'标记未完成':'标记完成'}</button></div>`;
+  });
+  document.getElementById("tasks").innerHTML=t||"<p style='font-size:13px;color:var(--muted)'>暂无任务</p>";
+  document.getElementById("list").innerHTML="<b>提示</b><p style='font-size:13px;color:#555'>把大任务拆成小步骤、给每一步估时间，能显著降低 ADHD 的"启动阻力"。子步骤可勾选完成。</p>";
+}
+function delTask(ti){items.splice(ti,1);save()}
+render();
+</script>
+</body>
+</html>

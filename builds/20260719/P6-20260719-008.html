@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>少儿英语分级自测</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">parenting</span><span class="tag">early_education</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">少儿英语分级自测（纯英文）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Adaptive-grading, pure-English kids reader</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">家长最烦"中英文夹杂不知道孩子听的是哪国话""太贵""分级不系统"。用词汇诊断→自适应分级，给孩子一个低生词、纯英文的阅读环境。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 词汇诊断</b>
+    <p style="font-size:13px;color:#555;margin:0">认识几个词就给几分（每词 1 分，满分 10）：</p>
+    <div id="quiz" style="margin-top:6px"></div>
+    <button class="btn" onclick="grade()">测分级</button>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 阅读打卡</b>
+    <div class="row">
+      <input id="book" placeholder="书名">
+      <input id="min" type="number" placeholder="分钟">
+    </div>
+    <label>本次阅读级别（1-12）</label>
+    <input id="lv" type="number" min="1" max="12" value="1">
+    <button class="btn" onclick="addRead()">记录阅读</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://learning.sohu.com/a/933788657_121314057" target="_blank" style="color:var(--coral)">适趣英语 / abc reading</a>
+  </div>
+<script>
+const KEY="P6-20260719-008";
+const WORDS=['cat','run','red','book','happy','jump','blue','eat','sun','dog'];
+let data=JSON.parse(localStorage.getItem(KEY)||'{"reads":[],"lastLevel":null}');
+document.getElementById('quiz').innerHTML=WORDS.map((w,i)=>
+  '<label style="display:flex;align-items:center;gap:6px;margin-top:6px"><input type="checkbox" id="w'+i+'" style="width:auto;margin:0"> 认识 <b>'+w+'</b></label>').join('');
+function grade(){
+  let score=0;WORDS.forEach((w,i)=>{if(document.getElementById('w'+i).checked)score++;});
+  const level=Math.max(1,Math.min(12,Math.round(score/10*12)));
+  data.lastLevel=level;save();
+  alert('诊断得分 '+score+'/10 ｜ 建议阅读级别 L'+level+'（共12级）');
+}
+function addRead(){
+  const book=document.getElementById('book').value.trim();
+  const min=+document.getElementById('min').value||0;
+  const lv=+document.getElementById('lv').value||1;
+  if(!book){alert('填书名');return;}
+  data.reads.unshift({book,min,lv,t:new Date().toLocaleDateString('zh-CN'),id:Date.now()});
+  document.getElementById('book').value='';document.getElementById('min').value='';save();
+}
+function del(id){data.reads=data.reads.filter(x=>x.id!==id);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function render(){
+  const el=document.getElementById('list');
+  let h='';
+  if(data.lastLevel)h='<b>🎯 当前建议级别</b><div style="font-size:22px;color:var(--coral);font-weight:700">L'+data.lastLevel+'</div>';
+  if(!data.reads.length){h+='<p style="font-size:13px;color:#999">还没有阅读记录。</p>';}
+  else h+='<b>📚 阅读 '+data.reads.length+' 次（共 '+data.reads.reduce((s,r)=>s+r.min,0)+' 分钟）</b>'+
+    data.reads.map(x=>'<div style="border-top:1px solid var(--line);padding:6px 0;font-size:13px">'+esc(x.book)+' · L'+x.lv+' · '+x.min+'分钟 <span style="font-size:11px;color:#999">'+x.t+'</span> <button onclick="del('+x.id+')" style="background:none;border:none;color:#bbb;font-size:11px;cursor:pointer">删</button></div>').join('');
+  el.innerHTML=h;
+}
+function esc(s){return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+render();
+</script>
+</body>
+</html>

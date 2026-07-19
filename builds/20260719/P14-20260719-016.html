@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>订阅流失挽回</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .meta{font-size:11px;color:var(--muted)}
+.mini{display:inline-block;padding:6px 10px;border:none;border-radius:8px;font-size:12px;cursor:pointer;background:#FFF0F0;color:var(--coral);margin:4px 4px 0 0}
+.mini.del{background:#FDECEC;color:#E85555}
+pre{white-space:pre-wrap;word-break:break-all;font-size:13px;background:#fafafa;border:1px solid var(--line);border-radius:8px;padding:8px;margin:6px 0 0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">micro_saas</span><span class="tag">subscription_mgmt</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">订阅流失挽回</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Subscription involuntary-churn recovery (retry + pause + win-back)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Recurflux(个人开发者)验证"挽回失败扣款"是SaaS刚需且可独立手搓(接Stripe/RevenueCat)；中日订阅类App/微SaaS同样受非自愿流失侵蚀但缺本地化dunning工具——可双语手搓。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>订阅名称</label>
+    <input id="name" placeholder="如：Pro 套餐">
+    <label>最近扣款状态</label>
+    <select id="status"><option>成功</option><option>失败（卡过期/余额不足）</option></select>
+    <label>月费（元）</label>
+    <input id="amt" type="number" placeholder="99">
+    <button class="btn" onclick="add()">登记订阅</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>🔁 流失看板</b>
+    <div id="sum" style="font-size:14px;margin:8px 0"></div>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="http://recurflux.com/" target="_blank" style="color:var(--coral)">Recurflux 流失恢复</a>
+  </div>
+
+<script>
+const KEY="P14-20260719-016";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function add(){
+  const name=document.getElementById('name').value.trim();
+  const failed=document.getElementById('status').value.startsWith('失败');
+  const amt=parseFloat(document.getElementById('amt').value||"0");
+  if(!name){alert('请填写订阅名称');return;}
+  items.unshift({name,failed,amt,ts:Date.now()});
+  document.getElementById('name').value='';document.getElementById('amt').value='';
+  save();
+}
+function winback(i){
+  const it=items[i];
+  const txt=`主题：关于您 ${it.name} 订阅的扣款提醒\n\n我们注意到您最近一次的 ¥${it.amt} 自动续费未能成功（可能卡片过期或余额不足）。\n为避免服务中断，请更新支付方式；或回复"暂停"可享一个月暂停优惠，暂不扣费。`;
+  if(navigator.clipboard)navigator.clipboard.writeText(txt);
+  alert('挽回邮件已生成并复制：\n\n'+txt);
+}
+function del(i){items.splice(i,1);save();}
+function render(){
+  const failed=items.filter(x=>x.failed);
+  const lost=failed.reduce((s,x)=>s+x.amt,0);
+  document.getElementById('sum').innerHTML=`失败扣款 <b class="h-coral">${failed.length}</b> 笔 · 月损失风险 ¥${lost}`;
+  const box=document.getElementById('items');
+  if(!items.length){box.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有订阅。</p>';return;}
+  box.innerHTML=items.map((it,i)=>`<div class="item"><div><b>${esc(it.name)}</b> · ¥${it.amt}/月 ${it.failed?'⚠️ 扣款失败':'✅ 正常'}</div>${it.failed?`<button class="mini" onclick="winback(${i})">生成挽回方案</button>`:''}<button class="mini del" onclick="del(${i})">删除</button></div>`).join('');
+}
+function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+render();
+</script>
+</body>
+</html>

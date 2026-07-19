@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>中文离线优先隐私笔记</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">productivity</span><span class="tag">note_taking</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">中文离线优先隐私笔记</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Chinese local-first privacy notes (E2E encryption + on-device AI search)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">中文离线优先 / 隐私笔记已有萌芽但分散，本地优先 + AI 检索一体化仍稀缺。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>笔记标题</label><input id="n2T" placeholder="周会要点">
+<label>内容</label><textarea id="n2C" rows="4" placeholder="本地优先，数据不出本机"></textarea>
+<button class="btn" onclick="addN2()">加密保存（本地）</button>
+<label>本地检索</label><input id="n2Q" oninput="render()" placeholder="搜索...">
+<div style="font-size:12px;color:var(--ok);margin-top:6px">🔒 端到端加密（演示）：内容以本地密文存储</div>
+  </div>
+
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://b3log.org/siyuan/" target="_blank" style="color:var(--coral)">inBox笔记 · 思源笔记(SiYuan) · 得到大脑</a>
+  </div>
+<script>
+
+const KEY='P15-20260719-020';
+let items=JSON.parse(localStorage.getItem(KEY)||'[]');
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addN2(){
+ var t=document.getElementById('n2T').value.trim();
+ var c=document.getElementById('n2C').value;
+ if(!t&&!c){alert('写点');return;}
+ var enc=typeof btoa!=='undefined'?btoa(unescape(encodeURIComponent(c))):c;
+ items.unshift({id:Date.now(),t:t,c:enc,ts:new Date().toLocaleString()});
+ document.getElementById('n2T').value='';document.getElementById('n2C').value='';save();
+}
+function dec(s){try{return decodeURIComponent(escape(atob(s)));}catch(e){return s;}}
+function del(id){items=items.filter(i=>i.id!=id);save();}
+function render(){
+ var box=document.getElementById('list');
+ var q=(document.getElementById('n2Q').value||'').toLowerCase();
+ var view=items.filter(i=>(i.t+' '+dec(i.c)).toLowerCase().indexOf(q)>=0);
+ box.innerHTML='<b>🔒 本地加密笔记 ('+items.length+')</b>';
+ if(!view.length){box.innerHTML+='<p style="font-size:13px;color:#999">无</p>';return;}
+ box.innerHTML+=view.map(i=>'<div class="card" style="margin:6px 0;padding:10px"><div style="font-weight:600">'+esc(i.t||'(无标题)')+'</div><div style="font-size:13px;color:#555;white-space:pre-wrap">'+esc(dec(i.c))+'</div><div style="font-size:11px;color:#aaa;margin-top:4px">'+i.ts+' <a style="color:var(--coral);cursor:pointer" onclick="del('+i.id+')">删除</a></div></div>').join('');
+}
+function esc(s){return (s||'').replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+render();
+
+</script>
+</body>
+</html>

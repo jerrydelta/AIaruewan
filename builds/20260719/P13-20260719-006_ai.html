@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>移动请柬 + RSVP + 礼金账本（AI版）</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{display:flex;justify-content:space-between;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer}
+.sum{font-size:13px;color:var(--muted)}
+.invite{background:linear-gradient(135deg,#FFF0F0,#FFE0E0);text-align:center;
+  padding:24px 16px;border-radius:16px;margin-bottom:6px}
+.invite h2{margin:0;color:var(--coral-dark);font-size:18px}
+.invite .meta{font-size:13px;color:var(--ink);margin-top:8px}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">wedding</span><span class="tag">kr_mobile_invitation_rsvp</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">移动请柬 + RSVP + 礼金账本</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Free mobile invitation + RSVP + cash-gift(축의금) digitization</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">纸质请柬贵且难统计出席；韩国웨딩북提供"평생 무료 모바일 청첩장"，中国婚礼纪"请柬+账本"工具矩阵已验证。礼金(축의금)数字化是空白机会。</p>
+  </div>
+
+  <div class="card">
+    <b>💌 制作请柬</b>
+    <div class="row">
+      <div><label>新郎</label><input type="text" id="groom" placeholder="홍길동"></div>
+      <div><label>新娘</label><input type="text" id="bride" placeholder="성춘향"></div>
+    </div>
+    <div class="row">
+      <div><label>日期</label><input type="date" id="date"></div>
+      <div><label>地点</label><input type="text" id="venue" placeholder="서울 시청"></div>
+    </div>
+    <label>寄语</label>
+    <input type="text" id="msg" placeholder="함께 걸어가요">
+    <button class="btn" onclick="saveInvite()">生成请柬</button>
+  </div>
+
+  <div class="card" id="inviteBox"></div>
+
+  <div class="card">
+    <b>📩 RSVP 出席确认</b>
+    <div class="row">
+      <div><label>姓名</label><input type="text" id="rname" placeholder="宾客名"></div>
+      <div><label>携带人数</label><input type="number" id="rnum" value="1" min="1"></div>
+    </div>
+    <label>是否出席</label>
+    <select id="ratt"><option value="yes">出席</option><option value="no">不克前来</option></select>
+    <button class="btn" onclick="addRsvp()">＋ 记录 RSVP</button>
+  </div>
+
+  <div class="card">
+    <b>🎁 礼金(축의금)账本</b>
+    <div class="row">
+      <div><label>赠送人</label><input type="text" id="cname" placeholder="성함"></div>
+      <div><label>金额(₩)</label><input type="number" id="camt" placeholder="100000"></div>
+    </div>
+    <button class="btn" onclick="addCash()">＋ 记一笔礼金</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+    <div class="collapse-header" onclick="toggleAI()">🤖 AI 助手（用户自带Key · 零成本）</div>
+    <div class="collapse-body collapsed" id="aiBody">
+      <div id="aiKeySection">
+        <label>Hy3 API Key（用户自带，零成本运营）</label>
+        <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+        <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。</div>
+      </div>
+      <div id="aiChatSection" style="display:none">
+        <div id="aiChat"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="aiInput" placeholder="问AI：写一段韩文请柬文案？" style="flex:1">
+          <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.appkittie.com/app/google-play-comhow2marryweddingbell" target="_blank" style="color:var(--coral)">웨딩북 / 婚礼纪</a>
+  </div>
+
+<script>
+const KEY="P13-20260719-006";
+let invite=JSON.parse(localStorage.getItem(KEY+"_inv")||"null");
+let rsvps=JSON.parse(localStorage.getItem(KEY+"_r")||"[]");
+let cash=JSON.parse(localStorage.getItem(KEY+"_c")||"[]");
+function save(){localStorage.setItem(KEY+"_inv",JSON.stringify(invite));localStorage.setItem(KEY+"_r",JSON.stringify(rsvps));localStorage.setItem(KEY+"_c",JSON.stringify(cash));render();}
+function saveInvite(){
+  invite={groom:document.getElementById('groom').value.trim(),bride:document.getElementById('bride').value.trim(),
+    date:document.getElementById('date').value,venue:document.getElementById('venue').value.trim(),msg:document.getElementById('msg').value.trim()};
+  save();
+}
+function addRsvp(){
+  const n=document.getElementById('rname').value.trim();
+  if(!n){alert('请填写姓名');return;}
+  rsvps.push({name:n,num:Number(document.getElementById('rnum').value)||1,att:document.getElementById('ratt').value});
+  document.getElementById('rname').value='';
+  save();
+}
+function delR(i){rsvps.splice(i,1);save();}
+function addCash(){
+  const n=document.getElementById('cname').value.trim();
+  const a=Number(document.getElementById('camt').value)||0;
+  if(!n||!a){alert('请填写赠送人与金额');return;}
+  cash.push({name:n,amt:a});
+  document.getElementById('cname').value='';document.getElementById('camt').value='';
+  save();
+}
+function delC(i){cash.splice(i,1);save();}
+function render(){
+  const ib=document.getElementById('inviteBox');
+  ib.innerHTML=invite?('<div class="invite"><h2>'+invite.groom+' ❤ '+invite.bride+'</h2><div class="meta">'+(invite.date||'')+(invite.venue?' · '+invite.venue:'')+'</div><div class="meta" style="margin-top:6px;font-style:italic">'+(invite.msg||'')+'</div></div>'):'<div class="sum">填写上方信息生成请柬预览。</div>';
+  const list=document.getElementById('list');
+  const attend=rsvps.filter(r=>r.att==='yes').reduce((s,r)=>s+r.num,0);
+  let html='<b>📊 汇总</b><div class="sum" style="margin:6px 0">出席 '+attend+' 人 ｜ RSVP '+rsvps.length+' 条 ｜ 礼金合计 ₩'+cash.reduce((s,c)=>s+c.amt,0)+'</div>';
+  rsvps.forEach((r,i)=>{html+='<div class="item"><div><b>'+r.name+'</b> <span class="sum">'+(r.att==='yes'?'出席 ×'+r.num:'不克前来')+'</span></div><span class="del" onclick="delR('+i+')">删</span></div>';});
+  cash.forEach((c,i)=>{html+='<div class="item"><div><b>'+c.name+'</b> <span class="sum">₩'+c.amt+'</span></div><span class="del" onclick="delC('+i+')">删</span></div>';});
+  list.innerHTML=html;
+}
+render();
+
+// AI助手模块
+let aiKey=localStorage.getItem('hy3_key')||'';
+let aiHistory=[];
+function toggleAI(){document.getElementById('aiBody').classList.toggle('collapsed');}
+function saveKey(){
+  aiKey=document.getElementById('aiKey').value.trim();
+  if(!aiKey){alert('请输入API Key');return;}
+  localStorage.setItem('hy3_key',aiKey);
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+  addAIMessage('assistant','Key已保存！我是你的请柬AI，可以帮你写韩文/中文请柬文案、感谢语。');
+}
+async function sendAI(){
+  if(!aiKey){alert('请先保存API Key');return;}
+  const input=document.getElementById('aiInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  addAIMessage('user',msg);
+  input.value='';
+  aiHistory.push({role:'user',content:msg});
+  try{
+    const res=await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body:JSON.stringify({model:'hunyuan-pro',messages:aiHistory,stream:false})
+    });
+    const data=await res.json();
+    const reply=data.choices?.[0]?.message?.content||'AI响应失败';
+    aiHistory.push({role:'assistant',content:reply});
+    addAIMessage('assistant',reply);
+  }catch(e){addAIMessage('assistant','调用失败：'+e.message);}
+}
+function addAIMessage(role,content){
+  const chat=document.getElementById('aiChat');
+  const div=document.createElement('div');
+  div.className='ai-msg '+role;
+  div.textContent=content;
+  chat.appendChild(div);
+  chat.scrollTop=chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+}
+</script>
+</body>
+</html>

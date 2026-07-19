@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>收据扫描家庭账本</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">home</span><span class="tag">utility_bills</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">收据扫描家庭账本</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Receipt-OCR family household book that auto-logs expenses from photos</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本"家計簿"文化根基深厚，家庭单位电子账本需求突出。レシートスキャン下载约24万，拍照即自动识别金额项目。おカネレコ累计400万DL。痛点：日常细碎支出手动输入易漏。机会：照片/截图OCR自动记录家庭账本。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:0 0 6px">录入一笔支出（模拟"拍照识别"：填项目与金额即可），按分类汇总，支持家庭备注。</p>
+    <label>项目（如：蔬菜/牛奶）</label>
+    <input id="item" placeholder="例如：超市蔬菜">
+    <div class="row">
+      <div><label>金额</label><input id="amt" type="number" placeholder="0"></div>
+      <div><label>分类</label>
+        <select id="cat">
+          <option>食材</option><option>日用品</option><option>水电</option><option>交通</option><option>其他</option>
+        </select>
+      </div>
+    </div>
+    <label>店铺 / 拍照备注</label>
+    <input id="shop" placeholder="如：永旺 / 截图已存">
+    <button class="btn" onclick="add()">+ 添加收据</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+    <div class="collapse-header" onclick="toggleAI()">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody">
+      <div id="aiKeySection">
+        <label>Hy3 API Key（用户自带，零成本运营）</label>
+        <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+        <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">
+          使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+        </div>
+      </div>
+      <div id="aiChatSection" style="display:none">
+        <div id="aiChat"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+          <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://new.qq.com/rain/a/20251103A05YM200?refer=cp_1009" target="_blank" style="color:var(--coral)">レシートスキャン / おカネレコ</a>
+  </div>
+<script>
+const KEY="P10-20260719-002";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const item=document.getElementById('item').value.trim();
+  const amt=parseFloat(document.getElementById('amt').value);
+  if(!item||!(amt>0)){alert('请填写项目和金额');return;}
+  items.push({id:Date.now(),item,amt,cat:document.getElementById('cat').value,
+    shop:document.getElementById('shop').value.trim(),date:new Date().toLocaleDateString()});
+  document.getElementById('item').value="";document.getElementById('amt').value="";document.getElementById('shop').value="";
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function render(){
+  const list=document.getElementById('list');
+  if(!items.length){list.innerHTML='<b>🧾 收据清单</b><p style="font-size:13px;color:var(--muted)">暂无记录</p>';return;}
+  const catSum={};let total=0;
+  items.forEach(it=>{catSum[it.cat]=(catSum[it.cat]||0)+it.amt;total+=it.amt;});
+  let html='<b>🧾 收据清单（'+items.length+'张 · 合计¥'+total.toFixed(0)+'）</b><div style="font-size:13px;margin:6px 0">';
+  Object.keys(catSum).forEach(c=>{html+='<div style="display:flex;justify-content:space-between"><span>'+c+'</span><span>¥'+catSum[c].toFixed(0)+'</span></div>';});
+  html+='</div>';
+  items.slice().reverse().forEach(it=>{
+    html+='<div style="font-size:13px;border-bottom:1px dashed var(--line);padding:6px 0"><div style="display:flex;justify-content:space-between"><b>'+it.item+'</b><span>¥'+it.amt.toFixed(0)+' <a onclick="del('+it.id+')" style="color:var(--coral);cursor:pointer">✕</a></span></div><div style="color:var(--muted);font-size:12px">'+it.cat+' · '+(it.shop||'—')+' · '+it.date+'</div></div>';
+  });
+  list.innerHTML=html;
+}
+render();
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+function toggleAI(){ const body=document.getElementById('aiBody'); body.classList.toggle('collapsed'); }
+function saveKey(){
+  aiKey=document.getElementById('aiKey').value.trim();
+  if(!aiKey){alert('请输入API Key');return;}
+  localStorage.setItem('hy3_key',aiKey);
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+  addAIMessage('assistant','Key已保存！我可以帮你整理收据、分析家庭支出结构。');
+}
+async function sendAI(){
+  if(!aiKey){alert('请先保存API Key');return;}
+  const input=document.getElementById('aiInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  addAIMessage('user',msg); input.value='';
+  aiHistory.push({role:'user',content:msg});
+  try{
+    const res=await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body:JSON.stringify({model:'hunyuan-pro',messages:aiHistory,stream:false})
+    });
+    const data=await res.json();
+    const reply=data.choices?.[0]?.message?.content||'AI响应失败';
+    aiHistory.push({role:'assistant',content:reply});
+    addAIMessage('assistant',reply);
+  }catch(e){ addAIMessage('assistant','调用失败：'+e.message); }
+}
+function addAIMessage(role,content){
+  const chat=document.getElementById('aiChat');
+  const div=document.createElement('div');
+  div.className='ai-msg '+role; div.textContent=content;
+  chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+}
+</script>
+</body>
+</html>

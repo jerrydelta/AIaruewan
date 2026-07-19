@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>戒酒助手 · 渴求+情绪+报告</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.big{font-size:26px;font-weight:700;color:var(--coral)}
+.muted{color:var(--muted);font-size:13px}
+.del{color:var(--coral);font-size:12px;cursor:pointer;float:right}
+.chip{display:inline-block;padding:6px 10px;border:1px solid var(--line);border-radius:999px;font-size:13px;margin:3px;cursor:pointer}
+.chip.on{background:var(--coral);color:#fff;border-color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">addiction_recovery</span><span class="tag">quit_drinking</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">戒酒助手 · 渴求 + 情绪 + 报告</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Localized alcohol-intervention (craving + mood + report)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">中国研究指出戒酒三大本土痛点：强烈渴求、环境影响、情绪状态——与西方 AA 模式不同。本工具做"渴求强度 + 情绪标签 + 应对方式"记录，并能一键生成可分享的戒酒报告。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>渴求强度（1-10）</label>
+    <input type="range" id="craving" min="1" max="10" value="6" oninput="document.getElementById('cv').textContent=this.value">
+    <div style="text-align:center" class="big"><span id="cv">6</span></div>
+    <label>此刻情绪（可多选）</label>
+    <div id="moods">
+      <span class="chip" data-v="焦虑">焦虑</span><span class="chip" data-v="孤独">孤独</span>
+      <span class="chip" data-v="压力">压力</span><span class="chip" data-v="无聊">无聊</span>
+      <span class="chip" data-v="开心">开心</span><span class="chip" data-v="愤怒">愤怒</span>
+    </div>
+    <label>触发场景</label>
+    <input id="trigger" placeholder="如 同事聚餐 / 深夜刷手机">
+    <label>我怎么应对的</label>
+    <textarea id="cope" rows="2" placeholder="如 喝了杯水+做了10个深呼吸"></textarea>
+    <button class="btn" onclick="addLog()">记录这次渴求</button>
+    <button class="btn" onclick="genReport()" style="background:var(--ok)">📤 生成可分享报告</button>
+    <textarea id="report" rows="5" style="margin-top:8px;display:none" readonly></textarea>
+  </div>
+
+  <div class="card" id="list"><b>📊 渴求记录</b><div id="listBody" style="margin-top:8px"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://xuebao.sjtu.edu.cn/sjtu_en/CN/10.1007/s12204-023-2685-9" target="_blank" style="color:var(--coral)">上海交大戒酒本土化研究</a>
+  </div>
+
+<script>
+const KEY="P14-20260719-004";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"logs":[]}');
+let selMoods=[];
+document.querySelectorAll('#moods .chip').forEach(c=>c.onclick=()=>{
+  c.classList.toggle('on');const v=c.dataset.v;
+  selMoods.includes(v)?selMoods=selMoods.filter(x=>x!==v):selMoods.push(v);
+});
+function addLog(){
+  const rec={date:new Date().toLocaleString('zh-CN'),craving:+document.getElementById('craving').value,
+    moods:[...selMoods],trigger:document.getElementById('trigger').value.trim(),cope:document.getElementById('cope').value.trim()};
+  data.logs.push(rec);selMoods=[];document.querySelectorAll('#moods .chip').forEach(c=>c.classList.remove('on'));
+  document.getElementById('trigger').value='';document.getElementById('cope').value='';
+  save();
+}
+function genReport(){
+  if(!data.logs.length){alert("还没有记录");return;}
+  const n=data.logs.length;
+  const avg=(data.logs.reduce((s,l)=>s+l.craving,0)/n).toFixed(1);
+  const allMoods={};data.logs.forEach(l=>l.moods.forEach(m=>allMoods[m]=(allMoods[m]||0)+1));
+  const top=Object.entries(allMoods).sort((a,b)=>b[1]-a[1])[0];
+  const txt=`【我的戒酒周报】\n共记录 ${n} 次渴求，平均强度 ${avg}/10。\n最常出现的情绪：${top?top[0]+'('+top[1]+'次)':'—'}。\n我已开始觉察自己的触发点，并练习用健康方式应对。\n#戒酒 #清醒生活`;
+  const r=document.getElementById('report');r.style.display='block';r.value=txt;r.select();
+}
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(data));render();
+}
+function render(){
+  const body=document.getElementById('listBody');
+  if(!data.logs.length){body.innerHTML='<div class="muted">暂无记录</div>';return;}
+  body.innerHTML=data.logs.slice().reverse().map((l,i)=>
+    '<div style="padding:6px 0;border-bottom:1px solid var(--line)">'+l.date+
+    ' · 渴求'+l.craving+'/10'+(l.moods.length?' · '+l.moods.join('/'):'')+
+    (l.trigger?'<div class="muted" style="font-size:12px">触发：'+l.trigger+'</div>':'')+
+    ' <span class="del" onclick="del('+i+')">删除</span></div>').join('');
+}
+function del(i){data.logs.splice(i,1);save();}
+save();
+</script>
+</body>
+</html>

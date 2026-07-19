@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>API 文档生成器</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">api_manager</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">API 文档生成器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Lightweight API doc-auto-gen + limited public portal for solo teams.</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">API First 开发成为主流。Apidog 提供"设计→Mock→测试→文档"一体化，日本开发团队导入增多Zuplo 以 API 网关+文档生成对个人开发者也很友好。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>接口名称</label><input id="d_name" placeholder="如 创建订单">
+<label>路径 / 方法</label><div class="row"><input id="d_path" placeholder="/orders"><select id="d_method"><option>POST</option><option>GET</option><option>PUT</option><option>DELETE</option></select></div>
+<label>参数（JSON，如 {"id":"number"}）</label><textarea id="d_params" rows="3" placeholder='{"page":"number","size":"number"}'></textarea>
+<label>说明</label><input id="d_desc" placeholder="接口用途简述">
+<button class="btn" onclick="addItem()">📝 生成并保存文档</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apidog.com" target="_blank" style="color:var(--coral)">Apidog / Zuplo / Postman / Swagger</a>
+  </div>
+
+<script>
+
+const KEY="P16-20260719-005";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addItem(){
+  const name=document.getElementById('d_name').value.trim();
+  const path=document.getElementById('d_path').value.trim();
+  const method=document.getElementById('d_method').value;
+  const params=document.getElementById('d_params').value.trim();
+  const desc=document.getElementById('d_desc').value.trim();
+  if(!name){alert('请填写接口名称');return;}
+  let pobj={};
+  try{ if(params) pobj=JSON.parse(params); }catch(e){alert('参数 JSON 有误');return;}
+  const md='## '+name+'\n\n'+(desc?desc+'\n\n':'')+'**'+method+'** `'+path+'`\n\n**参数**\n```json\n'+JSON.stringify(pobj,null,2)+'\n```\n';
+  items.push({name,method,path,params:pobj,desc,md,added:new Date().toLocaleString()});
+  save();
+  document.getElementById('d_name').value='';document.getElementById('d_path').value='';document.getElementById('d_params').value='';document.getElementById('d_desc').value='';
+}
+function copyMd(i){ prompt('复制 Markdown：',items[i].md); }
+function del(i){items.splice(i,1);save();}
+function render(){
+  const el=document.getElementById('list');
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">暂无文档</p>';return;}
+  el.innerHTML='<b>📘 文档库（'+items.length+'）</b>'+items.map((it,idx)=>
+    '<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px">'+
+    '<div style="font-weight:600">'+esc(it.name)+' <span class="tag">'+esc(it.method)+'</span></div>'+
+    '<div style="font-size:12px;color:var(--muted)">'+esc(it.path)+'</div>'+
+    (it.desc?'<div style="font-size:12px;color:#555;margin-top:4px">'+esc(it.desc)+'</div>':'')+
+    '<div class="row" style="margin-top:6px"><button class="btn" style="background:var(--ok);margin:0 4px 0 0" onclick="copyMd('+idx+')">复制 MD</button>'+
+    '<button class="btn" style="background:#fff;color:var(--coral);border:1px solid var(--line);margin:0" onclick="del('+idx+')">删除</button></div>'+
+    '</div>'
+  ).join('');
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+render();
+</script>
+</body>
+</html>

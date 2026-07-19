@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>DIY留学进度追踪</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;
+  --ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;
+  --card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.mini{display:inline-block;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer;margin:3px 4px 0 0}
+.mini.warn{background:var(--coral);color:#fff;border-color:var(--coral)}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600;font-size:15px}.item .meta{font-size:12px;color:var(--muted);margin:4px 0}
+.s-green{background:#F0FBF6;color:var(--ok);border:1px solid #CDEFE0;border-radius:999px;padding:1px 8px;font-size:11px}
+.s-blue{background:#EAF3FF;color:#3B82F6;border:1px solid #CFE2FF;border-radius:999px;padding:1px 8px;font-size:11px}
+.s-amber{background:#FFF6E5;color:#E8A33D;border:1px solid #FFE3B0;border-radius:999px;padding:1px 8px;font-size:11px}
+.s-red{background:#FFEFEF;color:var(--coral);border:1px solid #FFD9D9;border-radius:999px;padding:1px 8px;font-size:11px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">student</span><span class="tag">study_abroad_tracker</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">DIY留学进度追踪</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">DIY study-abroad progress tracker + offer comparison + visa checklist</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">多国联申（英美澳加新港）成主流，痛点："申请黑箱"——机构以内部系统为由拒绝共享申请邮箱，学生只能听口头汇报、无法核实材料是否按时送达。指南者留学覆盖312所名校；51offer进度看板颜色编码（绿=待操作/蓝=院校处理/金=录取）。DIY申请人群需要自主掌控全流程的轻量工具。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 多校申请看板 + offer对比 + 签证清单</b>
+    <label>申请学校</label><input id="f_sch" placeholder="如：University of XXX">
+    <label>专业</label><input id="f_major" placeholder="如：MSc CS">
+    <div class="row">
+      <div><label>状态</label>
+        <select id="f_st"><option value="green">待操作</option><option value="blue">院校处理中</option><option value="amber">已录取</option><option value="red">已拒</option></select></div>
+      <div><label>截止日</label><input id="f_due" type="date"></div>
+    </div>
+    <button class="btn" onclick="addApp()">添加申请</button>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <b style="font-size:14px">🎓 Offer 对比</b>
+    <div class="row" style="margin-top:6px">
+      <div><input id="o_sch" placeholder="学校"></div>
+      <div><input id="o_amt" type="number" placeholder="奖学金/年(元)"></div>
+    </div>
+    <button class="btn" onclick="addOffer()" style="background:var(--ok)">加入对比</button>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <b style="font-size:14px">📋 签证材料清单</b>
+    <div id="visa" style="font-size:13px;margin-top:6px"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📊 申请进度</b><div id="stat" style="font-size:12px;color:var(--muted);margin:6px 0"></div>
+    <div id="apps"></div>
+    <b style="font-size:14px;display:block;margin-top:12px">Offer 并排对比</b>
+    <div id="offers"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://m.onlinedown.net/soft/10075815.htm" target="_blank" style="color:var(--coral)">指南者留学 / 51offer / 留学邦</a>
+  </div>
+
+<script>
+const KEY="P12-20260719-006";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"apps":[],"offers":[]}');
+const VISA=["护照","录取通知书","资金证明","体检/疫苗","无犯罪证明","照片","签证申请表","SEVIS/签证费"];
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+const STMAP={green:["s-green","待操作"],blue:["s-blue","院校处理中"],amber:["s-amber","已录取"],red:["s-red","已拒"]};
+function addApp(){
+  const sch=f_sch.value.trim(),major=f_major.value.trim();if(!sch){alert("请填学校");return;}
+  data.apps.unshift({id:Date.now(),sch,major,st:f_st.value,due:f_due.value});
+  f_sch.value=f_major.value=f_due.value="";save();
+}
+function addOffer(){
+  const sch=o_sch.value.trim();if(!sch){alert("请填学校");return;}
+  data.offers.unshift({id:Date.now(),sch,amt:+o_amt.value||0});
+  o_sch.value=o_amt.value="";save();
+}
+function delApp(id){data.apps=data.apps.filter(x=>x.id!==id);save();}
+function delOffer(id){data.offers=data.offers.filter(x=>x.id!==id);save();}
+function dday(due){if(!due)return"";const diff=Math.ceil((new Date(due)-new Date())/86400000);return diff>=0?`D-${diff}`:`逾期${-diff}天`;}
+function render(){
+  const a=data.apps,got=a.filter(x=>x.st==="amber").length;
+  stat.innerHTML=`在申 ${a.length} · 已录 <b class="h-coral">${got}</b> · 最佳offer ${data.offers.length?Math.max(...data.offers.map(o=>o.amt)):0}元/年`;
+  document.getElementById("apps").innerHTML=a.length?a.map(x=>{
+    const s=STMAP[x.st];
+    return `<div class="item"><div class="t">${esc(x.sch)} <span class="${s[0]}">${s[1]}</span></div>
+    <div class="meta">${esc(x.major)||"未填专业"} ${x.due?('· '+x.due+' '+dday(x.due)):''} <span class="mini warn" onclick="delApp(${x.id})">删</span></div></div>`;
+  }).join(""):'<p style="font-size:13px;color:var(--muted)">暂无申请。</p>';
+  document.getElementById("offers").innerHTML=data.offers.length?data.offers.map(o=>
+    `<div class="item"><div class="t">${esc(o.sch)}</div><div class="meta">奖学金/年：¥${o.amt} <span class="mini warn" onclick="delOffer(${o.id})">删</span></div></div>`).join("")
+    :'<p style="font-size:13px;color:var(--muted)">加入offer自动并排对比。</p>';
+  document.getElementById("visa").innerHTML=VISA.map(v=>`<div style="margin:4px 0">☐ ${v}</div>`).join("");
+}
+render();
+</script>
+</body>
+</html>

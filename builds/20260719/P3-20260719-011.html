@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>低FODMAP肠易激食谱规划</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.light{padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600}
+.g{background:#E8F8F0;color:var(--ok)}.a{background:#FFF6E5;color:#C98A00}.r{background:#FFECEC;color:#E85555}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">food</span><span class="tag">diet_meal_plan</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">低FODMAP肠易激食谱规划</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Low-FODMAP IBS meal planner with symptom diary</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">低FODMAP饮食服务IBS患者（约1/7成人，约75%症状缓解）。官方Monash应用在50+国家医疗榜第一，2025年9月推出日文版，证明日本潜在需求。用户抱怨价格（$7.99）、筛选bug、缺少「能吃什么」视图。更便宜、体验更好的低FODMAP规划器+条码扫描是明确缺口。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>食物 / 食品</label>
+    <input id="fName" placeholder="如：香蕉 / 燕麦">
+    <label>信号灯（红=高FODMAP，黄=适量，绿=安全）</label>
+    <select id="fLight"><option value="g">🟢 绿 安全</option><option value="a">🟡 黄 适量</option><option value="r">🔴 红 避免</option></select>
+    <button class="btn" onclick="addFood()">＋ 加入食物库</button>
+  </div>
+
+  <div class="card">
+    <b>📓 症状日记</b>
+    <label>今天吃了什么</label>
+    <input id="sEat" placeholder="如：燕麦+蓝莓">
+    <label>症状程度（0无 → 5严重）</label>
+    <input id="sLevel" type="range" min="0" max="5" value="0">
+    <button class="btn" onclick="logSym()">＋ 记录今天</button>
+  </div>
+
+  <div class="card" id="list"><b>🍽 食物库 & 日记</b>
+    <div id="foods" style="margin-bottom:8px"></div>
+    <div id="syms"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/us/app/monash-fodmap-diet/id586149216" target="_blank" style="color:var(--coral)">Monash FODMAP · Phase · Casa de Sante</a>
+  </div>
+
+<script>
+const KEY="P3-20260719-011";
+let foods=JSON.parse(localStorage.getItem(KEY+"_f")||"[]");
+let syms=JSON.parse(localStorage.getItem(KEY+"_s")||"[]");
+const MAP={g:['g','🟢 安全'],a:['a','🟡 适量'],r:['r','🔴 避免']};
+function addFood(){
+  const n=document.getElementById('fName').value.trim();
+  if(!n){alert('请输入食物');return;}
+  foods.push({id:Date.now(),name:n,light:document.getElementById('fLight').value});
+  document.getElementById('fName').value='';save();
+}
+function logSym(){
+  const eat=document.getElementById('sEat').value.trim();
+  if(!eat){alert('请填写吃了什么');return;}
+  syms.push({id:Date.now(),date:new Date().toLocaleDateString(),eat,lvl:+document.getElementById('sLevel').value});
+  document.getElementById('sEat').value='';document.getElementById('sLevel').value=0;save();
+}
+function render(){
+  document.getElementById('foods').innerHTML='<b style="font-size:13px">食物库</b>'+(foods.length?foods.map(f=>{
+    const[l,t]=MAP[f.light];
+    return `<div class="item"><span>${f.name}</span><span class="light ${l}">${t}</span></div>`;
+  }).join(''):'<p style="color:var(--muted);font-size:13px">空</p>');
+  document.getElementById('syms').innerHTML='<b style="font-size:13px">症状日记</b>'+(syms.length?[...syms].reverse().map(s=>
+    `<div class="item"><span>${s.date} · ${s.eat}</span><span>症状 ${'●'.repeat(s.lvl)||'○'}</span></div>`).join(''):'<p style="color:var(--muted);font-size:13px">空</p>');
+}
+function del(id){foods=foods.filter(f=>f.id!=id);syms=syms.filter(s=>s.id!=id);save();}
+function save(){localStorage.setItem(KEY+"_f",JSON.stringify(foods));localStorage.setItem(KEY+"_s",JSON.stringify(syms));render();}
+render();
+</script>
+</body>
+</html>

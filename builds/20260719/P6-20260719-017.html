@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>胶片摄影按卷归档</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.s{width:auto;display:inline-block;padding:8px 12px;margin:4px 4px 0 0;font-size:13px}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">hobby</span><span class="tag">photography</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">胶片摄影 · 按卷归档</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Film database: roll-based archive, EXIF, dev notes (local)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">数码时代，"拍这张时的参数和情境"很容易丢失。一卷一卷地归档胶卷，记录每帧的光圈快门焦距，冲扫完还能生成单据，全部本地保存。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 新卷</b>
+    <label>胶卷型号</label><input id="stock" placeholder="如：Kodak Portra 400">
+    <div class="row">
+      <div><label>ISO</label><input id="iso" type="number" value="400"></div>
+      <div><label>帧数</label><input id="frames" type="number" value="36"></div>
+    </div>
+    <button class="btn" onclick="addRoll()">开新卷</button>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 记一帧</b>
+    <select id="rollSel"></select>
+    <div class="row">
+      <div><label>光圈</label><input id="ap" placeholder="f/2.8"></div>
+      <div><label>快门</label><input id="ss" placeholder="1/125"></div>
+      <div><label>焦距</label><input id="fl" placeholder="50mm"></div>
+    </div>
+    <label>地点/备注</label><input id="note" placeholder="如：公园午后">
+    <button class="btn" onclick="addFrame()">记录这一帧</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/app/filmer/id6758050284" target="_blank" style="color:var(--coral)">Filmer</a>
+  </div>
+<script>
+const KEY="P6-20260719-017";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"rolls":[]}');
+function addRoll(){
+  const stock=document.getElementById('stock').value.trim();
+  if(!stock){alert('填型号');return;}
+  data.rolls.unshift({stock,iso:+document.getElementById('iso').value||400,frames:+document.getElementById('frames').value||36,framesLog:[],id:Date.now()});
+  document.getElementById('stock').value='';save();
+}
+function addFrame(){
+  const rid=+document.getElementById('rollSel').value;
+  const roll=data.rolls.find(r=>r.id===rid);if(!roll)return;
+  if(roll.framesLog.length>=roll.frames){alert('这卷已拍满');return;}
+  roll.framesLog.push({n:roll.framesLog.length+1,ap:document.getElementById('ap').value.trim(),
+    ss:document.getElementById('ss').value.trim(),fl:document.getElementById('fl').value.trim(),note:document.getElementById('note').value.trim()});
+  document.getElementById('note').value='';save();
+}
+function delRoll(id){data.rolls=data.rolls.filter(x=>x.id!==id);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function render(){
+  document.getElementById('rollSel').innerHTML=data.rolls.map(r=>'<option value="'+r.id+'">'+esc(r.stock)+'（'+r.framesLog.length+'/'+r.frames+'）</option>').join('');
+  const el=document.getElementById('list');
+  if(!data.rolls.length){el.innerHTML='<b>🎞 我的胶卷</b><p style="font-size:13px;color:#999">还没有开卷。</p>';return;}
+  el.innerHTML='<b>🎞 我的胶卷 '+data.rolls.length+' 卷</b>'+data.rolls.map(r=>{
+    const done=r.framesLog.length>=r.frames;
+    return '<div style="border-top:1px solid var(--line);padding:8px 0">'+
+      '<div style="font-weight:600">'+esc(r.stock)+' · ISO'+r.iso+(done?' <span style="color:var(--ok)">✓拍满</span>':'')+'</div>'+
+      '<div style="font-size:13px;color:#555">已拍 '+r.framesLog.length+'/'+r.frames+' 帧</div>'+
+      r.framesLog.slice(-3).map(f=>'<div style="font-size:12px;color:#777">#'+f.n+' '+f.ap+' '+f.ss+' '+f.fl+(f.note?' · '+esc(f.note):'')+'</div>').join('')+
+      '<button class="btn s" style="background:#bbb" onclick="delRoll('+r.id+')">删卷</button></div>';
+  }).join('');
+}
+function esc(s){return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+render();
+</script>
+</body>
+</html>

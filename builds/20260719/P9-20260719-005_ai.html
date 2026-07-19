@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>多份兼职并行计时工资记账 + 欠薪提醒（AI版）</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.small{font-size:12px;color:var(--muted)}
+.stat{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.stat b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;text-decoration:underline}
+.item{font-size:13px;padding:8px 0;border-bottom:1px solid var(--line)}
+.warn{background:#FFEFEF;border:1px solid #FFC9C9;border-radius:10px;padding:10px;font-size:13px;margin-top:8px}
+.ok{color:var(--ok)}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">gig_economy</span><span class="tag">shift_mgmt</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">多份兼职并行计时工资记账 + 欠薪提醒</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Multi-part-time timesheet wage tracker with unpaid-wage alerts</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">中国兼职/日结人群庞大，"按小时/按天记工时算工资"是高频刚需。已有轻量记账 App，但普遍缺"多份兼职并行 + 老板对账 + 欠薪提醒"。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 记一笔工时</b>
+    <label>兼职名称</label>
+    <input type="text" id="job" placeholder="如 便利店夜班">
+    <div class="row">
+      <div><label>工时(小时)</label><input type="number" id="hours" placeholder="8"></div>
+      <div><label>时薪(元)</label><input type="number" id="rate" placeholder="22"></div>
+    </div>
+    <div class="row">
+      <div><label>工作日期</label><input type="date" id="date"></div>
+      <div><label>预计发薪日</label><input type="date" id="payday"></div>
+    </div>
+    <label>状态</label>
+    <select id="status"><option value="unpaid">未结清</option><option value="paid">已结清</option></select>
+    <button class="btn" onclick="add()">记账</button>
+    <div class="small" style="margin-top:8px">工资 = 工时 × 时薪；预计发薪日过期仍未结清将触发欠薪提醒。</div>
+  </div>
+
+  <div class="card">
+    <b>📊 汇总</b>
+    <div id="summary"></div>
+    <div id="alert"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+    <div class="collapse-header" onclick="toggleAI()">🤖 AI 助手（用户自带Key · 零成本）</div>
+    <div class="collapse-body collapsed" id="aiBody">
+      <div id="aiKeySection">
+        <label>Hy3 API Key（用户自带，零成本运营）</label>
+        <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+        <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。</div>
+      </div>
+      <div id="aiChatSection" style="display:none">
+        <div id="aiChat"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="aiInput" placeholder="问AI：被欠薪怎么合法维权？" style="flex:1">
+          <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/search?term=%E6%AF%8F%E6%97%A5%E8%AE%B0%E5%B7%A5%E8%B5%84" target="_blank" style="color:var(--coral)">创薪工时宝 / 每日记工资 / 精准工资记录助手</a>
+  </div>
+
+<script>
+const KEY="P9-20260719-005";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function today(){return new Date().toISOString().slice(0,10);}
+function add(){
+  const job=document.getElementById("job").value.trim()||"兼职";
+  const hours=parseFloat(document.getElementById("hours").value)||0;
+  const rate=parseFloat(document.getElementById("rate").value)||0;
+  const date=document.getElementById("date").value||today();
+  const payday=document.getElementById("payday").value||"";
+  const status=document.getElementById("status").value;
+  const wage=hours*rate;
+  items.unshift({job,hours,rate,date,payday,status,wage,id:Date.now()});
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function toggle(id){
+  const x=items.find(i=>i.id===id); if(x){x.status=x.status==='paid'?'unpaid':'paid';save();}
+}
+function render(){
+  const totalWage=items.reduce((s,x)=>s+x.wage,0);
+  const unpaid=items.filter(x=>x.status==='unpaid');
+  const unpaidSum=unpaid.reduce((s,x)=>s+x.wage,0);
+  const t=today();
+  const overdue=unpaid.filter(x=>x.payday && x.payday<t);
+  const byJob={};
+  items.forEach(x=>byJob[x.job]=(byJob[x.job]||0)+x.wage);
+  const sum=document.getElementById("summary");
+  sum.innerHTML='<div class="stat"><span>工资合计</span><b>'+totalWage.toLocaleString()+' 元</b></div>'+
+    '<div class="stat"><span>未结清</span><span>'+unpaidSum.toLocaleString()+' 元（'+unpaid.length+'笔）</span></div>'+
+    Object.keys(byJob).map(j=>'<div class="stat"><span>'+j+'</span><span>'+byJob[j].toLocaleString()+' 元</span></div>').join("");
+  const al=document.getElementById("alert");
+  al.innerHTML=overdue.length?'<div class="warn">⚠️ 欠薪预警：'+overdue.length+' 笔已过发薪日未结清，合计 '+overdue.reduce((s,x)=>s+x.wage,0).toLocaleString()+' 元。请催老板对账！</div>':'<div class="small ok">✅ 暂无逾期欠薪</div>';
+  const list=document.getElementById("list");
+  list.innerHTML='<b>📋 工时记录（'+items.length+'）</b>'+
+    (items.length?items.map(x=>'<div class="item"><div style="display:flex;justify-content:space-between"><b>'+x.job+'</b><span class="del" onclick="del('+x.id+')">删除</span></div><div class="small">'+x.date+' · '+x.hours+'h×'+x.rate+' = <b>'+x.wage.toLocaleString()+'</b> 元 · 发薪 '+x.payday+' <span class="'+(x.status==='paid'?'ok':'h-coral')+'" onclick="toggle('+x.id+')">['+(x.status==='paid'?'已结 ✓':'未结 · 点此结清')+']</span></div></div>').join(""):'<p class="small">暂无记录</p>');
+}
+render();
+
+let aiKey=localStorage.getItem('hy3_key')||'';
+let aiHistory=[];
+function toggleAI(){document.getElementById('aiBody').classList.toggle('collapsed');}
+function saveKey(){
+  aiKey=document.getElementById('aiKey').value.trim();
+  if(!aiKey){alert('请输入API Key');return;}
+  localStorage.setItem('hy3_key',aiKey);
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+  addAIMessage('assistant','Key已保存！我是你的AI助手，可帮你起草催薪话术、了解维权途径。');
+}
+async function sendAI(){
+  if(!aiKey){alert('请先保存API Key');return;}
+  const input=document.getElementById('aiInput');
+  const msg=input.value.trim(); if(!msg)return;
+  addAIMessage('user',msg); input.value='';
+  aiHistory.push({role:'user',content:msg});
+  try{
+    const res=await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body:JSON.stringify({model:'hunyuan-pro',messages:aiHistory,stream:false})});
+    const data=await res.json();
+    const reply=data.choices?.[0]?.message?.content||'AI响应失败';
+    aiHistory.push({role:'assistant',content:reply});
+    addAIMessage('assistant',reply);
+  }catch(e){addAIMessage('assistant','调用失败：'+e.message);}
+}
+function addAIMessage(role,content){
+  const chat=document.getElementById('aiChat');
+  const div=document.createElement('div');
+  div.className='ai-msg '+role; div.textContent=content;
+  chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+}
+</script>
+</body>
+</html>

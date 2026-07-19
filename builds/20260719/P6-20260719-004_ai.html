@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>宝宝记录+成长曲线（中文版）</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.ai-card .collapse-body.collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">parenting</span><span class="tag">newborn_record</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">宝宝记录 + 成长曲线（中文透明版）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Localized baby-tracker with clear pricing & growth curve</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">海外育儿记录 App 进中国常"年费太贵""想要中文版"。本工具把喂养/睡眠/尿布记录 + 成长曲线全部本地化、零订阅费，数据只存你手机，价格透明。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 日常记录</b>
+    <div class="row">
+      <button class="btn" style="margin:8px 4px 0 0" onclick="log('feed')">🍼 喂奶</button>
+      <button class="btn" style="margin:8px 4px 0 0" onclick="log('sleep')">😴 睡眠</button>
+      <button class="btn" style="margin:8px 4px 0 0" onclick="log('diaper')">💧 尿布</button>
+    </div>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 成长曲线</b>
+    <div class="row">
+      <div><label>日期</label><input id="gd" type="date"></div>
+      <div><label>体重(kg)</label><input id="gw" type="number" step="0.01" placeholder="6.8"></div>
+      <div><label>身高(cm)</label><input id="gh" type="number" step="0.1" placeholder="65"></div>
+    </div>
+    <button class="btn" onclick="addGrowth()">记录生长点</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+  <div class="collapse-header" onclick="toggleAI()">
+    🤖 AI 助手（用户自带Key · 零成本）
+  </div>
+  <div class="collapse-body collapsed" id="aiBody">
+    <div id="aiKeySection">
+      <label>Hy3 API Key（用户自带，零成本运营）</label>
+      <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+      <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">
+        使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+      </div>
+    </div>
+    <div id="aiChatSection" style="display:none">
+      <div id="aiChat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+        <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/app/%E5%AE%9D%E5%AE%9D%E7%94%9F%E6%B4%BB%E8%AE%B0%E5%BD%95-%E5%85%B1%E4%B9%90%E5%AD%95/id1077177456" target="_blank" style="color:var(--coral)">Glow Baby(共乐孕)</a>
+  </div>
+<script>
+const KEY="P6-20260719-004";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"logs":[],"growth":[]}');
+function log(t){data.logs.unshift({t,time:new Date().toLocaleString('zh-CN'),id:Date.now()});save();}
+function addGrowth(){
+  const d=document.getElementById('gd').value, w=document.getElementById('gw').value, h=document.getElementById('gh').value;
+  if(!d){alert('选日期');return;}
+  data.growth.push({d,w:w?+w:null,h:h?+h:null,id:Date.now()});
+  data.growth.sort((a,b)=>a.d<b.d?-1:1);
+  document.getElementById('gd').value='';document.getElementById('gw').value='';document.getElementById('gh').value='';save();
+}
+function delG(id){data.growth=data.growth.filter(x=>x.id!==id);save();}
+function delL(id){data.logs=data.logs.filter(x=>x.id!==id);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function render(){
+  const c={feed:'🍼 喂奶',sleep:'😴 睡眠',diaper:'💧 尿布'};
+  let html='<b>📋 日常 '+data.logs.length+' 条</b>';
+  html+=data.logs.slice(0,6).map(x=>'<div style="border-top:1px solid var(--line);padding:6px 0;font-size:13px">'+c[x.t]+' <span style="font-size:11px;color:#999">'+x.time+'</span> <button onclick="delL('+x.id+')" style="background:none;border:none;color:#bbb;font-size:11px;cursor:pointer">删</button></div>').join('')||'<p style="font-size:13px;color:#999">暂无</p>';
+  html+='<hr style="border:none;border-top:1px dashed var(--line);margin:10px 0"><b>📈 生长点 '+data.growth.length+' 个</b>';
+  if(data.growth.length){
+    const ws=data.growth.filter(x=>x.w).map(x=>x.w), hs=data.growth.filter(x=>x.h).map(x=>x.h);
+    html+='<div style="font-size:13px;color:#555">体重范围 '+Math.min(...ws)+'~'+Math.max(...ws)+'kg ｜ 身高范围 '+Math.min(...hs)+'~'+Math.max(...hs)+'cm</div>';
+  }
+  html+=data.growth.map(x=>'<div style="border-top:1px solid var(--line);padding:5px 0;font-size:13px">'+x.d+' ｜ 体重 '+(x.w||'—')+'kg ｜ 身高 '+(x.h||'—')+'cm <button onclick="delG('+x.id+')" style="background:none;border:none;color:#bbb;font-size:11px;cursor:pointer">删</button></div>').join('')||'<p style="font-size:13px;color:#999">暂无</p>';
+  document.getElementById('list').innerHTML=html;
+}
+render();
+
+// ===== AI助手模块（用户自带Key · 零成本） =====
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({
+        model:'hunyuan-pro',
+        messages:aiHistory,
+        stream: false
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// 初始化AI模块
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+// ===== AI助手模块结束 =====
+</script>
+</body>
+</html>

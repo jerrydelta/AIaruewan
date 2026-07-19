@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>毛线布料库存</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.s{width:auto;display:inline-block;padding:8px 12px;margin:4px 4px 0 0;font-size:13px}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">hobby</span><span class="tag">handicraft_diy</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">毛线 / 布料库存</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Yarn/fabric inventory with auto remaining calc</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">手工爱好者最烦"材料散乱、重复买、剩多少不知道"。给每团线/每匹布建档，自动算剩余用量与单价，买之前先查库存。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 入库</b>
+    <label>名称</label><input id="mname" placeholder="如：羊毛线 驼色">
+    <div class="row">
+      <div><label>材质</label><input id="mat" placeholder="羊毛"></div>
+      <div><label>颜色</label><input id="col" placeholder="驼色"></div>
+    </div>
+    <div class="row">
+      <div><label>总长度(m)</label><input id="len" type="number" value="0"></div>
+      <div><label>单价(¥)</label><input id="price" type="number" value="0"></div>
+    </div>
+    <button class="btn" onclick="add()">入库</button>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 扣减用量</b>
+    <select id="useSel"></select>
+    <div class="row">
+      <div><label>用了(m)</label><input id="used" type="number" value="0"></div>
+      <button class="btn s" onclick="use()">扣减</button>
+    </div>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/app/%E7%BC%96%E7%BB%87%E5%8A%A9%E6%89%8B/id6744092783" target="_blank" style="color:var(--coral)">編織助手</a>
+  </div>
+<script>
+const KEY="P6-20260719-013";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const mname=document.getElementById('mname').value.trim();
+  if(!mname){alert('填名称');return;}
+  items.push({mname,mat:document.getElementById('mat').value.trim(),col:document.getElementById('col').value.trim(),
+    len:+document.getElementById('len').value||0,used:0,price:+document.getElementById('price').value||0,id:Date.now()});
+  ['mname','mat','col','len','price'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('len').value='0';document.getElementById('price').value='0';save();
+}
+function use(){
+  const id=+document.getElementById('useSel').value;const u=+document.getElementById('used').value||0;
+  const it=items.find(x=>x.id===id);if(!it)return;
+  it.used=Math.min(it.len,it.used+u);save();
+}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const sel=document.getElementById('useSel');
+  sel.innerHTML=items.map(x=>'<option value="'+x.id+'">'+esc(x.mname)+'（剩'+(x.len-x.used)+'m）</option>').join('');
+  const el=document.getElementById('list');
+  if(!items.length){el.innerHTML='<b>🧶 库存</b><p style="font-size:13px;color:#999">还没有材料。</p>';return;}
+  el.innerHTML='<b>🧶 库存 '+items.length+' 项</b>'+items.map(x=>{
+    const left=x.len-x.used;const dup=items.filter(o=>o.mname===x.mname&&o.col===x.col&&o.id!==x.id).length;
+    const unit=x.len?('¥'+(x.price/x.len).toFixed(2)+'/m'):'';
+    return '<div style="border-top:1px solid var(--line);padding:8px 0">'+
+      '<div style="font-weight:600">'+esc(x.mname)+(dup?' <span style="color:#E85555;font-size:11px">⚠疑似重复</span>':'')+'</div>'+
+      '<div style="font-size:13px;color:#555">'+[x.mat,x.col].filter(Boolean).join(' · ')+' ｜ 剩 '+left+'/'+x.len+'m ｜ '+unit+'</div>'+
+      '<button class="btn s" style="background:#bbb" onclick="del('+x.id+')">删除</button></div>';
+  }).join('');
+}
+function esc(s){return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI英语单词暗记（发音+例文自动）韩国</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.ok{background:var(--ok)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.small{font-size:12px;color:var(--muted)}
+.word{font-size:30px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="card">
+  <div><span class="tag">education</span><span class="tag">vocabulary_memory</span></div>
+  <h1 style="font-size:20px;margin:8px 0 4px">AI 英语单词暗记（发音＋例句）</h1>
+  <p class="h-coral" style="font-size:13px;margin:0">AI English vocabulary memorization (pronunciation + auto examples)</p>
+</div>
+<div class="card">
+  <b>💡 痛点</b>
+  <p style="font-size:14px;color:#555;margin:6px 0 0">韩国 수능 英语单词记忆需求大，암카 用 Leitner 法提升效率。但「AI 发音判定＋例句自动抽取＋个人化出题」仍不足。</p>
+</div>
+<div class="card">
+  <b>🛠 工具 · 英语单词卡</b>
+  <div id="card"></div>
+</div>
+<div class="card" id="list"></div>
+<div class="card" style="font-size:12px;color:var(--muted)">
+  <b>来源参考</b><br>
+  <a href="https://apps.apple.com/cn/app/id6746261486" target="_blank" style="color:var(--coral)">암카수능영단어2025（Leitner 学习法）</a>
+</div>
+<script>
+const KEY="P8-20260719-009";
+const WORDS=[
+ {w:"analyze",m:"分析",e:"We analyze the data."},
+ {w:"benefit",m:"利益；受益",e:"It benefits everyone."},
+ {w:"consider",m:"考虑",e:"Consider the options."},
+ {w:"demonstrate",m:"证明；演示",e:"He demonstrated the method."},
+ {w:"environment",m:"环境",e:"Protect the environment."},
+ {w:"frequency",m:"频率",e:"The frequency increased."},
+ {w:"interpret",m:"解释；理解",e:"Interpret the result."},
+ {w:"negotiate",m:"谈判",e:"They negotiated a deal."}
+];
+const IV=[1,2,4,7,15,30];
+let st=JSON.parse(localStorage.getItem(KEY)||"{}");
+WORDS.forEach((_,i)=>{if(!st[i])st[i]={box:0,next:Date.now()};});
+function due(){return WORDS.map((_,i)=>i).filter(i=>st[i].next<=Date.now());}
+let cur=null;
+function speak(t){try{const u=new SpeechSynthesisUtterance(t);u.lang="en-US";speechSynthesis.speak(u);}catch(e){}}
+function save(){localStorage.setItem(KEY,JSON.stringify(st));render();}
+function nextCard(){const d=due();if(!d.length){cur=null;render();return;}cur=d[Math.floor(Math.random()*d.length)];render();}
+function answer(know){if(cur==null)return;const s=st[cur];if(know)s.box=Math.min(s.box+1,IV.length-1);else s.box=0;s.next=Date.now()+IV[s.box]*86400000;save();nextCard();}
+function render(){const c=document.getElementById("card");if(cur==null){const d=due().length;c.innerHTML=d?`<button class="btn" onclick="nextCard()">开始复习（${d} 个）</button>`:`<p class="small">🎉 今天复习完成！</p><button class="btn" onclick="resetAll()">重置</button>`;return;}const x=WORDS[cur];c.innerHTML=`<div class="item"><div style="text-align:right"><span class="tag" onclick="speak('${x.w}')">🔊 发音</span></div><div class="word">${x.w}</div><div class="small" style="margin-top:6px">盒子 ${st[cur].box+1} · 例句：${x.e}</div></div><div class="row" style="margin-top:10px"><button class="btn ok" onclick="answer(true)">认识</button><button class="btn" onclick="answer(false)">不认识</button></div><div class="small" style="margin-top:6px">意思：${x.m}</div>`;if(cur!=null)speak(x.w);}
+function resetAll(){st={};WORDS.forEach((_,i)=>st[i]={box:0,next:Date.now()});save();nextCard();}
+let lo="<b>📊 进度</b>";WORDS.forEach((x,i)=>{lo+=`<div class="item"><b>${x.w}</b> <span class="small">盒子${st[i].box+1}</span></div>`;});document.getElementById("list").innerHTML=lo;
+nextCard();
+</script>
+</body>
+</html>

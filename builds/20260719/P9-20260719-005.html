@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>多份兼职并行计时工资记账 + 欠薪提醒</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.ghost{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.small{font-size:12px;color:var(--muted)}
+.stat{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.stat b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;text-decoration:underline}
+.item{font-size:13px;padding:8px 0;border-bottom:1px solid var(--line)}
+.warn{background:#FFEFEF;border:1px solid #FFC9C9;border-radius:10px;padding:10px;font-size:13px;margin-top:8px}
+.ok{color:var(--ok)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">gig_economy</span><span class="tag">shift_mgmt</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">多份兼职并行计时工资记账 + 欠薪提醒</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Multi-part-time timesheet wage tracker with unpaid-wage alerts</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">中国兼职/日结人群庞大，"按小时/按天记工时算工资"是高频刚需。已有轻量记账 App，但普遍缺"多份兼职并行 + 老板对账 + 欠薪提醒"。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 记一笔工时</b>
+    <label>兼职名称</label>
+    <input type="text" id="job" placeholder="如 便利店夜班">
+    <div class="row">
+      <div><label>工时(小时)</label><input type="number" id="hours" placeholder="8"></div>
+      <div><label>时薪(元)</label><input type="number" id="rate" placeholder="22"></div>
+    </div>
+    <div class="row">
+      <div><label>工作日期</label><input type="date" id="date"></div>
+      <div><label>预计发薪日</label><input type="date" id="payday"></div>
+    </div>
+    <label>状态</label>
+    <select id="status"><option value="unpaid">未结清</option><option value="paid">已结清</option></select>
+    <button class="btn" onclick="add()">记账</button>
+    <div class="small" style="margin-top:8px">工资 = 工时 × 时薪；预计发薪日过期仍未结清将触发欠薪提醒。</div>
+  </div>
+
+  <div class="card">
+    <b>📊 汇总</b>
+    <div id="summary"></div>
+    <div id="alert"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/search?term=%E6%AF%8F%E6%97%A5%E8%AE%B0%E5%B7%A5%E8%B5%84" target="_blank" style="color:var(--coral)">创薪工时宝 / 每日记工资 / 精准工资记录助手</a>
+  </div>
+
+<script>
+const KEY="P9-20260719-005";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function today(){return new Date().toISOString().slice(0,10);}
+function add(){
+  const job=document.getElementById("job").value.trim()||"兼职";
+  const hours=parseFloat(document.getElementById("hours").value)||0;
+  const rate=parseFloat(document.getElementById("rate").value)||0;
+  const date=document.getElementById("date").value||today();
+  const payday=document.getElementById("payday").value||"";
+  const status=document.getElementById("status").value;
+  const wage=hours*rate;
+  items.unshift({job,hours,rate,date,payday,status,wage,id:Date.now()});
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function toggle(id){
+  const x=items.find(i=>i.id===id); if(x){x.status=x.status==='paid'?'unpaid':'paid';save();}
+}
+function render(){
+  const totalWage=items.reduce((s,x)=>s+x.wage,0);
+  const unpaid=items.filter(x=>x.status==='unpaid');
+  const unpaidSum=unpaid.reduce((s,x)=>s+x.wage,0);
+  const t=today();
+  const overdue=unpaid.filter(x=>x.payday && x.payday<t);
+  const byJob={};
+  items.forEach(x=>byJob[x.job]=(byJob[x.job]||0)+x.wage);
+  const sum=document.getElementById("summary");
+  sum.innerHTML='<div class="stat"><span>工资合计</span><b>'+totalWage.toLocaleString()+' 元</b></div>'+
+    '<div class="stat"><span>未结清</span><span>'+unpaidSum.toLocaleString()+' 元（'+unpaid.length+'笔）</span></div>'+
+    Object.keys(byJob).map(j=>'<div class="stat"><span>'+j+'</span><span>'+byJob[j].toLocaleString()+' 元</span></div>').join("");
+  const al=document.getElementById("alert");
+  al.innerHTML=overdue.length?'<div class="warn">⚠️ 欠薪预警：'+overdue.length+' 笔已过发薪日未结清，合计 '+overdue.reduce((s,x)=>s+x.wage,0).toLocaleString()+' 元。请催老板对账！</div>':'<div class="small ok">✅ 暂无逾期欠薪</div>';
+  const list=document.getElementById("list");
+  list.innerHTML='<b>📋 工时记录（'+items.length+'）</b>'+
+    (items.length?items.map(x=>'<div class="item"><div style="display:flex;justify-content:space-between"><b>'+x.job+'</b><span class="del" onclick="del('+x.id+')">删除</span></div><div class="small">'+x.date+' · '+x.hours+'h×'+x.rate+' = <b>'+x.wage.toLocaleString()+'</b> 元 · 发薪 '+x.payday+' <span class="'+(x.status==='paid'?'ok':'h-coral')+'" onclick="toggle('+x.id+')">['+(x.status==='paid'?'已结 ✓':'未结 · 点此结清')+']</span></div></div>').join(""):'<p class="small">暂无记录</p>');
+}
+render();
+</script>
+</body>
+</html>

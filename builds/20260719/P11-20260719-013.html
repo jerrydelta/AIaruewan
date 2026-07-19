@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>多货币净资产追踪</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600}.item .s{font-size:13px;color:var(--muted)}
+.mini{display:inline-block;padding:6px 10px;border:none;border-radius:8px;font-size:13px;cursor:pointer;margin:6px 6px 0 0}
+.mini.del{background:#eee;color:#999}
+.sum{font-size:16px;font-weight:600;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">finance</span><span class="tag">personal_accounting</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">多货币净资产追踪</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Multi-currency net-worth tracker (FX gains, for nomads)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">跨境游牧者同时持多国账户，普通记账 app 只支持单一本币、无换汇损益科目。本工具记录多币种账户余额并折算本位币看净资产。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 添加账户</b>
+    <label>账户名</label>
+    <input id="nName" placeholder="如：日本银行 / 美股券商">
+    <div class="row">
+      <div><label>余额</label><input id="nBal" type="number" step="0.01" placeholder="0"></div>
+      <div><label>币种</label><select id="nCur"><option>JPY</option><option>USD</option><option>EUR</option><option>CNY</option></select></div>
+    </div>
+    <label>类型</label>
+    <select id="nType"><option>资产</option><option>负债</option></select>
+    <button class="btn" onclick="addAcc()">添加</button>
+  </div>
+  <div class="card" id="list">
+    <b>📋 净资产（折算 JPY）</b>
+    <div id="summary"></div>
+    <div id="items" style="margin-top:8px"></div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://nomadinit.com/p/160.html" target="_blank" style="color:var(--coral)">Beancount / Actual Budget / Firefly III</a>
+  </div>
+<script>
+const KEY="P11-20260719-013";
+const RATE={"JPY":1,"USD":150,"EUR":165,"CNY":21};
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addAcc(){
+  const name=document.getElementById('nName').value.trim();
+  const bal=parseFloat(document.getElementById('nBal').value);
+  const cur=document.getElementById('nCur').value;
+  const type=document.getElementById('nType').value;
+  if(!name||isNaN(bal)){ alert('请填账户名和余额'); return; }
+  const jpy=bal*(RATE[cur]||1)*(type==='负债'?-1:1);
+  items.push({id:Date.now(),name,bal,cur,type,jpy});
+  document.getElementById('nName').value='';document.getElementById('nBal').value='';
+  save();
+}
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function render(){
+  const net=items.reduce((s,x)=>s+x.jpy,0);
+  document.getElementById('summary').innerHTML='<div class="sum">净资产 ≈ ¥'+net.toFixed(0)+' (JPY)</div>';
+  const box=document.getElementById('items');
+  if(!items.length){ box.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有账户。</p>'; return; }
+  box.innerHTML=items.map(x=>
+    '<div class="item"><div class="t">'+x.name+' <span style="float:right">'+x.cur+' '+x.bal+'</span></div>'+
+    '<div class="s">'+x.type+' · ≈¥'+x.jpy.toFixed(0)+'<button class="mini del" onclick="del('+x.id+')" style="float:right">删除</button></div></div>'
+  ).join('');
+}
+render();
+</script>
+</body>
+</html>

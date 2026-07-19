@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>日本語議事録AI要約SaaS｜中小企业会议纪要</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{display:flex;justify-content:space-between;align-items:flex-start;
+  padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.del{color:var(--muted);font-size:13px;cursor:pointer;border:none;background:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">career</span><span class="tag">meeting_notes</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">日本語議事録AI要約SaaS</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Japan-SME-focused AI meeting minutes &amp; summarization SaaS</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本の議事録自動化市場はリコー(toruno)、RSUPPORT(Ai:repoto)、LINE WORKS AiNote、Auto Minutes等が競う。企業の会議効率化・文字起こし需要急拡大。痛点：議事録作成に時間がかかり、ToDoが漏れる。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 議事録メモ＋ToDo抽出</b>
+    <input id="topic" placeholder="会議テーマ">
+    <textarea id="notes" rows="5" placeholder="議論内容をメモ…（「ToDo: 〇〇 @担当者 期限7/30」の形式で書くと自動抽出）"></textarea>
+    <button class="btn" onclick="save()">保存する</button>
+    <div id="extract" style="font-size:13px;margin-top:8px;color:var(--coral)"></div>
+  </div>
+
+  <div class="card" id="list"><b>📋 保存済み議事録</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.ricoh.co.jp/" target="_blank" style="color:var(--coral)">toruno (リコー) / Ai:repoto (RSUPPORT)</a>
+  </div>
+
+<script>
+const KEY="P2-20260719-004";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){
+  const topic=document.getElementById("topic").value.trim();
+  const notes=document.getElementById("notes").value.trim();
+  if(!topic){alert("请输入会議テーマ");return;}
+  const todos=[...notes.matchAll(/ToDo[:：]\s*([^@\n]+?)\s*@?([^\n]*?)(?:期限|締切)?([0-9\/月日.-]*)/gi)]
+    .map(m=>("• "+m[1].trim()+(m[2]?(" @"+m[2].trim()):"")+(m[3]?(" 期限"+m[3].trim()):"")));
+  document.getElementById("extract").textContent=todos.length?("抽出ToDo："+todos.length+"件"):"未检测到ToDo标记";
+  items.unshift({topic,notes,todos,date:new Date().toLocaleString()});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("topic").value="";document.getElementById("notes").value="";
+  document.getElementById("extract").textContent="";
+  render();
+}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>📋 保存済み議事録</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>暂无记录</p>";return;}
+  box.innerHTML="<b>📋 保存済み議事録（"+items.length+"）</b>"+items.map((it,i)=>
+    "<div class='item'><div style='flex:1'><div style='font-size:14px'>"+it.topic+
+    "</div><div style='font-size:11px;color:var(--muted)'>"+it.date+(it.todos.length?(" ｜ ToDo "+it.todos.length+"件"):"")+"</div>"+
+    "</div><button class='del' onclick='del("+i+")'>删除</button></div>").join("");
+}
+render();
+</script>
+</body>
+</html>

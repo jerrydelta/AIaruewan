@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI视频字幕+多语言配音(服务短视频出海创作者)</title>
+<style>
+:root{
+  --coral:#FF6B6B;        /* 主品牌色 */
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag">ai_video_subtitle_translate</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI视频字幕+多语言配音(服务短视频出海创作者)</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI video subtitle + multilingual dubbing (for short-video creators going global)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">短视频出海/跨区域分发必须多语言字幕+配音。Rask AI 用户 200 万+、订阅 $50/月,做 130+ 语言配音翻译;BibiGPT(中文)做视频总结+字幕提取;腾讯云媒体 AI 提供字幕识别 API。痛点:人工字幕贵、翻译腔重、口型不对。</p>
+  </div>
+
+  <div class="card" id="tool">
+    <b>🛠 工具</b>
+    <label>时间码（如 00:01）</label>
+<input id="s_start" placeholder="00:01">
+<label>原文</label>
+<textarea id="s_src" rows="2" placeholder="原语言字幕..."></textarea>
+<label>译文</label>
+<textarea id="s_dst" rows="2" placeholder="翻译后字幕..."></textarea>
+<button class="btn" onclick="act()">添加字幕条</button>
+    <div id="out"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://rask.ai" target="_blank" style="color:var(--coral)">Rask AI · BibiGPT · 腾讯云媒体AI</a>
+  </div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function v(id){var e=$(id); return e?e.value.trim():'';}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function saveItem(o){ items.unshift(o); localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function del(t){ items=items.filter(function(x){return x.t!==t;}); localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function copy(s){ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(s).then(function(){alert('已复制到剪贴板');},function(){alert(s);}); } else { alert(s); } }
+function copyText(t){ var x=items.find(function(z){return z.t===t;}); if(x) copy(x.text||x.desc||x.name||''); }
+function dlSVG(t){ var x=items.find(function(z){return z.t===t;}); if(x&&x.svg){ var b=new Blob([x.svg],{type:'image/svg+xml'}); var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='icon.svg'; a.click(); } }
+function copyCode(t){ var x=items.find(function(z){return z.t===t;}); if(x) copy(x.code||''); }
+function copyPalette(t){ var x=items.find(function(z){return z.t===t;}); if(x&&x.cols){ copy(':root{\n'+x.cols.map(function(c,i){return '  --c'+(i+1)+': '+c.toUpperCase()+';';}).join('\n')+'\n}'); } }
+function toggleStep(t,i,checked){ var x=items.find(function(z){return z.t===t;}); if(x){ x.stepsDone=x.stepsDone||[]; x.stepsDone[i]=checked; localStorage.setItem(KEY, JSON.stringify(items)); render(); } }
+function doneMed(t){ var x=items.find(function(z){return z.t===t;}); if(x){ var cyc={'每日':1,'每周':7,'每月':30,'每季':90}[x.cycle]||30; var d=new Date(x.next); d.setDate(d.getDate()+cyc); x.next=d.toISOString().slice(0,10); localStorage.setItem(KEY, JSON.stringify(items)); render(); } }
+function hexToHsl(hex){ hex=hex.replace('#',''); var r=parseInt(hex.substr(0,2),16)/255,g=parseInt(hex.substr(2,2),16)/255,b=parseInt(hex.substr(4,2),16)/255; var mx=Math.max(r,g,b),mn=Math.min(r,g,b),h,s,l=(mx+mn)/2; if(mx===mn){h=s=0;}else{var d=mx-mn; s=l>0.5?d/(2-mx-mn):d/(mx+mn); switch(mx){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;default:h=(r-g)/d+4;} h/=6;} return [Math.round(h*360),Math.round(s*100),Math.round(l*100)]; }
+function hslToHex(h,s,l){ s/=100; l/=100; var k=function(n){return (n+h/30)%12;}; var a=s*Math.min(l,1-l); var f=function(n){return l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));}; var to=function(x){return Math.round(255*x).toString(16).padStart(2,'0');}; return '#'+to(f(0))+to(f(8))+to(f(4)); }
+function contrast(c1,c2){ var L=function(hex){hex=hex.replace('#','');var r=parseInt(hex.substr(0,2),16)/255,g=parseInt(hex.substr(2,2),16)/255,b=parseInt(hex.substr(4,2),16)/255;var f=function(x){return x<=0.03928?x/12.92:Math.pow((x+0.055)/1.055,2.4);};return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b);}; var l1=L(c1),l2=L(c2),hi=Math.max(l1,l2),lo=Math.min(l1,l2); return (hi+0.05)/(lo+0.05); }
+var SIZES={'微信':[240,240],'Telegram':[512,512],'WhatsApp':[512,512],'Discord':[320,320]};
+var RANGE={'龟':[25,32,50,80],'蜥蜴':[28,35,40,70],'蛇':[26,32,40,60],'守宫':[28,34,40,60]};
+function act(){
+    const start=v('s_start'), src=v('s_src'), dst=v('s_dst');
+    if(!src && !dst){ alert('请填写字幕内容'); return; }
+    saveItem({ start:start||'--:--', src:src, dst:dst, t:Date.now() });
+    $('s_src').value=''; $('s_dst').value=''; $('s_start').value='';
+  }
+function itemHTML(it){
+    return `<div style="border-top:1px solid var(--line);padding:8px 0;display:flex;gap:8px">
+      <span class="tag" style="flex:none">${esc(it.start)}</span>
+      <div style="flex:1;font-size:13px"><div style="color:#555">${esc(it.src)}</div><div style="color:var(--coral)">${esc(it.dst)}</div></div>
+      <button class="btn" style="width:auto;padding:6px 10px;background:#bbb" onclick="del(${it.t})">✕</button>
+    </div>`;
+  }
+
+function render(){
+  var head = items.length? '<b>📋 我的记录（'+items.length+'）</b>' : '<b>📋 记录</b><div style="font-size:13px;color:var(--muted);margin-top:6px">暂无，先添加一条 ↓</div>';
+  var ex = (typeof extraHTML==='function')? extraHTML() : '';
+  var h = items.map(itemHTML).join('');
+  $('list').innerHTML = head + (ex?('<div style="margin:8px 0;font-size:13px;color:#555">'+ex+'</div>'):'') + h;
+}
+const KEY="P1-20260719-005";
+let items = JSON.parse(localStorage.getItem(KEY)||"[]");
+render();
+
+</script>
+</body>
+</html>

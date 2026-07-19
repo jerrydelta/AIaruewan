@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>科目横断AI错题本（韩国史+其他）</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.small{font-size:12px;color:var(--muted)}
+.del{color:var(--coral);font-size:13px;cursor:pointer;float:right}
+.days{font-size:26px;font-weight:700;color:var(--coral)}
+</style>
+</head>
+<body>
+<div class="card">
+  <div><span class="tag">education</span><span class="tag">error_notebook</span></div>
+  <h1 style="font-size:20px;margin:8px 0 4px">科目横断 AI 错题本（韩国史＋其他）</h1>
+  <p class="h-coral" style="font-size:13px;margin:0">Cross-subject AI wrong-answer notebook</p>
+</div>
+<div class="card">
+  <b>💡 痛点</b>
+  <p style="font-size:14px;color:#555;margin:6px 0 0">韩国史（수능 必考）错题本 App 买断制受欢迎。但「韩国史＋其他科目」横断错题本与 AI 解说仍不足。</p>
+</div>
+<div class="card">
+  <b>🛠 工具 · 横断错题本</b>
+  <label>考试日（D-Day）</label><input id="examDate" type="date">
+  <button class="btn" onclick="saveDate()">保存考试日</button>
+  <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+  <label>科目</label>
+  <select id="subj"><option>韩国史</option><option>国语</option><option>数学</option><option>英语</option><option>其他</option></select>
+  <label>题目 / 考点</label><textarea id="q" rows="2" placeholder="题目或易错考点"></textarea>
+  <label>我的答案 vs 正确答案</label>
+  <div class="row"><input id="mine" placeholder="我写的"><input id="ans" placeholder="正确"></div>
+  <button class="btn" onclick="addErr()">加入错题本</button>
+</div>
+<div class="card" id="list"></div>
+<div class="card" style="font-size:12px;color:var(--muted)">
+  <b>来源参考</b><br>
+  <a href="https://apps.apple.com/ci/app/id1538308063" target="_blank" style="color:var(--coral)">한국사오답노트（韩国史错题本买断制）</a>
+</div>
+<script>
+const KEY="P8-20260719-007";
+let errs=JSON.parse(localStorage.getItem(KEY)||"[]");
+let dday=localStorage.getItem(KEY+"_dd")||"";
+examDate.value=dday;
+function saveDate(){dday=examDate.value;if(dday)localStorage.setItem(KEY+"_dd",dday);render();}
+function addErr(){const s=subj.value,q=q_.value.trim(),m=mine.value.trim(),a=ans.value.trim();if(!q){alert("请填题目");return;}errs.unshift({s,q,m,a,t:Date.now()});q_.value=mine.value=ans.value="";save();}
+function del(i){errs.splice(i,1);save();}
+function render(){let o="";if(dday){const ms=new Date(dday+"T00:00:00")-new Date();const d=Math.ceil(ms/86400000);o+=`<div class='item'><b>D-Day</b><div class='days'>${d>=0?"D-"+d:"D+"+Math.abs(d)}</div><div class='small'>${dday}</div></div>`;}
+const groups={};errs.forEach(x=>{(groups[x.s]=groups[x.s]||[]).push(x);});
+o+="<b>📒 错题本</b>";if(!errs.length)o+="<p class='small'>还没有错题。</p>";
+Object.keys(groups).forEach(g=>{o+=`<div style='margin-top:10px'><b>${g}（${groups[g].length}）</b></div>`;groups[g].forEach(x=>{const idx=errs.indexOf(x);o+=`<div class='item'><span class='del' onclick='del(${idx})'>删除</span>${x.q}<div class='small'>我：${x.m||"—"} ／ 正确：${x.a||"—"}</div></div>`;});});list.innerHTML=o;}
+render();
+</script>
+</body>
+</html>

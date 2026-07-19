@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>OpenAPI 端点清单解析器</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">api_manager</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">OpenAPI 端点清单解析器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KO-team API client that auto-syncs from Swagger/OpenAPI.</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国开发者使用 Insomnia（OSS，REST/GraphQL）与 Hoppscotch（浏览器端、免费）作为 Postman 替代品。在 Okky 等社区中，"团队共享、环境切换"的烦恼频繁出现</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>项目名称</label><input id="o_name" placeholder="如 用户服务 API">
+<label>粘贴 OpenAPI / Swagger JSON</label><textarea id="o_json" rows="5" placeholder='{"paths":{"/users":{"get":{}}}}'></textarea>
+<button class="btn" onclick="parseO()">🔍 解析端点</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://insomnia.rest" target="_blank" style="color:var(--coral)">Insomnia / Hoppscotch / Postman</a>
+  </div>
+
+<script>
+
+const KEY="P16-20260719-004";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function parseO(){
+  const name=document.getElementById('o_name').value.trim();
+  const raw=document.getElementById('o_json').value.trim();
+  if(!name){alert('请填写项目名称');return;}
+  let eps=[];
+  try{
+    const doc=JSON.parse(raw);
+    const paths=doc.paths||{};
+    for(const p in paths){
+      for(const m in paths[p]){ if(['get','post','put','delete','patch'].indexOf(m.toLowerCase())>=0) eps.push({method:m.toUpperCase(),path:p}); }
+    }
+    if(!eps.length){alert('未解析到端点，请检查 JSON');return;}
+  }catch(e){alert('JSON 解析失败：'+e.message);return;}
+  items.push({name,eps,added:new Date().toLocaleString()});
+  save();
+  document.getElementById('o_name').value='';document.getElementById('o_json').value='';
+}
+function del(i){items.splice(i,1);save();}
+function render(){
+  const el=document.getElementById('list');
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">暂无项目</p>';return;}
+  el.innerHTML='<b>📑 项目端点（'+items.length+'）</b>'+items.map((it,idx)=>
+    '<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px">'+
+    '<div style="font-weight:600">'+esc(it.name)+' <span class="tag">'+it.eps.length+' 端点</span></div>'+
+    it.eps.map(e=>'<div style="font-size:12px;margin-top:3px"><span class="tag">'+esc(e.method)+'</span> '+esc(e.path)+'</div>').join('')+
+    '<button class="btn" style="background:#fff;color:var(--coral);border:1px solid var(--line);margin-top:6px" onclick="del('+idx+')">删除</button>'+
+    '</div>'
+  ).join('');
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+render();
+</script>
+</body>
+</html>

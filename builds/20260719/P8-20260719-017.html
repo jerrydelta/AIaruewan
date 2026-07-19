@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>日韩双语加密备忘录（多语言·离线）</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.small{font-size:12px;color:var(--muted)}
+.del{color:var(--coral);font-size:13px;cursor:pointer;float:right}
+</style>
+</head>
+<body>
+<div class="card">
+  <div><span class="tag">privacy</span><span class="tag">encrypted_notes</span></div>
+  <h1 style="font-size:20px;margin:8px 0 4px">日韩双语加密备忘录（多语言·离线）</h1>
+  <p class="h-coral" style="font-size:13px;margin:0">JP-KR bilingual encrypted notes (multilingual, offline)</p>
+</div>
+<div class="card">
+  <b>💡 痛点</b>
+  <p style="font-size:14px;color:#555;margin:6px 0 0">韩国「AES-256·离线优先·多语言（含日语）」加密备忘受欢迎（密管2025）。跨日韩的多语言用户有清晰需求。</p>
+</div>
+<div class="card">
+  <b>🛠 工具 · 多语言加密备忘</b>
+  <label>解锁密码</label>
+  <div class="row"><input id="pw" type="password" placeholder="密码"><button class="btn" style="width:auto;padding:8px 16px" onclick="unlock()">解锁</button></div>
+  <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+  <label>语言</label>
+  <select id="lang"><option>日本語</option><option>한국어</option><option>中文</option></select>
+  <label>标题</label><input id="nt" placeholder="タイトル / 제목 / 标题">
+  <label>内容</label><textarea id="nc" rows="3" placeholder="本文 / 내용 / 内容"></textarea>
+  <button class="btn" onclick="addNote()">暗号化保存</button>
+  <label>按语言筛选</label>
+  <select id="filter" onchange="render()"><option value="">全部</option><option>日本語</option><option>한국어</option><option>中文</option></select>
+</div>
+<div class="card" id="list"></div>
+<div class="card" style="font-size:12px;color:var(--muted)">
+  <b>来源参考</b><br>
+  <a href="https://apps.apple.com/cn/app/id6749887304" target="_blank" style="color:var(--coral)">密管2025（JA/韩/中 多语言加密备忘）</a>
+</div>
+<script>
+const KEY="P8-20260719-017";
+let sessionPW="";
+let notes=JSON.parse(localStorage.getItem(KEY)||"[]");
+function xor(t,k){let o="";for(let i=0;i<t.length;i++)o+=String.fromCharCode(t.charCodeAt(i)^k.charCodeAt(i%k.length));return o;}
+function enc(t,k){return btoa(unescape(encodeURIComponent(xor(t,k))));}
+function dec(b,k){try{return xor(decodeURIComponent(escape(atob(b))),k);}catch(e){return "【解密失败】";}}
+function unlock(){sessionPW=pw.value;if(!sessionPW){alert("请输入密码");return;}render();}
+function addNote(){if(!sessionPW){alert("请先解锁");return;}const l=lang.value,t=nt.value.trim(),c=nc.value.trim();if(!t){alert("请填标题");return;}notes.unshift({l,t:enc(t,sessionPW),c:enc(c,sessionPW)});localStorage.setItem(KEY,JSON.stringify(notes));nt.value=nc.value="";render();}
+function del(i){notes.splice(i,1);localStorage.setItem(KEY,JSON.stringify(notes));render();}
+function render(){const f=filter.value;let o=`<b>🔐 备忘录（${notes.length}）</b>`;if(!notes.length)o+="<p class='small'>还没有备忘录。</p>";if(!sessionPW){o+="<p class='small'>请输入密码查看。</p>";list.innerHTML=o;return;}notes.forEach((x,i)=>{if(f&&x.l!==f)return;o+=`<div class='item'><span class='del' onclick='del(${i})'>删除</span><span class='tag'>${x.l}</span><b>${dec(x.t,sessionPW)}</b><div class='small' style='margin-top:4px;white-space:pre-wrap'>${dec(x.c,sessionPW)}</div></div>`;});list.innerHTML=o;}
+render();
+</script>
+</body>
+</html>

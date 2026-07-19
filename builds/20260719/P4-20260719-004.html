@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩文本地化多平台调度工具（Kakao/Naver/Instagram）</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;position:relative}
+.del{position:absolute;right:0;top:10px;background:#fff;color:var(--coral);
+  border:1px solid #FFD9D9;border-radius:8px;font-size:12px;padding:4px 10px;cursor:pointer}
+.mini{font-size:13px;color:var(--ink);background:#FAFAFA;border:1px solid var(--line);
+  border-radius:10px;padding:10px;margin-top:8px}
+.hr{height:1px;background:var(--line);border:none;margin:14px 0}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">social</span><span class="tag">content_calendar</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩文本地化多平台调度工具（Kakao/Naver/Instagram）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Korean-localized multi-platform scheduler (Kakao/Naver/Instagram)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国中小企业在Instagram(1800만 MAU)、Naver Band、Kakao多平台运营，但调度工具多依赖海外(Metricool/Buffer)。痛点：韩国本地化弱、韩文客服缺、定价以美元计、信用卡门槛。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>내용 (内容)</label><input id="k1" placeholder="게시할 내용을 입력하세요">
+<label>플랫폼 (平台)</label><select id="k2"><option>카카오톡</option><option>네이버 밴드</option><option>인스타그램</option></select>
+<label>예약 시간 (定时)</label><input type="datetime-local" id="k3">
+<label>상태 (状态)</label><select id="k4"><option>예약됨</option><option>발행완료</option><option>실패</option></select>
+<button class="btn" onclick="addPost()">예약 등록</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://mixpost.app/blog/social-media-management-tools-comparison" target="_blank" style="color:var(--coral)">Metricool / Buffer / Hootsuite / Sprout Social / Schedulin</a>
+  </div>
+
+<script>
+const KEY="P4-20260719-004";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addPost(){
+ var c=document.getElementById('k1').value.trim();
+ if(!c){alert('내용을 입력하세요');return;}
+ items.push({content:c,plat:document.getElementById('k2').value,time:document.getElementById('k3').value||'미정',status:document.getElementById('k4').value,ts:Date.now()});
+ save();document.getElementById('k1').value='';
+}
+function render(){
+ var el=document.getElementById('list');
+ var arr=items.slice().sort(function(a,b){return (a.time>b.time)?1:-1;});
+ if(!arr.length){el.innerHTML='<b>📅 예약 발행 (定时发布)</b><p style="font-size:13px;color:var(--muted)">예약 내역이 없습니다.</p>';return;}
+ el.innerHTML='<b>📅 예약 발행（'+arr.length+'）</b>'+arr.map(function(r,i){
+  return '<div class="item"><div><b>'+esc(r.content)+'</b></div><div style="font-size:12px;color:var(--muted)">'+r.plat+' · '+r.time+' · '+r.status+'</div><button class="del" onclick="del('+i+')">삭제</button></div>';
+ }).join('');
+}
+function del(i){items.splice(i,1);save();}
+function esc(s){return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+render();
+</script>
+</body>
+</html>

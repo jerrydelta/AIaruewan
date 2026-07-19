@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>康复会员社区 · 课程+同伴</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.big{font-size:22px;font-weight:700;color:var(--coral)}
+.muted{color:var(--muted);font-size:13px}
+.del{color:var(--coral);font-size:12px;cursor:pointer;float:right}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">addiction_recovery</span><span class="tag">recovery_community</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">康复会员社区 · 课程 + 同伴</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Addiction membership school + peer community</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本已有"视频课程订阅（约 ¥9800/月）+ 免费同伴社区"组合验证付费意愿；中国多靠互助群、缺乏产品化会员制康复社区。本 MVP 做课程学习进度 + 同伴互助打卡发布，模拟会员社区闭环。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <b>① 会员课程（勾选学习进度）</b>
+    <div id="courses"></div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:12px 0">
+    <b>② 同伴互助打卡</b>
+    <input id="nick" placeholder="我的昵称">
+    <textarea id="post" rows="2" placeholder="分享今天的坚持 / 求助…"></textarea>
+    <button class="btn" onclick="addPost()">发布到社区</button>
+  </div>
+
+  <div class="card" id="list"><b>🤝 社区动态</b><div id="listBody" style="margin-top:8px"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://prtimes.jp/main/html/rd/p/000000026.000026562.html" target="_blank" style="color:var(--coral)">IZON.JP 会员制康复学校</a> ·
+    <a href="https://prtimes.jp/main/html/rd/p/000000069.000027080.html" target="_blank" style="color:var(--coral)">おうち病院 peer 社区</a>
+  </div>
+
+<script>
+const KEY="P14-20260719-009";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"courses":[{"n":"认识成瘾机制",done:false},{"n":"应对渴求的技巧",done:false},{"n":"重建日常生活",done:false},{"n":"家庭沟通指南",done:false}],"posts":[]}');
+const cEl=document.getElementById('courses');
+function drawCourses(){
+  cEl.innerHTML=data.courses.map((c,i)=>
+    '<label style="display:flex;align-items:center;gap:8px;margin-top:6px;color:var(--ink);font-size:14px">'+
+    '<input type="checkbox" style="width:auto;margin:0" '+(c.done?'checked':'')+' onchange="toggle('+i+')"> '+c.n+'</label>').join('');
+}
+function toggle(i){data.courses[i].done=!data.courses[i].done;save();}
+function addPost(){
+  const t=document.getElementById('post').value.trim();
+  if(!t){alert("说点什么吧");return;}
+  data.posts.push({nick:document.getElementById('nick').value.trim()||'匿名',text:t,date:new Date().toLocaleString('zh-CN')});
+  document.getElementById('post').value='';save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));drawCourses();render();}
+function render(){
+  const done=data.courses.filter(c=>c.done).length;
+  const body=document.getElementById('listBody');
+  body.innerHTML='<div class="muted" style="margin-bottom:8px">课程进度 '+done+'/'+data.courses.length+'</div>'+
+    (data.posts.length?data.posts.slice().reverse().map((p,i)=>
+      '<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>'+p.nick+'</b> <span class="muted" style="font-size:11px">'+p.date+'</span><div>'+p.text+'</div></div>').join(''):'<div class="muted">还没有动态，来发第一条吧</div>');
+}
+save();
+</script>
+</body>
+</html>

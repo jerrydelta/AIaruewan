@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>多平台库存防超卖中台</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;
+  --ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;
+  --card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.mini{display:inline-block;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer;margin:3px 4px 0 0}
+.mini.warn{background:var(--coral);color:#fff;border-color:var(--coral)}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600;font-size:14px}.item .meta{font-size:12px;color:var(--muted);margin:4px 0}
+.over{background:var(--coral);color:#fff;padding:1px 8px;border-radius:999px;font-size:11px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">business</span><span class="tag">multichannel_ecommerce_sync</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">多平台库存防超卖中台</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Lightweight multichannel hub (anti-oversell + auto-transfer + profit calc)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">店小秘服务180万+跨境卖家、日处理1100万订单、对接70+平台。超60%多渠道商家促销季面临库存协同问题：各平台库存独立→超卖/缺货；人工登录多后台下载订单易错。旺店通20+渠道统一归集使错单率8%→0.5%、热销缺货率降80%。抖音/小红书/拼多多/视频号多渠道割裂比跨境更深。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 总库存分配 + 超卖检测</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">给商品设总库存，按渠道（抖音/小红书/拼多多/视频号）分配，分配之和超过总库存即标红预警，从源头防超卖。</p>
+    <label>商品名</label><input id="f_name" placeholder="如：保温杯 500ml">
+    <label>总库存</label><input id="f_total" type="number" value="100">
+    <button class="btn" onclick="addProd()">新增商品</button>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <div class="row">
+      <div><label>商品</label><select id="f_sel"></select></div>
+      <div><label>渠道</label><select id="f_ch"><option>抖音</option><option>小红书</option><option>拼多多</option><option>视频号</option></select></div>
+    </div>
+    <div class="row">
+      <div><label>分配库存</label><input id="f_alloc" type="number" value="0"></div>
+      <div><label>单件利润</label><input id="f_profit" type="number" value="0"></div>
+    </div>
+    <button class="btn" onclick="alloc()" style="background:var(--ok)">分配/更新渠道库存</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📦 库存中台</b><div id="stat" style="font-size:12px;color:var(--muted);margin:6px 0"></div>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.dianxiaomi.com/?from=ll" target="_blank" style="color:var(--coral)">店小秘 / 旺店通 / 有赞OMS / 聚水潭</a>
+  </div>
+
+<script>
+const KEY="P12-20260719-015";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addProd(){
+  const name=f_name.value.trim();if(!name){alert("请输入商品名");return;}
+  items.unshift({id:Date.now(),name,total:+f_total.value||0,ch:{},profit:0});
+  f_name.value="";save();
+}
+function alloc(){
+  const p=items.find(x=>x.id===+f_sel.value);if(!p){alert("请选择商品");return;}
+  const ch=f_ch.value,a=+f_alloc.value||0,pf=+f_profit.value||0;
+  p.ch[ch]=a;p.profit=pf;save();
+}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function render(){
+  f_sel.innerHTML=items.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");
+  const over=items.filter(x=>Object.values(x.ch).reduce((s,v)=>s+v,0)>x.total).length;
+  stat.innerHTML=`商品 ${items.length} · <b class="h-coral">超卖风险 ${over}</b>`;
+  const d=document.getElementById("items");
+  if(!items.length){d.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有商品。</p>';return;}
+  d.innerHTML=items.map(x=>{
+    const used=Object.values(x.ch).reduce((s,v)=>s+v,0);
+    const ov=used>x.total;
+    const chs=Object.entries(x.ch).map(e=>`${e[0]}:${e[1]}`).join(" / ")||"未分配";
+    return `<div class="item"><div class="t">${esc(x.name)} ${ov?'<span class="over">超卖!分配'+used+'/总'+x.total+'</span>':''}</div>
+    <div class="meta">总库存 ${x.total} · 已分配 ${used} · 渠道：${chs} · 预期利润 ¥${used*(x.profit||0)} <span class="mini warn" onclick="del(${x.id})">删</span></div></div>`;
+  }).join("");
+}
+render();
+</script>
+</body>
+</html>

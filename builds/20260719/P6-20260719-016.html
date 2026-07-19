@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>桌游对局记录</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.s{width:auto;display:inline-block;padding:8px 12px;margin:4px 4px 0 0;font-size:13px}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">hobby</span><span class="tag">boardgame</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">桌游对局记录 + 胜率</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Board-game play-log + win-rate (lightweight)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">桌游玩家想看"我哪桌游戏胜率高、玩得勤不勤"，但大 App 偏重社交。轻量记录每局结果，自动算出胜率，顺便管谁借走了哪盒。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 记一局</b>
+    <label>游戏名</label><input id="gname" placeholder="如：璀璨宝石">
+    <div class="row">
+      <div><label>玩家数</label><input id="players" type="number" value="2"></div>
+      <div><label>结果</label><select id="res"><option value="win">赢</option><option value="lose">输</option><option value="draw">平</option></select></div>
+    </div>
+    <label>得分（可选）</label><input id="score" type="number" placeholder="0">
+    <button class="btn" onclick="add()">记录对局</button>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 借出管理</b>
+    <div class="row">
+      <div><input id="bgame" placeholder="借出的游戏"></div>
+      <div><input id="bwho" placeholder="借给谁"></div>
+    </div>
+    <button class="btn" onclick="borrow()">记下借出</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://boardgamenow.app/zh" target="_blank" style="color:var(--coral)">Board Game Now</a>
+  </div>
+<script>
+const KEY="P6-20260719-016";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"plays":[],"borrows":[]}');
+function add(){
+  const gname=document.getElementById('gname').value.trim();
+  if(!gname){alert('填游戏名');return;}
+  data.plays.unshift({gname,players:+document.getElementById('players').value||1,
+    res:document.getElementById('res').value,score:+document.getElementById('score').value||0,id:Date.now()});
+  document.getElementById('gname').value='';save();
+}
+function borrow(){
+  const bgame=document.getElementById('bgame').value.trim(),bwho=document.getElementById('bwho').value.trim();
+  if(!bgame||!bwho){alert('填完整');return;}
+  data.borrows.unshift({bgame,bwho,id:Date.now()});document.getElementById('bgame').value='';document.getElementById('bwho').value='';save();
+}
+function ret(id){data.borrows=data.borrows.filter(x=>x.id!==id);save();}
+function del(id){data.plays=data.plays.filter(x=>x.id!==id);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function render(){
+  const el=document.getElementById('list');
+  const stat={};data.plays.forEach(p=>{stat[p.gname]=stat[p.gname]||{w:0,t:0};stat[p.gname].t++;if(p.res==='win')stat[p.gname].w++;});
+  let h='<b>🎲 对局 '+data.plays.length+' 局</b><div style="font-size:13px;color:#555;margin-top:4px">胜率：'+Object.entries(stat).map(([g,s])=>esc(g)+' '+(s.w/s.t*100).toFixed(0)+'%').join(' · ')+'</div>';
+  h+=data.plays.slice(0,6).map(p=>'<div style="border-top:1px solid var(--line);padding:5px 0;font-size:13px">'+(p.res==='win'?'🏆':p.res==='lose'?'💔':'🤝')+' '+esc(p.gname)+' · '+p.players+'人 · 分'+p.score+' <button onclick="del('+p.id+')" style="background:none;border:none;color:#bbb;font-size:11px;cursor:pointer">删</button></div>').join('')||'<p style="font-size:13px;color:#999">暂无</p>';
+  h+='<hr style="border:none;border-top:1px dashed var(--line);margin:10px 0"><b>📤 借出 '+data.borrows.length+' 盒</b>';
+  h+=data.borrows.map(b=>'<div style="border-top:1px solid var(--line);padding:5px 0;font-size:13px">'+esc(b.bgame)+' → '+esc(b.bwho)+' <button onclick="ret('+b.id+')" style="background:none;border:none;color:var(--ok);font-size:11px;cursor:pointer">已还</button></div>').join('')||'<p style="font-size:13px;color:#999">无借出</p>';
+  el.innerHTML=h;
+}
+function esc(s){return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+render();
+</script>
+</body>
+</html>

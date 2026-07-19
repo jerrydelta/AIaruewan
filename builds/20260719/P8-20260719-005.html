@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>读书记录＋AI摘要＋社交书架</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.small{font-size:12px;color:var(--muted)}
+.del{color:var(--coral);font-size:13px;cursor:pointer;float:right}
+</style>
+</head>
+<body>
+<div class="card">
+  <div><span class="tag">education</span><span class="tag">reading_management</span></div>
+  <h1 style="font-size:20px;margin:8px 0 4px">读书记录 ＋ AI摘要 ＋ 社交书架</h1>
+  <p class="h-coral" style="font-size:13px;margin:0">Reading-log + AI summary + social bookshelf</p>
+</div>
+<div class="card">
+  <b>💡 痛点</b>
+  <p style="font-size:14px;color:#555;margin:6px 0 0">日本读书管理需求稳固，My読書ノート 月下载 48K、4.5 星。但「读书日志＋感想＋AI摘要＋书架共享」整合与跨平台联动较弱。</p>
+</div>
+<div class="card">
+  <b>🛠 工具 · 我的书架</b>
+  <label>书名</label><input id="title" placeholder="如：人间失格">
+  <label>作者</label><input id="author" placeholder="太宰治">
+  <label>状态</label>
+  <select id="status"><option>想读</option><option>在读</option><option>读完</option></select>
+  <div class="row"><div><label>评分(1-5)</label><input id="rate" type="number" min="1" max="5" placeholder="5"></div><div><label>一句话感想</label><input id="note" placeholder="很震撼"></div></div>
+  <button class="btn" onclick="addBook()">上架</button>
+</div>
+<div class="card" id="list"></div>
+<div class="card" style="font-size:12px;color:var(--muted)">
+  <b>来源参考</b><br>
+  <a href="https://www.appkittie.com/app/app-mye8aaade69bb8ee3838ee383bce38388-id1459643744" target="_blank" style="color:var(--coral)">My読書ノート（读书管理 4.5★）</a>
+</div>
+<script>
+const KEY="P8-20260719-005";
+let books=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(books));render();}
+function addBook(){const t=title.value.trim(),a=author.value.trim(),s=status.value,r=+rate.value||0,n=note.value.trim();if(!t){alert("请填书名");return;}books.unshift({t,a,s,r,n});title.value=author.value=rate.value=note.value="";save();}
+function del(i){books.splice(i,1);save();}
+function render(){const read=books.filter(b=>b.s==="读完").length;let o=`<b>📚 书架（共 ${books.length} 本 · 已读 ${read}）</b>`;if(!books.length)o+="<p class='small'>书架空空，先上一本。</p>";books.forEach((b,i)=>{o+=`<div class='item'><span class='del' onclick='del(${i})'>下架</span><b>${b.t}</b> <span class='tag'>${b.s}</span><div class='small'>${b.a||""} ${"★".repeat(b.r)}${"☆".repeat(5-b.r)}</div>${b.n?`<div class='small' style='margin-top:4px'>「${b.n}」</div>`:""}</div>`;});list.innerHTML=o;}
+render();
+</script>
+</body>
+</html>

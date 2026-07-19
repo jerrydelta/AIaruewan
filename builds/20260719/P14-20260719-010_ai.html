@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>触发地图 · 清醒计数</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.big{font-size:30px;font-weight:700;color:var(--coral);text-align:center}
+.muted{color:var(--muted);font-size:13px}
+.del{color:var(--coral);font-size:12px;cursor:pointer;float:right}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:4px}
+.bar>i{display:block;height:100%;background:var(--coral)}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+.collapsed{display:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">addiction_recovery</span><span class="tag">trigger_mgmt</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">触发地图 · 清醒计数</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Trigger analysis + sobriety counter (11.9M installs)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">I Am Sober 以"触发分析 + 每日质押"全球验证 1190 万安装。中日本地化（酒桌/熬夜/短视频等文化触发场景）弱。本工具记录每次冲动/复发的触发因素，自动分析最高频触发，并统计清醒天数。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>清醒开始日</label>
+    <input type="date" id="startDate">
+    <button class="btn" onclick="saveProfile()">保存</button>
+    <div class="big" id="sober">0</div><div class="muted" style="text-align:center">连续清醒天数</div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:12px 0">
+    <label>记录一次触发 / 冲动</label>
+    <input id="trigger" placeholder="如 酒桌应酬 / 深夜emo / 短视频">
+    <button class="btn" onclick="addTrigger()">＋ 记触发</button>
+    <div style="margin-top:10px"><b>🔥 高频触发排行</b><div id="rank" style="margin-top:8px"></div></div>
+  </div>
+
+  <div class="card" id="list"><b>🧭 触发记录</b><div id="listBody" style="margin-top:8px"></div></div>
+
+  
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+    <div class="collapse-header" onclick="toggleAI()">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody">
+      <div id="aiKeySection">
+        <label>Hy3 API Key（用户自带，零成本运营）</label>
+        <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+        <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">
+          使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+        </div>
+      </div>
+      <div id="aiChatSection" style="display:none">
+        <div id="aiChat"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+          <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apkzip.com/zh-TW/com.thehungrywasp.iamsober" target="_blank" style="color:var(--coral)">I Am Sober（1190万安装）</a>
+  </div>
+
+<script>
+const KEY="P14-20260719-010";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"startDate":"","triggers":[]}');
+function saveProfile(){data.startDate=document.getElementById('startDate').value;save();}
+function addTrigger(){
+  const t=document.getElementById('trigger').value.trim();
+  if(!t){alert("输入触发因素");return;}
+  data.triggers.push({t,date:new Date().toLocaleDateString('zh-CN')});
+  document.getElementById('trigger').value='';save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));
+  document.getElementById('startDate').value=data.startDate;render();}
+function render(){
+  let days=0;
+  if(data.startDate)days=Math.floor((new Date()-new Date(data.startDate))/86400000);
+  if(days<0)days=0;
+  document.getElementById('sober').textContent=days;
+  const cnt={};data.triggers.forEach(x=>cnt[x.t]=(cnt[x.t]||0)+1);
+  const arr=Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
+  const max=arr.length?arr[0][1]:1;
+  document.getElementById('rank').innerHTML=arr.length?arr.map(([k,v])=>
+    '<div style="margin:6px 0"><div style="font-size:13px">'+k+' <span class="muted">'+v+'次</span></div><div class="bar"><i style="width:'+(v/max*100)+'%"></i></div></div>').join(''):'<div class="muted">暂无触发记录</div>';
+  const body=document.getElementById('listBody');
+  body.innerHTML=data.triggers.length?data.triggers.slice().reverse().map((x,i)=>
+    '<div style="padding:6px 0;border-bottom:1px solid var(--line)">'+x.date+' · '+x.t+' <span class="del" onclick="del('+i+')">删除</span></div>').join(''):'<div class="muted">暂无记录</div>';
+}
+function del(i){data.triggers.splice(i,1);save();}
+save();
+</script>
+
+<script>
+let aiKey=localStorage.getItem('hy3_key')||'';
+let aiHistory=[];
+function toggleAI(){document.getElementById('aiBody').classList.toggle('collapsed');}
+function saveKey(){
+  aiKey=document.getElementById('aiKey').value.trim();
+  if(!aiKey){alert('请输入API Key');return;}
+  localStorage.setItem('hy3_key',aiKey);
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+  addAIMessage('assistant','Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+async function sendAI(){
+  if(!aiKey){alert('请先保存API Key');return;}
+  const input=document.getElementById('aiInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  addAIMessage('user',msg);
+  input.value='';
+  aiHistory.push({role:'user',content:msg});
+  try{
+    const res=await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body:JSON.stringify({model:'hunyuan-pro',messages:aiHistory,stream:false})
+    });
+    const data=await res.json();
+    const reply=data.choices?.[0]?.message?.content||'AI响应失败';
+    aiHistory.push({role:'assistant',content:reply});
+    addAIMessage('assistant',reply);
+  }catch(e){addAIMessage('assistant','调用失败：'+e.message);}
+}
+function addAIMessage(role,content){
+  const chat=document.getElementById('aiChat');
+  const div=document.createElement('div');
+  div.className='ai-msg '+role;
+  div.textContent=content;
+  chat.appendChild(div);
+  chat.scrollTop=chat.scrollHeight;
+}
+if(aiKey){
+  const ks=document.getElementById('aiKeySection');
+  const cs=document.getElementById('aiChatSection');
+  if(ks)ks.style.display='none';
+  if(cs)cs.style.display='block';
+}
+</script>
+</body>
+</html>

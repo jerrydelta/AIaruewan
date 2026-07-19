@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>透明化婚礼预算+AI类目建议+供应商比价的轻量App</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">wedding</span><span class="tag">wedding_budget_transparency</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">透明化婚礼预算+AI类目建议+供应商比价的轻量App</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Transparent wedding budget app with AI category advice + vendor quote comparison</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">美国平均婚礼花费2024年达$33,000(The Knot Real Weddings Study); CNBC/Zola数据74%新人预期超预算; Axios/Zola调查90%的2025年新人考虑用AI做婚礼策划。痛点:小决定叠加导致超支、隐性费用(小费/邮费/改衣)。机会:透明化预算+AI类…</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>类目</label>
+<select id="t1cat"><option>场地</option><option>餐饮</option><option>摄影</option><option>服装</option><option>花艺</option><option>其他</option></select>
+<label>项目名</label><input id="t1name" placeholder="如：酒店宴会厅">
+<label>预算金额($)</label><input id="t1budget" type="number" placeholder="0">
+<label>实际花费($)</label><input id="t1spent" type="number" placeholder="0">
+<label>状态</label><select id="t1st"><option>未付</option><option>已付定金</option><option>已付清</option></select>
+<button class="btn" onclick="addItem()">添加预算项</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.theappnote.com/blog/cut-wedding-costs-with-budget-apps" target="_blank" style="color:var(--coral)">Zola / The Knot / WBM - Wedding Budget Manager / Wedding Budget Buddy / Money Vault</a>
+  </div>
+<script>
+const KEY="P13-20260719-001";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);save();}
+function addItem(){
+  const cat=document.getElementById('t1cat').value;
+  const name=document.getElementById('t1name').value.trim();
+  const budget=+document.getElementById('t1budget').value||0;
+  const spent=+document.getElementById('t1spent').value||0;
+  const st=document.getElementById('t1st').value;
+  if(!name){alert('请填写项目名');return;}
+  items.push({cat,name,budget,spent,st});
+  document.getElementById('t1name').value='';
+  document.getElementById('t1budget').value='';
+  document.getElementById('t1spent').value='';
+  save();
+}
+function render(){
+  let html='<b>📋 预算明细</b>';
+  let tb=0,ts=0;
+  items.forEach((it,i)=>{tb+=it.budget;ts+=it.spent;
+    html+='<div style="border-bottom:1px solid var(--line);padding:8px 0;font-size:13px"><b>'+it.name+'</b> <span class="tag">'+it.cat+'</span><br>预算 $'+it.budget+' · 实付 $'+it.spent+' · '+it.st+'<br><button class="btn" style="background:var(--muted);padding:6px;margin:4px 0" onclick="del('+i+')">删除</button></div>';
+  });
+  html+='<div style="margin-top:8px"><b>总预算 $'+tb+'</b> · <b>已花 $'+ts+'</b>';
+  if(ts>tb) html+=' <span style="color:var(--coral)">⚠ 超支 $'+(ts-tb)+'</span>';
+  html+='</div>';
+  document.getElementById('list').innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

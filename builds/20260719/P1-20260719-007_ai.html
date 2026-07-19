@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI 3D模型生成器(电商/游戏资产,接混元3D中文版)</title>
+<style>
+:root{
+  --coral:#FF6B6B;        /* 主品牌色 */
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag">ai_3d_model_generator</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI 3D模型生成器(电商/游戏资产,接混元3D中文版)</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI 3D model generator (ecommerce / game assets, zh via Hunyuan3D)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">文本/图片转 3D 模型正从玩具变生产工具。Meshy 提供 API 供游戏/电商生成资产;Luma、Tripo 做高保真重建;中文侧腾讯混元 3D、智影 3D 开源/开放。痛点:传统 3D 建模学习曲线陡、外包贵。</p>
+  </div>
+
+  <div class="card" id="tool">
+    <b>🛠 工具</b>
+    <label>模型描述</label>
+<input id="m_desc" placeholder="如：复古木质咖啡椅">
+<label>类型</label>
+<select id="m_type"><option>电商商品</option><option>游戏角色</option><option>家具</option><option>道具</option></select>
+<label>风格</label>
+<select id="m_style"><option>写实</option><option>卡通风</option><option>Q版</option></select>
+<label>导出格式</label>
+<select id="m_fmt"><option>glTF</option><option>OBJ</option><option>STL</option></select>
+<button class="btn" onclick="act()">生成参数预设单</button>
+    <div id="out"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+<div class="card ai-card ai-bg ai-border" id="aiCard">
+  <div class="collapse-header" onclick="toggleAI()">
+    🤖 AI 助手（用户自带Key · 零成本）
+  </div>
+  <div class="collapse-body collapsed" id="aiBody">
+    <div id="aiKeySection">
+      <label>Hy3 API Key（用户自带，零成本运营）</label>
+      <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+      <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">
+        使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+      </div>
+    </div>
+    <div id="aiChatSection" style="display:none">
+      <div id="aiChat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+        <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://meshy.ai" target="_blank" style="color:var(--coral)">Meshy · Luma AI · Tripo · 腾讯混元3D</a>
+  </div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function v(id){var e=$(id); return e?e.value.trim():'';}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function saveItem(o){ items.unshift(o); localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function del(t){ items=items.filter(function(x){return x.t!==t;}); localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function copy(s){ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(s).then(function(){alert('已复制到剪贴板');},function(){alert(s);}); } else { alert(s); } }
+function copyText(t){ var x=items.find(function(z){return z.t===t;}); if(x) copy(x.text||x.desc||x.name||''); }
+function dlSVG(t){ var x=items.find(function(z){return z.t===t;}); if(x&&x.svg){ var b=new Blob([x.svg],{type:'image/svg+xml'}); var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='icon.svg'; a.click(); } }
+function copyCode(t){ var x=items.find(function(z){return z.t===t;}); if(x) copy(x.code||''); }
+function copyPalette(t){ var x=items.find(function(z){return z.t===t;}); if(x&&x.cols){ copy(':root{\n'+x.cols.map(function(c,i){return '  --c'+(i+1)+': '+c.toUpperCase()+';';}).join('\n')+'\n}'); } }
+function toggleStep(t,i,checked){ var x=items.find(function(z){return z.t===t;}); if(x){ x.stepsDone=x.stepsDone||[]; x.stepsDone[i]=checked; localStorage.setItem(KEY, JSON.stringify(items)); render(); } }
+function doneMed(t){ var x=items.find(function(z){return z.t===t;}); if(x){ var cyc={'每日':1,'每周':7,'每月':30,'每季':90}[x.cycle]||30; var d=new Date(x.next); d.setDate(d.getDate()+cyc); x.next=d.toISOString().slice(0,10); localStorage.setItem(KEY, JSON.stringify(items)); render(); } }
+function hexToHsl(hex){ hex=hex.replace('#',''); var r=parseInt(hex.substr(0,2),16)/255,g=parseInt(hex.substr(2,2),16)/255,b=parseInt(hex.substr(4,2),16)/255; var mx=Math.max(r,g,b),mn=Math.min(r,g,b),h,s,l=(mx+mn)/2; if(mx===mn){h=s=0;}else{var d=mx-mn; s=l>0.5?d/(2-mx-mn):d/(mx+mn); switch(mx){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;default:h=(r-g)/d+4;} h/=6;} return [Math.round(h*360),Math.round(s*100),Math.round(l*100)]; }
+function hslToHex(h,s,l){ s/=100; l/=100; var k=function(n){return (n+h/30)%12;}; var a=s*Math.min(l,1-l); var f=function(n){return l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));}; var to=function(x){return Math.round(255*x).toString(16).padStart(2,'0');}; return '#'+to(f(0))+to(f(8))+to(f(4)); }
+function contrast(c1,c2){ var L=function(hex){hex=hex.replace('#','');var r=parseInt(hex.substr(0,2),16)/255,g=parseInt(hex.substr(2,2),16)/255,b=parseInt(hex.substr(4,2),16)/255;var f=function(x){return x<=0.03928?x/12.92:Math.pow((x+0.055)/1.055,2.4);};return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b);}; var l1=L(c1),l2=L(c2),hi=Math.max(l1,l2),lo=Math.min(l1,l2); return (hi+0.05)/(lo+0.05); }
+var SIZES={'微信':[240,240],'Telegram':[512,512],'WhatsApp':[512,512],'Discord':[320,320]};
+var RANGE={'龟':[25,32,50,80],'蜥蜴':[28,35,40,70],'蛇':[26,32,40,60],'守宫':[28,34,40,60]};
+function act(){
+    const desc=v('m_desc')||'未命名模型', type=$('m_type').value, style=$('m_style').value, fmt=$('m_fmt').value;
+    const res = type==='游戏角色'?'2K 贴图 / 3万面内':type==='电商商品'?'4K 贴图 / 2万面内':'1K 贴图 / 5千面内';
+    const steps=['撰写文本描述','草图 / 参考图','AI 生成粗模','减面优化','绘制贴图','导出 '+fmt];
+    const rec={ desc:desc, type:type, style:style, fmt:fmt, res:res, steps:steps, t:Date.now() };
+    saveItem(rec);
+    const checks=steps.map(function(s,i){return `<label style="display:flex;align-items:center;gap:6px;font-size:13px;margin-top:4px"><input type="checkbox" style="width:auto;margin:0" onchange="toggleStep(${rec.t},${i},this.checked)"> ${s}</label>`;}).join('');
+    $('out').innerHTML=`<div style="margin-top:10px;padding:14px;border:1px solid var(--line);border-radius:12px"><div style="font-size:13px;color:#555">推荐规格：<b>${res}</b> · 风格 ${style}</div><div style="margin-top:6px">${checks}</div></div>`;
+  }
+function itemHTML(it){
+    const done=(it.stepsDone||[]).filter(Boolean).length;
+    return `<div style="border-top:1px solid var(--line);padding:10px 0"><b style="font-size:14px">${esc(it.desc)}</b><div style="font-size:12px;color:var(--muted)">${esc(it.type)} · ${esc(it.style)} · ${esc(it.fmt)} · 进度 ${done}/${it.steps.length}</div><button class="btn" style="background:#bbb;margin-top:6px" onclick="del(${it.t})">删除</button></div>`;
+  }
+
+function render(){
+  var head = items.length? '<b>📋 我的记录（'+items.length+'）</b>' : '<b>📋 记录</b><div style="font-size:13px;color:var(--muted);margin-top:6px">暂无，先添加一条 ↓</div>';
+  var ex = (typeof extraHTML==='function')? extraHTML() : '';
+  var h = items.map(itemHTML).join('');
+  $('list').innerHTML = head + (ex?('<div style="margin:8px 0;font-size:13px;color:#555">'+ex+'</div>'):'') + h;
+}
+const KEY="P1-20260719-007";
+let items = JSON.parse(localStorage.getItem(KEY)||"[]");
+render();
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({
+        model:'hunyuan-pro',
+        messages:aiHistory,
+        stream: false
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+</script>
+</body>
+</html>

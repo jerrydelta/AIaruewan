@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>非技术者用韩文自动化/代码模板（脚手架+RPA）</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;position:relative}
+.del{position:absolute;right:0;top:10px;background:#fff;color:var(--coral);
+  border:1px solid #FFD9D9;border-radius:8px;font-size:12px;padding:4px 10px;cursor:pointer}
+.mini{font-size:13px;color:var(--ink);background:#FAFAFA;border:1px solid var(--line);
+  border-radius:10px;padding:10px;margin-top:8px}
+.hr{height:1px;background:var(--line);border:none;margin:14px 0}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">digital_product</span><span class="tag">code_template</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">非技术者用韩文自动化/代码模板（脚手架+RPA）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KR no-code automation/code templates (scaffolds + RPA) for non-devs</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">AI降低代码门槛，韩国自动化脚本/代码模板需求爆发。BrainDetox：自动化脚本单价20-80만원、月接4-10件。机会：给非技术者的AI自动化脚本模板/脚手架(RPA、数据抓取、Notion API)。痛点：韩语技术模板少、交付/售后重。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>템플릿 유형 (类型)</label><select id="ct1"><option>RPA</option><option>웹스크래핑</option><option>Notion API</option><option>자동화</option></select>
+<label>가격(원)</label><input type="number" id="ct2" placeholder="300000">
+<label>제작시간(시간)</label><input type="number" id="ct3" placeholder="8">
+<label>월 판매추정(개)</label><input type="number" id="ct4" placeholder="5">
+<button class="btn" onclick="addCt()">등록</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://braindetox.kr/zh/posts/side_business_trends_2026_top10.html" target="_blank" style="color:var(--coral)">Framer Marketplace / Gumroad / 크몽 / Upwork</a>
+  </div>
+
+<script>
+const KEY="P4-20260719-018";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addCt(){
+ var price=+document.getElementById('ct2').value||0,hour=+document.getElementById('ct3').value||1,sale=+document.getElementById('ct4').value||0;
+ items.push({type:document.getElementById('ct1').value,price:price,hour:hour,sale:sale,rev:price*sale,rate:price/hour,ts:Date.now()});
+ save();document.getElementById('ct2').value='';document.getElementById('ct3').value='';document.getElementById('ct4').value='';
+}
+function render(){
+ var el=document.getElementById('list');
+ if(!items.length){el.innerHTML='<b>💻 코드/자동화 템플릿 (韩文)</b><p style="font-size:13px;color:var(--muted)">템플릿을 등록하세요.</p>';return;}
+ var tot=0;items.forEach(function(x){tot+=x.rev;});
+ el.innerHTML='<b>💻 코드/자동화 템플릿（'+items.length+' · 월추정 ₩'+tot.toFixed(0)+'）</b>'+items.map(function(x,i){
+  return '<div class="item"><div><b>'+x.type+'</b></div><div style="font-size:12px;color:var(--muted)">₩'+x.price+' · '+x.hour+'h · 시급₩'+x.rate.toFixed(0)+' · 월'+x.sale+'개</div><button class="del" onclick="del('+i+')">삭제</button></div>';
+ }).join('');
+}
+function del(i){items.splice(i,1);save();}
+render();
+</script>
+</body>
+</html>

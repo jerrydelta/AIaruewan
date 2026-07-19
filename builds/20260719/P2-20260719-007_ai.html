@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>相手別ギフト履歴・自動提案SaaS（日本語）｜礼物记录管家</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{display:flex;justify-content:space-between;align-items:flex-start;
+  padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.del{color:var(--muted);font-size:13px;cursor:pointer;border:none;background:none}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+.collapsed{display:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">relationship</span><span class="tag">gift_planner</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">相手別ギフト履歴・自動提案SaaS（日本語）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Per-recipient gift history &amp; auto-recommendation SaaS (Japanese)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本の贈り物・ギフトプランニングはEC連携型ツールが少なく、「誰に・いつ・何を」を自動提案するSaaSが薄い。Giftmall等が存在するが市場未飽和。痛点：去年何をあげたか忘れ、毎回悩む。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · ギフト履歴</b>
+    <input id="person" placeholder="相手（例：母・上司・友人A）">
+    <div class="row">
+      <input id="gift" placeholder="贈ったもの">
+      <input id="date" type="date">
+    </div>
+    <div class="row">
+      <input id="occasion" placeholder="機会（誕生日等）">
+      <input id="budget" type="number" placeholder="予算円">
+    </div>
+    <button class="btn" onclick="add()">記録する</button>
+  </div>
+
+  <div class="card" id="list"><b>📋 ギフト履歴</b></div>
+
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+    <div class="collapse-header" onclick="toggleAI()">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody">
+      <div id="aiKeySection">
+        <label>Hy3 API Key（用户自带，零成本运营）</label>
+        <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+        <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">
+          使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+        </div>
+      </div>
+      <div id="aiChatSection" style="display:none">
+        <div id="aiChat"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+          <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://coupply.co.jp/" target="_blank" style="color:var(--coral)">Giftmall / Memoryiit / my-best</a>
+  </div>
+
+<script>
+const KEY="P2-20260719-007";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const person=document.getElementById("person").value.trim();
+  const gift=document.getElementById("gift").value.trim();
+  if(!person||!gift){alert("请输入相手と贈ったもの");return;}
+  items.unshift({
+    person,gift,
+    date:document.getElementById("date").value||new Date().toLocaleDateString(),
+    occasion:document.getElementById("occasion").value.trim(),
+    budget:document.getElementById("budget").value||""
+  });
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("person").value="";document.getElementById("gift").value="";
+  document.getElementById("date").value="";document.getElementById("occasion").value="";document.getElementById("budget").value="";
+  render();
+}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>📋 ギフト履歴</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>暂无记录</p>";return;}
+  box.innerHTML="<b>📋 ギフト履歴（"+items.length+"）</b>"+items.map((it,i)=>
+    "<div class='item'><div style='flex:1'><div style='font-size:14px'>"+it.person+" へ <b>"+it.gift+"</b></div>"+
+    "<div style='font-size:11px;color:var(--muted)'>"+it.date+(it.occasion?(" ・ "+it.occasion):"")+(it.budget?(" ・ "+it.budget+"円"):"")+"</div></div>"+
+    "<button class='del' onclick='del("+i+")'>删除</button></div>").join("");
+}
+render();
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+  
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({
+        model:'hunyuan-pro',
+        messages:aiHistory,
+        stream: false
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// 初始化AI模块
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+</script>
+</body>
+</html>

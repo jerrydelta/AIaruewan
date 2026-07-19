@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>糖尿病碳水计算</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.stat{display:flex;gap:8px;margin-top:8px}
+.stat>div{flex:1;background:#FFF7F7;border-radius:10px;padding:8px;text-align:center}
+.stat b{display:block;font-size:18px;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">food</span><span class="tag">diabetes_diet</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">糖尿病碳水计算</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Diabetes carb-counting with glucose log</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">糖尿病碳水计算应用是高需求、高留存品类。mySugr（被Roche收购）、One Drop 整合CGM；SNAQ用照片/AI估算碳水；Carb Manager、Cronometer 覆盖宏量。用户想要准确快速记录与AI拍照估算。缺口：一个简单、可负担、结合AI拍照算碳水 + CGM同步 + 控糖餐建议的应用。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>餐食</label>
+    <input id="mName" placeholder="如：米饭一碗+青菜">
+    <div class="row">
+      <div><label>碳水(g)</label><input id="mCarb" type="number" value="0"></div>
+      <div><label>血糖(mg/dL)</label><input id="mBg" type="number" placeholder="餐前/后"></div>
+    </div>
+    <button class="btn" onclick="logMeal()">＋ 记录</button>
+    <p style="font-size:12px;color:var(--muted);margin:8px 0 0">演示版手动录入；正式版可加AI拍照估算碳水。</p>
+  </div>
+
+  <div class="card" id="list"><b>🩸 今日记录</b>
+    <div class="stat" id="stats"></div>
+    <div id="logs" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/us/app/snaq-carb-counting-for/id1490345913" target="_blank" style="color:var(--coral)">mySugr · SNAQ · Carb Manager · Cronometer</a>
+  </div>
+
+<script>
+const KEY="P3-20260719-016";
+let logs=JSON.parse(localStorage.getItem(KEY)||"[]");
+const today=()=>new Date().toLocaleDateString();
+function logMeal(){
+  const name=document.getElementById('mName').value.trim();
+  if(!name){alert('请输入餐食');return;}
+  logs.push({id:Date.now(),date:today(),name,carb:+document.getElementById('mCarb').value||0,bg:+document.getElementById('mBg').value||0});
+  document.getElementById('mName').value='';document.getElementById('mCarb').value=0;document.getElementById('mBg').value='';save();
+}
+function render(){
+  const t=logs.filter(l=>l.date==today());
+  const totC=t.reduce((a,l)=>a+l.carb,0);
+  const bgs=t.filter(l=>l.bg).map(l=>l.bg);
+  const avgBg=bgs.length?(bgs.reduce((a,b)=>a+b,0)/bgs.length).toFixed(0):'—';
+  document.getElementById('stats').innerHTML=`<div><b>${t.length}</b>餐</div><div><b>${totC}</b>碳水g</div><div><b>${avgBg}</b>均血糖</div>`;
+  document.getElementById('logs').innerHTML=logs.length?[...logs].reverse().map(l=>
+    `<div class="item"><span>${l.date}<br><span style="font-size:13px">${l.name}</span></span>
+     <span>碳水 ${l.carb}g${l.bg?'<br>血糖 '+l.bg:''}</span></div>`).join(''):'<p style="color:var(--muted);font-size:13px">空</p>';
+}
+function del(id){logs=logs.filter(l=>l.id!=id);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(logs));render();}
+render();
+</script>
+</body>
+</html>

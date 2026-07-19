@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI犬类症状自查器(初诊+就近医院,接中文宠物医院)</title>
+<style>
+:root{
+  --coral:#FF6B6B;        /* 主品牌色 */
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">pet</span><span class="tag">dog_health</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI犬类症状自查器(初诊+就近医院,接中文宠物医院)</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI dog symptom checker (triage + nearby clinic, zh vet integration)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">养狗家庭遇到呕吐/皮肤/腹泻时急需『症状自查+就医指引』。DogMD 提供犬类症状检查器与用药库;Pawp 做线上兽医 $19/月。中文侧新瑞鹏、宠物家做线上问诊。</p>
+  </div>
+
+  <div class="card" id="tool">
+    <b>🛠 工具</b>
+    <div style="font-size:13px;color:#555;margin-bottom:6px">勾选你观察到的症状：</div>
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" value="呕吐" style="width:auto;margin:0"> 呕吐</label>
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" value="腹泻" style="width:auto;margin:0"> 腹泻</label>
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" value="食欲不振" style="width:auto;margin:0"> 食欲不振</label>
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" value="精神差" style="width:auto;margin:0"> 精神萎靡</label>
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" value="抽搐" style="width:auto;margin:0"> 抽搐</label>
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" value="呼吸困难" style="width:auto;margin:0"> 呼吸困难</label>
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" value="流鼻水" style="width:auto;margin:0"> 流鼻水</label>
+<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" value="跛行" style="width:auto;margin:0"> 跛行</label>
+<button class="btn" onclick="act()">开始自查</button>
+    <div id="out"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+<div class="card ai-card ai-bg ai-border" id="aiCard">
+  <div class="collapse-header" onclick="toggleAI()">
+    🤖 AI 助手（用户自带Key · 零成本）
+  </div>
+  <div class="collapse-body collapsed" id="aiBody">
+    <div id="aiKeySection">
+      <label>Hy3 API Key（用户自带，零成本运营）</label>
+      <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+      <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">
+        使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+      </div>
+    </div>
+    <div id="aiChatSection" style="display:none">
+      <div id="aiChat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+        <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.dogmd.com" target="_blank" style="color:var(--coral)">DogMD · Pawp · 新瑞鹏/宠物家</a>
+  </div>
+
+<script>
+function $(id){return document.getElementById(id);}
+function v(id){var e=$(id); return e?e.value.trim():'';}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function saveItem(o){ items.unshift(o); localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function del(t){ items=items.filter(function(x){return x.t!==t;}); localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function copy(s){ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(s).then(function(){alert('已复制到剪贴板');},function(){alert(s);}); } else { alert(s); } }
+function copyText(t){ var x=items.find(function(z){return z.t===t;}); if(x) copy(x.text||x.desc||x.name||''); }
+function dlSVG(t){ var x=items.find(function(z){return z.t===t;}); if(x&&x.svg){ var b=new Blob([x.svg],{type:'image/svg+xml'}); var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='icon.svg'; a.click(); } }
+function copyCode(t){ var x=items.find(function(z){return z.t===t;}); if(x) copy(x.code||''); }
+function copyPalette(t){ var x=items.find(function(z){return z.t===t;}); if(x&&x.cols){ copy(':root{\n'+x.cols.map(function(c,i){return '  --c'+(i+1)+': '+c.toUpperCase()+';';}).join('\n')+'\n}'); } }
+function toggleStep(t,i,checked){ var x=items.find(function(z){return z.t===t;}); if(x){ x.stepsDone=x.stepsDone||[]; x.stepsDone[i]=checked; localStorage.setItem(KEY, JSON.stringify(items)); render(); } }
+function doneMed(t){ var x=items.find(function(z){return z.t===t;}); if(x){ var cyc={'每日':1,'每周':7,'每月':30,'每季':90}[x.cycle]||30; var d=new Date(x.next); d.setDate(d.getDate()+cyc); x.next=d.toISOString().slice(0,10); localStorage.setItem(KEY, JSON.stringify(items)); render(); } }
+function hexToHsl(hex){ hex=hex.replace('#',''); var r=parseInt(hex.substr(0,2),16)/255,g=parseInt(hex.substr(2,2),16)/255,b=parseInt(hex.substr(4,2),16)/255; var mx=Math.max(r,g,b),mn=Math.min(r,g,b),h,s,l=(mx+mn)/2; if(mx===mn){h=s=0;}else{var d=mx-mn; s=l>0.5?d/(2-mx-mn):d/(mx+mn); switch(mx){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;default:h=(r-g)/d+4;} h/=6;} return [Math.round(h*360),Math.round(s*100),Math.round(l*100)]; }
+function hslToHex(h,s,l){ s/=100; l/=100; var k=function(n){return (n+h/30)%12;}; var a=s*Math.min(l,1-l); var f=function(n){return l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));}; var to=function(x){return Math.round(255*x).toString(16).padStart(2,'0');}; return '#'+to(f(0))+to(f(8))+to(f(4)); }
+function contrast(c1,c2){ var L=function(hex){hex=hex.replace('#','');var r=parseInt(hex.substr(0,2),16)/255,g=parseInt(hex.substr(2,2),16)/255,b=parseInt(hex.substr(4,2),16)/255;var f=function(x){return x<=0.03928?x/12.92:Math.pow((x+0.055)/1.055,2.4);};return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b);}; var l1=L(c1),l2=L(c2),hi=Math.max(l1,l2),lo=Math.min(l1,l2); return (hi+0.05)/(lo+0.05); }
+var SIZES={'微信':[240,240],'Telegram':[512,512],'WhatsApp':[512,512],'Discord':[320,320]};
+var RANGE={'龟':[25,32,50,80],'蜥蜴':[28,35,40,70],'蛇':[26,32,40,60],'守宫':[28,34,40,60]};
+function act(){
+    const cs=[].slice.call(document.querySelectorAll('#tool input[type=checkbox]:checked')).map(function(x){return x.value;});
+    if(!cs.length){ alert('请至少勾选一项症状'); return; }
+    const urgent=['抽搐','呼吸困难'], mid=['呕吐','腹泻','精神差'];
+    let level, advice;
+    if(cs.some(function(s){return urgent.indexOf(s)>=0;})){ level='🚨 立即就医'; advice='出现神经或呼吸症状，请立即前往最近的宠物急诊，途中注意保暖与呼吸通畅。'; }
+    else if(cs.some(function(s){return mid.indexOf(s)>=0;})){ level='⚠️ 尽快就诊'; advice='建议 24 小时内就医，先禁食观察，记录症状频率与精神状态。'; }
+    else { level='👀 居家观察'; advice='暂可居家观察，保证饮水，若 24 小时无好转或加重请就医。'; }
+    const rec={ symptoms:cs, level:level, t:Date.now() };
+    saveItem(rec);
+    const bg=level[0]==='🚨'?'#FFECEC':level[0]==='⚠'?'#FFF6E5':'#EAF7F0';
+    const bd=level[0]==='🚨'?'#FFB3B3':level[0]==='⚠'?'#FFD9A0':'#BFE9D6';
+    $('out').innerHTML=`<div style="margin-top:10px;padding:14px;border-radius:12px;background:${bg};border:1px solid ${bd}"><b style="font-size:16px">${level}</b><div style="font-size:13px;color:#555;margin-top:6px">${advice}</div><div style="font-size:12px;color:var(--muted);margin-top:6px">症状：${cs.join('、')}</div></div>`;
+  }
+function itemHTML(it){
+    const col=it.level[0]==='🚨'?'var(--coral)':it.level[0]==='⚠'?'#E0962A':'var(--ok)';
+    return `<div style="border-top:1px solid var(--line);padding:10px 0"><b style="font-size:14px;color:${col}">${esc(it.level)}</b><div style="font-size:12px;color:var(--muted)">${esc((it.symptoms||[]).join('、'))}</div><button class="btn" style="background:#bbb;margin-top:6px" onclick="del(${it.t})">删除</button></div>`;
+  }
+
+function render(){
+  var head = items.length? '<b>📋 我的记录（'+items.length+'）</b>' : '<b>📋 记录</b><div style="font-size:13px;color:var(--muted);margin-top:6px">暂无，先添加一条 ↓</div>';
+  var ex = (typeof extraHTML==='function')? extraHTML() : '';
+  var h = items.map(itemHTML).join('');
+  $('list').innerHTML = head + (ex?('<div style="margin:8px 0;font-size:13px;color:#555">'+ex+'</div>'):'') + h;
+}
+const KEY="P1-20260719-011";
+let items = JSON.parse(localStorage.getItem(KEY)||"[]");
+render();
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({
+        model:'hunyuan-pro',
+        messages:aiHistory,
+        stream: false
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>장학금 마감 알리미</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;
+  --ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;
+  --card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.mini{display:inline-block;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer;margin:3px 4px 0 0}
+.mini.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.mini.warn{background:var(--coral);color:#fff;border-color:var(--coral)}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600;font-size:14px}.item .meta{font-size:12px;color:var(--muted);margin:4px 0}
+.stage{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;margin:2px 3px 0 0}
+.s0{background:#FFF6E5;color:#E8A33D}.s1{background:#EAF3FF;color:#3B82F6}.s2{background:#F0FBF6;color:var(--ok)}.s3{background:#EEE;color:#888}
+.urgent{background:var(--coral);color:#fff;padding:2px 8px;border-radius:999px;font-size:11px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">student</span><span class="tag">scholarship_manager</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">장학금 마감 알리미</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Student scholarship deadline / docs / eligibility alert + progress tracker</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">한국장학재단(KOSAF) 연예산 11조원 초과. 국가장학금 1·2차 신청 기간 엄수, 재학생은 1차 원칙. 서류제출·가구원 동의·전자서명(공동/금융/간편)·수혜유형(I·II·다자녀) 복잡하여 학생 혼란·누락 다수. 신청 마감 7일 전 언론 보도까지 나오는 고관심 영역.</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 도구 · 장학금 신청 추적</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">장학금을 등록하면 D-day를 계산하고, 마감 7일 전에 알림 표시. 진행 단계(서류제출→가구원동의→전자서명→완료)를 체크하고, 필요 서류를 관리하세요.</p>
+    <label>장학금名</label><input id="f_name" placeholder="예: 2026 1학기 국가장학금 1차">
+    <div class="row">
+      <div><label>수혜유형</label>
+        <select id="f_type"><option>I유형</option><option>II유형</option><option>다자녀</option><option>기타</option></select></div>
+      <div><label>신청 마감일</label><input id="f_due" type="date"></div>
+    </div>
+    <button class="btn" onclick="add()">장학금 등록</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📅 신청 진행</b><div id="stat" style="font-size:12px;color:var(--muted);margin:6px 0"></div>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>출처</b><br>
+    <a href="https://mcfamily.or.kr/zh/posts/info/13860" target="_blank" style="color:var(--coral)">한국장학재단 KOSAF / 국가장학금 모바일 신청</a>
+  </div>
+
+<script>
+const KEY="P12-20260719-008";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const STAGES=["서류제출","가구원동의","전자서명","완료"];
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function add(){
+  const name=f_name.value.trim();if(!name){alert("장학금名을 입력하세요");return;}
+  items.unshift({id:Date.now(),name,type:f_type.value,due:f_due.value,stage:0});
+  f_name.value=f_due.value="";save();
+}
+function dday(due){if(!due)return"";const d=Math.ceil((new Date(due)-new Date())/86400000);return d>=0?`D-${d}`:`마감${(-d)}일 지남`;}
+function next(id){const it=items.find(x=>x.id===id);if(it&&it.stage<3)it.stage++;save();}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function render(){
+  const soon=items.filter(x=>x.due&&Math.ceil((new Date(x.due)-new Date())/86400000)<=7&&x.stage<3).length;
+  stat.innerHTML=`등록 ${items.length} · 마감임박(7일내) <b class="h-coral">${soon}</b>`;
+  const d=document.getElementById("items");
+  if(!items.length){d.innerHTML='<p style="font-size:13px;color:var(--muted)">장학금을 등록하세요.</p>';return;}
+  d.innerHTML=items.map(x=>{
+    const diff=Math.ceil((new Date(x.due)-new Date())/86400000);
+    const urg=(x.due&&diff<=7&&x.stage<3)?`<span class="urgent">마감임박 ${dday(x.due)}</span>`:`<span class="tag">${dday(x.due)}</span>`;
+    let st=STAGES.map((s,i)=>`<span class="stage ${i<=x.stage?'s'+i:''}" style="${i<=x.stage?'':'opacity:.4'}">${i<x.stage?'✓':''}${s}</span>`).join("");
+    return `<div class="item"><div class="t">${esc(x.name)} <span class="tag">${esc(x.type)}</span></div>
+    <div class="meta">${x.due?('마감 '+x.due+' '+urg):'마감일 미정'}</div>
+    <div>${st}</div>
+    <div><span class="mini ok" onclick="next(${x.id})">다음단계</span><span class="mini warn" onclick="del(${x.id})">삭제</span></div></div>`;
+  }).join("");
+}
+render();
+</script>
+</body>
+</html>

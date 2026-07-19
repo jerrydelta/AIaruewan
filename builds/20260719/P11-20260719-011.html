@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>预付卡 + AI 记账</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600}.item .s{font-size:13px;color:var(--muted)}
+.mini{display:inline-block;padding:6px 10px;border:none;border-radius:8px;font-size:13px;cursor:pointer;margin:6px 6px 0 0}
+.mini.del{background:#eee;color:#999}
+.sum{font-size:15px;font-weight:600;color:var(--coral)}
+.tip{font-size:13px;color:var(--ok);margin-top:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">finance</span><span class="tag">personal_accounting</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">预付卡 + AI 记账</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Visa prepaid + AI bookkeeping (screenshot OCR + savings)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本用户嫌手动记账麻烦、银行连携不完整。ワンバンク 用预付卡消费实时自动入账 + AI 算"可省支出（埋蔵金）"。本工具记录消费并自动给出省钱诊断。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 记一笔</b>
+    <label>商户 / 项目</label>
+    <input id="fMer" placeholder="如：便利店 / 订阅 Netflix">
+    <div class="row">
+      <div><label>金额</label><input id="fAmt" type="number" step="0.01" placeholder="0"></div>
+      <div><label>分类</label><select id="fCat"><option>餐饮</option><option>订阅</option><option>交通</option><option>购物</option><option>娱乐</option><option>其他</option></select></div>
+    </div>
+    <button class="btn" onclick="addExp()">记账</button>
+  </div>
+  <div class="card" id="list">
+    <b>📋 本月汇总</b>
+    <div id="summary"></div>
+    <div id="items" style="margin-top:8px"></div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://prtimes.jp/main/html/rd/p/000000089.000080496.html" target="_blank" style="color:var(--coral)">ワンバンク（旧B/43）</a>
+  </div>
+<script>
+const KEY="P11-20260719-011";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function thisMonth(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+function addExp(){
+  const mer=document.getElementById('fMer').value.trim();
+  const amt=parseFloat(document.getElementById('fAmt').value);
+  const cat=document.getElementById('fCat').value;
+  if(!mer||isNaN(amt)){ alert('请填商户和金额'); return; }
+  items.push({id:Date.now(),mer,amt,cat,ym:thisMonth()});
+  document.getElementById('fMer').value='';document.getElementById('fAmt').value='';
+  save();
+}
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function render(){
+  const cur=thisMonth();
+  const curItems=items.filter(x=>x.ym===cur);
+  const total=curItems.reduce((s,x)=>s+x.amt,0);
+  const byCat={}; curItems.forEach(x=>byCat[x.cat]=(byCat[x.cat]||0)+x.amt);
+  let tip='';
+  if(byCat['订阅']>0) tip='💡 埋蔵金诊断：订阅类本月已花 ¥'+byCat['订阅'].toFixed(0)+'，可检查是否有闲置会员。';
+  else if(total>0) tip='💡 继续记账，订阅/重复消费累计后可诊断"可省支出"。';
+  document.getElementById('summary').innerHTML='<div class="sum">本月支出 ¥'+total.toFixed(2)+'</div>'+tip;
+  const box=document.getElementById('items');
+  if(!curItems.length){ box.innerHTML='<p style="font-size:13px;color:var(--muted)">本月暂无记录。</p>'; return; }
+  box.innerHTML=[...curItems].reverse().map(x=>
+    '<div class="item"><div class="t">'+x.mer+' <span style="float:right">¥'+x.amt.toFixed(2)+'</span></div>'+
+    '<div class="s">'+x.cat+' · '+x.ym+'<button class="mini del" onclick="del('+x.id+')" style="float:right">删除</button></div></div>'
+  ).join('');
+}
+render();
+</script>
+</body>
+</html>

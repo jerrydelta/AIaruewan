@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI 婚礼座位优化 + 平面图</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer}
+.sum{font-size:13px;color:var(--muted)}
+.tbl{background:#FFF8F8;border:1px dashed var(--coral);border-radius:12px;
+  padding:10px;margin:8px 0}
+.tbl h4{margin:0 0 6px;font-size:14px;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">wedding</span><span class="tag">ai_seating_optimizer</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI 婚礼座位优化 + 平面图</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI wedding seating optimizer + printable floor plan tool</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">座位安排是婚礼最痛任务之一：120人+家庭政治+饮食需求手排崩溃。Seatbee 用 AI 按关系/饮食优化落座。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具：桌位与宾客</b>
+    <label>添加桌子（名称 / 座位数）</label>
+    <div class="row">
+      <div><input type="text" id="tname" placeholder="主桌"></div>
+      <div><input type="number" id="tcap" placeholder="10" value="10"></div>
+    </div>
+    <button class="btn" onclick="addTable()">＋ 添加桌子</button>
+    <label style="margin-top:14px">添加宾客（姓名 / 关系组）</label>
+    <div class="row">
+      <div><input type="text" id="gname" placeholder="张三"></div>
+      <div><input type="text" id="ggrp" placeholder="男方亲属"></div>
+    </div>
+    <button class="btn" onclick="addGuest()">＋ 添加宾客</button>
+    <button class="btn" onclick="optimize()" style="background:#3FB984">🤖 AI 同组优先落座</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.seatbee.app/blog/best-free-wedding-seating-chart-tools" target="_blank" style="color:var(--coral)">Seatbee / SeatYourGuests / Stellanza</a>
+  </div>
+
+<script>
+const KEY="P13-20260719-004";
+let tables=JSON.parse(localStorage.getItem(KEY+"_t")||"[]");
+let guests=JSON.parse(localStorage.getItem(KEY+"_g")||"[]");
+function save(){localStorage.setItem(KEY+"_t",JSON.stringify(tables));localStorage.setItem(KEY+"_g",JSON.stringify(guests));render();}
+function addTable(){
+  const n=document.getElementById('tname').value.trim();
+  const c=Number(document.getElementById('tcap').value)||10;
+  if(!n){alert('请填写桌名');return;}
+  tables.push({id:'T'+Date.now(),name:n,cap:c});
+  document.getElementById('tname').value='';
+  save();
+}
+function delTable(i){const t=tables[i];guests.forEach(g=>{if(g.tid===t.id)g.tid=null;});tables.splice(i,1);save();}
+function addGuest(){
+  const n=document.getElementById('gname').value.trim();
+  if(!n){alert('请填写姓名');return;}
+  guests.push({id:'G'+Date.now(),name:n,grp:document.getElementById('ggrp').value.trim(),tid:null});
+  document.getElementById('gname').value='';
+  document.getElementById('ggrp').value='';
+  save();
+}
+function delGuest(i){guests.splice(i,1);save();}
+function assign(i,tid){guests[i].tid=tid||null;save();}
+function optimize(){
+  // 同关系组尽量放同桌：按组聚合，依次填桌
+  const groups={};
+  guests.forEach(g=>{ if(!g.tid){ (groups[g.grp||'未分组']=groups[g.grp||'未分组']||[]).push(g); }});
+  tables.forEach(t=>{
+    let used=guests.filter(g=>g.tid===t.id).length;
+    Object.keys(groups).forEach(grp=>{
+      while(used<t.cap && groups[grp].length){ const g=groups[grp].pop(); g.tid=t.id; used++; }
+    });
+  });
+  save();
+  alert('已按关系组优先落座，未分配宾客仍可在下方手动调整。');
+}
+function render(){
+  const list=document.getElementById('list');
+  let html='<b>🪑 平面图（'+tables.length+' 桌 / '+guests.length+' 人）</b>';
+  tables.forEach(t=>{
+    const seated=guests.filter(g=>g.tid===t.id);
+    html+='<div class="tbl"><h4>'+t.name+' · '+seated.length+'/'+t.cap+'</h4>';
+    seated.forEach(g=>{ html+='<span class="tag">'+g.name+(g.grp?'·'+g.grp:'')+'</span>'; });
+    html+='<div style="text-align:right"><span class="del" onclick="delTable('+tables.indexOf(t)+')">删除桌</span></div></div>';
+  });
+  html+='<b style="display:block;margin-top:10px">👥 宾客分配</b>';
+  guests.forEach((g,i)=>{
+    const opts='<option value="">未分配</option>'+tables.map(t=>'<option value="'+t.id+'" '+(g.tid===t.id?'selected':'')+'>'+t.name+'</option>').join('');
+    html+='<div class="item"><div><b>'+g.name+'</b> <span class="sum">'+(g.grp||'')+'</span></div>'+
+      '<div class="row" style="width:55%"><select onchange="assign('+i+',this.value)">'+opts+'</select>'+
+      '<span class="del" onclick="delGuest('+i+')">删</span></div></div>';
+  });
+  if(!guests.length) html+='<div class="sum">还没有宾客，先添加吧。</div>';
+  list.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

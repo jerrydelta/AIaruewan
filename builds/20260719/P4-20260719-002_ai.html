@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>跨平台私信评论统一收件箱+AI自动接待</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;position:relative}
+.del{position:absolute;right:0;top:10px;background:#fff;color:var(--coral);
+  border:1px solid #FFD9D9;border-radius:8px;font-size:12px;padding:4px 10px;cursor:pointer}
+.mini{font-size:13px;color:var(--ink);background:#FAFAFA;border:1px solid var(--line);
+  border-radius:10px;padding:10px;margin-top:8px}
+.hr{height:1px;background:var(--line);border:none;margin:14px 0}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.ai-card .collapse-body.collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px;white-space:pre-wrap}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">social</span><span class="tag">comment_manager</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">跨平台私信评论统一收件箱+AI自动接待</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Unified DM/comment inbox + AI auto-reception for CN creators</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">中国创作者跨抖音/视频号/小红书私信评论分散，漏接率高。蚁小二2026上线评论私信自动回复，支持多账号统一配置，50个账号回复"价格多少"只需设一次。痛点：夜间/节假日无人值守导致线索流失，自动回复规则弱。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>平台</label><select id="p1"><option>抖音</option><option>视频号</option><option>小红书</option></select>
+<label>类型</label><select id="p2"><option>私信</option><option>评论</option></select>
+<label>内容</label><input id="p3" placeholder="用户发来的私信/评论">
+<label>状态</label><select id="p4"><option>待处理</option><option>已回复</option><option>已转化</option></select>
+<button class="btn" onclick="addMsg()">收入收件箱</button>
+<hr class="hr">
+<label>关键词自动回复规则</label>
+<div class="row"><input id="r1" placeholder="关键词，如：价格"><input id="r2" placeholder="回复语"></div>
+<button class="btn" style="background:#3FB984" onclick="addRule()">添加规则</button>
+<div id="ruleList" class="mini"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+  <div class="collapse-header" onclick="toggleAI()">
+    🤖 AI 助手（用户自带Key · 零成本）
+  </div>
+  <div class="collapse-body collapsed" id="aiBody">
+    <div id="aiKeySection">
+      <label>Hy3 API Key（用户自带，零成本运营）</label>
+      <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+      <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">
+        使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+      </div>
+    </div>
+    <div id="aiChatSection" style="display:none">
+      <div id="aiChat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+        <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.yixiaoer.cn/index.html" target="_blank" style="color:var(--coral)">蚁小二评论私信 / SocialEcho / Buffer Community / 螳螂AI私信客服</a>
+  </div>
+
+<script>
+const KEY="P4-20260719-002";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+var KEYR='RULE_'+KEY;
+var rules=JSON.parse(localStorage.getItem(KEYR)||'[]');
+function saveRule(){localStorage.setItem(KEYR,JSON.stringify(rules));showRules();}
+function showRules(){
+ var el=document.getElementById('ruleList');
+ if(!rules.length){el.innerHTML='暂无规则。';return;}
+ el.innerHTML='已设规则：<br>'+rules.map(function(r,i){return (i+1)+'. 命中「'+esc(r.k)+'」→ '+esc(r.a)+' <a style="color:var(--coral);cursor:pointer" onclick="delRule('+i+')">[删]</a>';}).join('<br>');
+}
+function delRule(i){rules.splice(i,1);saveRule();}
+function addRule(){
+ var k=document.getElementById('r1').value.trim(),a=document.getElementById('r2').value.trim();
+ if(!k||!a){alert('请填关键词和回复语');return;}
+ rules.push({k:k,a:a});saveRule();document.getElementById('r1').value='';document.getElementById('r2').value='';
+}
+function addMsg(){
+ var c=document.getElementById('p3').value.trim();
+ if(!c){alert('请输入内容');return;}
+ var sug='';
+ for(var i=0;i<rules.length;i++){if(c.indexOf(rules[i].k)>=0){sug=rules[i].a;break;}}
+ items.push({plat:document.getElementById('p1').value,type:document.getElementById('p2').value,content:c,status:document.getElementById('p4').value,sug:sug,ts:Date.now()});
+ save();document.getElementById('p3').value='';
+}
+function render(){
+ var el=document.getElementById('list');
+ if(!items.length){el.innerHTML='<b>📥 统一收件箱</b><p style="font-size:13px;color:var(--muted)">暂无消息。</p>';return;}
+ el.innerHTML='<b>📥 统一收件箱（'+items.length+'）</b>'+items.map(function(m,i){
+  var s=m.sug?'<div class="mini" style="color:var(--ok)">命中规则 · 建议回复：'+esc(m.sug)+'</div>':'';
+  return '<div class="item"><div><b>'+m.plat+' · '+m.type+'</b></div><div style="font-size:13px">'+esc(m.content)+'</div>'+s+'<div style="font-size:12px;color:var(--muted)">'+m.status+'</div><button class="del" onclick="del('+i+')">删除</button></div>';
+ }).join('');
+}
+function del(i){items.splice(i,1);save();}
+function esc(s){return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+showRules();
+render();
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({
+        model:'hunyuan-pro',
+        messages:aiHistory,
+        stream: false
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>隐私优先习惯追踪器</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.small{font-size:12px;color:var(--muted)}
+.del{color:var(--coral);font-size:12px;cursor:pointer;float:right;margin-left:8px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;margin-left:6px}
+.b-good{background:#EAFaf1;color:var(--ok)}
+.b-bad{background:#FFF0F0;color:var(--coral)}
+</style>
+</head>
+<body>
+<div class="card">
+  <div><span class="tag">lifestyle</span><span class="tag">daily_checklist</span></div>
+  <h1 style="font-size:20px;margin:8px 0 4px">隐私优先习惯追踪器</h1>
+  <p class="h-coral" style="font-size:13px;margin:0">Privacy-first habit tracker with bad-habit breaking, flexible cadence</p>
+</div>
+<div class="card">
+  <b>💡 痛点</b>
+  <p style="font-size:14px;color:#555;margin:6px 0 0">习惯追踪用户反复抱怨缺少核心功能：坏习惯追踪（不只是好习惯）、灵活频率（如"每周3次"而非每天）、跨设备同步与隐私保护。一个只做"好习惯+坏习惯+本地优先"的轻量追踪器是已验证的切入点。</p>
+</div>
+<div class="card">
+  <b>🛠 工具 · 我的习惯</b>
+  <label>习惯名称</label><input id="hName" placeholder="如：喝水 / 戒奶茶">
+  <div class="row">
+    <div><label>类型</label><select id="hType"><option value="good">✅ 好习惯</option><option value="bad">⛔ 坏习惯</option></select></div>
+    <div><label>频率</label><select id="hFreq"><option>每天</option><option>每周3次</option><option>每周5次</option></select></div>
+  </div>
+  <button class="btn" onclick="addHabit()">+ 添加习惯</button>
+</div>
+<div class="card" id="list"><b>📋 习惯清单</b><div id="habits"></div></div>
+<div class="card" style="font-size:12px;color:var(--muted)">
+  <b>来源参考</b><br>
+  <a href="https://apps.apple.com/us/app/hellohabits/id1159144147" target="_blank" style="color:var(--coral)">HelloHabit / HabitKit / Streaks</a>
+</div>
+<script>
+const KEY="P3-20260719-002";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function today(){return new Date().toISOString().slice(0,10);}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addHabit(){const name=hName.value.trim();if(!name){alert('请输入习惯名称');return;}
+  items.push({name,type:hType.value,freq:hFreq.value,log:[],t:Date.now()});
+  hName.value='';save();}
+function del(i){items.splice(i,1);save();}
+function check(i){const d=today();const k=items[i].log;
+  if(k.includes(d)){items[i].log=k.filter(x=>x!==d);}else{k.push(d);}
+  save();}
+function streak(i){const k=[...items[i].log].sort();let n=0;let d=new Date();
+  for(let j=k.length-1;j>=0;j--){const ds=k[j];const dc=new Date(ds);
+    if(dc.toISOString().slice(0,10)===d.toISOString().slice(0,10)){n++;d.setDate(d.getDate()-1);}else break;}
+  return n;}
+function render(){habits.innerHTML=items.length?items.map((x,i)=>`<div class="item"><div><b>${x.name}</b><span class="badge ${x.type==='good'?'b-good':'b-bad'}">${x.type==='good'?'好':'坏'}·${x.freq}</span><br><span class="small">连续 ${streak(i)} 天</span></div><button class="btn" style="width:auto;padding:8px 14px;margin:0" onclick="check(${i})">${x.log.includes(today())?'已打卡✓':'打卡'}</button></div>`).join(''):'<p class="small">还没有习惯，先添加一个吧。</p>';}
+render();
+</script>
+</body>
+</html>

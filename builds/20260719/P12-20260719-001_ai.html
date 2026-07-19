@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>校园官方背书的实名二手交易小程序（担保支付+信用评价+线下验货）</title>
+<style>
+:root{
+  --coral:#FF6B6B;        /* 主品牌色 */
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.item button{background:var(--coral);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer;margin-left:8px}
+.sum-line{display:flex;justify-content:space-between;padding:5px 0;font-size:14px}
+.sum-line b{color:var(--coral)}.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.ai-card .collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">student</span><span class="tag">campus_secondhand</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">校园官方背书的实名二手交易小程序（担保支付+信用评价+线下验货）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Campus-official verified secondhand marketplace (escrow + reputation + offline inspection)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">对304名大学生调研：超半数曾在二手交易踩坑，最高频痛点是个人信息泄露（诈骗短信精准报出宿舍楼层）、资金安全（私下转账被拉黑）、售后无门。72.04%大学生有闲置、80.84%愿意交易，预计2025校园二手交易量破150万、金额达2亿元；但综合平台（闲鱼）难满足'近距离自提+校园实名'，微信群处于监管真空。学生强烈呼吁'官方背书+实名认证+担保交易+线下集市'。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>物品名称</label><input type="text" id="f_name" placeholder="如 高数教材"><label>价格(元)</label><input type="number" id="f_price" placeholder=""><label>分类</label><select id="f_cat"><option>教材</option><option>数码</option><option>宿舍用品</option><option>其他</option></select><label>备注/成色</label><input type="text" id="f_note" placeholder="九成新">
+    <button class="btn" onclick="add()">保存记录</button>
+  </div>
+  <div class="card" id="summary" style="display:none;background:#FFF0F0"></div>
+  <div class="card" id="list"></div>
+<div class="card ai-card ai-bg ai-border" id="aiCard">
+  <div class="collapse-header" onclick="toggleAI()">
+    🤖 AI 助手（用户自带Key · 零成本）
+  </div>
+  <div class="collapse-body collapsed" id="aiBody">
+    <div id="aiKeySection">
+      <label>Hy3 API Key（用户自带，零成本运营）</label>
+      <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+      <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">
+        使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+      </div>
+    </div>
+    <div id="aiChatSection" style="display:none">
+      <div id="aiChat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+        <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+      </div>
+    </div>
+  </div>
+</div>  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://m.voc.com.cn/xhn/news/202512/31171304.html" target="_blank" style="color:var(--coral)">闲鱼 / 转转 / 校内二手QQ/微信群</a>
+  </div>
+<script>
+const CONFIG = {"id":"P12-20260719-001","fields":[{"key":"name","label":"物品名称","type":"text","placeholder":"如 高数教材"},{"key":"price","label":"价格(元)","type":"number"},{"key":"cat","label":"分类","type":"select","options":["教材","数码","宿舍用品","其他"]},{"key":"note","label":"备注/成色","type":"text","placeholder":"九成新"}],"summary":[{"kind":"count","label":"在售条数"},{"kind":"sum","field":"price","label":"挂售总价值(元)"}]};
+
+const KEY = CONFIG.id;
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function fmtTime(t){ var d=new Date(t); return (d.getMonth()+1)+"/"+d.getDate()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2); }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+function val(it,f){ return Number(it[f])||0; }
+function render(){
+  var list=document.getElementById("list");
+  if(items.length===0){ list.innerHTML='<p style="color:var(--muted);font-size:13px;margin:0">暂无记录，添加一条试试 ✦</p>'; }
+  else {
+    var h='<b style="font-size:14px">📋 我的记录（'+items.length+'）</b>';
+    for(var i=0;i<items.length;i++){
+      var it=items[i]; var parts=[];
+      for(var j=0;j<CONFIG.fields.length;j++){ var f=CONFIG.fields[j]; if(it[f.key]!=="" && it[f.key]!=null) parts.push(esc(it[f.key])); }
+      h+='<div class="item"><span>'+parts.join(" · ")+' <small style="color:var(--muted)">'+fmtTime(it.t)+'</small></span><button onclick="del('+i+')">删</button></div>';
+    }
+    list.innerHTML=h;
+  }
+  renderSummary();
+}
+function renderSummary(){
+  var s=document.getElementById("summary");
+  if(!CONFIG.summary||!CONFIG.summary.length){ s.style.display="none"; return; }
+  s.style.display="block";
+  var h='<b style="font-size:14px">📊 数据概览</b>';
+  for(var k=0;k<CONFIG.summary.length;k++){
+    var d=CONFIG.summary[k]; var v=0;
+    if(d.kind==="count") v=items.length;
+    else if(d.kind==="sum"){ for(var i=0;i<items.length;i++) v+=val(items[i],d.field); }
+    else if(d.kind==="sumByType"){ for(var i=0;i<items.length;i++) if(items[i][d.typeField]===d.value) v+=val(items[i],d.amountField); }
+    else if(d.kind==="net"){ var inc=0,out=0; for(var i=0;i<items.length;i++){ if(items[i][d.typeField]===d.inVal) inc+=val(items[i],d.amountField); else if(items[i][d.typeField]===d.outVal) out+=val(items[i],d.amountField);} v=inc-out; }
+    else if(d.kind==="low"){ for(var i=0;i<items.length;i++) if(val(items[i],d.field) < val(items[i],d.min)) v++; }
+    else if(d.kind==="invValue"){ for(var i=0;i<items.length;i++) v+=val(items[i],d.field)*val(items[i],d.price); }
+    else if(d.kind==="profitSimple"){ var r=0,c=0; for(var i=0;i<items.length;i++){ r+=val(items[i],d.revenue); c+=val(items[i],d.cost);} v=r-c; }
+    else if(d.kind==="profit"){ for(var i=0;i<items.length;i++) v+=(val(items[i],d.price)-val(items[i],d.cost))*val(items[i],d.qty); }
+    else if(d.kind==="avg"){ if(items.length){ var s2=0; for(var i=0;i<items.length;i++) s2+=val(items[i],d.field); v=(s2/items.length).toFixed(1);} else v=0; }
+    h+='<div class="sum-line"><span>'+d.label+'</span><b>'+v+'</b></div>';
+  }
+  s.innerHTML=h;
+}
+function add(){
+  var it={t:Date.now()};
+  for(var i=0;i<CONFIG.fields.length;i++){ var f=CONFIG.fields[i]; var el=document.getElementById("f_"+f.key); it[f.key]= (f.type==="number") ? (el.value===""?"":el.value) : el.value; }
+  if(!it[CONFIG.fields[0].key]){ alert("请填写"+CONFIG.fields[0].label); return; }
+  items.unshift(it); save();
+  for(var i=0;i<CONFIG.fields.length;i++){ document.getElementById("f_"+CONFIG.fields[i].key).value=""; }
+}
+function del(i){ items.splice(i,1); save(); }
+render();
+
+
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({
+        model:'hunyuan-pro',
+        messages:aiHistory,
+        stream: false
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+
+</script>
+</body>
+</html>

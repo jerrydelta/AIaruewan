@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>本地优先植物养护（买断·隐私）</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600}.item .s{font-size:13px;color:var(--muted)}
+.mini{display:inline-block;padding:6px 10px;border:none;border-radius:8px;font-size:13px;cursor:pointer;margin:6px 6px 0 0}
+.mini.ok{background:var(--ok);color:#fff}.mini.del{background:#eee;color:#999}
+.due{color:var(--coral);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">plant</span><span class="tag">watering_reminder</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">本地优先植物养护（买断·隐私）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Offline-first / local-first plant care (buy-once, privacy)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">植物养护类多依赖云端 AI，隐私敏感用户与网络不稳场景受限。用户要"本地优先、买断、无订阅"的养护工具。本工具 100% 离线、数据只存本机。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 养护计划（本地存储）</b>
+    <label>植物名称</label>
+    <input id="oName" placeholder="如：卧室绿萝">
+    <div class="row">
+      <div><label>浇水周期(天)</label><input id="oW" type="number" value="7" min="1"></div>
+      <div><label>施肥周期(天)</label><input id="oF" type="number" value="30" min="1"></div>
+    </div>
+    <label>上次浇水</label>
+    <input id="oLastW" type="date">
+    <button class="btn" onclick="addOff()">添加（仅存本机）</button>
+  </div>
+  <div class="card" id="list">
+    <b>📋 本地养护清单</b>
+    <div id="items"></div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.greensage.co.uk/blog/picturethis-vs-green-sage" target="_blank" style="color:var(--coral)">Green Sage / Waterbot</a>
+  </div>
+<script>
+const KEY="P11-20260719-009";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function daysBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+function addOff(){
+  const name=document.getElementById('oName').value.trim();
+  if(!name){ alert('请输入植物名称'); return; }
+  const w=parseInt(document.getElementById('oW').value)||7;
+  const f=parseInt(document.getElementById('oF').value)||30;
+  const lastW=document.getElementById('oLastW').value;
+  items.push({id:Date.now(),name,w,f,lastW});
+  document.getElementById('oName').value='';
+  save();
+}
+function mark(id,key){ const it=items.find(x=>x.id===id); if(!it)return; it[key]=new Date().toISOString().slice(0,10); save(); }
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function render(){
+  const box=document.getElementById('items');
+  if(!items.length){ box.innerHTML='<p style="font-size:13px;color:var(--muted)">本地暂无植物。</p>'; return; }
+  const today=new Date().toISOString().slice(0,10);
+  box.innerHTML=items.map(it=>{
+    let w='';
+    if(it.lastW){ const n=new Date(new Date(it.lastW).getTime()+it.w*86400000).toISOString().slice(0,10); const d=daysBetween(today,n); w='浇水还剩 '+Math.max(d,0)+' 天'; }
+    return '<div class="item"><div class="t">'+it.name+'</div>'+
+      '<div class="s due">'+w+' · 施肥每 '+it.f+' 天</div>'+
+      '<button class="mini ok" onclick="mark('+it.id+',\'lastW\')">已浇水</button>'+
+      '<button class="mini del" onclick="del('+it.id+')">删除</button></div>';
+  }).join('');
+}
+render();
+</script>
+</body>
+</html>

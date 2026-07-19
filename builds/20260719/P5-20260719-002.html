@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>50+适老自适应训练</title>
+<style>
+:root{
+  --coral:#FF6B6B;        /* 主品牌色 */
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">fitness</span><span class="tag">senior_adaptive_workout_50plus</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">50+适老自适应训练</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Low-barrier adaptive at-home workout for adults 50+</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">NicheMetric将「银发健身」列为健身app最大未满足细分。Restart! 专为50+久坐/慢病/有伤老人群设计，无器械居家训练，按反馈自动调下一练。主流app假设用户已有基础体能。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#666;margin:8px 0">为50+用户记录居家训练，按身体情况与感受给出下次建议。</p>
+<label>身体状况</label><select id="f_condition"><option value="高血压">高血压</option><option value="关节炎">关节炎</option><option value="平衡弱">平衡弱</option><option value="久坐">久坐</option></select>
+<label>今日动作</label><input type="text" id="f_exercise" placeholder="如 椅子深蹲">
+<label>时长(分钟)</label><input type="number" id="f_durationMin" placeholder="如 20">
+<label>感受</label><select id="f_feel"><option value="轻松">轻松</option><option value="适中">适中</option><option value="吃力">吃力</option></select>
+    <button class="btn" onclick="addItem()">保存记录</button>
+    <div id="derive" style="font-size:13px;color:var(--coral);margin-top:8px"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="#" style="color:var(--coral)">Restart! / Fitbod / Apple Fitness+</a>
+  </div>
+
+<script>
+const KEY="P5-20260719-002";
+const FIELDS=[{"label":"身体状况","key":"condition"},{"label":"今日动作","key":"exercise"},{"label":"时长(分钟)","key":"durationMin"},{"label":"感受","key":"feel"}];
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addItem(){
+const v_condition=document.getElementById('f_condition').value;
+const v_exercise=document.getElementById('f_exercise').value;
+const v_durationMin=document.getElementById('f_durationMin').value;
+const v_feel=document.getElementById('f_feel').value;
+  const item={ ts:Date.now() , condition:v_condition, exercise:v_exercise, durationMin:v_durationMin, feel:v_feel };
+  items.unshift(item);
+  save();
+  document.getElementById('f_condition').value='';
+document.getElementById('f_exercise').value='';
+document.getElementById('f_durationMin').value='';
+document.getElementById('f_feel').value='';
+  const dv=derive(item);
+  document.getElementById('derive').textContent = dv?('已保存 ✓ '+dv):'已保存 ✓';
+}
+function derive(it){ if(it.feel==='吃力') return '⚠️ 吃力：下次降难度或缩短时长'; if(it.feel==='轻松') return '👍 轻松：可适度增加'; return '➡️ 适中：维持当前方案'; return ''; }
+function rowHTML(it){
+  let h='<div style="font-size:12px;color:var(--muted)">'+(new Date(it.ts).toLocaleString())+'</div>';
+  FIELDS.forEach(f=>{ if(it[f.key]!==''){ h+='<div style="font-size:14px;margin:2px 0"><b>'+f.label+'：</b>'+it[f.key]+'</div>'; } });
+  const d=derive(it); if(d) h+='<div style="font-size:13px;color:var(--coral);margin-top:4px">'+d+'</div>';
+  return h;
+}
+function render(){
+  const el=document.getElementById('list');
+  if(!items.length){ el.innerHTML='<div style="font-size:13px;color:var(--muted)">暂无记录，添加第一条吧。</div>'; return; }
+  el.innerHTML='<b style="font-size:13px">📋 记录 ('+items.length+')</b>'+items.map((it,i)=>'<div style="border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px">'+rowHTML(it)+'<button class="btn" style="background:#bbb;margin-top:8px" onclick="del('+i+')">删除</button></div>').join('');
+}
+function del(i){ items.splice(i,1); save(); }
+render();
+
+</script>
+</body>
+</html>

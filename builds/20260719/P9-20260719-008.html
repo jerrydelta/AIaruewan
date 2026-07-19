@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>零工跨平台口碑 · 接单健康度看板</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:8px}
+.stat b{color:var(--coral);font-size:18px}
+.del{color:var(--muted);font-size:12px;cursor:pointer;border:none;background:none}
+.item{border-bottom:1px dashed var(--line);padding:8px 0;font-size:14px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">gig_economy</span><span class="tag">client_review</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">零工跨平台口碑 · 接单健康度看板</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Cross-platform reputation & booking-health</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">零工在 Upwork/Fiverr/滴滴/美团 等多平台有不同评分与接单率，但没有任何工具把"跨平台口碑与接单健康度"统一看板化。这是明显的需求空白。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>平台</label>
+    <input type="text" id="plat" placeholder="如：Upwork / 滴滴 / 美团">
+    <label>评分（1-5）</label>
+    <input type="number" id="rating" placeholder="5" step="0.1" min="0" max="5">
+    <label>接单率（%，0-100）</label>
+    <input type="number" id="rate" placeholder="80" step="1" min="0" max="100">
+    <label>评价数</label>
+    <input type="number" id="reviews" placeholder="0" step="1">
+    <button class="btn" onclick="addRec()">+ 更新平台数据</button>
+    <div class="stat" id="health">填写后显示健康度</div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/us/search?term=gig%20worker%20rating" target="_blank" style="color:var(--coral)">Gigwalk · Field Agent（跨平台口碑空白）</a>
+  </div>
+
+<script>
+const KEY="P9-20260719-008";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render()}
+function addRec(){
+  const plat=document.getElementById("plat").value.trim()||"未命名";
+  const rating=Math.min(5,Math.max(0,parseFloat(document.getElementById("rating").value)||0));
+  const rate=Math.min(100,Math.max(0,parseFloat(document.getElementById("rate").value)||0));
+  const reviews=parseInt(document.getElementById("reviews").value)||0;
+  if(!plat){alert("请输入平台");return}
+  const health=Math.round(rating/5*60+rate/100*40);
+  items.push({plat,rating,rate,reviews,health});
+  ["plat","rating","rate","reviews"].forEach(id=>document.getElementById(id).value="");
+  save();
+}
+function render(){
+  let total=0;
+  items.forEach(i=>total+=i.health);
+  const avg=items.length?Math.round(total/items.length):0;
+  let html="<b>📈 接单健康度（评分60% + 接单率40%）</b>";
+  if(items.length===0)html+="<p style='font-size:13px;color:var(--muted)'>暂无数据</p>";
+  html+=`<div style="margin:4px 0">综合健康度：<b class="h-coral" style="font-size:18px">${avg}</b>/100</div>`;
+  items.slice().reverse().forEach((i)=>{
+    const warn=i.health<50?"🔴 偏低，建议提升":"🟢 健康";
+    html+=`<div class="item">${i.plat}：${warn}<br>评分 ${i.rating} · 接单率 ${i.rate}% · ${i.reviews}评价 → 健康度 <b class="h-coral">${i.health}</b></div>`;
+  });
+  document.getElementById("health").innerHTML=html;
+  let l="<b>📋 平台记录</b>";
+  if(items.length===0)l+="<p style='font-size:13px;color:var(--muted)'>暂无记录</p>";
+  items.slice().reverse().forEach((i,idx)=>{
+    const real=items.length-1-idx;
+    l+=`<div class="item"><div class="row"><div>${i.plat} · 健康度<b class="h-coral">${i.health}</b></div><button class="del" onclick="del(${real})">删除</button></div></div>`;
+  });
+  document.getElementById("list").innerHTML=l;
+}
+function del(i){items.splice(i,1);save()}
+render();
+</script>
+</body>
+</html>

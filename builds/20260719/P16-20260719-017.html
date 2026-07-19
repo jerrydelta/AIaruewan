@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>一人公司收支台账</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">micro_saas</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">一人公司收支台账</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">JA OPC back-office SaaS: tax/invoicing/Stripe+payment reconciliation.</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本"个人 SaaS""0円 SaaS（用云免费额度盈利）"运动正在扩大。一人公司（OPC）指南案例中，用 Next.js+Railway+Stripe 做到月 MRR 从 5 万日元增至 60 万日元/年，毛利率 88%</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>日期</label><input id="f_date" type="date">
+<label>类别</label><select id="f_cat"><option>收入-Stripe</option><option>收入-银行入账</option><option>支出-发票</option><option>支出-云服务</option><option>支出-其他</option></select>
+<label>金额（日元）</label><input id="f_amt" type="number" placeholder="0">
+<label>备注</label><input id="f_note" placeholder="如 客户A 月费">
+<button class="btn" onclick="addItem()">+ 记一笔</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.opcguide.com/saas-solo-developer-case" target="_blank" style="color:var(--coral)">個人SaaS コミュニティ / OPC 一人会社</a>
+  </div>
+
+<script>
+
+const KEY="P16-20260719-017";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addItem(){
+  const date=document.getElementById('f_date').value||new Date().toISOString().slice(0,10);
+  const cat=document.getElementById('f_cat').value;
+  const amt=parseFloat(document.getElementById('f_amt').value);
+  const note=document.getElementById('f_note').value.trim();
+  if(isNaN(amt)){alert('请填写金额');return;}
+  items.push({date,cat,amt,note,added:new Date().toLocaleString()});
+  save();
+  document.getElementById('f_amt').value='';document.getElementById('f_note').value='';
+}
+function del(i){items.splice(i,1);save();}
+function render(){
+  const el=document.getElementById('list');
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">暂无记录</p>';return;}
+  let inc=0,exp=0;
+  items.forEach(it=>{ if(it.cat.indexOf('收入')>=0) inc+=it.amt; else exp+=it.amt; });
+  const months={};
+  items.forEach(it=>{ const m=it.date.slice(0,7); months[m]=(months[m]||0)+it.amt*(it.cat.indexOf('收入')>=0?1:-1); });
+  const monthRows=Object.keys(months).sort().map(m=>'<div style="font-size:13px">'+m+'：<b class="h-coral">'+Math.round(months[m]).toLocaleString()+' 円</b></div>').join('');
+  el.innerHTML='<b>💴 收支台账（'+items.length+' 笔）</b>'+
+    '<div style="margin:6px 0;font-size:14px">收入 <b class="h-coral">'+Math.round(inc).toLocaleString()+'</b> 円 ／ 支出 '+Math.round(exp).toLocaleString()+' 円 ／ 净额 <b>'+Math.round(inc-exp).toLocaleString()+'</b> 円</div>'+
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:6px">消费税概算（10%）：'+Math.round(exp*0.1).toLocaleString()+' 円</div>'+
+    (monthRows?'<div style="border-top:1px dashed var(--line);padding-top:6px;margin-top:4px">'+monthRows+'</div>':'')+
+    items.slice().reverse().map((it,ri)=>{
+      const idx=items.length-1-ri;
+      const sign=it.cat.indexOf('收入')>=0?'+':'';
+      return '<div style="border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:6px">'+
+        '<div style="display:flex;justify-content:space-between"><span style="font-weight:600">'+sign+Math.round(it.amt).toLocaleString()+' 円</span><span class="tag">'+esc(it.cat)+'</span></div>'+
+        '<div style="font-size:12px;color:var(--muted)">'+esc(it.date)+(it.note?(' · '+esc(it.note)):'')+'</div>'+
+        '<button class="btn" style="background:#fff;color:var(--coral);border:1px solid var(--line);margin-top:4px;padding:8px" onclick="del('+idx+')">删除</button>'+
+        '</div>';
+    }).join('');
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+render();
+</script>
+</body>
+</html>

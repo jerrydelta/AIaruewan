@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>银发语音陪伴日记</title>
+<style>
+:root{
+  --coral:#FF6B6B;        /* 主品牌色 */
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">elderly</span><span class="tag">senior_voice_companion</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">银发语音陪伴日记</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Screen-free AI voice companion journal</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">老年陪伴是2026最强信号之一。ElliQ纽约试点94%用户表示不那么孤独、用满30天孤独感降95%。痛点：老人孤独、子女远距离难陪伴。机会：无屏/低门槛AI语音陪伴+家属端。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#666;margin:8px 0">记录每日陪伴互动与情绪，追踪老人孤独改善趋势。</p>
+<label>日期</label><input type="date" id="f_cdate" placeholder="">
+<label>陪伴话题</label><input type="text" id="f_topic" placeholder="如 聊天气/回忆">
+<label>情绪</label><select id="f_mood"><option value="开心">开心</option><option value="平静">平静</option><option value="孤独">孤独</option><option value="焦虑">焦虑</option></select>
+<label>互动(分钟)</label><input type="number" id="f_minutes" placeholder="如 15">
+    <button class="btn" onclick="addItem()">保存记录</button>
+    <div id="derive" style="font-size:13px;color:var(--coral);margin-top:8px"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="#" style="color:var(--coral)">ElliQ / Ato / CareYaya QuikTok / JoyCalls</a>
+  </div>
+
+<script>
+const KEY="P5-20260719-013";
+const FIELDS=[{"label":"日期","key":"cdate"},{"label":"陪伴话题","key":"topic"},{"label":"情绪","key":"mood"},{"label":"互动(分钟)","key":"minutes"}];
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addItem(){
+const v_cdate=document.getElementById('f_cdate').value;
+const v_topic=document.getElementById('f_topic').value;
+const v_mood=document.getElementById('f_mood').value;
+const v_minutes=document.getElementById('f_minutes').value;
+  const item={ ts:Date.now() , cdate:v_cdate, topic:v_topic, mood:v_mood, minutes:v_minutes };
+  items.unshift(item);
+  save();
+  document.getElementById('f_cdate').value='';
+document.getElementById('f_topic').value='';
+document.getElementById('f_mood').value='';
+document.getElementById('f_minutes').value='';
+  const dv=derive(item);
+  document.getElementById('derive').textContent = dv?('已保存 ✓ '+dv):'已保存 ✓';
+}
+function derive(it){ if(it.mood==='孤独'||it.mood==='焦虑') return '💛 情绪偏低，建议增加陪伴互动'; return '😊 情绪良好'; return ''; }
+function rowHTML(it){
+  let h='<div style="font-size:12px;color:var(--muted)">'+(new Date(it.ts).toLocaleString())+'</div>';
+  FIELDS.forEach(f=>{ if(it[f.key]!==''){ h+='<div style="font-size:14px;margin:2px 0"><b>'+f.label+'：</b>'+it[f.key]+'</div>'; } });
+  const d=derive(it); if(d) h+='<div style="font-size:13px;color:var(--coral);margin-top:4px">'+d+'</div>';
+  return h;
+}
+function render(){
+  const el=document.getElementById('list');
+  if(!items.length){ el.innerHTML='<div style="font-size:13px;color:var(--muted)">暂无记录，添加第一条吧。</div>'; return; }
+  el.innerHTML='<b style="font-size:13px">📋 记录 ('+items.length+')</b>'+items.map((it,i)=>'<div style="border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px">'+rowHTML(it)+'<button class="btn" style="background:#bbb;margin-top:8px" onclick="del('+i+')">删除</button></div>').join('');
+}
+function del(i){ items.splice(i,1); save(); }
+render();
+
+</script>
+</body>
+</html>

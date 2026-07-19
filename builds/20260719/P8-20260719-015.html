@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>日本向自托管秘密管理简单导入</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.small{font-size:12px;color:var(--muted)}
+.del{color:var(--coral);font-size:13px;cursor:pointer;float:right}
+</style>
+</head>
+<body>
+<div class="card">
+  <div><span class="tag">privacy</span><span class="tag">local_storage</span></div>
+  <h1 style="font-size:20px;margin:8px 0 4px">日本向 自托管秘密管理·简单导入</h1>
+  <p class="h-coral" style="font-size:13px;margin:0">Easy self-hosted secret management for Japan</p>
+</div>
+<div class="card">
+  <b>💡 痛点</b>
+  <p style="font-size:14px;color:#555;margin:6px 0 0">日本「自托管·数据主权」需求升高，Vaultwarden 59K+ stars、KeePassXC 获法国国防部认证。但日本用户的日语搭建/托管步骤不足。</p>
+</div>
+<div class="card">
+  <b>🛠 工具 · 秘密保管 + 导入向导</b>
+  <label>秘密名称</label><input id="name" placeholder="如：域名注册商密码">
+  <label>值 / 密钥</label><input id="val" placeholder="内容">
+  <label>备注</label><input id="note" placeholder="用途说明">
+  <button class="btn" onclick="addSec()">本地保存</button>
+  <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+  <b>🧭 自托管导入步骤（勾选记录进度）</b>
+  <div id="steps"></div>
+</div>
+<div class="card" id="list"></div>
+<div class="card" style="font-size:12px;color:var(--muted)">
+  <b>来源参考</b><br>
+  <a href="https://keepassxc.org/" target="_blank" style="color:var(--coral)">Vaultwarden / KeePassXC（OSS 自托管）</a>
+</div>
+<script>
+const KEY="P8-20260719-015";
+let secs=JSON.parse(localStorage.getItem(KEY)||"[]");
+let steps=JSON.parse(localStorage.getItem(KEY+"_steps")||"[false,false,false,false,false]");
+const STEP_TXT=["① 选服务器（如 ConoHa / Sakura 等日本VPS）","② 用 Docker 部署 Vaultwarden","③ 配置域名与 HTTPS","④ 导入已有密码库（csv/json）","⑤ 安装浏览器扩展并登录"];
+function saveSec(){localStorage.setItem(KEY,JSON.stringify(secs));render();}
+function addSec(){const n=name.value.trim(),v=val.value.trim(),nt=note.value.trim();if(!n||!v){alert("请填名称和值");return;}secs.unshift({n,v,nt});name.value=val.value=note.value="";saveSec();}
+function del(i){secs.splice(i,1);saveSec();}
+function toggleStep(i){steps[i]=!steps[i];localStorage.setItem(KEY+"_steps",JSON.stringify(steps));renderSteps();}
+function renderSteps(){document.getElementById("steps").innerHTML=steps.map((s,i)=>`<div class='item' onclick='toggleStep(${i})' style='cursor:pointer'>${s?"✅":"⬜"} ${STEP_TXT[i]}</div>`).join("");}
+function render(){let o=`<b>🔐 秘密保管（${secs.length}）</b>`;if(!secs.length)o+="<p class='small'>还没有秘密。</p>";secs.forEach((x,i)=>{o+=`<div class='item'><span class='del' onclick='del(${i})'>删除</span><b>${x.n}</b><div class='small'>${x.v}</div>${x.nt?`<div class='small' style='margin-top:4px'>${x.nt}</div>`:""}</div>`;});list.innerHTML=o;renderSteps();}
+render();
+</script>
+</body>
+</html>

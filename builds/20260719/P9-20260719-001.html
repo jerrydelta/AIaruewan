@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>多平台零工收入聚合 + 自动分桶预缴税管家</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.ghost{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.small{font-size:12px;color:var(--muted)}
+.stat{display:flex;justify-content:space-between;font-size:14px;padding:4px 0;border-bottom:1px dashed var(--line)}
+.stat b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;text-decoration:underline}
+.item{font-size:13px;padding:8px 0;border-bottom:1px solid var(--line)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">gig_economy</span><span class="tag">income_tracker</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">多平台零工收入聚合 + 自动分桶预缴税管家</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Multi-app gig earnings aggregator with auto tax-bucket splitting</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">美国零工普遍同时跑 Uber/DoorDash/Instacart 多个平台，收入分散、扣费不透明、报税混乱。现有工具多为单平台或纯里程记录，缺乏把多平台收入自动归集 + 按税档自动分流到"预缴税桶"的一体化方案。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 收入入账与税桶</b>
+    <label>平台</label>
+    <select id="platform">
+      <option>Uber</option><option>DoorDash</option><option>Instacart</option><option>其他</option>
+    </select>
+    <label>日期</label>
+    <input type="date" id="date">
+    <label>毛收入（税前 $）</label>
+    <input type="number" id="gross" placeholder="例如 180">
+    <label>里程抵扣（$0.67/英里自动估算，可改）</label>
+    <div class="row">
+      <div><input type="number" id="miles" placeholder="英里数"></div>
+      <div><input type="number" id="expense" placeholder="其他费用$"></div>
+    </div>
+    <label>税桶比例（默认 25%）</label>
+    <input type="number" id="rate" value="25">
+    <button class="btn" onclick="add()">入账并锁税</button>
+    <div class="small" style="margin-top:8px">净收入 = 毛收入 − 里程抵扣 − 其他费用；税桶 = 净收入 × 比例，单独锁定不花。</div>
+  </div>
+
+  <div class="card">
+    <b>📊 汇总看板</b>
+    <div id="summary"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://everlance.com/" target="_blank" style="color:var(--coral)">Everlance / Shift Tracker / WBB Gig Taxes / GigFlow</a>
+  </div>
+
+<script>
+const KEY="P9-20260719-001";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const RATE_MILE=0.67;
+function fmt(n){return "$"+(Math.round(n*100)/100).toLocaleString();}
+function add(){
+  const platform=document.getElementById("platform").value;
+  const date=document.getElementById("date").value||new Date().toISOString().slice(0,10);
+  const gross=parseFloat(document.getElementById("gross").value)||0;
+  const miles=parseFloat(document.getElementById("miles").value)||0;
+  const expense=parseFloat(document.getElementById("expense").value)||0;
+  const rate=(parseFloat(document.getElementById("rate").value)||25)/100;
+  const mileDeduct=miles*RATE_MILE;
+  const net=gross-mileDeduct-expense;
+  const bucket=net*rate;
+  items.unshift({platform,date,gross,miles,mileDeduct,expense,net,bucket,id:Date.now()});
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function render(){
+  const sum=document.getElementById("summary");
+  const totalNet=items.reduce((s,x)=>s+x.net,0);
+  const totalBucket=items.reduce((s,x)=>s+x.bucket,0);
+  const byPlat={};
+  items.forEach(x=>byPlat[x.platform]=(byPlat[x.platform]||0)+x.net);
+  sum.innerHTML='<div class="stat"><span>净收入合计</span><b>'+fmt(totalNet)+'</b></div>'+
+    '<div class="stat"><span>🔒 已锁税桶</span><b>'+fmt(totalBucket)+'</b></div>'+
+    '<div class="stat"><span>可花费余额</span><b>'+fmt(totalNet-totalBucket)+'</b></div>'+
+    Object.keys(byPlat).map(p=>'<div class="stat"><span>'+p+' 净收</span><span>'+fmt(byPlat[p])+'</span></div>').join("");
+  const list=document.getElementById("list");
+  list.innerHTML='<b>📋 入账记录（'+items.length+'）</b>'+
+    (items.length?items.map(x=>'<div class="item"><div style="display:flex;justify-content:space-between"><b>'+x.platform+' · '+x.date+'</b><span class="del" onclick="del('+x.id+')">删除</span></div><div class="small">毛'+fmt(x.gross)+' −里程'+fmt(x.mileDeduct)+' −费'+fmt(x.expense)+' = 净 <b>'+fmt(x.net)+'</b>；税桶 '+fmt(x.bucket)+'</div></div>').join(""):'<p class="small">暂无记录</p>');
+}
+render();
+</script>
+</body>
+</html>

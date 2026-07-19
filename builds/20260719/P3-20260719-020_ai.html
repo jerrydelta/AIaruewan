@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI原生食谱管理器（多源导入+自动换算+库存感知购物清单）</title>
+<style>:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;--ai-border:#7C3AED;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.card.ai{border:1px solid var(--ai-border)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.btn.ai{background:linear-gradient(135deg,#7C3AED,#FF6B6B);color:#fff}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+.tag.ai{color:#fff;background:var(--ai-border);border-color:var(--ai-border)}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.prog{height:8px;background:#EEE;border-radius:999px;margin-top:10px;overflow:hidden}
+.bar{height:100%;width:0;background:var(--coral);transition:.3s}
+.ws-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.ws-item .del{color:var(--coral);font-size:12px;cursor:pointer;margin-left:auto}
+.ws-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--muted);flex:0 0 auto;margin-top:2px;cursor:pointer}
+.ws-dot.on{background:var(--ok);border-color:var(--ok)}
+.feat{display:block;font-size:14px;color:var(--ink);margin:6px 0;cursor:pointer}
+.feat input{width:auto;margin-right:6px}
+.out{margin-top:10px;font-size:14px;color:var(--ink);background:#FFF7F7;border-radius:10px;padding:10px}
+.collapse-header{cursor:pointer}
+.collapse-body.collapsed{display:none}
+.ai-msg{background:#F6F0FF;border-radius:10px;padding:8px 10px;margin-top:8px;font-size:13px}
+.ai-msg .role{font-size:11px;color:var(--ai-border);font-weight:600}
+.loading{color:var(--muted)}
+small{color:var(--muted)}
+a{color:var(--coral)}
+</style></head>
+<body>
+  <div class="card">
+    <div><span class="tag">food</span><span class="tag">recipe_management</span><span class="tag">recipe manager</span><span class="tag">recipe clipper</span><span class="tag">meal planner</span><span class="tag">grocery list</span><span class="tag ai">AI增强</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI原生食谱管理器（多源导入+自动换算+库存感知购物清单）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI-native recipe manager with multi-source import, auto-scaling, and pantry-aware grocery list</p>
+  </div>
+
+  <div class="card"><b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Recipe manager/organizer apps are a proven, profitable category. Paprika ($4.99 one-time/platform, best-in-class web importer, offline) dominates serious home cooks; AnyList wins families (shared lists); Mise (2025) adds AI import from Safari/YouTube/photos + scaling; Recipe Keeper adds OCR for handwritten cards; Plan to Eat ($4.95/mo) drag-drop planner. Gap: an AI-native recipe manager that imports from ANY source (incl. TikTok/IG video + handwriting), auto-scales, and builds a pantry-aware grocery list — at a fair one-time or low sub price.</p></div>
+
+  <div class="card">
+    <b>🛠 本地工作台</b>
+    <p style="font-size:13px;color:#555">把「AI原生食谱管理器（多源导入+自动换算+库存感知购物清单）」落地成你的执行清单。数据仅存你浏览器本地。</p>
+    <label>添加条目 / 任务</label>
+    <input id="newItem" placeholder="例如：本周完成 MVP 原型">
+    <button class="btn" id="addBtn">添加到工作台</button>
+    <div id="items" style="margin-top:8px"></div>
+    <div class="prog"><div class="bar" id="bar"></div></div>
+    <small id="progTxt" style="color:var(--muted)"></small>
+  </div>
+
+  <div class="card">
+    <b>✅ 推荐功能清单（来自发现线索）</b>
+    <div id="featList" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card">
+    <b>🧮 收益速算器</b>
+    <p style="font-size:13px;color:#555">粗略估算你的手搓项目月利润与回本周期。</p>
+    <div class="row">
+      <div><label>客单价 ¥</label><input id="price" type="number" placeholder="如 29"></div>
+      <div><label>月销量</label><input id="vol" type="number" placeholder="如 200"></div>
+    </div>
+    <label>单件变动成本 ¥</label><input id="cost" type="number" placeholder="如 5">
+    <label>一次性投入 ¥（可选）</label><input id="init" type="number" placeholder="如 3000">
+    <button class="btn" id="calcBtn">计算月利润</button>
+    <div id="calcOut" class="out"></div>
+  </div>
+
+  <div class="card ai" id="aiCard_P3-20260719-020">
+    <div class="collapse-header" id="aiHeader_P3-20260719-020" onclick="toggleAI('P3-20260719-020')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P3-20260719-020" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P3-20260719-020">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P3-20260719-020" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P3-20260719-020')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。</p>
+      </div>
+      <div id="aiChatSection_P3-20260719-020" style="display:none;margin-top:10px">
+        <div id="aiMessages_P3-20260719-020" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P3-20260719-020" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P3-20260719-020')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源 / 参考</b><br><a href="https://apps.apple.com/us/app/paprika-recipe-manager/id431493319" target="_blank">https://apps.apple.com/us/app/paprika-recipe-manager/id431493319</a><br><a href="https://trymise.app/blog/best-recipe-apps-for-iphone" target="_blank">https://trymise.app/blog/best-recipe-apps-for-iphone</a><br><a href="https://www.savortheapp.com/blog/food-tracking-apps/organize-recipes-app" target="_blank">https://www.savortheapp.com/blog/food-tracking-apps/organize-recipes-app</a><br>· Paprika Recipe Manager<br>· AnyList<br>· Mise<br>· Recipe Keeper
+  </div>
+
+<script>
+
+const ID="P3-20260719-020";
+const SEED=["AI import from web/YouTube/TikTok/handwritten", "auto recipe scaling", "pantry-aware grocery list", "offline access", "family shared lists"];
+let items=JSON.parse(localStorage.getItem(ID+"_items")||"[]");
+let feats=JSON.parse(localStorage.getItem(ID+"_feats")||"null")||SEED.map(f=>({t:f,done:false}));
+function saveItems(){localStorage.setItem(ID+"_items",JSON.stringify(items));}
+function saveFeats(){localStorage.setItem(ID+"_feats",JSON.stringify(feats));}
+function esc_html(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function render(){
+  const ib=document.getElementById("items");
+  if(!items.length){ib.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">暂无条目，添加你的第一个任务。</p>';}
+  else ib.innerHTML=items.map((r,i)=>'<div class="ws-item"><span class="del" data-i="'+i+'">✕</span><span class="ws-dot '+(r.done?"on":"")+'" data-i="'+i+'"></span><div><b>'+esc_html(r.t)+'</b>'+(r.note?('<br><small>'+esc_html(r.note)+'</small>'):"")+'</div></div>').join("");
+  ib.querySelectorAll(".del").forEach(e=>e.onclick=()=>{items.splice(+e.dataset.i,1);saveItems();render();});
+  ib.querySelectorAll(".ws-dot").forEach(e=>e.onclick=()=>{items[+e.dataset.i].done=!items[+e.dataset.i].done;saveItems();render();});
+  const fb=document.getElementById("featList");
+  fb.innerHTML=feats.map((f,i)=>'<label class="feat"><input type="checkbox" data-i="'+i+'" '+(f.done?"checked":"")+'> '+esc_html(f.t)+'</label>').join("");
+  fb.querySelectorAll("input").forEach(c=>c.onchange=()=>{feats[+c.dataset.i].done=c.checked;saveFeats();updProg();});
+  updProg();
+}
+function updProg(){
+  const tot=items.length+feats.length;
+  const done=items.filter(x=>x.done).length+feats.filter(x=>x.done).length;
+  const pct=tot?Math.round(done/tot*100):0;
+  document.getElementById("bar").style.width=pct+"%";
+  document.getElementById("progTxt").textContent="完成 "+done+"/"+tot+"（"+pct+"%）";
+}
+document.getElementById("addBtn").onclick=function(){
+  const t=document.getElementById("newItem").value.trim();
+  if(!t)return;
+  items.push({t:t,note:"",done:false});
+  document.getElementById("newItem").value="";
+  saveItems();render();
+};
+render();
+
+
+if(document.getElementById("calcBtn")){
+  document.getElementById("calcBtn").onclick=function(){
+    const p=parseFloat(document.getElementById("price").value)||0;
+    const v=parseFloat(document.getElementById("vol").value)||0;
+    const c=parseFloat(document.getElementById("cost").value)||0;
+    const init=parseFloat(document.getElementById("init").value)||0;
+    const profit=(p-c)*v;
+    const payback=init>0&&profit>0?(init/profit).toFixed(1)+" 个月":(profit>0?"当月即回本":"尚未盈利");
+    document.getElementById("calcOut").innerHTML="<b>月利润：</b>¥"+profit.toLocaleString()+"<br><b>回本周期：</b>"+payback;
+  };
+}
+
+
+let aiKey=localStorage.getItem("HY3_API_KEY")||"";
+let aiSys="你是「AI原生食谱管理器（多源导入+自动换算+库存感知购物清单）」这个手搓工具（方向：AI-native recipe manager with multi-source import, auto-scaling, and pantry-aware grocery list）的AI助手。帮助用户更好地使用本工具、落地该方向，提供专业建议和优化方案。用中文简洁回答。";
+function toggleAI(id){
+  const body=document.getElementById("aiBody_"+id);
+  const header=document.getElementById("aiHeader_"+id);
+  if(body.classList.contains("collapsed")){body.classList.remove("collapsed");header.classList.remove("collapsed");}
+  else{body.classList.add("collapsed");header.classList.add("collapsed");}
+}
+function saveKey(id){
+  const key=document.getElementById("apiKey_"+id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY",key);aiKey=key;
+  document.getElementById("aiKeySection_"+id).style.display="none";
+  document.getElementById("aiChatSection_"+id).style.display="block";
+}
+async function callHy3(messages,id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading=document.createElement("div");
+  loading.className="ai-msg";
+  loading.innerHTML='<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>';
+  document.getElementById("aiMessages_"+id).appendChild(loading);
+  try{
+    const res=await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+aiKey},
+      body:JSON.stringify({model:"hy3",messages:messages,temperature:0.7})
+    });
+    const data=await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  }catch(e){loading.remove();alert("调用失败："+e.message);return null;}
+}
+function addMsg(role,content,id){
+  const box=document.getElementById("aiMessages_"+id);
+  if(!box)return;
+  const div=document.createElement("div");
+  div.className="ai-msg";
+  div.innerHTML='<div class="role">'+(role==="user"?"🙋 你":"🤖 AI")+'</div><div class="content">'+content.replace(/\n/g,"<br>")+'</div>';
+  box.appendChild(div);box.scrollTop=box.scrollHeight;
+}
+async function aiChat(id){
+  const input=document.getElementById("aiInput_"+id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_"+id).value="";
+  addMsg("user",input,id);
+  const msgs=[{role:"system",content:aiSys},{role:"user",content:input}];
+  const reply=await callHy3(msgs,id);
+  if(reply)addMsg("assistant",reply,id);
+}
+
+</script>
+</body></html>

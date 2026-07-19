@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>에브리타임 세분 기능 MVP</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;
+  --ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;
+  --card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.mini{display:inline-block;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer;margin:3px 4px 0 0}
+.mini.warn{background:var(--coral);color:#fff;border-color:var(--coral)}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600;font-size:14px}.item .meta{font-size:12px;color:var(--muted);margin:4px 0}
+.star{color:#E8A33D}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">student</span><span class="tag">timetable_kr</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">에브리타임 세분 기능 MVP</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Underserved features beyond Everytime (AI course rec / club matching)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Everytime 397개 대학·584만 사용자로 한국 대학생 캠퍼스 슈퍼앱 독점. 신규 진입은 어려우나 미충족 세분 존재：AI 수강신청 추천·취업 연계·동아리 매칭·시험 D-day 플래너 등 에브리타임 미포함 기능.</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 도구 · 강의평가은행 + 동아리 매칭</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">① 강의를 평가(코드/교수/별점/후기)해 은행을 쌓고, ② 관심사를 고르면 맞는 동아리를 추천합니다.</p>
+    <label>강의코드</label><input id="c_code" placeholder="예: CS201">
+    <div class="row">
+      <div><label>교수</label><input id="c_prof" placeholder="교수명"></div>
+      <div><label>별점</label><select id="c_star"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
+    </div>
+    <label>후기</label><textarea id="c_rev" rows="2" placeholder="강의 후기"></textarea>
+    <button class="btn" onclick="addCourse()">강의 평가 등록</button>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <b style="font-size:14px">🤝 동아리 매칭</b>
+    <div style="margin-top:6px">
+      <span class="mini" onclick="toggleInt('운동')">운동</span>
+      <span class="mini" onclick="toggleInt('예술')">예술</span>
+      <span class="mini" onclick="toggleInt('봉사')">봉사</span>
+      <span class="mini" onclick="toggleInt('창업')">창업</span>
+      <span class="mini" onclick="toggleInt('언어')">언어</span>
+      <span class="mini" onclick="toggleInt('게임')">게임</span>
+    </div>
+    <div id="rec" style="font-size:13px;margin-top:8px"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>⭐ 강의평가은행</b><div id="stat" style="font-size:12px;color:var(--muted);margin:6px 0"></div>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>출처</b><br>
+    <a href="https://m.goapk.com/anzhuo/34531.html" target="_blank" style="color:var(--coral)">Everytime(에브리타임) / 超级课程表</a>
+  </div>
+
+<script>
+const KEY="P12-20260719-010";
+let courses=JSON.parse(localStorage.getItem(KEY)||"[]");
+let interests=[];
+const CLUBS={"운동":["FC축구부","클라이밍 동아리"],"예술":["아카펠라","사진 동아리"],"봉사":["지역아동센터 봉사"],"창업":["스타트업 큐브","IDEA톤"],"언어":["영어회화 모임","중국어 교환"],"게임":["게임메이커 동아리","롤 동아리"]};
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function save(){localStorage.setItem(KEY,JSON.stringify(courses));render();}
+function addCourse(){
+  const code=c_code.value.trim(),prof=c_prof.value.trim();if(!code){alert("강의코드를 입력하세요");return;}
+  courses.unshift({id:Date.now(),code,prof,star:+c_star.value,rev:c_rev.value.trim()});
+  c_code.value=c_prof.value=c_rev.value="";save();
+}
+function delCourse(id){courses=courses.filter(x=>x.id!==id);save();}
+function toggleInt(t){if(interests.includes(t))interests=interests.filter(x=>x!==t);else interests.push(t);renderRec();}
+function renderRec(){
+  const d=document.getElementById("rec");
+  if(!interests.length){d.innerHTML='관심사를 선택하면 동아리를 추천합니다.';return;}
+  let rec=[];interests.forEach(i=>(CLUBS[i]||[]).forEach(c=>rec.push(`[${i}] ${c}`)));
+  d.innerHTML='추천 동아리：'+rec.map(c=>`<span class="tag">${esc(c)}</span>`).join("");
+}
+function render(){
+  const avg=courses.length?(courses.reduce((s,x)=>s+x.star,0)/courses.length).toFixed(1):"-";
+  stat.innerHTML=`평가 ${courses.length} · 평균별점 <b class="h-coral">${avg}</b>`;
+  const d=document.getElementById("items");
+  if(!courses.length){d.innerHTML='<p style="font-size:13px;color:var(--muted)">강의를 평가해 은행을 쌓으세요.</p>';return;}
+  d.innerHTML=courses.slice(0,40).map(x=>`
+    <div class="item"><div class="t">${esc(x.code)} · ${esc(x.prof)} <span class="star">${'★'.repeat(x.star)}</span></div>
+    <div class="meta">${esc(x.rev)||"후기 없음"} <span class="mini warn" onclick="delCourse(${x.id})">삭제</span></div></div>`).join("");
+  renderRec();
+}
+render();
+</script>
+</body>
+</html>

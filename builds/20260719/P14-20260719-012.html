@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>自由职业客户门户</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.big{font-size:20px;font-weight:700}
+.muted{color:var(--muted);font-size:13px}
+.del{color:var(--coral);font-size:12px;cursor:pointer;float:right}
+.sum{display:flex;gap:8px;margin-top:8px}
+.sum>div{flex:1;text-align:center;background:#FAFAFA;border-radius:10px;padding:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">micro_saas</span><span class="tag">client_portal</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">自由职业客户门户</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">All-in-one freelancer client portal (invoice+file+contract+payment)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">欧美自由职业者客户门户（约 $7/月）已被个人开发者用 Supabase+Stripe 验证可行；中日自由职业者多用微信/Excel，缺一体化门户。本 MVP 做轻量客户管理：项目金额、发票/合同/收款状态一目了然，统计应收与已收。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>客户 / 项目名</label>
+    <input id="name" placeholder="如 张三-官网设计">
+    <div class="row">
+      <div><label>合同金额(元)</label><input type="number" id="amt" placeholder="5000"></div>
+      <div><label>状态</label>
+        <select id="status"><option>沟通中</option><option>已签合同</option><option>已开票</option><option>已收款</option></select></div>
+    </div>
+    <label>备注（文件/节点）</label>
+    <input id="note" placeholder="如 初稿已发 / 发票号 INV-001">
+    <button class="btn" onclick="addClient()">添加客户项目</button>
+    <div class="sum">
+      <div><div class="muted">应收</div><div class="big h-coral" id="rec">¥0</div></div>
+      <div><div class="muted">已收</div><div class="big" style="color:var(--ok)" id="got">¥0</div></div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>👥 客户项目</b><div id="listBody" style="margin-top:8px"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://dev.to/yashboldhane99/i-built-a-saas-for-freelancers-in-my-spare-time-heres-what-i-learned-1pai" target="_blank" style="color:var(--coral)">独立开发者自由职业 SaaS 实战</a>
+  </div>
+
+<script>
+const KEY="P14-20260719-012";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"clients":[]}');
+function addClient(){
+  const n=document.getElementById('name').value.trim();
+  if(!n){alert("填客户/项目名");return;}
+  data.clients.push({name:n,amt:+document.getElementById('amt').value||0,
+    status:document.getElementById('status').value,note:document.getElementById('note').value.trim()});
+  document.getElementById('name').value='';document.getElementById('amt').value='';document.getElementById('note').value='';
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function render(){
+  const rec=data.clients.reduce((s,c)=>s+c.amt,0);
+  const got=data.clients.filter(c=>c.status==='已收款').reduce((s,c)=>s+c.amt,0);
+  document.getElementById('rec').textContent='¥'+rec.toLocaleString();
+  document.getElementById('got').textContent='¥'+got.toLocaleString();
+  const body=document.getElementById('listBody');
+  body.innerHTML=data.clients.length?data.clients.slice().reverse().map((c,i)=>
+    '<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>'+c.name+'</b> · ¥'+c.amt+
+    ' <span class="tag">'+c.status+'</span>'+(c.note?'<div class="muted" style="font-size:12px">'+c.note+'</div>':'')+
+    ' <span class="del" onclick="del('+i+')">删除</span></div>').join(''):'<div class="muted">还没有客户项目</div>';
+}
+function del(i){data.clients.splice(i,1);save();}
+save();
+</script>
+</body>
+</html>

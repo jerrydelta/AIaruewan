@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>免费隐私植物养护助手</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600}
+.item .s{font-size:13px;color:var(--muted)}
+.mini{display:inline-block;padding:6px 10px;border:none;border-radius:8px;font-size:13px;cursor:pointer;margin:6px 6px 0 0}
+.mini.ok{background:var(--ok);color:#fff}
+.mini.del{background:#eee;color:#999}
+.due{color:var(--coral);font-weight:600}
+.done{color:var(--ok);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">plant</span><span class="tag">watering_reminder</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">免费无限 + 隐私优先植物养护助手</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Free unlimited + on-device private plant care (clone Green Sage)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">PictureThis 等龙头激进付费墙：免费每日仅 3-5 次识别、诊断与提醒锁订阅。用户想要"免费 + 隐私 + 无限"的植物养护，而非被订阅套路。本工具本地优先、无订阅、数据只存你手机。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 我的植物养护清单</b>
+    <label>植物名称 / 备注</label>
+    <input id="pName" placeholder="如：客厅龟背竹">
+    <label>浇水周期（天）</label>
+    <input id="pCycle" type="number" value="7" min="1">
+    <label>上次浇水日期</label>
+    <input id="pLast" type="date">
+    <button class="btn" onclick="addPlant()">添加到我的花园</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 养护清单</b>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.greensage.co.uk/blog/picturethis-vs-green-sage" target="_blank" style="color:var(--coral)">Green Sage / PictureThis 对比</a>
+  </div>
+
+<script>
+const KEY="P11-20260719-001";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function fmt(d){ return d ? d : "—"; }
+function daysBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+function addPlant(){
+  const name=document.getElementById('pName').value.trim();
+  const cycle=parseInt(document.getElementById('pCycle').value)||7;
+  const last=document.getElementById('pLast').value;
+  if(!name){ alert('请输入植物名称'); return; }
+  items.push({id:Date.now(),name,cycle,last});
+  document.getElementById('pName').value='';
+  save();
+}
+function water(id){
+  const it=items.find(x=>x.id===id); if(!it) return;
+  it.last=new Date().toISOString().slice(0,10);
+  save();
+}
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function render(){
+  const box=document.getElementById('items');
+  if(!items.length){ box.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有植物，先添加一盆吧。</p>'; return; }
+  const today=new Date().toISOString().slice(0,10);
+  box.innerHTML=items.map(it=>{
+    let status='', cls='';
+    if(it.last){
+      const next=new Date(new Date(it.last).getTime()+it.cycle*86400000).toISOString().slice(0,10);
+      const d=daysBetween(today,next);
+      status = d>0 ? ('下次浇水：'+next+'（还有 '+d+' 天）') : ('⚠ 该浇水了！（应于 '+next+'）');
+      cls = d>0 ? 'due' : 'done';
+    } else { status='未记录浇水'; cls='due'; }
+    return '<div class="item"><div class="t">'+it.name+'</div>'+
+      '<div class="s '+cls+'">'+status+' · 周期 '+it.cycle+' 天</div>'+
+      '<button class="mini ok" onclick="water('+it.id+')">已浇水</button>'+
+      '<button class="mini del" onclick="del('+it.id+')">删除</button></div>';
+  }).join('');
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>灵活就业连续劳务个税测算 + 到手预测（AI版）</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.small{font-size:12px;color:var(--muted)}
+.stat{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.stat b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;text-decoration:underline}
+.item{font-size:13px;padding:8px 0;border-bottom:1px solid var(--line)}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">gig_economy</span><span class="tag">income_tracker</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">灵活就业连续劳务个税测算 + 到手预测</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Flexible-employment 个税测算 & take-home estimator</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">2025年10月1日起云账户切换"连续劳务"方案，按累计预扣法计算劳务报酬个税（3%-45%七级累进、每月5000减除）。数亿灵活就业者对"到手多少、怎么交税、汇算清缴"高度焦虑。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 按月录入测算</b>
+    <label>月份</label>
+    <input type="month" id="month">
+    <label>本月劳务收入（元）</label>
+    <input type="number" id="income" placeholder="例如 8000">
+    <button class="btn" onclick="add()">测算并保存</button>
+    <div class="small" style="margin-top:8px">按累计预扣法：累计应纳税所得额 = 累计收入 − 累计5000减除；本月预扣税 = 累计税 − 已预扣税。</div>
+  </div>
+
+  <div class="card">
+    <b>📊 到手预测</b>
+    <div id="summary"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+    <div class="collapse-header" onclick="toggleAI()">🤖 AI 助手（用户自带Key · 零成本）</div>
+    <div class="collapse-body collapsed" id="aiBody">
+      <div id="aiKeySection">
+        <label>Hy3 API Key（用户自带，零成本运营）</label>
+        <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+        <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。</div>
+      </div>
+      <div id="aiChatSection" style="display:none">
+        <div id="aiChat"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="aiInput" placeholder="问AI：连续劳务怎么汇算？" style="flex:1">
+          <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://yunzhanghu.com/" target="_blank" style="color:var(--coral)">云账户 / 工猫 / 众薪 / 身边云</a>
+  </div>
+
+<script>
+const KEY="P9-20260719-002";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function cumTax(t){
+  if(t<=0)return 0;
+  const b=[[36000,0.03,0],[144000,0.10,2520],[300000,0.20,16920],[420000,0.25,31920],[660000,0.30,52920],[960000,0.35,85920,[1e12,0.45,181920]]];
+  for(const [cap,r,q] of b){ if(t<=cap) return t*r-q; }
+  return 0;
+}
+function add(){
+  const month=document.getElementById("month").value||new Date().toISOString().slice(0,7);
+  const income=parseFloat(document.getElementById("income").value)||0;
+  items.push({month,income,id:Date.now()});
+  items.sort((a,b)=>a.month.localeCompare(b.month));
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function render(){
+  let cumInc=0,cumTaxPaid=0;
+  const rows=items.map(x=>{
+    cumInc+=x.income;
+    const taxable=cumInc-5000*items.filter(m=>m.month<=x.month).length;
+    const thisCumTax=Math.max(0,cumTax(taxable));
+    const thisMonthTax=thisCumTax-cumTaxPaid;
+    cumTaxPaid=thisCumTax;
+    const take=x.income-thisMonthTax;
+    return {...x,thisMonthTax,take,cumTaxPaid};
+  });
+  const totalInc=items.reduce((s,x)=>s+x.income,0);
+  const totalTax=cumTaxPaid;
+  const sum=document.getElementById("summary");
+  sum.innerHTML='<div class="stat"><span>累计收入</span><b>'+totalInc.toLocaleString()+' 元</b></div>'+
+    '<div class="stat"><span>累计已预扣税</span><b>'+totalTax.toLocaleString()+' 元</b></div>'+
+    '<div class="stat"><span>预计全年到手</span><b>'+(totalInc-totalTax).toLocaleString()+' 元</b></div>';
+  const list=document.getElementById("list");
+  list.innerHTML='<b>📋 月度测算（'+items.length+'）</b>'+
+    (items.length?rows.map(x=>'<div class="item"><div style="display:flex;justify-content:space-between"><b>'+x.month+'</b><span class="del" onclick="del('+x.id+')">删除</span></div><div class="small">收入 '+x.income.toLocaleString()+' − 税 '+x.thisMonthTax.toLocaleString()+' = 到手 <b>'+x.take.toLocaleString()+'</b></div></div>').join(""):'<p class="small">暂无记录</p>');
+}
+render();
+
+let aiKey=localStorage.getItem('hy3_key')||'';
+let aiHistory=[];
+function toggleAI(){document.getElementById('aiBody').classList.toggle('collapsed');}
+function saveKey(){
+  aiKey=document.getElementById('aiKey').value.trim();
+  if(!aiKey){alert('请输入API Key');return;}
+  localStorage.setItem('hy3_key',aiKey);
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+  addAIMessage('assistant','Key已保存！我是你的AI助手，可解答连续劳务个税与汇算问题。');
+}
+async function sendAI(){
+  if(!aiKey){alert('请先保存API Key');return;}
+  const input=document.getElementById('aiInput');
+  const msg=input.value.trim(); if(!msg)return;
+  addAIMessage('user',msg); input.value='';
+  aiHistory.push({role:'user',content:msg});
+  try{
+    const res=await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body:JSON.stringify({model:'hunyuan-pro',messages:aiHistory,stream:false})});
+    const data=await res.json();
+    const reply=data.choices?.[0]?.message?.content||'AI响应失败';
+    aiHistory.push({role:'assistant',content:reply});
+    addAIMessage('assistant',reply);
+  }catch(e){addAIMessage('assistant','调用失败：'+e.message);}
+}
+function addAIMessage(role,content){
+  const chat=document.getElementById('aiChat');
+  const div=document.createElement('div');
+  div.className='ai-msg '+role; div.textContent=content;
+  chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+}
+</script>
+</body>
+</html>

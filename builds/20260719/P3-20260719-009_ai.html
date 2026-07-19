@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>日本着回し私人衣橱（AI版）</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.small{font-size:12px;color:var(--muted)}
+.del{color:var(--coral);font-size:12px;cursor:pointer;float:right;margin-left:8px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.combo{background:#FFF7F7;border:1px dashed var(--coral);border-radius:12px;padding:12px;margin-top:10px;font-size:14px}
+.combo b{color:var(--coral)}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+.collapsed{display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div><span class="tag">lifestyle</span><span class="tag">wardrobe</span></div>
+  <h1 style="font-size:20px;margin:8px 0 4px">日本着回し私人衣橱</h1>
+  <p class="h-coral" style="font-size:13px;margin:0">Japan 着回し private wardrobe planner (JP/EN)</p>
+</div>
+<div class="card">
+  <b>💡 痛点</b>
+  <p style="font-size:14px;color:#555;margin:6px 0 0">日本"着回し"文化庞大，WEAR 主导社交分享，但私人衣橱规划器相对不足。一个日英双语、私人的着回し搭配器是跨境缺口。</p>
+</div>
+<div class="card">
+  <b>🛠 工具 · 私のクローゼット</b>
+  <label>衣類名（和/英）</label><input id="cName" placeholder="如：白いシャツ / White Shirt">
+  <div class="row">
+    <div><label>カテゴリ</label><select id="cCat"><option>トップス</option><option>ボトムス</option><option>アウター</option><option>靴</option><option>小物</option></select></div>
+    <div><label>季節</label><select id="cSeason"><option>春</option><option>夏</option><option>秋</option><option>冬</option><option>オール</option></select></div>
+  </div>
+  <button class="btn" onclick="addCloth()">+ 追加</button>
+  <div class="row" style="margin-top:8px">
+    <div><label>季節で着回し提案</label><select id="gSeason"><option>春</option><option>夏</option><option>秋</option><option>冬</option><option>オール</option></select></div>
+    <div><button class="btn" onclick="genCoord()" style="background:var(--ok);margin-top:26px">着回し提案</button></div>
+  </div>
+  <div id="combo"></div>
+</div>
+<div class="card" id="list"><b>👘 クローゼット</b><div id="clothes"></div></div>
+<div class="card ai-card ai-bg ai-border" id="aiCard">
+  <div class="collapse-header" onclick="toggleAI()">🤖 AI 助手（用户自带Key · 零成本）</div>
+  <div class="collapse-body collapsed" id="aiBody">
+    <div id="aiKeySection">
+      <label>Hy3 API Key（用户自带，零成本运营）</label>
+      <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+      <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+      <div class="small">使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。</div>
+    </div>
+    <div id="aiChatSection" style="display:none">
+      <div id="aiChat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="text" id="aiInput" placeholder="问AI，如：通勤用着回し提案" style="flex:1">
+        <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">送信</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card" style="font-size:12px;color:var(--muted)">
+  <b>来源参考</b><br>
+  <a href="https://apps.apple.com/jp/app/wear/id1004316978" target="_blank" style="color:var(--coral)">WEAR / Stylebook (JP)</a>
+</div>
+<script>
+const KEY="P3-20260719-009";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addCloth(){const name=cName.value.trim();if(!name){alert('衣類名を入力');return;}
+  items.push({name,cat:cCat.value,season:cSeason.value,t:Date.now()});cName.value='';save();}
+function del(i){items.splice(i,1);save();}
+function genCoord(){const s=gSeason.value;
+  const pool=x=>(x.season===s||x.season==='オール'||s==='オール');
+  const tops=items.filter(x=>(x.cat==='トップス'||x.cat==='アウター')&&pool(x));
+  const bots=items.filter(x=>x.cat==='ボトムス'&&pool(x));
+  const shoes=items.filter(x=>x.cat==='靴'&&pool(x));
+  if(!tops.length||!bots.length||!shoes.length){combo.innerHTML='<div class="combo">'+s+'の組み合わせに必要なアイテムが足りません（トップス/ボトムス/靴）。</div>';return;}
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  combo.innerHTML=`<div class="combo">着回し提案（${s}）：<br>トップス：<b>${pick(tops).name}</b><br>ボトムス：<b>${pick(bots).name}</b><br>靴：<b>${pick(shoes).name}</b></div>`;}
+function render(){clothes.innerHTML=items.length?items.map((x,i)=>`<div class="item"><span>${x.name} <span class="small">${x.cat}·${x.season}</span></span><span class="del" onclick="del(${i})">削除</span></div>`).join(''):'<p class="small">まだ衣類がありません。</p>';}
+render();
+let aiKey=localStorage.getItem('hy3_key')||'';
+let aiHistory=[];
+function toggleAI(){document.getElementById('aiBody').classList.toggle('collapsed');}
+function saveKey(){aiKey=document.getElementById('aiKey').value.trim();if(!aiKey){alert('请输入API Key');return;}
+  localStorage.setItem('hy3_key',aiKey);document.getElementById('aiKeySection').style.display='none';document.getElementById('aiChatSection').style.display='block';
+  addAIMessage('assistant','Key保存！着回しコーディネート助手です。持ち物から提案します。');}
+async function sendAI(){if(!aiKey){alert('请先保存API Key');return;}
+  const input=document.getElementById('aiInput');const msg=input.value.trim();if(!msg)return;
+  addAIMessage('user',msg);input.value='';aiHistory.push({role:'user',content:msg});
+  const closet=items.map(x=>`${x.name}(${x.cat},${x.season})`).join('、')||'（空）';
+  const sys={role:'system',content:'你是日本着回しコーディネーター。所持アイテム：'+closet+'。簡潔に日本語で提案。'};
+  try{const res=await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},body:JSON.stringify({model:'hunyuan-pro',messages:[sys,...aiHistory],stream:false})});
+    const data=await res.json();const reply=data.choices?.[0]?.message?.content||'AI响应失败';
+    aiHistory.push({role:'assistant',content:reply});addAIMessage('assistant',reply);}catch(e){addAIMessage('assistant','调用失败：'+e.message);}}
+function addAIMessage(role,content){const chat=document.getElementById('aiChat');const div=document.createElement('div');div.className='ai-msg '+role;div.textContent=content;chat.appendChild(div);chat.scrollTop=chat.scrollHeight;}
+if(aiKey){document.getElementById('aiKeySection').style.display='none';document.getElementById('aiChatSection').style.display='block';}
+</script>
+</body>
+</html>

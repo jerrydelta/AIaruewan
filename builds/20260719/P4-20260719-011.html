@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI生成+自动发货的闲鱼虚拟资料店（简历/合同/PPT）</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;position:relative}
+.del{position:absolute;right:0;top:10px;background:#fff;color:var(--coral);
+  border:1px solid #FFD9D9;border-radius:8px;font-size:12px;padding:4px 10px;cursor:pointer}
+.mini{font-size:13px;color:var(--ink);background:#FAFAFA;border:1px solid var(--line);
+  border-radius:10px;padding:10px;margin-top:8px}
+.hr{height:1px;background:var(--line);border:none;margin:14px 0}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">digital_product</span><span class="tag">plr_content</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI生成+自动发货的闲鱼虚拟资料店（简历/合同/PPT）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI-generated + auto-delivery virtual-goods shop on Goofish (resume/contract/PPT)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">闲鱼月活超1亿，虚拟资料(简历/合同/PPT/Excel模板)零库存可无限复卖。案例：AI生成简历+合同模板月入2万(定价9.9-19.9元)。痛点：选品、标题SEO、自动发货搭建、多账号矩阵。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>资料标题</label><input id="v1" placeholder="如：2026简历模板套装">
+<label>类型</label><select id="v2"><option>简历</option><option>合同</option><option>PPT</option><option>Excel</option></select>
+<label>定价(元)</label><input type="number" id="v3" placeholder="9.9">
+<label>自动发货链接/网盘</label><input id="v4" placeholder="https://...">
+<label>预估日单量</label><input type="number" id="v5" placeholder="3">
+<button class="btn" onclick="addProd()">上架</button>
+<hr class="hr">
+<label>标题SEO生成（规则，离线）</label>
+<div class="row"><input id="v6" placeholder="基础词"><button class="btn" style="width:auto;padding:8px 14px" onclick="seo()">生成</button></div>
+<div id="seoOut" class="mini" style="color:var(--coral)"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.goofish.com/" target="_blank" style="color:var(--coral)">闲鱼(goofish) / 淘宝 / 小红书店铺</a>
+  </div>
+
+<script>
+const KEY="P4-20260719-011";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addProd(){
+ var n=document.getElementById('v1').value.trim();
+ if(!n){alert('请输入标题');return;}
+ var price=+document.getElementById('v3').value||0,day=+document.getElementById('v5').value||0;
+ items.push({name:n,type:document.getElementById('v2').value,price:price,link:document.getElementById('v4').value,day:day,month:price*day*30,ts:Date.now()});
+ save();document.getElementById('v1').value='';document.getElementById('v3').value='';document.getElementById('v4').value='';document.getElementById('v5').value='';
+}
+function seo(){
+ var b=document.getElementById('v6').value.trim();
+ if(!b){alert('输入基础词');return;}
+ var t=['2026新版','可编辑','附教程','高清','爆款','现货秒发'];
+ document.getElementById('seoOut').innerHTML='1. '+b+'【'+t[0]+'】<br>2. '+b+'「'+t[2]+'」<br>3. '+b+' '+t[4]+' '+t[5];
+}
+function render(){
+ var el=document.getElementById('list');
+ if(!items.length){el.innerHTML='<b>🛒 虚拟资料店</b><p style="font-size:13px;color:var(--muted)">上架你的第一个资料。</p>';return;}
+ var tot=0;items.forEach(function(x){tot+=x.month;});
+ el.innerHTML='<b>🛒 虚拟资料店（'+items.length+' · 预估月入¥'+tot+'）</b>'+items.map(function(x,i){
+  return '<div class="item"><div><b>'+esc(x.name)+'</b> · '+x.type+'</div><div style="font-size:12px;color:var(--muted)">¥'+x.price+' · 日'+x.day+'单 · 月估¥'+x.month+'</div><button class="del" onclick="del('+i+')">下架</button></div>';
+ }).join('');
+}
+function del(i){items.splice(i,1);save();}
+function esc(s){return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+render();
+</script>
+</body>
+</html>

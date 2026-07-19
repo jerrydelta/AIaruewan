@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩国语更年期失眠非药物数字化方案(CBTi/이압/호흡)</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.ai-card .collapse-body.collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">health</span><span class="tag">kr_menopausal_sleep</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩国语更年期失眠非药物数字化方案(CBTi/이압/호흡)</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Korean-language non-pharma menopause insomnia app (CBTi / acupressure / breathing)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国갱년기 여성 23.9%经历수면장애(폐경 후기 심화), 多靠饮酒/수면제(记忆下降等副作用)。研究指出需非药物중재(빛요법/수지요법/이압요법), 但需持续执行+动机。Oura Menopause Insights也覆盖睡眠维度。痛点:更年期失眠缺易坚持的数字化非药物方案。机会:갱년기 수면…</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>취침시간</label><input id="t19bed" type="time" value="23:00">
+<label>기상시간</label><input id="t19up" type="time" value="07:00">
+<label>수면 품질(1-5)</label><input id="t19q" type="number" min="1" max="5" value="3">
+<b style="display:block;margin-top:8px">오늘 수행한 중재</b>
+<div id="cbx19"></div>
+<button class="btn" onclick="addItem()">기록</button>
+  </div>
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+  <div class="collapse-header" onclick="toggleAI()">
+    🤖 AI 助手（用户自带Key · 零成本）
+  </div>
+  <div class="collapse-body collapsed" id="aiBody">
+    <div id="aiKeySection">
+      <label>Hy3 API Key（用户自带，零成本运营）</label>
+      <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+      <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">
+        使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+      </div>
+    </div>
+    <div id="aiChatSection" style="display:none">
+      <div id="aiChat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+        <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://rcphn.org/journal/view.php?number=956&view=citations" target="_blank" style="color:var(--coral)">리프리티 / Oura / Balance(영국)</a>
+  </div>
+<script>
+const KEY="P13-20260719-019";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);save();}
+const CBX19=["호흡훈련","이압(耳压)요법","카페인 컷","명상","따뜻한 목욕"];
+let cbx19={};
+function renderCbx19(){let h='';CBX19.forEach((s,i)=>{h+='<label style="display:flex;gap:8px;align-items:center;margin:4px 0;color:var(--ink)"><input type="checkbox" style="width:auto;margin:0" onchange="cbx19['+i+']=this.checked"> '+s+'</label>';});document.getElementById('cbx19').innerHTML=h;}
+function addItem(){
+  const bed=document.getElementById('t19bed').value;
+  const up=document.getElementById('t19up').value;
+  const q=+document.getElementById('t19q').value||3;
+  const picked=CBX19.filter((s,i)=>cbx19[i]);
+  items.push({d:new Date().toISOString().slice(0,10),bed,up,q,picked});
+  save();
+}
+function render(){
+  let html='<b>🌙 수면 기록</b>';
+  let sum=0;
+  items.forEach((it,i)=>{sum+=it.q;html+='<div style="border-bottom:1px solid var(--line);padding:6px 0;font-size:13px">'+it.d+' · '+it.bed+'~'+it.up+' · 품질'+it.q+'/5<br>'+(it.picked.join('、')||'중재없음')+'<br><button class="btn" style="background:var(--muted);padding:5px;margin:3px 0;width:auto;display:inline-block" onclick="del('+i+')">삭제</button></div>';});
+  if(items.length)html+='<div style="margin-top:6px">평균 수면품질 '+(sum/items.length).toFixed(1)+'/5</div>';
+  document.getElementById('list').innerHTML=html;
+  renderCbx19();
+}
+render();
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({ model:'hunyuan-pro', messages:aiHistory, stream: false })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+</script>
+</body>
+</html>

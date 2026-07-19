@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI家庭账本 · 自动分类省錢</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">home</span><span class="tag">utility_bills</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI家庭账本 · 自动分类省錢</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Next-gen AI household finance book that auto-categorizes from receipts/screenshots/voice and surfaces savings</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本家計簿文化深厚但手动记账弃用率高。ワンバンク2025年7月累计200万下载突破，AI自动从QR支付截图识别分类，并用"埋蔵金检查器"可视化浪费。物价高企下节约需求上升，传统账本app手动输入与银行联动繁琐。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:0 0 6px">录入一笔支出（模拟AI自动分类：填说明即自动归类），查看本月汇总与节省建议。</p>
+    <label>支出说明（如：超市/电费/外卖）</label>
+    <input id="desc" placeholder="例如：全家超市购物">
+    <div class="row">
+      <div><label>金额</label><input id="amt" type="number" placeholder="0"></div>
+      <div><label>分类（留"其他"则自动识别）</label>
+        <select id="cat">
+          <option>其他</option><option>餐饮</option><option>居住</option><option>交通</option>
+          <option>娱乐</option><option>医疗</option>
+        </select>
+      </div>
+    </div>
+    <label>月度预算（用于节省提示）</label>
+    <input id="budget" type="number" placeholder="如 5000">
+    <button class="btn" onclick="add()">+ 记录支出</button>
+    <div id="summary" style="margin-top:10px;font-size:14px"></div>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+    <div class="collapse-header" onclick="toggleAI()">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody">
+      <div id="aiKeySection">
+        <label>Hy3 API Key（用户自带，零成本运营）</label>
+        <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+        <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">
+          使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+        </div>
+      </div>
+      <div id="aiChatSection" style="display:none">
+        <div id="aiChat"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+          <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://prtimes.jp/main/html/rd/p/000000089.000080496.html" target="_blank" style="color:var(--coral)">ワンバンク (旧B/43) / ONE BANK</a>
+  </div>
+<script>
+const KEY="P10-20260719-001";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function guessCat(d){
+  const m={餐饮:["外卖","餐厅","饭","餐","咖啡","超市","便利","全家","菜","吃"],
+           居住:["电","水","燃气","房租","物业","网"],
+           交通:["地铁","打车","油","公交","高铁","火车"],
+           娱乐:["电影","游戏","视频","会员","票"],
+           医疗:["药","医","诊所","体检","医院"]};
+  for(const k in m){ if(m[k].some(w=>d.indexOf(w)>=0)) return k; }
+  return "其他";
+}
+function add(){
+  const desc=document.getElementById('desc').value.trim();
+  const amt=parseFloat(document.getElementById('amt').value);
+  if(!desc||!(amt>0)){alert('请填写说明和金额');return;}
+  let cat=document.getElementById('cat').value;
+  if(cat==="其他") cat=guessCat(desc);
+  items.push({id:Date.now(),desc,amt,cat,date:new Date().toLocaleDateString()});
+  document.getElementById('desc').value="";document.getElementById('amt').value="";
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function render(){
+  const list=document.getElementById('list');
+  if(!items.length){list.innerHTML='<b>📒 支出记录</b><p style="font-size:13px;color:var(--muted)">暂无记录</p>';}
+  else{
+    let html='<b>📒 支出记录（'+items.length+'笔）</b>';
+    const catSum={};let total=0;
+    items.forEach(it=>{catSum[it.cat]=(catSum[it.cat]||0)+it.amt;});
+    html+='<div style="font-size:13px">';
+    Object.keys(catSum).forEach(c=>{total+=catSum[c];html+='<div style="display:flex;justify-content:space-between"><span>'+c+'</span><span>¥'+catSum[c].toFixed(0)+'</span></div>';});
+    html+='<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:6px;padding-top:6px;font-weight:700"><span>合计</span><span>¥'+total.toFixed(0)+'</span></div></div><div style="margin-top:8px">';
+    items.slice().reverse().forEach(it=>{
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;border-bottom:1px dashed var(--line);padding:6px 0"><span>'+it.desc+' <span style="color:var(--muted)">'+it.cat+'</span></span><span>¥'+it.amt.toFixed(0)+' <a onclick="del('+it.id+')" style="color:var(--coral);cursor:pointer">✕</a></span></div>';
+    });
+    html+='</div>';
+    list.innerHTML=html;
+  }
+  const budget=parseFloat(document.getElementById('budget').value);
+  const total=items.reduce((s,x)=>s+x.amt,0);
+  const sum=document.getElementById('summary');
+  if(budget>0){
+    const left=budget-total;
+    sum.innerHTML='本月合计 <b>¥'+total.toFixed(0)+'</b> ｜ 预算 ¥'+budget+' ｜ '+(left>=0?'<span style="color:var(--ok)">剩余 ¥'+left.toFixed(0)+'</span>':'<span style="color:var(--coral)">已超 ¥'+(-left).toFixed(0)+'</span>');
+  }else{
+    sum.innerHTML='已记录合计 <b>¥'+total.toFixed(0)+'</b>（设置预算可看节省提示）';
+  }
+}
+render();
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+function toggleAI(){ const body=document.getElementById('aiBody'); body.classList.toggle('collapsed'); }
+function saveKey(){
+  aiKey=document.getElementById('aiKey').value.trim();
+  if(!aiKey){alert('请输入API Key');return;}
+  localStorage.setItem('hy3_key',aiKey);
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+  addAIMessage('assistant','Key已保存！我是你的AI助手，可以帮你优化记账、分析节省空间。');
+}
+async function sendAI(){
+  if(!aiKey){alert('请先保存API Key');return;}
+  const input=document.getElementById('aiInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  addAIMessage('user',msg); input.value='';
+  aiHistory.push({role:'user',content:msg});
+  try{
+    const res=await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body:JSON.stringify({model:'hunyuan-pro',messages:aiHistory,stream:false})
+    });
+    const data=await res.json();
+    const reply=data.choices?.[0]?.message?.content||'AI响应失败';
+    aiHistory.push({role:'assistant',content:reply});
+    addAIMessage('assistant',reply);
+  }catch(e){ addAIMessage('assistant','调用失败：'+e.message); }
+}
+function addAIMessage(role,content){
+  const chat=document.getElementById('aiChat');
+  const div=document.createElement('div');
+  div.className='ai-msg '+role; div.textContent=content;
+  chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+}
+</script>
+</body>
+</html>

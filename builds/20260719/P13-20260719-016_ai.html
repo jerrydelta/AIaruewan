@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩国更年期数字疗法(DTx)蓝海(症状管理+临床转介)</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.ai-card .collapse-body.collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">health</span><span class="tag">kr_menopause_dtx</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩国更年期数字疗法(DTx)蓝海(症状管理+临床转介)</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Korea menopause digital therapeutics (symptom mgmt + clinical referral) blue ocean</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国DTx市场2025年$1.349亿→2034年预计$7.378亿(CAGR 18.52%), 2024年1月实施《数字医疗器械法(DMPA)》。但已获批11号DTx多为认知/失眠/吸烟/卒中康复, 更年期专用DTx空白。韩国갱년기 여성(32.7%)长期被忽视, 75%治疗需求未满足(美国数据)…</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <b style="display:block;margin-top:8px">今日 비약물 중재(CBT/이압/호흡)</b>
+<div id="cbx16"></div>
+<label>증상 정도(1-5)</label><input id="t16sev" type="number" min="1" max="5" value="3">
+<button class="btn" onclick="addItem()">기록</button>
+<b style="display:block;margin-top:12px">의사 처방/전문의 상담 필요 항목</b>
+<div id="ref16" style="font-size:13px"></div>
+  </div>
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+  <div class="collapse-header" onclick="toggleAI()">
+    🤖 AI 助手（用户自带Key · 零成本）
+  </div>
+  <div class="collapse-body collapsed" id="aiBody">
+    <div id="aiKeySection">
+      <label>Hy3 API Key（用户自带，零成本运营）</label>
+      <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+      <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">
+        使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+      </div>
+    </div>
+    <div id="aiChatSection" style="display:none">
+      <div id="aiChat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+        <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.imarcgroup.com/south-korea-digital-therapeutics-market" target="_blank" style="color:var(--coral)">슈퍼브레인 DEX (로완) / MFDS / Midi(미국)</a>
+  </div>
+<script>
+const KEY="P13-20260719-016";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);save();}
+const CBX16=["호흡훈련 5분","이압(耳压) 수행","가벼운 산책","명상/CBT","수면 위생 지키기"];
+let cbx16={};
+function renderCbx(){let h='';CBX16.forEach((s,i)=>{h+='<label style="display:flex;gap:8px;align-items:center;margin:4px 0;color:var(--ink)"><input type="checkbox" style="width:auto;margin:0" onchange="cbx16['+i+']=this.checked"> '+s+'</label>';});document.getElementById('cbx16').innerHTML=h;
+  document.getElementById('ref16').innerHTML='심한 안면홍조/기분장애 지속 시 산부인과 또는 갱년기 클리닉 전문의 상담 권장(MFDS DTx 근거).';}
+function addItem(){
+  const picked=CBX16.filter((s,i)=>cbx16[i]);
+  const sev=+document.getElementById('t16sev').value||3;
+  items.push({d:new Date().toISOString().slice(0,10),picked,sev});
+  save();
+}
+function render(){
+  let html='<b>🧠 DTx 기록</b>';
+  items.forEach((it,i)=>{html+='<div style="border-bottom:1px solid var(--line);padding:6px 0;font-size:13px">'+it.d+' · 증상'+it.sev+'/5<br>'+(it.picked.join('、')||'중재없음')+'<br><button class="btn" style="background:var(--muted);padding:5px;margin:3px 0;width:auto;display:inline-block" onclick="del('+i+')">삭제</button></div>';});
+  document.getElementById('list').innerHTML=html;
+  renderCbx();
+}
+render();
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({ model:'hunyuan-pro', messages:aiHistory, stream: false })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+</script>
+</body>
+</html>

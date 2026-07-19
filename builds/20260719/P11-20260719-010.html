@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>季节感知园艺助手</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600}.item .s{font-size:13px;color:var(--muted)}
+.mini{display:inline-block;padding:6px 10px;border:none;border-radius:8px;font-size:13px;cursor:pointer;margin:6px 6px 0 0}
+.mini.ok{background:var(--ok);color:#fff}.mini.del{background:#eee;color:#999}
+.alert{color:var(--coral);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">plant</span><span class="tag">seasonal_care</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">季节感知园艺助手</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Localized season-aware assistant (frost/heat alerts)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Growli 仅覆盖美/英，日本/澳洲等非美英气候区缺乏"本地化季节提醒 + 霜冻/高温预警"对话式助手。本工具记录季节性任务与预警。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 季节任务 / 预警</b>
+    <label>任务 / 预警内容</label>
+    <input id="seTask" placeholder="如：夜温<5℃ 防冻覆盖番茄">
+    <div class="row">
+      <div><label>类型</label><select id="seType"><option>霜冻预警</option><option>高温预警</option><option>季节任务</option></select></div>
+      <div><label>季节</label><select id="seSeason"><option>春</option><option>夏</option><option>秋</option><option>冬</option></select></div>
+    </div>
+    <label>提醒日期</label>
+    <input id="seDate" type="date">
+    <button class="btn" onclick="addSe()">添加</button>
+  </div>
+  <div class="card" id="list">
+    <b>📋 季节日历</b>
+    <div id="items"></div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.getgrowli.app/blog/best-gardening-app" target="_blank" style="color:var(--coral)">Growli</a>
+  </div>
+<script>
+const KEY="P11-20260719-010";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addSe(){
+  const task=document.getElementById('seTask').value.trim();
+  if(!task){ alert('请输入内容'); return; }
+  const type=document.getElementById('seType').value;
+  const season=document.getElementById('seSeason').value;
+  const date=document.getElementById('seDate').value;
+  items.push({id:Date.now(),task,type,season,date});
+  document.getElementById('seTask').value='';
+  save();
+}
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function render(){
+  const box=document.getElementById('items');
+  if(!items.length){ box.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有任务。</p>'; return; }
+  box.innerHTML=[...items].reverse().map(it=>
+    '<div class="item"><div class="t">'+it.task+'</div>'+
+    '<div class="s"><span class="alert">'+it.type+'</span> · '+it.season+' · '+(it.date||'—')+'</div>'+
+    '<button class="mini del" onclick="del('+it.id+')">删除</button></div>'
+  ).join('');
+}
+render();
+</script>
+</body>
+</html>

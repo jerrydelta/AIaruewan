@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>批量备餐规划</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.ok{background:var(--ok)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+#grocery{background:#FFF7F7;border-radius:10px;padding:10px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">food</span><span class="tag">meal_prep</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">批量备餐规划</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Batch-cooking planner with parallel timeline & grocery list</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">备餐/批量烹饪应用因用户对抗食物浪费与时间稀缺而兴起。中国食光提供一站式规划+小票OCR；KitchenHeroes（€6.99/月）含AI；Yuka（条码扫描，5000万+用户）显示扫描需求。缺口：英文备餐应用能自动生成含并行烹饪步骤的周批量session + 智能去重购物清单。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>菜谱名称</label>
+    <input id="rName" placeholder="如：红烧鸡腿（备5份）">
+    <div class="row">
+      <div><label>烹饪时长(分)</label><input id="rTime" type="number" value="30"></div>
+      <div><label>份数</label><input id="rServ" type="number" value="5"></div>
+    </div>
+    <label>食材（每行一个，自动去重汇总）</label>
+    <textarea id="rIng" placeholder="鸡腿 500g&#10;生抽 2勺&#10;姜 1块"></textarea>
+    <button class="btn" onclick="addRecipe()">＋ 加入备餐计划</button>
+  </div>
+
+  <div class="card" id="list"><b>🥘 本周备餐</b><div id="recipes"></div>
+    <div id="grocery"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/us/app/kitchenheroes/id1594839684" target="_blank" style="color:var(--coral)">食光 · KitchenHeroes · BigOven · Yuka</a>
+  </div>
+
+<script>
+const KEY="P3-20260719-014";
+let recipes=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addRecipe(){
+  const name=document.getElementById('rName').value.trim();
+  if(!name){alert('请输入菜谱名');return;}
+  const ings=document.getElementById('rIng').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  recipes.push({id:Date.now(),name,time:+document.getElementById('rTime').value||0,
+    serv:+document.getElementById('rServ').value||1,ings});
+  document.getElementById('rName').value='';document.getElementById('rIng').value='';save();
+}
+function render(){
+  const el=document.getElementById('recipes');
+  if(!recipes.length){el.innerHTML='<p style="color:var(--muted);font-size:13px">还没有备餐计划。</p>';document.getElementById('grocery').innerHTML='';return;}
+  const total=recipes.reduce((a,r)=>a+r.time,0);
+  el.innerHTML=recipes.map(r=>
+    `<div class="item"><div><div style="font-weight:600">${r.name}</div>
+     <div style="font-size:12px;color:var(--muted)">⏱ ${r.time}分 · ${r.serv}份</div></div>
+     <span style="color:var(--muted);cursor:pointer" onclick="del(${r.id})">✕</span></div>`).join('')
+    +`<p style="font-size:13px">📊 总烹饪时间约 <b>${total}</b> 分钟，建议并行处理以缩短。</p>`;
+  const all=[];recipes.forEach(r=>r.ings.forEach(i=>all.push(i)));
+  const dedup=[...new Set(all)];
+  document.getElementById('grocery').innerHTML='<b style="font-size:13px">🛒 去重购物清单</b><div style="font-size:14px;margin-top:4px">'+dedup.map(i=>`• ${i}`).join('<br>')+'</div>';
+}
+function del(id){recipes=recipes.filter(r=>r.id!=id);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(recipes));render();}
+render();
+</script>
+</body>
+</html>

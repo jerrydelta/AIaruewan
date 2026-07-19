@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>隐私优先个人 CRM</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">productivity</span><span class="tag">task_management</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">隐私优先个人 CRM</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Privacy-first personal CRM (AI voice relationship notes + self-host)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">个人 CRM 是新兴细分，「隐私自托管 + AI 语音关系笔记」仍空白。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>姓名 / 关系</label><input id="crName" placeholder="李总 / 客户">
+<label>关系笔记</label><textarea id="crNote" rows="2" placeholder="上次聊了…"></textarea>
+<label>下次跟进日期</label><input id="crDate" type="date">
+<button class="btn" onclick="addCr()">保存联系人</button>
+  </div>
+
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://clay.earth" target="_blank" style="color:var(--coral)">Clay · Dex · Monica · Orvo · Covve</a>
+  </div>
+<script>
+
+const KEY='P15-20260719-016';
+let items=JSON.parse(localStorage.getItem(KEY)||'[]');
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function today(){return new Date().toISOString().slice(0,10);}
+function addCr(){
+ var n=document.getElementById('crName').value.trim();
+ var note=document.getElementById('crNote').value.trim();
+ var d=document.getElementById('crDate').value;
+ if(!n){alert('姓名');return;}
+ items.unshift({id:Date.now(),n:n,note:note,due:d,contacted:false});
+ document.getElementById('crName').value='';document.getElementById('crNote').value='';document.getElementById('crDate').value='';save();
+}
+function mark(id){var x=items.find(i=>i.id==id);if(x)x.contacted=!x.contacted;save();}
+function del(id){items=items.filter(i=>i.id!=id);save();}
+function render(){
+ var box=document.getElementById('list');
+ var tk=today();
+ box.innerHTML='<b>👥 人脉 ('+items.length+')</b>';
+ if(!items.length){box.innerHTML+='<p style="font-size:13px;color:#999">添加联系人</p>';return;}
+ var sorted=items.slice().sort(function(a,b){return (a.due||'9999').localeCompare(b.due||'9999');});
+ box.innerHTML+=sorted.map(i=>{
+  var overdue=i.due&&i.due<tk&&!i.contacted;
+  return '<div class="card" style="margin:6px 0;padding:10px;border-left:4px solid '+(overdue?'var(--coral)':'#eee')+'"><div style="font-weight:600">'+esc(i.n)+'</div><div style="font-size:13px;color:#555;white-space:pre-wrap">'+esc(i.note||'')+'</div><div style="font-size:12px;color:'+(overdue?'var(--coral)':'#999')+'">跟进: '+(i.due||'未设')+(overdue?' ⚠':'')+'</div><a style="color:var(--coral);cursor:pointer;font-size:12px" onclick="mark('+i.id+')">'+(i.contacted?'↩':'已联系')+'</a> <a style="color:#999;cursor:pointer;font-size:12px" onclick="del('+i.id+')">删</a></div>';
+ }).join('');
+}
+function esc(s){return (s||'').replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+render();
+
+</script>
+</body>
+</html>

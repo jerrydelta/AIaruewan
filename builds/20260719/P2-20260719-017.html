@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韓国語結婚準備一元管理SaaS（予算＋ベンダー比較）｜韩婚礼筹备</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.seg{display:flex;gap:6px;margin:6px 0}
+.seg button{flex:1;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--coral);color:#fff;border-color:var(--coral)}
+.item{display:flex;justify-content:space-between;align-items:flex-start;
+  padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.del{color:var(--muted);font-size:13px;cursor:pointer;border:none;background:none}
+.sum{font-weight:700;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">relationship</span><span class="tag">wedding_planner</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韓国語結婚準備一元管理SaaS（予算＋ベンダー比較）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Korean wedding-planning all-in-one SaaS (budget + vendor compare)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韓国の結婚準備(웨딩)市場は高単価・情報非対称が大きい。予算管理・ベンダー比較・招待状・혼수(婚礼用品)を一元化する軽量SaaSが薄い。痛点：予算オーバー・ベンダー選びに時間。</p>
+  </div>
+
+  <div class="card">
+    <div class="seg">
+      <button id="t1" class="on" onclick="tab('b')">💰予算</button>
+      <button id="t2" onclick="tab('v')">🏢ベンダー</button>
+    </div>
+    <div id="fB">
+      <div class="row"><input id="bItem" placeholder="項目（例：招待状）"><input id="bAmt" type="number" placeholder="予算(원)"></div>
+      <button class="btn" onclick="addB()">追加</button>
+      <p id="bSum" class="h-coral sum" style="font-size:14px;margin-top:8px"></p>
+    </div>
+    <div id="fV" style="display:none">
+      <div class="row"><input id="vName" placeholder="ベンダー名"><input id="vCat" placeholder="カテゴリ"></div>
+      <div class="row"><input id="vRate" type="number" placeholder="見積(원)"><input id="vStar" type="number" placeholder="評価1-5" min="1" max="5"></div>
+      <button class="btn" onclick="addV()">追加</button>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>📋 データ</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.koreaherald.com/article/10714677" target="_blank" style="color:var(--coral)">워드카드 / 마이웨딩 / 결혼의신</a>
+  </div>
+
+<script>
+const KEY="P2-20260719-017";
+let db=JSON.parse(localStorage.getItem(KEY)||'{"budget":[],"vendors":[]}');
+function tab(t){
+  document.getElementById("t1").classList.toggle("on",t==="b");
+  document.getElementById("t2").classList.toggle("on",t==="v");
+  document.getElementById("fB").style.display=t==="b"?"block":"none";
+  document.getElementById("fV").style.display=t==="v"?"block":"none";
+}
+function addB(){const i=document.getElementById("bItem").value.trim();const a=parseFloat(document.getElementById("bAmt").value)||0;
+  if(!i){alert("項目を入力");return;}db.budget.unshift({item:i,amt:a});save();
+  document.getElementById("bItem").value="";document.getElementById("bAmt").value="";render();}
+function addV(){const n=document.getElementById("vName").value.trim();if(!n){alert("ベンダー名を入力");return;}
+  db.vendors.unshift({name:n,cat:document.getElementById("vCat").value.trim(),rate:parseFloat(document.getElementById("vRate").value)||0,star:document.getElementById("vStar").value||"-"});
+  save();document.getElementById("vName").value="";document.getElementById("vCat").value="";document.getElementById("vRate").value="";document.getElementById("vStar").value="";render();}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));}
+function render(){
+  const box=document.getElementById("list");
+  const tot=db.budget.reduce((s,b)=>s+b.amt,0);
+  document.getElementById("bSum").textContent="総予算："+tot.toLocaleString()+"원";
+  const vSort=[...db.vendors].sort((a,b)=>(b.star-a.star));
+  box.innerHTML="<b>📋 予算("+db.budget.length+")</b>"+db.budget.map(b=>"<div class='item'><div style='flex:1;font-size:14px'>"+b.item+"</div><span>"+b.amt.toLocaleString()+"원</span></div>").join("")+
+    "<b style='display:block;margin-top:10px'>🏢 ベンダー("+db.vendors.length+")・評価順</b>"+vSort.map(v=>"<div class='item'><div style='flex:1'><div style='font-size:14px'>"+v.name+" <span style='font-size:11px;color:var(--muted)'>"+(v.cat||"")+"</span></div><div style='font-size:11px;color:var(--muted)'>"+v.rate.toLocaleString()+"원 ・ ★"+(v.star||"-")+"</div></div></div>").join("");
+}
+render();
+</script>
+</body>
+</html>

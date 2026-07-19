@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韓国語特化AI자소서生成・診断SaaS｜韩文求职信诊断</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.score{font-weight:700;color:var(--coral)}
+.del{color:var(--muted);font-size:13px;cursor:pointer;border:none;background:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">career</span><span class="tag">resume_interview</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韓国語特化AI자소서生成・診断SaaS</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Korean-focused AI cover-letter generation &amp; diagnosis SaaS</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韓国就職市場でAI自己紹介書(자소서)生成・診断ツール需要大。Saramin(사람인)はAI자소서機能をクレジット課金で提供。Jumpitは開発者290,000アクティブ・履歴書340,000件。痛点：자소서の質・具体性が足りず落ちる。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 자소서自動診断</b>
+    <div class="row">
+      <input id="company" placeholder="기업명">
+      <input id="role" placeholder="직무">
+    </div>
+    <textarea id="content" rows="6" placeholder="자소서 본문을 입력하세요…"></textarea>
+    <label>진단 체크리스트</label>
+    <div style="font-size:13px">
+      <label style="margin:2px 0"><input type="checkbox" class="chk" style="width:auto;margin:0 6px 0 0">구체적 경험/사례 있음</label>
+      <label style="margin:2px 0"><input type="checkbox" class="chk" style="width:auto;margin:0 6px 0 0">숫자/성과 포함</label>
+      <label style="margin:2px 0"><input type="checkbox" class="chk" style="width:auto;margin:0 6px 0 0">열정/비전 표현</label>
+      <label style="margin:2px 0"><input type="checkbox" class="chk" style="width:auto;margin:0 6px 0 0">논리적 구조</label>
+    </div>
+    <div id="live" class="h-coral" style="font-size:14px;margin-top:8px"></div>
+    <button class="btn" onclick="add()">진단 결과 저장</button>
+  </div>
+
+  <div class="card" id="list"><b>📋 저장된 자소서 진단</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.saramin.co.kr/zf_user/member/ai-cover-letter" target="_blank" style="color:var(--coral)">사람인 AI자소서 / 점핏(Jumpit) / Kcampus</a>
+  </div>
+
+<script>
+const KEY="P2-20260719-010";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function calc(){
+  const checks=document.querySelectorAll(".chk:checked").length;
+  const len=document.getElementById("content").value.length;
+  let s=checks*20;
+  if(len>=200&&len<=1000) s+=20;
+  document.getElementById("live").textContent="예상 진단점수："+s+"/100";
+  return s;
+}
+document.querySelectorAll(".chk").forEach(c=>c.addEventListener("change",calc));
+document.getElementById("content").addEventListener("input",calc);
+function add(){
+  const company=document.getElementById("company").value.trim();
+  if(!company){alert("기업명을 입력하세요");return;}
+  const score=calc();
+  items.unshift({company,role:document.getElementById("role").value.trim(),score,date:new Date().toLocaleDateString()});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("company").value="";document.getElementById("role").value="";document.getElementById("content").value="";
+  document.querySelectorAll(".chk").forEach(c=>c.checked=false);document.getElementById("live").textContent="";
+  render();
+}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>📋 저장된 자소서 진단</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>暂无记录</p>";return;}
+  box.innerHTML="<b>📋 저장된 자소서 진단（"+items.length+"）</b>"+items.map((it,i)=>
+    "<div style='display:flex;justify-content:space-between;padding:9px;border:1px solid var(--line);border-radius:10px;margin-top:8px'>"+
+    "<div style='font-size:14px'>"+it.company+(it.role?" · "+it.role:"")+" <span style='color:var(--muted);font-size:11px'>"+it.date+"</span></div>"+
+    "<div><span class='score'>"+it.score+"</span> <button class='del' onclick='del("+i+")'>删</button></div></div>").join("");
+}
+render();
+</script>
+</body>
+</html>

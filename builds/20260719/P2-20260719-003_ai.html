@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>外国人フリーランス確定申告・免税SaaS｜全球自由职业报税</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.out{background:#FFF7F0;border:1px solid #FFE0CC;border-radius:10px;padding:12px;margin-top:10px;font-size:14px}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+.collapsed{display:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">career</span><span class="tag">work_efficiency</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">外国人フリーランス確定申告・免税SaaS</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Tax-filing &amp; consumption-tax-exemption SaaS for foreign/global freelancers in Japan</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本で個人事業主・フリーランス（含む外国籍）の確定申告・免税手続き需要拡大。Money Forward クラウド確定申告は¥900〜2,980/月。痛点：外国籍フリーランスは用語・免税要件が分からず損をする。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 简易报税・免税診断</b>
+    <div class="row">
+      <input id="income" type="number" placeholder="年収入(円)">
+      <input id="expense" type="number" placeholder="経費(円)">
+    </div>
+    <label>事業開始年（免税判定用）</label>
+    <input id="startYear" type="number" placeholder="例：2025">
+    <label>本年（課税年度）</label>
+    <input id="year" type="number" placeholder="例：2026">
+    <button class="btn" onclick="calc()">計算する</button>
+    <div id="out" class="out" style="display:none"></div>
+  </div>
+
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+    <div class="collapse-header" onclick="toggleAI()">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody">
+      <div id="aiKeySection">
+        <label>Hy3 API Key（用户自带，零成本运营）</label>
+        <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+        <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">
+          使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+        </div>
+      </div>
+      <div id="aiChatSection" style="display:none">
+        <div id="aiChat"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+          <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://biz.moneyforward.com/tax_return/price/" target="_blank" style="color:var(--coral)">Money Forward クラウド確定申告 / freee</a>
+  </div>
+
+<script>
+const KEY="P2-20260719-003";
+function calc(){
+  const income=parseFloat(document.getElementById("income").value)||0;
+  const expense=parseFloat(document.getElementById("expense").value)||0;
+  const profit=income-expense;
+  // 简化：所得税估算（日本建制所得，青色申告控除65万想定しない簡易版）
+  let tax=0;
+  if(profit>0){
+    const base=Math.max(0,profit-550000); // 基礎控除簡易
+    tax=base*0.05; // 最低税率帯近似
+  }
+  // 消費税免税判定：2年前開始・前年売上1,000万円以下
+  const sy=parseInt(document.getElementById("startYear").value)||0;
+  const y=parseInt(document.getElementById("year").value)||0;
+  let免税="不可判定（年次未入力）";
+  if(sy&&y){
+    const yearsSince=y-sy;
+    免税=(yearsSince<2&&income<=10000000)?"✅ 免税対象の可能性大（前年売上1,000万円以下・基準期間なし）":"⚠ 課税事業者判定要（売上・基準期間確認）";
+  }
+  const out=document.getElementById("out");
+  out.style.display="block";
+  out.innerHTML="📊 推定所得："+profit.toLocaleString()+"円<br>"+
+    "📊 概算所得税（簡易5%帯）："+Math.round(tax).toLocaleString()+"円<br>"+
+    "🏷 消費税免税："+免税+"<br><span style='color:var(--muted);font-size:11px'>※簡易見積り。正確は税理士・公式へ。</span>";
+  const data={income,expense,profit,date:new Date().toLocaleString()};
+  const hist=JSON.parse(localStorage.getItem(KEY)||"[]");hist.unshift(data);
+  localStorage.setItem(KEY,JSON.stringify(hist.slice(0,30)));
+}
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+  
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({
+        model:'hunyuan-pro',
+        messages:aiHistory,
+        stream: false
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// 初始化AI模块
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+</script>
+</body>
+</html>

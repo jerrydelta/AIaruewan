@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>实时结算共享卡分账 App(免代垫,对标 Cino,面向国际旅行团)</title>
+<style>:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;--ai-border:#7C3AED;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.card.ai{border:1px solid var(--ai-border)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.btn.ai{background:linear-gradient(135deg,#7C3AED,#FF6B6B);color:#fff}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+.tag.ai{color:#fff;background:var(--ai-border);border-color:var(--ai-border)}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.prog{height:8px;background:#EEE;border-radius:999px;margin-top:10px;overflow:hidden}
+.bar{height:100%;width:0;background:var(--coral);transition:.3s}
+.ws-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.ws-item .del{color:var(--coral);font-size:12px;cursor:pointer;margin-left:auto}
+.ws-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--muted);flex:0 0 auto;margin-top:2px;cursor:pointer}
+.ws-dot.on{background:var(--ok);border-color:var(--ok)}
+.feat{display:block;font-size:14px;color:var(--ink);margin:6px 0;cursor:pointer}
+.feat input{width:auto;margin-right:6px}
+.out{margin-top:10px;font-size:14px;color:var(--ink);background:#FFF7F7;border-radius:10px;padding:10px}
+.collapse-header{cursor:pointer}
+.collapse-body.collapsed{display:none}
+.ai-msg{background:#F6F0FF;border-radius:10px;padding:8px 10px;margin-top:8px;font-size:13px}
+.ai-msg .role{font-size:11px;color:var(--ai-border);font-weight:600}
+.loading{color:var(--muted)}
+small{color:var(--muted)}
+a{color:var(--coral)}
+</style></head>
+<body>
+  <div class="card">
+    <div><span class="tag">finance</span><span class="tag">bill_split</span><span class="tag">bill_split</span><span class="tag">travel</span><span class="tag">real_time_settle</span><span class="tag">shared_card</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">实时结算共享卡分账 App(免代垫,对标 Cino,面向国际旅行团)</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Real-time settlement shared-card split app (no fronting, like Cino, for intl groups)</p>
+  </div>
+
+  <div class="card"><b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">旅行/团体分账需求大:Splitwise 老牌(手动、多币种、期末结算)、Tricount 轻量、Settle Up 百分比分账。Cino 差异化:共享虚拟卡在支付点自动拆分,每人即时从自己卡扣款,免去&#x27;代垫+催账+期末对账&#x27;,且零 FX 费(国际旅行优势)。</p></div>
+
+  <div class="card">
+    <b>🛠 本地工作台</b>
+    <p style="font-size:13px;color:#555">把「实时结算共享卡分账 App(免代垫,对标 Cino,面向国际旅行团)」落地成你的执行清单。数据仅存你浏览器本地。</p>
+    <label>添加条目 / 任务</label>
+    <input id="newItem" placeholder="例如：本周完成 MVP 原型">
+    <button class="btn" id="addBtn">添加到工作台</button>
+    <div id="items" style="margin-top:8px"></div>
+    <div class="prog"><div class="bar" id="bar"></div></div>
+    <small id="progTxt" style="color:var(--muted)"></small>
+  </div>
+
+  <div class="card">
+    <b>✅ 推荐功能清单（来自发现线索）</b>
+    <div id="featList" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card">
+    <b>🧮 收益速算器</b>
+    <p style="font-size:13px;color:#555">粗略估算你的手搓项目月利润与回本周期。</p>
+    <div class="row">
+      <div><label>客单价 ¥</label><input id="price" type="number" placeholder="如 29"></div>
+      <div><label>月销量</label><input id="vol" type="number" placeholder="如 200"></div>
+    </div>
+    <label>单件变动成本 ¥</label><input id="cost" type="number" placeholder="如 5">
+    <label>一次性投入 ¥（可选）</label><input id="init" type="number" placeholder="如 3000">
+    <button class="btn" id="calcBtn">计算月利润</button>
+    <div id="calcOut" class="out"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源 / 参考</b><br><a href="https://www.getcino.com/post/split-trip-expenses" target="_blank">https://www.getcino.com/post/split-trip-expenses</a><br>· Splitwise<br>· Tricount<br>· Cino<br>· Revolut
+  </div>
+
+<script>
+
+const ID="P11-20260719-016";
+const SEED=["共享虚拟卡即时拆分", "实时结算免代垫", "多币种零 FX 费", "复杂比例分账", "旅行账单导出"];
+let items=JSON.parse(localStorage.getItem(ID+"_items")||"[]");
+let feats=JSON.parse(localStorage.getItem(ID+"_feats")||"null")||SEED.map(f=>({t:f,done:false}));
+function saveItems(){localStorage.setItem(ID+"_items",JSON.stringify(items));}
+function saveFeats(){localStorage.setItem(ID+"_feats",JSON.stringify(feats));}
+function esc_html(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function render(){
+  const ib=document.getElementById("items");
+  if(!items.length){ib.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">暂无条目，添加你的第一个任务。</p>';}
+  else ib.innerHTML=items.map((r,i)=>'<div class="ws-item"><span class="del" data-i="'+i+'">✕</span><span class="ws-dot '+(r.done?"on":"")+'" data-i="'+i+'"></span><div><b>'+esc_html(r.t)+'</b>'+(r.note?('<br><small>'+esc_html(r.note)+'</small>'):"")+'</div></div>').join("");
+  ib.querySelectorAll(".del").forEach(e=>e.onclick=()=>{items.splice(+e.dataset.i,1);saveItems();render();});
+  ib.querySelectorAll(".ws-dot").forEach(e=>e.onclick=()=>{items[+e.dataset.i].done=!items[+e.dataset.i].done;saveItems();render();});
+  const fb=document.getElementById("featList");
+  fb.innerHTML=feats.map((f,i)=>'<label class="feat"><input type="checkbox" data-i="'+i+'" '+(f.done?"checked":"")+'> '+esc_html(f.t)+'</label>').join("");
+  fb.querySelectorAll("input").forEach(c=>c.onchange=()=>{feats[+c.dataset.i].done=c.checked;saveFeats();updProg();});
+  updProg();
+}
+function updProg(){
+  const tot=items.length+feats.length;
+  const done=items.filter(x=>x.done).length+feats.filter(x=>x.done).length;
+  const pct=tot?Math.round(done/tot*100):0;
+  document.getElementById("bar").style.width=pct+"%";
+  document.getElementById("progTxt").textContent="完成 "+done+"/"+tot+"（"+pct+"%）";
+}
+document.getElementById("addBtn").onclick=function(){
+  const t=document.getElementById("newItem").value.trim();
+  if(!t)return;
+  items.push({t:t,note:"",done:false});
+  document.getElementById("newItem").value="";
+  saveItems();render();
+};
+render();
+
+
+if(document.getElementById("calcBtn")){
+  document.getElementById("calcBtn").onclick=function(){
+    const p=parseFloat(document.getElementById("price").value)||0;
+    const v=parseFloat(document.getElementById("vol").value)||0;
+    const c=parseFloat(document.getElementById("cost").value)||0;
+    const init=parseFloat(document.getElementById("init").value)||0;
+    const profit=(p-c)*v;
+    const payback=init>0&&profit>0?(init/profit).toFixed(1)+" 个月":(profit>0?"当月即回本":"尚未盈利");
+    document.getElementById("calcOut").innerHTML="<b>月利润：</b>¥"+profit.toLocaleString()+"<br><b>回本周期：</b>"+payback;
+  };
+}
+
+
+</script>
+</body></html>

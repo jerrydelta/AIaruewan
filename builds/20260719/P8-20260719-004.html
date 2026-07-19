@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI自动单词本生成（文本/图片→单词本）</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.ok{background:var(--ok)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.small{font-size:12px;color:var(--muted)}
+.del{color:var(--coral);font-size:13px;cursor:pointer;float:right}
+</style>
+</head>
+<body>
+<div class="card">
+  <div><span class="tag">education</span><span class="tag">vocabulary_memory</span></div>
+  <h1 style="font-size:20px;margin:8px 0 4px">AI 自动单词本生成（文本→单词本）</h1>
+  <p class="h-coral" style="font-size:13px;margin:0">AI auto-flashcard generator (text/image → flashcards)</p>
+</div>
+<div class="card">
+  <b>💡 痛点</b>
+  <p style="font-size:14px;color:#555;margin:6px 0 0">日本单词本 App「単語帳メーカー」累计 100 万用户。但 AI「长文自动抽词＋语音朗读＋按学习者出题」较弱。机会：自动单词本生成。</p>
+</div>
+<div class="card">
+  <b>🛠 工具 · 文本抽词</b>
+  <label>粘贴一段日文（自动匹配常见词）</label>
+  <textarea id="txt" rows="3" placeholder="例：私は学生です。毎日日本語を勉強して、友達と話します。"></textarea>
+  <button class="btn" onclick="extract()">AI 抽取候选词</button>
+  <div id="cand"></div>
+  <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+  <label>手动添加单词</label>
+  <div class="row">
+    <input id="w" placeholder="単語">
+    <input id="m" placeholder="意味（中文）">
+  </div>
+  <button class="btn ok" onclick="addWord()">加入单词本</button>
+</div>
+<div class="card" id="list"></div>
+<div class="card" style="font-size:12px;color:var(--muted)">
+  <b>来源参考</b><br>
+  <a href="https://apps.apple.com/vn/app/id1124195119" target="_blank" style="color:var(--coral)">単語帳メーカー4（100万用户自制单词本）</a>
+</div>
+<script>
+const KEY="P8-20260719-004";
+const DIC={学生:"学生",先生:"老师",勉強:"学习",友達:"朋友",日本語:"日语",話:"说话",毎日:"每天",私:"我",言葉:"语言",本:"书",食べ:"吃",行:"去",会社:"公司",時間:"时间",仕事:"工作",国:"国家",町:"城市",映画:"电影",音楽:"音乐"};
+let book=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(book));render();}
+function extract(){const t=txt.value;if(!t){alert("请先粘贴文本");return;}const found=Object.keys(DIC).filter(k=>t.indexOf(k)>=0);if(!found.length){cand.innerHTML="<p class='small'>未匹配到内置常见词，可手动添加。</p>";return;}cand.innerHTML="<p class='small'>勾选加入：</p>"+found.map(k=>`<span class='tag' onclick='pick("${k}")'>${k}（${DIC[k]}）＋</span>`).join("");}
+function pick(k){book.push({w:k,m:DIC[k]});cand.innerHTML="";save();}
+function addWord(){const w1=w.value.trim(),m1=m.value.trim();if(!w1||!m1){alert("请填单词和意思");return;}book.push({w:w1,m:m1});w.value=m.value="";save();}
+function del(i){book.splice(i,1);save();}
+function render(){let o="<b>📚 我的单词本（"+book.length+"）</b>";if(!book.length)o+="<p class='small'>单词本还是空的。</p>";book.forEach((x,i)=>{o+=`<div class='item'><span class='del' onclick='del(${i})'>删除</span><b>${x.w}</b> — ${x.m}</div>`;});list.innerHTML=o;}
+render();
+</script>
+</body>
+</html>

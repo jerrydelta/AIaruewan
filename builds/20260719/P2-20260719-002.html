@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>フリーランス統合管理（匹配+請求+確定申告）｜自由职业一体化</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{display:flex;justify-content:space-between;align-items:center;
+  padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.del{color:var(--muted);font-size:13px;cursor:pointer;border:none;background:none}
+.sum{font-weight:700;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">career</span><span class="tag">freelance_tools</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">フリーランス統合管理（匹配+請求+確定申告）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Integrated freelance matching + invoicing &amp; tax-filing automation</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本クラウドソーシング市場はCrowdWorksが約700万事業者・100万社クライアント基盤。国内フリーランス人口約470万人。痛点：仕事管理・請求書作成・年末確定申告がバラバラで手間。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · プロジェクト・報酬管理</b>
+    <div class="row">
+      <input id="client" placeholder="クライアント名">
+      <input id="title" placeholder="案件名">
+    </div>
+    <div class="row">
+      <input id="amount" type="number" placeholder="報酬(円)" style="flex:2">
+      <select id="status" style="flex:1.4">
+        <option value="進行中">進行中</option>
+        <option value="完了">完了</option>
+        <option value="請求済">請求済</option>
+        <option value="入金済">入金済</option>
+      </select>
+    </div>
+    <button class="btn" onclick="addJob()">記録する</button>
+    <p id="stats" class="h-coral" style="font-size:14px;margin-top:10px"></p>
+  </div>
+
+  <div class="card" id="list"><b>📋 案件一覧</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://crowdworks.jp" target="_blank" style="color:var(--coral)">CrowdWorks / Lancers</a>
+  </div>
+
+<script>
+const KEY="P2-20260719-002";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addJob(){
+  const client=document.getElementById("client").value.trim();
+  const title=document.getElementById("title").value.trim();
+  const amount=parseFloat(document.getElementById("amount").value)||0;
+  const status=document.getElementById("status").value;
+  if(!client||!title){alert("請填写クライアントと案件名");return;}
+  items.unshift({client,title,amount,status,date:new Date().toLocaleDateString()});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("client").value="";document.getElementById("title").value="";
+  document.getElementById("amount").value="";
+  render();
+}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>📋 案件一覧</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>暂无记录</p>";return;}
+  const total=items.reduce((s,it)=>s+it.amount,0);
+  const done=items.filter(it=>it.status==="入金済").reduce((s,it)=>s+it.amount,0);
+  document.getElementById("stats").textContent="総報酬 "+total.toLocaleString()+"円 ｜ 入金済 "+done.toLocaleString()+"円";
+  box.innerHTML="<b>📋 案件一覧（"+items.length+"）</b>"+items.map((it,i)=>
+    "<div class='item'><div><div style='font-size:14px'>"+it.client+" · "+it.title+
+    "</div><div style='font-size:11px;color:var(--muted)'>"+it.date+" · "+it.status+"</div></div>"+
+    "<div style='text-align:right'><span class='sum'>"+it.amount.toLocaleString()+"円</span><div><button class='del' onclick='del("+i+")'>删除</button></div></div></div>").join("");
+}
+render();
+</script>
+</body>
+</html>

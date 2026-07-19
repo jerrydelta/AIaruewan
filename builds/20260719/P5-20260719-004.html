@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>残障/慢病/术后自适应训练</title>
+<style>
+:root{
+  --coral:#FF6B6B;        /* 主品牌色 */
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">fitness</span><span class="tag">adaptive_fitness_disability_chronic</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">残障/慢病/术后自适应训练</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Adaptive training for disability / chronic / post-op</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">NicheMetric将「残障/慢病/术后自适应健身」列为高机会细分：轮椅用户、关节置换、中风幸存者选择少、付费意愿强。通用健身app完全忽略。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#666;margin:8px 0">为特殊需求人群记录训练与疼痛水平，追踪康复进展。</p>
+<label>部位/场景</label><select id="f_area"><option value="膝关节">膝关节</option><option value="腰椎">腰椎</option><option value="肩">肩</option><option value="中风康复">中风康复</option><option value="轮椅">轮椅</option></select>
+<label>训练动作</label><input type="text" id="f_exercise" placeholder="如 坐位抬腿">
+<label>疼痛(0-10)</label><input type="number" id="f_painLevel" placeholder="0=无痛">
+<label>完成度</label><select id="f_done"><option value="完成">完成</option><option value="部分">部分</option><option value="未做">未做</option></select>
+    <button class="btn" onclick="addItem()">保存记录</button>
+    <div id="derive" style="font-size:13px;color:var(--coral);margin-top:8px"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="#" style="color:var(--coral)">AdaptiveFit / WELL健康 / 强脉运动</a>
+  </div>
+
+<script>
+const KEY="P5-20260719-004";
+const FIELDS=[{"label":"部位/场景","key":"area"},{"label":"训练动作","key":"exercise"},{"label":"疼痛(0-10)","key":"painLevel"},{"label":"完成度","key":"done"}];
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addItem(){
+const v_area=document.getElementById('f_area').value;
+const v_exercise=document.getElementById('f_exercise').value;
+const v_painLevel=document.getElementById('f_painLevel').value;
+const v_done=document.getElementById('f_done').value;
+  const item={ ts:Date.now() , area:v_area, exercise:v_exercise, painLevel:v_painLevel, done:v_done };
+  items.unshift(item);
+  save();
+  document.getElementById('f_area').value='';
+document.getElementById('f_exercise').value='';
+document.getElementById('f_painLevel').value='';
+document.getElementById('f_done').value='';
+  const dv=derive(item);
+  document.getElementById('derive').textContent = dv?('已保存 ✓ '+dv):'已保存 ✓';
+}
+function derive(it){ const p=Number(it.painLevel)||0; if(!p) return ''; if(p>=7) return '🔴 疼痛偏高，建议减量并咨询医生'; if(p>=4) return '🟡 中度不适，注意动作幅度'; return '🟢 疼痛可控'; return ''; }
+function rowHTML(it){
+  let h='<div style="font-size:12px;color:var(--muted)">'+(new Date(it.ts).toLocaleString())+'</div>';
+  FIELDS.forEach(f=>{ if(it[f.key]!==''){ h+='<div style="font-size:14px;margin:2px 0"><b>'+f.label+'：</b>'+it[f.key]+'</div>'; } });
+  const d=derive(it); if(d) h+='<div style="font-size:13px;color:var(--coral);margin-top:4px">'+d+'</div>';
+  return h;
+}
+function render(){
+  const el=document.getElementById('list');
+  if(!items.length){ el.innerHTML='<div style="font-size:13px;color:var(--muted)">暂无记录，添加第一条吧。</div>'; return; }
+  el.innerHTML='<b style="font-size:13px">📋 记录 ('+items.length+')</b>'+items.map((it,i)=>'<div style="border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px">'+rowHTML(it)+'<button class="btn" style="background:#bbb;margin-top:8px" onclick="del('+i+')">删除</button></div>').join('');
+}
+function del(i){ items.splice(i,1); save(); }
+render();
+
+</script>
+</body>
+</html>

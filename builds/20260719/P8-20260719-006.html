@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI错题本（自动生成+ 맞춤문제）韩国</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.small{font-size:12px;color:var(--muted)}
+.del{color:var(--coral);font-size:13px;cursor:pointer;float:right}
+</style>
+</head>
+<body>
+<div class="card">
+  <div><span class="tag">education</span><span class="tag">error_notebook</span></div>
+  <h1 style="font-size:20px;margin:8px 0 4px">AI 错题本（自动生成＋定制题）</h1>
+  <p class="h-coral" style="font-size:13px;margin:0">AI wrong-answer notebook (auto-generated + custom problems), Korea</p>
+</div>
+<div class="card">
+  <b>💡 痛点</b>
+  <p style="font-size:14px;color:#555;margin:6px 0 0">韩国考生（수능/사탐）过去问需求大，기출탭탭 提供 3 万道 AI 定制题。但「错题自动生成＋AI 追加题」一体化的个人轻量工具仍不足。</p>
+</div>
+<div class="card">
+  <b>🛠 工具 · 错题录入</b>
+  <label>科目</label><input id="subj" placeholder="如：数学 / 英语 / 韩国史">
+  <label>题目</label><textarea id="q" rows="2" placeholder="题目内容或考点"></textarea>
+  <div class="row"><div><label>我的答案</label><input id="mine" placeholder="我的"></div><div><label>正确答案</label><input id="ans" placeholder="正确"></div></div>
+  <label>解析（可选）</label><input id="exp" placeholder="为什么错">
+  <button class="btn" onclick="addErr()">加入错题本</button>
+</div>
+<div class="card" id="list"></div>
+<div class="card" style="font-size:12px;color:var(--muted)">
+  <b>来源参考</b><br>
+  <a href="https://tabtap.co.kr/" target="_blank" style="color:var(--coral)">기출탭탭（韩国 3万道 AI 定制题）</a>
+</div>
+<script>
+const KEY="P8-20260719-006";
+let errs=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(errs));render();}
+function addErr(){const s=subj.value.trim(),q=q_.value.trim(),m=mine.value.trim(),a=ans.value.trim(),e=exp.value.trim();if(!s||!q){alert("请填科目和题目");return;}errs.unshift({s,q,m,a,e,done:false,t:Date.now()});subj.value=q_.value=mine.value=ans.value=exp.value="";save();}
+function toggle(i){errs[i].done=!errs[i].done;save();}
+function del(i){errs.splice(i,1);save();}
+function render(){const by={};errs.forEach(x=>by[x.s]=(by[x.s]||0)+1);let o=`<b>📒 错题本（${errs.length} 道 · 已掌握 ${errs.filter(x=>x.done).length}）</b>`;if(!errs.length)o+="<p class='small'>还没有错题。</p>";errs.forEach((x,i)=>{o+=`<div class='item'><span class='del' onclick='del(${i})'>删除</span><span class='tag'>${x.s}</span>${x.done?"<span class='tag' style='color:var(--ok);background:#EAFaf3;border-color:#cdeee0'>已掌握</span>":""}<div style='margin-top:4px'>${x.q}</div><div class='small'>我：${x.m||"—"} ／ 正确：${x.a||"—"}</div>${x.e?`<div class='small' style='margin-top:4px'>解析：${x.e}</div>`:""}<button class='btn' style='margin-top:6px;background:${x.done?"var(--muted)":"var(--ok)"}' onclick='toggle(${i})'>${x.done?"标为未掌握":"标记为已掌握"}</button></div>`;});
+o+="<hr style='border:none;border-top:1px solid var(--line);margin:14px 0'><b>📊 薄弱科目</b>";if(!Object.keys(by).length)o+="<p class='small'>暂无。</p>";Object.entries(by).forEach(([k,v])=>{o+=`<div class='item'>${k}：<b>${v}</b> 道错题 <span class='small'>→ 建议加练同类题</span></div>`;});list.innerHTML=o;}
+render();
+</script>
+</body>
+</html>

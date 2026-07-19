@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>日韓両語カップル葛藤解決・関係維持AIアプリ｜情侣矛盾化解</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.result{background:#FFF7F0;border:1px solid #FFE0CC;border-radius:10px;padding:12px;margin-top:10px;font-size:14px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">relationship</span><span class="tag">conflict_resolution</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">日韓両語カップル葛藤解決・関係維持AIアプリ</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">JP+KR bilingual couple conflict-resolution &amp; relationship-maintenance AI app</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日韓ともに恋愛・夫婦の「関係維持・葛藤解決」需要顕在化。KOはデートアプリ信頼危機(70%拒否)から「安心・相性」重視へ。AI相談・葛藤解決特化ツールは両市場で空白。痛点：喧嘩の後にどう修復するか分からない。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 葛藤診断＋提案</b>
+    <input id="topic" placeholder="テーマ（例：家事の分担）">
+    <label>感情の強さ（0-5）</label>
+    <input id="emo" type="range" min="0" max="5" value="3">
+    <label>相手への理解度（0-5）</label>
+    <input id="und" type="range" min="0" max="5" value="3">
+    <textarea id="desc" rows="3" placeholder="何が起きたか簡単に…"></textarea>
+    <button class="btn" onclick="diag()">診断する</button>
+    <div id="res" class="result" style="display:none"></div>
+  </div>
+
+  <div class="card" id="list"><b>📋 葛藤ジャーナル</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://en.sedaily.com/finance/2026/07/05/korea-is-a-red-ocean-k-dating-apps-set-sights-on-japan" target="_blank" style="color:var(--coral)">Wippy安心設計 (KO) / カップルカウンセリング系 (JA)</a>
+  </div>
+
+<script>
+const KEY="P2-20260719-020";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function diag(){
+  const topic=document.getElementById("topic").value.trim();
+  if(!topic){alert("テーマを入力してください");return;}
+  const emo=parseInt(document.getElementById("emo").value);
+  const und=parseInt(document.getElementById("und").value);
+  // 理解高・感情低＝良好、感情高・理解低＝要注意
+  const score=Math.round((und/5)*60+(1-emo/5)*40);
+  let advice;
+  if(score>=70) advice="関係は安定。この調子で感謝を言葉に。";
+  else if(score>=45) advice="少し距離を置いてから「事実」だけを共有しよう。";
+  else advice="⚠ 感情が高い。一旦冷却、Iメッセージ（「私は〜と感じる」）で伝える。";
+  const res=document.getElementById("res");res.style.display="block";
+  res.textContent="💞 関係スコア："+score+"/100\n"+advice;
+  items.unshift({topic,score,date:new Date().toLocaleDateString()});
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>📋 葛藤ジャーナル</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>暂无记录</p>";return;}
+  box.innerHTML="<b>📋 葛藤ジャーナル（"+items.length+"）</b>"+items.map((it,i)=>
+    "<div style='display:flex;justify-content:space-between;padding:9px;border:1px solid var(--line);border-radius:10px;margin-top:8px'>"+
+    "<div style='font-size:14px'>"+it.topic+" <span style='color:var(--muted);font-size:11px'>"+it.date+"</span></div>"+
+    "<div><span class='h-coral' style='font-weight:700'>"+it.score+"</span> <button class='del' onclick='del("+i+")'>删</button></div></div>").join("");
+}
+render();
+</script>
+</body>
+</html>

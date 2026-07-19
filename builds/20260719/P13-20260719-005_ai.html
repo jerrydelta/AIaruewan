@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩国透明婚礼预算 + 协同备婚（AI版）</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{display:flex;justify-content:space-between;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer}
+.sum{font-size:13px;color:var(--muted)}
+.done{text-decoration:line-through;color:var(--muted)}
+.warn{color:#E85555;font-weight:600}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">wedding</span><span class="tag">kr_wedding_marketplace_gap</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩国透明婚礼预算 + 协同备婚</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Korea transparent wedding budget + collaborative planning tool</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国婚礼 App 以商城/中介为核心（웨딩북），透明预算管控+情绪协同是空白。中国《婚启》8元/3000+对已验证需求，可反向出海。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具：独立透明预算</b>
+    <label>总预算（₩）</label>
+    <input type="number" id="total" placeholder="如 50000000">
+    <div class="row">
+      <div><label>类目</label><input type="text" id="cat" placeholder="혼수/예식장"></div>
+      <div><label>预算额</label><input type="number" id="alloc" placeholder="分配"></div>
+    </div>
+    <div class="row">
+      <div><label>已付</label><input type="number" id="spent" placeholder="已花"></div>
+      <div><label>商家</label><input type="text" id="vendor" placeholder="업체명"></div>
+    </div>
+    <button class="btn" onclick="addB()">＋ 添加预算项</button>
+  </div>
+
+  <div class="card">
+    <b>👫 伴侣协同任务</b>
+    <div class="row">
+      <div><label>任务</label><input type="text" id="tname" placeholder="예식장 투어"></div>
+      <div><label>负责</label>
+        <select id="twho"><option>나(我)</option><option>파트너(伴侣)</option><option>함께(一起)</option></select></div>
+    </div>
+    <button class="btn" onclick="addT()">＋ 添加任务</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+    <div class="collapse-header" onclick="toggleAI()">🤖 AI 助手（用户自带Key · 零成本）</div>
+    <div class="collapse-body collapsed" id="aiBody">
+      <div id="aiKeySection">
+        <label>Hy3 API Key（用户自带，零成本运营）</label>
+        <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+        <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。</div>
+      </div>
+      <div id="aiChatSection" style="display:none">
+        <div id="aiChat"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="aiInput" placeholder="问AI：韩国혼수怎么规划？" style="flex:1">
+          <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://softwar.io/app/app-994071144" target="_blank" style="color:var(--coral)">웨딩북(WeddingBook) / 婚礼纪 / 婚启</a>
+  </div>
+
+<script>
+const KEY="P13-20260719-005";
+let budgets=JSON.parse(localStorage.getItem(KEY+"_b")||"[]");
+let tasks=JSON.parse(localStorage.getItem(KEY+"_t")||"[]");
+let total=Number(localStorage.getItem(KEY+"_total")||0);
+function save(){
+  localStorage.setItem(KEY+"_b",JSON.stringify(budgets));
+  localStorage.setItem(KEY+"_t",JSON.stringify(tasks));
+  localStorage.setItem(KEY+"_total",total);
+  render();
+}
+function addB(){
+  const cat=document.getElementById('cat').value.trim();
+  if(!cat){alert('请填写类目');return;}
+  budgets.push({cat,alloc:Number(document.getElementById('alloc').value)||0,
+    spent:Number(document.getElementById('spent').value)||0,
+    vendor:document.getElementById('vendor').value.trim()});
+  document.getElementById('cat').value='';document.getElementById('alloc').value='';
+  document.getElementById('spent').value='';document.getElementById('vendor').value='';
+  save();
+}
+function delB(i){budgets.splice(i,1);save();}
+function addT(){
+  const n=document.getElementById('tname').value.trim();
+  if(!n){alert('请填写任务');return;}
+  tasks.push({name:n,who:document.getElementById('twho').value,done:false});
+  document.getElementById('tname').value='';
+  save();
+}
+function toggleT(i){tasks[i].done=!tasks[i].done;save();}
+function delT(i){tasks.splice(i,1);save();}
+window.onload=function(){document.getElementById('total').value=total||'';document.getElementById('total').oninput=function(){total=Number(this.value)||0;save();};};
+function render(){
+  const list=document.getElementById('list');
+  const spentT=budgets.reduce((s,x)=>s+x.spent,0);
+  const allocT=budgets.reduce((s,x)=>s+x.alloc,0);
+  let html='<b>💰 预算看板</b><div class="sum" style="margin:6px 0">总预算 '+(total||0)+' ｜ 已分配 '+allocT+' ｜ 已花费 '+spentT+'</div>';
+  if(total&&spentT>total) html+='<div class="warn">⚠️ 超支 '+(spentT-total)+'</div>';
+  budgets.forEach((x,i)=>{html+='<div class="item"><div><b>'+x.cat+'</b><br><span class="sum">'+x.alloc+' · 已花'+x.spent+(x.vendor?' · '+x.vendor:'')+'</span></div><span class="del" onclick="delB('+i+')">删</span></div>';});
+  const done=tasks.filter(t=>t.done).length;
+  html+='<b style="display:block;margin-top:12px">✅ 协同任务 '+done+'/'+tasks.length+'</b>';
+  tasks.forEach((t,i)=>{html+='<div class="item"><div class="'+(t.done?'done':'')+'" onclick="toggleT('+i+')">'+t.name+' <span class="sum">· '+t.who+'</span></div><span class="del" onclick="delT('+i+')">删</span></div>';});
+  list.innerHTML=html;
+}
+render();
+
+// AI助手模块
+let aiKey=localStorage.getItem('hy3_key')||'';
+let aiHistory=[];
+function toggleAI(){document.getElementById('aiBody').classList.toggle('collapsed');}
+function saveKey(){
+  aiKey=document.getElementById('aiKey').value.trim();
+  if(!aiKey){alert('请输入API Key');return;}
+  localStorage.setItem('hy3_key',aiKey);
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+  addAIMessage('assistant','Key已保存！我是你的韩国备婚AI，可以帮你规划혼수、解读预算、给协同建议。');
+}
+async function sendAI(){
+  if(!aiKey){alert('请先保存API Key');return;}
+  const input=document.getElementById('aiInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  addAIMessage('user',msg);
+  input.value='';
+  aiHistory.push({role:'user',content:msg});
+  try{
+    const res=await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body:JSON.stringify({model:'hunyuan-pro',messages:aiHistory,stream:false})
+    });
+    const data=await res.json();
+    const reply=data.choices?.[0]?.message?.content||'AI响应失败';
+    aiHistory.push({role:'assistant',content:reply});
+    addAIMessage('assistant',reply);
+  }catch(e){addAIMessage('assistant','调用失败：'+e.message);}
+}
+function addAIMessage(role,content){
+  const chat=document.getElementById('aiChat');
+  const div=document.createElement('div');
+  div.className='ai-msg '+role;
+  div.textContent=content;
+  chat.appendChild(div);
+  chat.scrollTop=chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+}
+</script>
+</body>
+</html>

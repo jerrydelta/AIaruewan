@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩国最适化隐私浏览器（PIPA准拠）</title>
+<style>
+:root{--coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.small{font-size:12px;color:var(--muted)}
+.del{color:var(--coral);font-size:13px;cursor:pointer;float:right}
+</style>
+</head>
+<body>
+<div class="card">
+  <div><span class="tag">privacy</span><span class="tag">anonymous_browsing</span></div>
+  <h1 style="font-size:20px;margin:8px 0 4px">韩国最适化 隐私浏览器（PIPA 准拠）</h1>
+  <p class="h-coral" style="font-size:13px;margin:0">Korea-optimized privacy browser (PIPA-compliant)</p>
+</div>
+<div class="card">
+  <b>💡 痛点</b>
+  <p style="font-size:14px;color:#555;margin:6px 0 0">韩国「追踪防护·隐私保护浏览器」需求明显，Brave 符合韩国 PIPA（个保法）、拦截广告追踪受欢迎。但「韩国网站（政府/金融）兼容·韩语 UI·本地搜索」优化不足。</p>
+</div>
+<div class="card">
+  <b>🛠 工具 · 网站隐私体检</b>
+  <label>输入网址（检查追踪器与合规建议）</label>
+  <div class="row"><input id="url" placeholder="https://example.co.kr"><button class="btn" style="width:auto;padding:8px 16px" onclick="scan()">体检</button></div>
+  <div id="result"></div>
+  <p class="small" style="margin-top:6px">🔍 本工具为「隐私体检」演示：检测常见第三方追踪域名并给出 PIPA 合规建议，不实际联网抓取。</p>
+</div>
+<div class="card" id="list"></div>
+<div class="card" style="font-size:12px;color:var(--muted)">
+  <b>来源参考</b><br>
+  <a href="https://privacydefend.com/pages/is-brave-safe-in-south-korea/" target="_blank" style="color:var(--coral)">Brave（韩国 PIPA 合规隐私浏览器）</a>
+</div>
+<script>
+const KEY="P8-20260719-020";
+let logs=JSON.parse(localStorage.getItem(KEY)||"[]");
+const TRACKERS=["google-analytics.com","doubleclick.net","facebook.net","googletagmanager.com","adservice.google.com","criteo.com","scorecardresearch.com"];
+function save(){localStorage.setItem(KEY,JSON.stringify(logs));render();}
+function scan(){const u=url.value.trim();if(!u){alert("请输入网址");return;}const hit=TRACKERS.filter(t=>u.indexOf(t)>=0);const hasKR=u.toLowerCase().indexOf(".kr")>=0;let score=100;if(hit.length)score-=hit.length*20;let tips=[];if(hit.length)tips.push("检测到 "+hit.length+" 个第三方追踪域，建议浏览器拦截。");if(hasKR)tips.push("韩国站点：确认其隐私政策符合 PIPA（个保法）。");if(!hasKR)tips.push("非 .kr 站点：留意跨境数据传输，必要时用本地搜索引擎。");if(!hit.length&&hasKR)tips.push("未检出常见追踪器，且为韩国站点，隐私友好度较高。");const rec={u,score:Math.max(score,0),tips:tips.join(" "),t:new Date().toISOString().slice(0,10)};logs.unshift(rec);url.value="";document.getElementById("result").innerHTML=`<div class='item'><b>隐私评分：${rec.score}/100</b><div class='small' style='margin-top:4px'>${rec.tips}</div></div>`;save();}
+function del(i){logs.splice(i,1);save();}
+function render(){let o=`<b>🧪 体检记录（${logs.length}）</b>`;if(!logs.length)o+="<p class='small'>还没有记录。</p>";logs.forEach((x,i)=>{o+=`<div class='item'><span class='del' onclick='del(${i})'>删除</span><b>${x.u}</b> · 评分 ${x.score}<div class='small' style='margin-top:4px'>${x.tips}</div></div>`;});list.innerHTML=o;}
+render();
+</script>
+</body>
+</html>

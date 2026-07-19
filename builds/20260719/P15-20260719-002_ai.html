@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI 任务拆解助手</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+.ai-card .collapse-body.collapsed{display:none}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">productivity</span><span class="tag">task_management</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI 任务拆解助手</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI task-decomposition assistant (time/difficulty-estimated task tree for ADHD)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">把模糊目标拆成可执行步骤是 ADHD / 执行功能弱人群的高频痛点，一体化工具稀缺。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>目标（模糊也行）</label>
+<input id="gGoal" placeholder="例如：准备下周的产品演示">
+<label>拆解出的步骤</label>
+<input id="tName" placeholder="步骤名称">
+<div class="row">
+ <input id="tTime" type="number" placeholder="预估分钟" style="flex:1">
+ <select id="tDiff" style="flex:1"><option value="1">难度1</option><option value="2">难度2</option><option value="3">难度3</option><option value="4">难度4</option><option value="5">难度5</option></select>
+</div>
+<button class="btn" onclick="addTask()">添加步骤</button>
+  </div>
+
+<div class="card ai-card ai-bg ai-border" id="aiCard">
+  <div class="collapse-header" onclick="toggleAI()">
+    🤖 AI 助手（用户自带Key · 零成本）
+  </div>
+  <div class="collapse-body collapsed" id="aiBody">
+    <div id="aiKeySection">
+      <label>Hy3 API Key（用户自带，零成本运营）</label>
+      <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+      <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">
+        使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+      </div>
+    </div>
+    <div id="aiChatSection" style="display:none">
+      <div id="aiChat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+        <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://goblin.tools" target="_blank" style="color:var(--coral)">Goblin Tools · Branchify · Completo AI</a>
+  </div>
+<script>
+
+const KEY='P15-20260719-002';
+let items=JSON.parse(localStorage.getItem(KEY)||'[]');
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addTask(){
+ var g=document.getElementById('gGoal').value.trim();
+ var n=document.getElementById('tName').value.trim();
+ var tm=document.getElementById('tTime').value;
+ var d=document.getElementById('tDiff').value;
+ if(!n){alert('请输入步骤');return;}
+ items.push({id:Date.now(),g:g,n:n,tm:tm,d:Number(d),done:false});
+ document.getElementById('tName').value='';document.getElementById('tTime').value='';
+ save();
+}
+function toggle(id){var x=items.find(i=>i.id==id);if(x)x.done=!x.done;save();}
+function del(id){items=items.filter(i=>i.id!=id);save();}
+function render(){
+ var box=document.getElementById('list');
+ if(!items.length){box.innerHTML='<b>📋 任务树</b><p style="font-size:13px;color:#999">添加步骤开始拆解</p>';return;}
+ var done=items.filter(i=>i.done).length;
+ var pct=Math.round(done/items.length*100);
+ var g=items[0].g;
+ var html='<b>🎯 目标：'+esc(g||'未命名')+'</b>';
+ html+='<div style="height:8px;background:#eee;border-radius:4px;margin:8px 0"><div style="width:'+pct+'%;height:100%;background:var(--ok);border-radius:4px"></div></div>';
+ html+='<div style="font-size:12px;color:#999;margin-bottom:6px">完成 '+done+'/'+items.length+' ('+pct+'%) · 总预估 '+(items.reduce((s,i)=>s+(Number(i.tm)||0),0))+' 分钟</div>';
+ html+=items.map(i=>'<div class="card" style="margin:6px 0;padding:10px"><div style="display:flex;justify-content:space-between"><span style="'+(i.done?'text-decoration:line-through;color:#aaa':'font-weight:600')+'">'+esc(i.n)+'</span><span style="font-size:11px;color:#999">'+(i.tm||'?')+'分 · 难度'+i.d+'</span></div><div style="margin-top:6px"><a style="color:var(--coral);cursor:pointer;font-size:12px" onclick="toggle('+i.id+')">'+(i.done?'↩重做':'✓完成')+'</a> <a style="color:#999;cursor:pointer;font-size:12px" onclick="del('+i.id+')">删除</a></div></div>').join('');
+ box.innerHTML=html;
+}
+function esc(s){return (s||'').replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+render();
+
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+function toggleAI(){
+  const body = document.getElementById('aiBody');
+  body.classList.toggle('collapsed');
+}
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+  addAIMessage('assistant', 'Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  addAIMessage('user', msg);
+  input.value = '';
+  aiHistory.push({role:'user', content:msg});
+  try {
+    const res = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body: JSON.stringify({ model:'hunyuan-pro', messages:aiHistory, stream: false })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'AI响应失败';
+    aiHistory.push({role:'assistant', content:reply});
+    addAIMessage('assistant', reply);
+  } catch(e) {
+    addAIMessage('assistant', '调用失败：'+e.message);
+  }
+}
+function addAIMessage(role, content){
+  const chat = document.getElementById('aiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display = 'none';
+  document.getElementById('aiChatSection').style.display = 'block';
+}
+</script>
+</body>
+</html>

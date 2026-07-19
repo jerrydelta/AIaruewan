@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>语音反馈收集</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.rec{background:var(--muted)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.muted{color:var(--muted);font-size:13px}
+.del{color:var(--coral);font-size:12px;cursor:pointer;float:right}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+.collapsed{display:none}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">micro_saas</span><span class="tag">feedback_collect</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">语音反馈收集</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Voice feedback collection (AI transcript-ready)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">语音反馈（Woise/VoiceHub）在英语 SaaS 圈兴起，能大幅降低用户表达门槛；中日独立开发者/代理商同样需要"客户低摩擦反馈"但缺本地化工具。本 MVP 让你用浏览器录制语音反馈并保存，文字备注可后续交给 AI 转录。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>用户 / 场景</label>
+    <input id="who" placeholder="如 客户A-官网首页">
+    <label>文字备注（可选，可交AI转录）</label>
+    <textarea id="note" rows="2" placeholder="补充背景或要点…"></textarea>
+    <button class="btn rec" id="recBtn" onclick="toggleRec()">🎙 开始录音</button>
+    <button class="btn" onclick="saveFeedback()" id="saveBtn" disabled style="background:var(--muted)">保存这条反馈</button>
+    <div class="muted" id="state" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" id="list"><b>🎧 反馈库</b><div id="listBody" style="margin-top:8px"></div></div>
+
+  
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+    <div class="collapse-header" onclick="toggleAI()">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody">
+      <div id="aiKeySection">
+        <label>Hy3 API Key（用户自带，零成本运营）</label>
+        <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+        <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">
+          使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。
+        </div>
+      </div>
+      <div id="aiChatSection" style="display:none">
+        <div id="aiChat"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+          <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://trend-hunt.com/zh/product/woise" target="_blank" style="color:var(--coral)">Woise 语音反馈</a> ·
+    <a href="https://dev.to/krishdevninja/voicehub-the-smartest-way-to-collect-and-act-on-customer-feedback-b1h" target="_blank" style="color:var(--coral)">VoiceHub</a>
+  </div>
+
+<script>
+const KEY="P14-20260719-013";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"fb":[]}');
+let rec=null,media=null,chunks=[],audioB64=null;
+async function toggleRec(){
+  if(rec){rec.stop();return;}
+  try{
+    media=await navigator.mediaDevices.getUserMedia({audio:true});
+    rec=new MediaRecorder(media);chunks=[];
+    rec.ondataavailable=e=>chunks.push(e.data);
+    rec.onstop=async()=>{
+      const blob=new Blob(chunks,{type:rec.mimeType});
+      audioB64=await blobToB64(blob);
+      document.getElementById('recBtn').textContent='🎙 开始录音';
+      document.getElementById('recBtn').classList.add('rec');
+      document.getElementById('saveBtn').disabled=false;
+      document.getElementById('saveBtn').style.background='var(--coral)';
+      document.getElementById('state').textContent='录音完成，可保存（'+Math.round(blob.size/1024)+'KB）';
+      media.getTracks().forEach(t=>t.stop());
+    };
+    rec.start();
+    document.getElementById('recBtn').textContent='⏹ 停止录音';
+    document.getElementById('recBtn').classList.remove('rec');
+    document.getElementById('state').textContent='录音中…';
+  }catch(e){alert('无法访问麦克风：'+e.message);}
+}
+function blobToB64(b){return new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(b);});}
+function saveFeedback(){
+  if(!audioB64){alert("请先录音");return;}
+  data.fb.push({who:document.getElementById('who').value.trim()||'匿名',
+    note:document.getElementById('note').value.trim(),audio:audioB64,date:new Date().toLocaleString('zh-CN')});
+  document.getElementById('who').value='';document.getElementById('note').value='';
+  audioB64=null;document.getElementById('saveBtn').disabled=true;
+  document.getElementById('saveBtn').style.background='var(--muted)';
+  document.getElementById('state').textContent='已保存';
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function render(){
+  const body=document.getElementById('listBody');
+  body.innerHTML=data.fb.length?data.fb.slice().reverse().map((f,i)=>
+    '<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>'+f.who+'</b> <span class="muted" style="font-size:11px">'+f.date+'</span>'+
+    (f.note?'<div class="muted" style="font-size:12px">'+f.note+'</div>':'')+
+    '<audio controls src="'+f.audio+'" style="width:100%;margin-top:6px"></audio>'+
+    ' <span class="del" onclick="del('+i+')">删除</span></div>').join(''):'<div class="muted">还没有反馈，点上方录音</div>';
+}
+function del(i){data.fb.splice(i,1);save();}
+save();
+</script>
+
+<script>
+let aiKey=localStorage.getItem('hy3_key')||'';
+let aiHistory=[];
+function toggleAI(){document.getElementById('aiBody').classList.toggle('collapsed');}
+function saveKey(){
+  aiKey=document.getElementById('aiKey').value.trim();
+  if(!aiKey){alert('请输入API Key');return;}
+  localStorage.setItem('hy3_key',aiKey);
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+  addAIMessage('assistant','Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+async function sendAI(){
+  if(!aiKey){alert('请先保存API Key');return;}
+  const input=document.getElementById('aiInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  addAIMessage('user',msg);
+  input.value='';
+  aiHistory.push({role:'user',content:msg});
+  try{
+    const res=await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body:JSON.stringify({model:'hunyuan-pro',messages:aiHistory,stream:false})
+    });
+    const data=await res.json();
+    const reply=data.choices?.[0]?.message?.content||'AI响应失败';
+    aiHistory.push({role:'assistant',content:reply});
+    addAIMessage('assistant',reply);
+  }catch(e){addAIMessage('assistant','调用失败：'+e.message);}
+}
+function addAIMessage(role,content){
+  const chat=document.getElementById('aiChat');
+  const div=document.createElement('div');
+  div.className='ai-msg '+role;
+  div.textContent=content;
+  chat.appendChild(div);
+  chat.scrollTop=chat.scrollHeight;
+}
+if(aiKey){
+  const ks=document.getElementById('aiKeySection');
+  const cs=document.getElementById('aiChatSection');
+  if(ks)ks.style.display='none';
+  if(cs)cs.style.display='block';
+}
+</script>
+</body>
+</html>

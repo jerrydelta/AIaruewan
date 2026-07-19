@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>2分钟正念 · 戒断冥想</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.big{font-size:48px;font-weight:700;color:var(--coral);text-align:center}
+.muted{color:var(--muted);font-size:13px}
+.del{color:var(--coral);font-size:12px;cursor:pointer;float:right}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">addiction_recovery</span><span class="tag">mindful_abstinence</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">2 分钟正念 · 戒断冥想</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Recovery-aid meditation (short mindfulness for urge moments)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本冥想 App 红海在睡眠/放松，但"戒断/冲动应对"垂直定位稀缺；中国同理。本工具提供"渴求来袭时的 2 分钟正念"：跟随引导逐步放松，并记录每次冥想场景，帮你建立可复用的平静练习。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>这次是什么场景</label>
+    <input id="scene" placeholder="如 想抽烟 / 想刷手机 / 焦虑">
+    <div class="big" id="t">02:00</div>
+    <div class="muted" style="text-align:center" id="guide">点击下方开始，跟随引导呼吸</div>
+    <button class="btn" onclick="startMed()">🧘 开始 2 分钟正念</button>
+    <div style="text-align:center;margin-top:10px" class="big" id="cnt" style="font-size:20px;color:var(--ok)">0</div>
+    <div class="muted" style="text-align:center">累计冥想次数</div>
+  </div>
+
+  <div class="card" id="list"><b>📿 冥想记录</b><div id="listBody" style="margin-top:8px"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/ch/app/russellme-%E3%83%9E%E3%82%A4%E3%83%B3%E3%83%89%E3%83%95%E3%83%AB%E3%83%8D%E3%82%B9%E7%9E%91%E6%83%B3-%E7%9D%A1%E7%9C%A0/id6450326444" target="_blank" style="color:var(--coral)">RussellMe 冥想（对照）</a>
+  </div>
+
+<script>
+const KEY="P14-20260719-011";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"logs":[]}');
+const GUIDE=["把注意力放在呼吸上","慢慢吸气…","停顿，感受","缓缓呼气…","让肩膀放松","念头来了，不评判，回来","你已经做得很好"];
+let timer=null,left=120,gi=0;
+function startMed(){
+  left=120;gi=0;document.getElementById('guide').textContent=GUIDE[0];tick();
+  timer=setInterval(tick,1000);
+}
+function tick(){
+  const mm=String(Math.floor(left/60)).padStart(2,'0'),ss=String(left%60).padStart(2,'0');
+  document.getElementById('t').textContent=mm+':'+ss;
+  if(left%17===0&&gi<GUIDE.length-1){gi++;document.getElementById('guide').textContent=GUIDE[gi];}
+  if(left<=0){clearInterval(timer);finish();}
+  left--;
+}
+function finish(){
+  data.logs.push({date:new Date().toLocaleString('zh-CN'),scene:document.getElementById('scene').value.trim()||'未填'});
+  document.getElementById('scene').value='';save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function render(){
+  document.getElementById('cnt').textContent=data.logs.length;
+  const body=document.getElementById('listBody');
+  body.innerHTML=data.logs.length?data.logs.slice().reverse().map((l,i)=>
+    '<div style="padding:6px 0;border-bottom:1px solid var(--line)">'+l.date+' · '+l.scene+' <span class="del" onclick="del('+i+')">删除</span></div>').join(''):'<div class="muted">还没有记录</div>';
+}
+function del(i){data.logs.splice(i,1);save();}
+save();
+</script>
+</body>
+</html>

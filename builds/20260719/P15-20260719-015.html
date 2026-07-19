@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>智能应用封锁/专注</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">productivity</span><span class="tag">pomodoro_focus</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">智能应用封锁/专注</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Smart app-blocker / focus tool (friction intercept + cross-platform)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">应用封锁 / 专注是常青需求，但强力桌面封锁 + AI 识别分心仍有整合空间。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>要封锁的网站/App</label><input id="blName" placeholder="twitter.com">
+<button class="btn" onclick="addBl()">加入黑名单</button>
+<label>专注时长（分钟）</label><input id="blMin" type="number" value="25">
+<button class="btn" onclick="startBlock()">开始封锁专注</button>
+<div id="blTimer" style="font-size:30px;text-align:center;font-weight:700;margin:10px 0">--:--</div>
+<div id="blStatus" style="font-size:13px;color:#999;text-align:center"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://getcoldturkey.com" target="_blank" style="color:var(--coral)">Cold Turkey · Freedom · Opal · one sec · Forest</a>
+  </div>
+<script>
+
+const KEY='P15-20260719-015';
+let items=JSON.parse(localStorage.getItem(KEY)||'[]');
+let blId=null;
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addBl(){
+ var n=document.getElementById('blName').value.trim();
+ if(!n){alert('名字');return;}
+ items.unshift({id:Date.now(),n:n});
+ document.getElementById('blName').value='';save();
+}
+function del(id){items=items.filter(i=>i.id!=id);save();}
+function startBlock(){
+ var m=Number(document.getElementById('blMin').value)||25;
+ var left=m*60;
+ document.getElementById('blStatus').textContent='封锁中：'+items.map(i=>i.n).join('、');
+ var el=document.getElementById('blTimer');
+ clearInterval(blId);
+ blId=setInterval(function(){
+  left--;
+  el.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');
+  if(left<=0){clearInterval(blId);el.textContent='✅ 完成';document.getElementById('blStatus').textContent='专注完成！';}
+ },1000);
+ el.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');
+}
+function render(){
+ var box=document.getElementById('list');
+ box.innerHTML='<b>🚫 封锁列表 ('+items.length+')</b>'+(items.length?'':'<p style="font-size:13px;color:#999">添加要封锁的站点</p>');
+ box.innerHTML+=items.map(i=>'<div class="card" style="margin:6px 0;padding:10px"><span style="font-weight:600">'+esc(i.n)+'</span> <a style="color:#999;cursor:pointer;font-size:12px" onclick="del('+i.id+')">删除</a></div>').join('');
+}
+function esc(s){return (s||'').replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+render();
+
+</script>
+</body>
+</html>

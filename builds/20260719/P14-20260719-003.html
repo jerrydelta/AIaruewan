@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>戒酒打卡 · 清醒社区</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.ok{background:var(--ok)}.btn.ok:active{background:#36a674}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.big{font-size:30px;font-weight:700;color:var(--coral)}
+.muted{color:var(--muted);font-size:13px}
+.del{color:var(--coral);font-size:12px;cursor:pointer;float:right}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">addiction_recovery</span><span class="tag">quit_drinking</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">戒酒打卡 · 清醒社区</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Sobriety support + community (China 10M+ users)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">中国"戒酒潮"催生千万级戒酒 App 用户，但多数人缺一个轻量、能每天给自己正向反馈的工具。本 MVP 帮你记录每日清醒状态、累计清醒天数、省下的酒钱，并用一句"今日感悟"建立自己的清醒日记。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>戒酒开始日</label>
+    <input type="date" id="startDate">
+    <label>以前日均酒钱（元）</label>
+    <input type="number" id="dailyCost" placeholder="如 60" value="60">
+    <button class="btn" onclick="saveProfile()">保存计划</button>
+
+    <div style="text-align:center;margin-top:12px">
+      <div class="big" id="sober">0</div><div class="muted">连续清醒天数</div>
+      <div style="color:var(--ok);font-weight:700" id="saved">已省 ¥0</div>
+    </div>
+    <label>今日状态</label>
+    <div class="row">
+      <button class="btn ok" onclick="checkIn(true)">✓ 保持清醒</button>
+      <button class="btn" onclick="checkIn(false)" style="background:var(--muted)">✗ 破戒</button>
+    </div>
+    <label>今日感悟 / 触发场景</label>
+    <textarea id="note" rows="2" placeholder="写一句给自己或同伴的话…"></textarea>
+    <button class="btn" onclick="saveNote()">保存感悟</button>
+  </div>
+
+  <div class="card" id="list"><b>📓 清醒日记</b><div id="listBody" style="margin-top:8px"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.toutiao.com/article/7529768305956094518/" target="_blank" style="color:var(--coral)">头条：戒酒潮千万级用户</a>
+  </div>
+
+<script>
+const KEY="P14-20260719-003";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"startDate":"","dailyCost":60,"days":[]}');
+function saveProfile(){
+  data.startDate=document.getElementById('startDate').value;
+  data.dailyCost=parseFloat(document.getElementById('dailyCost').value)||0;
+  save();
+}
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function checkIn(ok){
+  if(!data.startDate){alert("请先保存戒酒开始日");return;}
+  const t=todayStr();
+  let d=data.days.find(x=>x.date===t);
+  if(!d){d={date:t,sober:ok,note:""};data.days.push(d);}
+  else d.sober=ok;
+  save();
+}
+function saveNote(){
+  const t=todayStr();
+  let d=data.days.find(x=>x.date===t);
+  if(!d){d={date:t,sober:true,note:""};data.days.push(d);}
+  d.note=document.getElementById('note').value.trim();
+  save();
+}
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(data));
+  document.getElementById('startDate').value=data.startDate;
+  document.getElementById('dailyCost').value=data.dailyCost;
+  render();
+}
+function calcSober(){
+  let c=0;
+  for(let i=data.days.length-1;i>=0;i--){
+    if(data.days[i].sober)c++;else break;
+  }
+  return c;
+}
+function render(){
+  document.getElementById('sober').textContent=calcSober();
+  document.getElementById('saved').textContent="已省 ¥"+(data.days.filter(d=>d.sober).length*(data.dailyCost||0)).toLocaleString();
+  const body=document.getElementById('listBody');
+  if(!data.days.length){body.innerHTML='<div class="muted">还没有记录</div>';return;}
+  body.innerHTML=data.days.slice().reverse().map(d=>
+    '<div style="padding:6px 0;border-bottom:1px solid var(--line)">'+d.date+
+    (d.sober?' <span class="tag">清醒</span>':' <span style="color:var(--muted)">破戒</span>')+
+    (d.note?'<div class="muted" style="font-size:12px">'+d.note+'</div>':'')+
+    ' <span class="del" onclick="del(\''+d.date+'\')">删除</span></div>').join('');
+}
+function del(t){data.days=data.days.filter(x=>x.date!==t);save();}
+save();
+</script>
+</body>
+</html>

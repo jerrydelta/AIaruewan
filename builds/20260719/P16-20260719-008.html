@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Git 提交速记</title>
+<style>
+:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">git_tools</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">Git 提交速记</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Cross-platform (incl. Linux) + JA/KO one-time-payment lightweight Git GUI.</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">个人开发者偏好"买断、轻量"的 Git GUI。Fork 以 $49.99 买断受欢迎（日本、韩国个人开发者博客中的标配）</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    
+<label>分支</label><input id="g_branch" placeholder="如 feature/login">
+<label>类型</label><select id="g_type"><option>feat</option><option>fix</option><option>docs</option><option>refactor</option><option>chore</option></select>
+<label>描述（英文短句）</label><input id="g_desc" placeholder="add login validation">
+<label>关联 Issue（可选）</label><input id="g_issue" placeholder="#123">
+<button class="btn" onclick="addItem()">+ 生成提交并记录</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://git-fork.com" target="_blank" style="color:var(--coral)">Fork / GitKraken / Tower / GitHub Desktop</a>
+  </div>
+
+<script>
+
+const KEY="P16-20260719-008";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function buildMsg(it){ return it.type+': '+it.desc+(it.issue?(' ('+it.issue+')'):''); }
+function addItem(){
+  const branch=document.getElementById('g_branch').value.trim();
+  const type=document.getElementById('g_type').value;
+  const desc=document.getElementById('g_desc').value.trim();
+  const issue=document.getElementById('g_issue').value.trim();
+  if(!desc){alert('请填写描述');return;}
+  const it={branch,type,desc,issue,msg:buildMsg({type,desc,issue}),added:new Date().toLocaleString()};
+  items.push(it); save();
+  document.getElementById('g_desc').value='';document.getElementById('g_issue').value='';
+}
+function copyMsg(i){ prompt('复制 commit message：',items[i].msg); }
+function del(i){items.splice(i,1);save();}
+function render(){
+  const el=document.getElementById('list');
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">暂无提交记录</p>';return;}
+  el.innerHTML='<b>🪵 提交历史（'+items.length+'）</b>'+items.map((it,idx)=>
+    '<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px">'+
+    (it.branch?'<div style="font-size:12px;color:var(--muted)">'+esc(it.branch)+'</div>':'')+
+    '<div style="font-weight:600">'+esc(it.msg)+'</div>'+
+    '<div class="row" style="margin-top:6px"><button class="btn" style="background:var(--ok);margin:0 4px 0 0" onclick="copyMsg('+idx+')">复制</button>'+
+    '<button class="btn" style="background:#fff;color:var(--coral);border:1px solid var(--line);margin:0" onclick="del('+idx+')">删除</button></div>'+
+    '</div>'
+  ).join('');
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+render();
+</script>
+</body>
+</html>

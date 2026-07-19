@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>多肉养护 + 繁殖记录</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600}.item .s{font-size:13px;color:var(--muted)}
+.mini{display:inline-block;padding:6px 10px;border:none;border-radius:8px;font-size:13px;cursor:pointer;margin:6px 6px 0 0}
+.mini.ok{background:var(--ok);color:#fff}.mini.del{background:#eee;color:#999}
+.due{color:var(--coral);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">plant</span><span class="tag">succulent_care</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">多肉养护 + 繁殖记录</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Succulent care + propagation journal (port CN model)</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">通用 app 只当普通盆栽，缺"叶插进度、砍头记录、休眠管理、上色对比"等专业维度。日语/英语市场缺专业多肉养护+繁殖记录工具。本工具记录浇水周期与繁殖进展。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具 · 添加一株多肉</b>
+    <label>品种 / 名称</label>
+    <input id="kName" placeholder="如：桃蛋 / 熊童子">
+    <label>浇水周期（天）</label>
+    <input id="kCycle" type="number" value="14" min="1">
+    <label>繁殖方式</label>
+    <select id="kProp"><option value="无">无</option><option value="叶插">叶插</option><option value="砍头">砍头</option><option value="分株">分株</option></select>
+    <label>上色状态备注</label>
+    <input id="kColor" placeholder="如：出状态（红边）/ 绿">
+    <label>上次浇水日期</label>
+    <input id="kLast" type="date">
+    <button class="btn" onclick="addSuc()">添加</button>
+  </div>
+  <div class="card" id="list">
+    <b>📋 我的多肉</b>
+    <div id="items"></div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.danpi.net/shzs/2350.html" target="_blank" style="color:var(--coral)">多肉成长记 / Succa</a>
+  </div>
+<script>
+const KEY="P11-20260719-004";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function daysBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+function addSuc(){
+  const name=document.getElementById('kName').value.trim();
+  if(!name){ alert('请输入品种/名称'); return; }
+  const cycle=parseInt(document.getElementById('kCycle').value)||14;
+  const prop=document.getElementById('kProp').value;
+  const color=document.getElementById('kColor').value.trim();
+  const last=document.getElementById('kLast').value;
+  items.push({id:Date.now(),name,cycle,prop,color,last});
+  document.getElementById('kName').value='';
+  save();
+}
+function water(id){ const it=items.find(x=>x.id===id); if(!it)return; it.last=new Date().toISOString().slice(0,10); save(); }
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function render(){
+  const box=document.getElementById('items');
+  if(!items.length){ box.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有多肉。</p>'; return; }
+  const today=new Date().toISOString().slice(0,10);
+  box.innerHTML=items.map(it=>{
+    let s='';
+    if(it.last){ const next=new Date(new Date(it.last).getTime()+it.cycle*86400000).toISOString().slice(0,10); const d=daysBetween(today,next); s='下次浇水 '+next+(d>0?('（'+d+' 天）'):'（该浇了）'); }
+    return '<div class="item"><div class="t">'+it.name+'</div>'+
+      '<div class="s">'+s+' · 繁殖：'+it.prop+(it.color?(' · '+it.color):'')+'</div>'+
+      '<button class="mini ok" onclick="water('+it.id+')">已浇水</button>'+
+      '<button class="mini del" onclick="del('+it.id+')">删除</button></div>';
+  }).join('');
+}
+render();
+</script>
+</body>
+</html>

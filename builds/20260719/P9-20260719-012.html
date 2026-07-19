@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>ADHD 时间盲 · 视觉化状态时间轴</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.del{color:var(--muted);font-size:12px;cursor:pointer;border:none;background:none}
+.item{border-bottom:1px dashed var(--line);padding:8px 0;font-size:14px}
+.bar{height:26px;border-radius:6px;color:#fff;font-size:12px;display:flex;align-items:center;padding:0 8px;margin:3px 0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">neurodiversity</span><span class="tag">adhd_tools</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">ADHD 时间盲 · 视觉化状态时间轴</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Visual timeline for time-blindness</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">中国 ADHD 人群"时间盲症"痛点在小红书/知乎大量讨论。"救猫猫"用"5 种状态时间轴"可视化时间，验证了国产 ADHD 时间感知工具的起步需求。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具（状态时间轴）</b>
+    <label>状态</label>
+    <select id="state">
+      <option value="专注" data-c="#FF6B6B">专注</option>
+      <option value="巡航" data-c="#4D96FF">巡航</option>
+      <option value="运动" data-c="#3FB984">运动</option>
+      <option value="冥想" data-c="#9B6BFF">冥想</option>
+      <option value="摸鱼" data-c="#FFB84D">摸鱼</option>
+    </select>
+    <label>开始时间</label>
+    <input type="time" id="start">
+    <label>结束时间</label>
+    <input type="time" id="end">
+    <label>备注</label>
+    <input type="text" id="note" placeholder="在做什么">
+    <button class="btn" onclick="addBlock()">+ 记录时间块</button>
+    <div id="tl" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/app/%E6%95%91%E7%8C%AB%E7%8C%AB-%E6%9B%B4%E6%87%82adhd%E7%9A%84%E6%97%B6%E9%97%B4%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7-%E7%A0%B4%E9%99%A4%E6%97%B6%E9%97%B4%E7%9B%B2%E7%97%87/id6766043402" target="_blank" style="color:var(--coral)">救猫猫 · Structured · Finch</a>
+  </div>
+
+<script>
+const KEY="P9-20260719-012";
+const COLORS={"专注":"#FF6B6B","巡航":"#4D96FF","运动":"#3FB984","冥想":"#9B6BFF","摸鱼":"#FFB84D"};
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render()}
+function toMin(t){const[h,m]=t.split(":").map(Number);return h*60+m;}
+function addBlock(){
+  const state=document.getElementById("state").value;
+  const start=document.getElementById("start").value;
+  const end=document.getElementById("end").value;
+  const note=document.getElementById("note").value.trim();
+  if(!start||!end){alert("请选择开始与结束时间");return}
+  if(toMin(end)<=toMin(start)){alert("结束需晚于开始");return}
+  items.push({state,start,end,note,dur:toMin(end)-toMin(start)});
+  document.getElementById("note").value="";
+  save();
+}
+function render(){
+  const tl=document.getElementById("tl");
+  if(items.length===0){tl.innerHTML="<p style='font-size:13px;color:var(--muted)'>还没有时间块</p>";}
+  else{
+    const sorted=items.slice().sort((a,b)=>toMin(a.start)-toMin(b.start));
+    tl.innerHTML=sorted.map(i=>`<div class="bar" style="background:${COLORS[i.state]}">${i.start}-${i.end} ${i.state} ${i.note?('· '+i.note):''} (${i.dur}min)</div>`).join("");
+  }
+  const byState={};
+  items.forEach(i=>byState[i.state]=(byState[i.state]||0)+i.dur);
+  let html="<b>📊 今日状态分布</b>";
+  Object.keys(byState).forEach(s=>{html+=`<div class="item"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${COLORS[s]};margin-right:6px"></span>${s}：<b class="h-coral">${byState[s]}min</b></div>`;});
+  html+="<button class='del' onclick='clearAll()'>清空今日</button>";
+  document.getElementById("list").innerHTML=html;
+}
+function clearAll(){if(confirm("清空所有时间块？")){items=[];save();}}
+render();
+</script>
+</body>
+</html>

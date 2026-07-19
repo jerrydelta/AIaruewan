@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>跨品牌智能家居中枢</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">home</span><span class="tag">smart_home</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">跨品牌智能家居中枢</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Multi-vendor smart-home hub unifying IoT appliances plus elder monitoring</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本IoT家电普及率约13%，远低于中美。原因："设置难""各厂商需不同app"。エディオン2025年推"エディオンスマートアプリ"，借ECHONET Lite Web API统一夏普/大金/松下等多品牌，远程操作·保修·报修。痛点：厂商app割裂。机会：多品牌统一管理中枢+看护。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:0 0 6px">登记家中各品牌家电，统一开关与维护提醒（模拟中枢）。</p>
+    <label>设备名称</label>
+    <input id="name" placeholder="如：客厅空调">
+    <div class="row">
+      <div><label>品牌</label><input id="brand" placeholder="如：大金"></div>
+      <div><label>房间</label><input id="room" placeholder="如：客厅"></div>
+    </div>
+    <label>下次维护日期</label>
+    <input id="mdate" type="date">
+    <button class="btn" onclick="add()">+ 添加设备</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://kyodonewsprwire.jp/release/202510157153" target="_blank" style="color:var(--coral)">エディオンスマートアプリ / ECHONET Lite</a>
+  </div>
+<script>
+const KEY="P10-20260719-005";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const name=document.getElementById('name').value.trim();
+  if(!name){alert('请填写设备名称');return;}
+  items.push({id:Date.now(),name,brand:document.getElementById('brand').value.trim(),
+    room:document.getElementById('room').value.trim(),mdate:document.getElementById('mdate').value,on:false});
+  document.getElementById('name').value="";document.getElementById('brand').value="";document.getElementById('room').value="";document.getElementById('mdate').value="";
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function toggle(id){const x=items.find(i=>i.id===id);if(x)x.on=!x.on;save();}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function render(){
+  const list=document.getElementById('list');
+  if(!items.length){list.innerHTML='<b>🏠 设备中枢</b><p style="font-size:13px;color:var(--muted)">暂无设备</p>';return;}
+  let html='<b>🏠 设备中枢（'+items.length+'台）</b>';
+  items.forEach(it=>{
+    const due=it.mdate?(' · 维护 '+it.mdate):'';
+    html+='<div style="display:flex;align-items:center;gap:8px;font-size:14px;padding:8px 0;border-bottom:1px dashed var(--line)"><span style="flex:1"><b>'+it.name+'</b><br><span style="font-size:12px;color:var(--muted)">'+(it.brand||'')+' '+(it.room||'')+due+'</span></span><span onclick="toggle('+it.id+')" style="cursor:pointer;font-size:12px;padding:6px 10px;border-radius:8px;'+(it.on?'background:var(--ok);color:#fff':'background:var(--line);color:var(--muted)')+'">'+(it.on?'开':'关')+'</span><span onclick="del('+it.id+')" style="color:var(--coral);cursor:pointer">✕</span></div>';
+  });
+  list.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

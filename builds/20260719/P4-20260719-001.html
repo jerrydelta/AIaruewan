@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>多平台一键分发+AI混剪的自媒体矩阵工具</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;position:relative}
+.del{position:absolute;right:0;top:10px;background:#fff;color:var(--coral);
+  border:1px solid #FFD9D9;border-radius:8px;font-size:12px;padding:4px 10px;cursor:pointer}
+.mini{font-size:13px;color:var(--ink);background:#FAFAFA;border:1px solid var(--line);
+  border-radius:10px;padding:10px;margin-top:8px}
+.hr{height:1px;background:var(--line);border:none;margin:14px 0}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">social</span><span class="tag">cross_platform</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">多平台一键分发+AI混剪的自媒体矩阵工具</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Multi-platform one-click publishing + AI remix tool for solo/small creator matrices</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">中国自媒体矩阵运营者核心痛点：在40-70+平台间手动切换发布、账号风控频发、批量效率低。实测个人用蚁小二管理3个账号，分发时间从3小时缩至20分钟。痛点集中在：免费版功能受限、移动端弱、云端存储有风险。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>内容标题</label>
+<input id="t1" placeholder="如：3分钟搞定营养早餐">
+<div style="margin-top:8px"><span class="tag">抖音</span><span class="tag">小红书</span><span class="tag">视频号</span><span class="tag">B站</span><span class="tag">快手</span></div>
+<label>选择分发平台（勾选）</label>
+<div style="display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:4px">
+<label style="flex:0 0 28%;margin:0"><input type="checkbox" value="抖音" style="width:auto;margin:0 4px 0 0">抖音</label>
+<label style="flex:0 0 28%;margin:0"><input type="checkbox" value="小红书" style="width:auto;margin:0 4px 0 0">小红书</label>
+<label style="flex:0 0 28%;margin:0"><input type="checkbox" value="视频号" style="width:auto;margin:0 4px 0 0">视频号</label>
+<label style="flex:0 0 28%;margin:0"><input type="checkbox" value="B站" style="width:auto;margin:0 4px 0 0">B站</label>
+<label style="flex:0 0 28%;margin:0"><input type="checkbox" value="快手" style="width:auto;margin:0 4px 0 0">快手</label>
+</div>
+<div class="row">
+<div><label>定时发布</label><input type="datetime-local" id="t2"></div>
+<div><label>状态</label><select id="t3"><option>待发</option><option>已发</option><option>失败</option></select></div>
+</div>
+<button class="btn" onclick="addRec()">加入分发队列</button>
+<hr class="hr">
+<label>AI混剪标题（规则生成，离线可用）</label>
+<div class="row">
+<input id="t4" placeholder="输入基础标题">
+<button class="btn" style="width:auto;padding:8px 14px" onclick="mixTitle()">混剪</button>
+</div>
+<div id="mixOut" class="mini" style="color:var(--coral)"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.yixiaoer.cn/index.html" target="_blank" style="color:var(--coral)">蚁小二 / 融媒宝 / 新榜矩阵通 / 易媒 / 聚媒通</a>
+  </div>
+
+<script>
+const KEY="P4-20260719-001";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function addRec(){
+ var title=document.getElementById('t1').value.trim();
+ if(!title){alert('请输入标题');return;}
+ var plats=[];document.querySelectorAll('input[type=checkbox]:checked').forEach(c=>plats.push(c.value));
+ if(!plats.length){alert('请至少勾选一个平台');return;}
+ items.push({title:title,plats:plats,time:document.getElementById('t2').value||'未定时',status:document.getElementById('t3').value,ts:Date.now()});
+ save();document.getElementById('t1').value='';
+}
+function mixTitle(){
+ var b=document.getElementById('t4').value.trim();
+ if(!b){alert('请输入基础标题');return;}
+ var hooks=['（保姆级教程）','｜0基础也能学会','✅99%的人不知道','，建议收藏','｜实测有效','｜3步搞定'];
+ document.getElementById('mixOut').innerHTML=(1)+'. '+b+hooks[0]+'<br>'+(2)+'. '+b+hooks[1]+'<br>'+(3)+'. '+b+hooks[2];
+}
+function render(){
+ var el=document.getElementById('list');
+ if(!items.length){el.innerHTML='<b>📋 分发队列</b><p style="font-size:13px;color:var(--muted)">暂无任务，添加一条试试。</p>';return;}
+ el.innerHTML='<b>📋 分发队列（'+items.length+'）</b>'+items.map(function(r,i){
+  var tags=r.plats.map(function(p){return '<span class="tag">'+p+'</span>';}).join('');
+  return '<div class="item"><div><b>'+esc(r.title)+'</b><br>'+tags+'</div><div style="font-size:12px;color:var(--muted)">'+r.time+' · '+r.status+'</div><button class="del" onclick="del('+i+')">删除</button></div>';
+ }).join('');
+}
+function del(i){items.splice(i,1);save();}
+function esc(s){return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+render();
+</script>
+</body>
+</html>

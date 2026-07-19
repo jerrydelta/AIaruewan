@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>计件工资极简记账 · 老板对账</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:8px}
+.stat b{color:var(--coral);font-size:18px}
+.del{color:var(--muted);font-size:12px;cursor:pointer;border:none;background:none}
+.item{border-bottom:1px dashed var(--line);padding:8px 0;font-size:14px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">gig_economy</span><span class="tag">part_time</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">计件工资极简记账 · 老板对账</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Piece-rate wage tracker</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">工厂/手工/家政等计件按劳人群需要"件数×单价=工资"的极简记账。市场已有基础工具，但缺"多工种单价模板 + 老板确认对账 + 月度结算单"。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>工种</label>
+    <input type="text" id="type" placeholder="如：缝纫 / 包装">
+    <label>件数</label>
+    <input type="number" id="qty" placeholder="0" step="1">
+    <label>单价（元/件）</label>
+    <input type="number" id="price" placeholder="0" step="0.1">
+    <button class="btn" onclick="addRec()">+ 记录一笔</button>
+    <div class="stat" id="sum">填写后汇总</div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/search?term=%E8%AE%A1%E4%BB%B6%E5%B7%A5%E8%B5%84%E8%AE%B0%E8%B4%A6" target="_blank" style="color:var(--coral)">计件工资记账软件 · 工资计算器</a>
+  </div>
+
+<script>
+const KEY="P9-20260719-009";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function fmt(n){return "¥"+Math.round(n*10)/10}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render()}
+function addRec(){
+  const type=document.getElementById("type").value.trim()||"未命名";
+  const qty=parseFloat(document.getElementById("qty").value)||0;
+  const price=parseFloat(document.getElementById("price").value)||0;
+  if(qty<=0||price<=0){alert("请填写件数与单价");return}
+  items.push({type,qty,price,wage:qty*price,confirmed:false,date:new Date().toISOString().slice(0,10)});
+  ["type","qty","price"].forEach(id=>document.getElementById(id).value="");
+  save();
+}
+function toggle(i){items[i].confirmed=!items[i].confirmed;save()}
+function render(){
+  let total=0,conf=0;
+  items.forEach(i=>{total+=i.wage;if(i.confirmed)conf+=i.wage});
+  document.getElementById("sum").innerHTML=
+    `<b>累计工资 <span class="h-coral">${fmt(total)}</span></b><br>已对账确认 ${fmt(conf)} ｜ 待确认 ${fmt(total-conf)}`;
+  let html="<b>📋 计件记录</b>";
+  if(items.length===0)html+="<p style='font-size:13px;color:var(--muted)'>暂无记录</p>";
+  items.slice().reverse().forEach((i,idx)=>{
+    const real=items.length-1-idx;
+    html+=`<div class="item"><div class="row"><div>${i.type} ${i.confirmed?'✅':''}<br>${i.qty}件×${i.price} = <b class="h-coral">${fmt(i.wage)}</b></div><div style="text-align:right"><button class="del" onclick="toggle(${real})">${i.confirmed?'取消':'对账'}</button><br><button class="del" onclick="del(${real})">删除</button></div></div></div>`;
+  });
+  document.getElementById("list").innerHTML=html;
+}
+function del(i){items.splice(i,1);save()}
+render();
+</script>
+</body>
+</html>

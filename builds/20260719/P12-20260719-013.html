@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>小微企微社群工具</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;
+  --ink:#2D2D2D;--muted:#8A8A8A;--bg:#F7F7F7;
+  --card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.mini{display:inline-block;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer;margin:3px 4px 0 0}
+.mini.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.mini.warn{background:var(--coral);color:#fff;border-color:var(--coral)}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .t{font-weight:600;font-size:14px}.item .meta{font-size:12px;color:var(--muted);margin:4px 0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">business</span><span class="tag">private_community_mgmt</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">小微商家企微社群工具</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Lightweight WeCom community tool (permanent QR + auto-segment + risk control)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">原生企微群活码仅7天有效、单群上限200人，大促引流频繁流失客户；新客/老客/VIP混群推送同质化广告退群率高；群内广告/违规话术无法自动拦截。探马SCRM单人可运维50+群；20万+商家落地验证私域社群自动化刚需，但3-5人微型个体户用不起完整SCRM。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 群分层 + 永久活码 + 敏感词风控</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">登记客户群（类型/人数/永久活码/离职继承），维护敏感词库，群发前自动拦截含敏感词的内容。</p>
+    <label>群名</label><input id="f_name" placeholder="如：VIP老客福利群">
+    <div class="row">
+      <div><label>分层</label><select id="f_tier"><option>新客</option><option>老客</option><option>VIP</option></select></div>
+      <div><label>人数</label><input id="f_num" type="number" value="0"></div>
+    </div>
+    <label>永久活码</label>
+    <select id="f_qr"><option value="1">已配置</option><option value="0">未配置</option></select>
+    <button class="btn" onclick="addGroup()">添加群</button>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <b style="font-size:14px">🛡 敏感词风控</b>
+    <input id="f_word" placeholder="添加敏感词，回车" onkeydown="if(event.key==='Enter')addWord()">
+    <div id="words" style="margin-top:6px"></div>
+    <input id="f_check" placeholder="粘贴要群发的内容，检测敏感词">
+    <button class="btn" onclick="check()" style="background:var(--ok)">检测群发内容</button>
+    <div id="res" style="font-size:13px;margin-top:6px"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>👥 我的客户群</b><div id="stat" style="font-size:12px;color:var(--muted);margin:6px 0"></div>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://weibanzhushou.com/blog/35088" target="_blank" style="color:var(--coral)">探马SCRM / 微伴助手 / 小鹅通 / 企业微信原生</a>
+  </div>
+
+<script>
+const KEY="P12-20260719-013";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"groups":[],"words":[]}');
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function addGroup(){
+  const name=f_name.value.trim();if(!name){alert("请输入群名");return;}
+  data.groups.unshift({id:Date.now(),name,tier:f_tier.value,num:+f_num.value||0,qr:f_qr.value==="1",inherit:false});
+  f_name.value=f_num.value="";save();
+}
+function toggleInherit(id){const g=data.groups.find(x=>x.id===id);if(g)g.inherit=!g.inherit;save();}
+function delGroup(id){data.groups=data.groups.filter(x=>x.id!==id);save();}
+function addWord(){const w=f_word.value.trim();if(!w)return;if(!data.words.includes(w))data.words.push(w);f_word.value="";save();}
+function check(){
+  const t=f_check.value;if(!t){alert("请输入内容");return;}
+  const hit=data.words.filter(w=>t.includes(w));
+  document.getElementById("res").innerHTML=hit.length?`<span class="h-coral">⚠ 命中敏感词：${hit.join("、")}，已拦截</span>`:'<span style="color:var(--ok)">✓ 无敏感词，可群发</span>';
+}
+function render(){
+  const noqr=data.groups.filter(x=>!x.qr).length;
+  stat.innerHTML=`群 ${data.groups.length} · 未配永久活码 <b class="h-coral">${noqr}</b> · 敏感词 ${data.words.length}`;
+  document.getElementById("words").innerHTML=data.words.map(w=>`<span class="tag">${esc(w)}</span>`).join("")||'<span style="font-size:12px;color:var(--muted)">暂无</span>';
+  const d=document.getElementById("items");
+  if(!data.groups.length){d.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有群。</p>';return;}
+  d.innerHTML=data.groups.map(g=>`
+    <div class="item"><div class="t">${esc(g.name)} <span class="tag">${esc(g.tier)}</span> ${g.qr?'<span class="tag">永久活码</span>':''}</div>
+    <div class="meta">${g.num}人 · 离职继承 ${g.inherit?'✅':'❌'} <span class="mini ok" onclick="toggleInherit(${g.id})">${g.inherit?'已继承':'设继承'}</span>
+    <span class="mini warn" onclick="delGroup(${g.id})">删</span></div></div>`).join("");
+}
+render();
+</script>
+</body>
+</html>

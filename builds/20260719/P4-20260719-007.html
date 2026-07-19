@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩文本地化社媒统一收件箱（Kakao/Naver/Instagram）</title>
+<style>:root{
+  --coral:#FF6B6B;
+  --coral-dark:#E85555;
+  --ink:#2D2D2D;
+  --muted:#8A8A8A;
+  --bg:#F7F7F7;
+  --card:#FFFFFF;
+  --line:#ECECEC;
+  --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;position:relative}
+.del{position:absolute;right:0;top:10px;background:#fff;color:var(--coral);
+  border:1px solid #FFD9D9;border-radius:8px;font-size:12px;padding:4px 10px;cursor:pointer}
+.mini{font-size:13px;color:var(--ink);background:#FAFAFA;border:1px solid var(--line);
+  border-radius:10px;padding:10px;margin-top:8px}
+.hr{height:1px;background:var(--line);border:none;margin:14px 0}</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">social</span><span class="tag">cross_platform</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩文本地化社媒统一收件箱（Kakao/Naver/Instagram）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KR-localized social unified inbox (Kakao/Naver/Instagram)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国创作者在Instagram(댓글/DM)、Naver(블로그 댓글)、Kakao(톡)多平台分散，统一收件箱工具多为海外高价。痛点：韩国本地化弱、韩文AI回复不成熟、Kakao/Naver覆盖差。这是韩国市场明显空白。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>플랫폼 (平台)</label><select id="s1"><option>인스타그램</option><option>네이버</option><option>카카오톡</option></select>
+<label>유형 (类型)</label><select id="s2"><option>DM</option><option>댓글</option></select>
+<label>내용 (内容)</label><input id="s3" placeholder="고객 메시지">
+<label>상태 (状态)</label><select id="s4"><option>미처리</option><option>완료</option><option>전환</option></select>
+<button class="btn" onclick="addMsg()">수신함에 추가</button>
+<hr class="hr">
+<label>키워드 자동응답 규칙</label>
+<div class="row"><input id="s5" placeholder="키워드"><input id="s6" placeholder="답변"></div>
+<button class="btn" style="background:#3FB984" onclick="addRule()">규칙 추가</button>
+<div id="ruleList" class="mini"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://postplanify.com/blog/best-social-inbox-tools" target="_blank" style="color:var(--coral)">PostPlanify / Agorapulse / Sprout Social / Buffer</a>
+  </div>
+
+<script>
+const KEY="P4-20260719-007";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+var KEYR='RULE_'+KEY;
+var rules=JSON.parse(localStorage.getItem(KEYR)||'[]');
+function saveRule(){localStorage.setItem(KEYR,JSON.stringify(rules));showRules();}
+function showRules(){
+ var el=document.getElementById('ruleList');
+ if(!rules.length){el.innerHTML='규칙 없음.';return;}
+ el.innerHTML='규칙：'+rules.map(function(r,i){return (i+1)+'.「'+esc(r.k)+'」→'+esc(r.a)+' <a style="color:var(--coral);cursor:pointer" onclick="delRule('+i+')">[삭제]</a>';}).join(' ');
+}
+function delRule(i){rules.splice(i,1);saveRule();}
+function addRule(){
+ var k=document.getElementById('s5').value.trim(),a=document.getElementById('s6').value.trim();
+ if(!k||!a){alert('입력하세요');return;}
+ rules.push({k:k,a:a});saveRule();document.getElementById('s5').value='';document.getElementById('s6').value='';
+}
+function addMsg(){
+ var c=document.getElementById('s3').value.trim();
+ if(!c){alert('내용을 입력하세요');return;}
+ var sug='';for(var i=0;i<rules.length;i++){if(c.indexOf(rules[i].k)>=0){sug=rules[i].a;break;}}
+ items.push({plat:document.getElementById('s1').value,type:document.getElementById('s2').value,content:c,status:document.getElementById('s4').value,sug:sug,ts:Date.now()});
+ save();document.getElementById('s3').value='';
+}
+function render(){
+ var el=document.getElementById('list');
+ if(!items.length){el.innerHTML='<b>📥 통합 수신함 (统一收件箱)</b><p style="font-size:13px;color:var(--muted)">메시지 없음.</p>';return;}
+ el.innerHTML='<b>📥 통합 수신함（'+items.length+'）</b>'+items.map(function(m,i){
+  var sg=m.sug?'<div class="mini" style="color:var(--ok)">규칙 매칭 · 제안: '+esc(m.sug)+'</div>':'';
+  return '<div class="item"><div><b>'+m.plat+' · '+m.type+'</b></div><div style="font-size:13px">'+esc(m.content)+'</div>'+sg+'<div style="font-size:12px;color:var(--muted)">'+m.status+'</div><button class="del" onclick="del('+i+')">삭제</button></div>';
+ }).join('');
+}
+function del(i){items.splice(i,1);save();}
+function esc(s){return (s||'').replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+showRules();
+render();
+</script>
+</body>
+</html>

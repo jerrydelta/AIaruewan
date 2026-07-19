@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>离乳食周食谱（避敏版）</title>
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#E85555; --ink:#2D2D2D; --muted:#8A8A8A;
+  --bg:#F7F7F7; --card:#FFFFFF; --line:#ECECEC; --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">parenting</span><span class="tag">baby_food</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">离乳食周食谱（自动避敏）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Weaning meal planner with allergen exclusion + weekly menu</p>
+  </div>
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">每天"做什么给宝宝吃"最头疼，还要避开蛋/小麦/奶等过敏原、应对挑食。一键生成避敏周食谱 + 买菜清单，省心又安全。</p>
+  </div>
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>需要排除的过敏原（可多选）</label>
+    <div class="row">
+      <label style="margin:0"><input type="checkbox" id="e_egg" style="width:auto;margin:0 4px 0 0">蛋</label>
+      <label style="margin:0"><input type="checkbox" id="e_wheat" style="width:auto;margin:0 4px 0 0">小麦</label>
+      <label style="margin:0"><input type="checkbox" id="e_milk" style="width:auto;margin:0 4px 0 0">奶</label>
+      <label style="margin:0"><input type="checkbox" id="e_soy" style="width:auto;margin:0 4px 0 0">大豆</label>
+      <label style="margin:0"><input type="checkbox" id="e_nut" style="width:auto;margin:0 4px 0 0">坚果</label>
+    </div>
+    <label>宝宝月龄</label>
+    <select id="month"><option>6-8月（初期）</option><option>9-11月（中期）</option><option>12月+（后期）</option></select>
+    <button class="btn" onclick="gen()">生成本周食谱</button>
+  </div>
+  <div class="card" id="list"></div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/gb/app/easy-bites-child-feeding-coach/id1562987724" target="_blank" style="color:var(--coral)">Easy Bites</a>
+  </div>
+<script>
+const KEY="P6-20260719-006";
+const RECIPES=[
+  {n:'南瓜米糊',a:[],ing:['南瓜','米粉']},{n:'胡萝卜泥',a:[],ing:['胡萝卜']},
+  {n:'西兰花土豆泥',a:[],ing:['西兰花','土豆']},{n:'苹果泥',a:[],ing:['苹果']},
+  {n:'鸡肉蔬菜粥',a:[],ing:['鸡胸','米饭','青菜']},{n:'鳕鱼蔬菜羹',a:[],ing:['鳕鱼','豆腐','青菜']},
+  {n:'鸡蛋羹',a:['蛋'],ing:['鸡蛋']},{n:'牛奶燕麦',a:['奶'],ing:['牛奶','燕麦']},
+  {n:'小麦饼干',a:['小麦'],ing:['面粉']},{n:'豆浆米糊',a:['大豆'],ing:['豆浆','米粉']},
+  {n:'花生酱吐司',a:['坚果','小麦'],ing:['花生酱','面包']},{n:'酸奶果粒',a:['奶'],ing:['酸奶','香蕉']},
+  {n:'番茄豆腐面',a:['小麦','大豆'],ing:['番茄','豆腐','面条']},{n:'紫薯泥',a:[],ing:['紫薯']},
+  {n:'牛肉碎菜饭',a:[],ing:['牛肉','米饭','胡萝卜']},{n:'南瓜鸡蛋饼',a:['蛋','小麦'],ing:['南瓜','鸡蛋','面粉']}
+];
+const DAYS=['周一','周二','周三','周四','周五','周六','周日'];
+function gen(){
+  const excl=[];
+  if(document.getElementById('e_egg').checked)excl.push('蛋');
+  if(document.getElementById('e_wheat').checked)excl.push('小麦');
+  if(document.getElementById('e_milk').checked)excl.push('奶');
+  if(document.getElementById('e_soy').checked)excl.push('大豆');
+  if(document.getElementById('e_nut').checked)excl.push('坚果');
+  const ok=RECIPES.filter(r=>!r.a.some(x=>excl.includes(x)));
+  if(ok.length<7){alert('可选食谱不足，减少排除项');return;}
+  const menu=[];const used=new Set();
+  for(let i=0;i<7;i++){
+    let pick;let guard=0;
+    do{pick=ok[Math.floor(Math.random()*ok.length)];guard++;}while(used.has(pick.n)&&guard<20);
+    used.add(pick.n);menu.push(pick);
+  }
+  const shop={};menu.forEach(r=>r.ing.forEach(i=>shop[i]=(shop[i]||0)+1));
+  const html='<b>🍽 本周食谱（已排除：'+(excl.join('/')||'无')+'）</b>'+
+    menu.map((r,i)=>'<div style="border-top:1px solid var(--line);padding:7px 0"><b>'+DAYS[i]+'</b> · '+r.n+(r.a.length?'':' <span style="color:var(--ok);font-size:12px">✓无敏</span>')+'</div>').join('')+
+    '<hr style="border:none;border-top:1px dashed var(--line);margin:10px 0"><b>🛒 买菜清单</b><div style="margin-top:6px">'+Object.keys(shop).map(k=>'<span class="tag">'+k+' ×'+shop[k]+'</span>').join('')+'</div>';
+  document.getElementById('list').innerHTML=html;
+  localStorage.setItem(KEY,JSON.stringify({excl,menu}));
+}
+const saved=JSON.parse(localStorage.getItem(KEY)||'null');
+if(saved){document.getElementById('list').innerHTML='<b>上次生成的食谱已保存</b><p style="font-size:13px;color:#999">点上方按钮可重新生成。</p>';}
+</script>
+</body>
+</html>

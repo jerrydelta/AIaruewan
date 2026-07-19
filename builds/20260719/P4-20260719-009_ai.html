@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>矩阵合规检测工具 · AI版</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0}
+.item .meta{font-size:12px;color:var(--muted)}
+.mini{font-size:13px;padding:7px 12px;border:none;border-radius:9px;cursor:pointer;margin-top:6px}
+.mini.del{background:#f3f3f3;color:#c33}
+.warn{color:var(--coral);font-weight:600}.safe{color:var(--ok);font-weight:600}
+.ai-bg{background:linear-gradient(135deg,#FFF0F0 0%,#F0F8FF 100%)}
+.ai-border{border:2px solid var(--coral)}
+.ai-card .collapse-header{background:var(--coral);color:#fff;padding:12px 16px;
+  border-radius:12px 12px 0 0;cursor:pointer;font-weight:600}
+.ai-card .collapse-body{padding:16px;background:#fff;border-radius:0 0 12px 12px}
+#aiChat{height:200px;overflow-y:auto;border:1px solid var(--line);
+  border-radius:8px;padding:8px;margin:8px 0;background:#fafafa}
+.ai-msg{margin:6px 0;padding:8px 12px;border-radius:12px;font-size:13px}
+.ai-msg.user{background:var(--coral);color:#fff;margin-left:40px}
+.ai-msg.assistant{background:#f0f0f0;color:var(--ink);margin-right:40px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">social</span><span class="tag">cross_platform</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">中小团队低价合规版矩阵管理</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Low-cost compliance-first matrix management for SMB teams</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">中大型团队做矩阵运营核心痛点不是分发而是合规与风控：账号违规、内容不可控、权限宽松。新榜矩阵通主打AI合规检测(违规词提醒)、账号分级。痛点：中小企业想要低价合规版。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">粘贴待发内容，选择账号分级，自动检测常见违规词并给出风险提示，记录留痕。</p>
+    <label>账号分级</label>
+    <select id="level"><option>主号</option><option>子号</option><option>矩阵小号</option></select>
+    <label>待发内容</label>
+    <textarea id="content" rows="3" placeholder="粘贴将要发布的内容..."></textarea>
+    <button class="btn" onclick="check()">合规检测</button>
+    <div id="result" style="font-size:14px;margin-top:8px"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card ai-card ai-bg ai-border" id="aiCard">
+    <div class="collapse-header" onclick="toggleAI()">🤖 AI 助手（用户自带Key · 零成本）</div>
+    <div class="collapse-body collapsed" id="aiBody">
+      <div id="aiKeySection">
+        <label>Hy3 API Key（用户自带，零成本运营）</label>
+        <input type="password" id="aiKey" placeholder="sk-..." style="margin:6px 0">
+        <button class="btn" onclick="saveKey()" style="background:#3FB984;margin:4px 0">保存Key</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">使用腾讯混元Hy3 API，按量计费。Key存储在本地，不上传服务器。</div>
+      </div>
+      <div id="aiChatSection" style="display:none">
+        <div id="aiChat"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input type="text" id="aiInput" placeholder="问AI..." style="flex:1">
+          <button class="btn" onclick="sendAI()" style="width:auto;padding:8px 16px">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.lfnews.cn/portal.php?aid=78599&mod=view" target="_blank" style="color:var(--coral)">新榜矩阵通 / 蚁小二 / 聚媒通</a>
+  </div>
+
+<script>
+const KEY="P4-20260719-009";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+const BAN=["最","第一","国家级","绝对","100%"," guaranteed","保证","免费送","点击领取","加微信","私聊"];
+function check(){
+  const level=document.getElementById('level').value;
+  const content=document.getElementById('content').value.trim();
+  if(!content){ alert('请粘贴待发内容'); return; }
+  const hit=BAN.filter(w=>content.includes(w));
+  const ok=hit.length===0;
+  const res=document.getElementById('result');
+  res.innerHTML = ok
+    ? '<span class="safe">✓ 未发现明显违规词，可发布</span>'
+    : '<span class="warn">⚠ 命中疑似违规词：'+hit.map(w=>'<b>'+w+'</b>').join('、')+'</span>';
+  items.push({id:Date.now(),level,content,ok,hit,at:new Date().toLocaleString('zh-CN')});
+  document.getElementById('content').value='';
+  save();
+}
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function render(){
+  const el=document.getElementById('list');
+  if(items.length===0){ el.innerHTML='<b>🛡 合规记录</b><p style="font-size:13px;color:var(--muted)">暂无检测记录。</p>'; return; }
+  const bad=items.filter(x=>!x.ok).length;
+  let h='<b>🛡 合规记录</b><div style="font-size:12px;color:var(--coral);margin:4px 0">命中风险 '+bad+' 条</div>';
+  items.slice().reverse().forEach(it=>{
+    h+='<div class="item"><div class="meta"><span class="tag">'+it.level+'</span>'+(it.ok?'<span class="safe">通过</span>':'<span class="warn">风险</span>')+' · '+it.at+'</div>';
+    h+='<div style="margin-top:4px">'+esc(it.content).slice(0,50)+(it.content.length>50?'…':'')+'</div>';
+    h+='<button class="mini del" onclick="del('+it.id+')">删除</button></div>';
+  });
+  el.innerHTML=h;
+}
+function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+render();
+
+// AI助手模块
+let aiKey = localStorage.getItem('hy3_key') || '';
+let aiHistory = [];
+function toggleAI(){ document.getElementById('aiBody').classList.toggle('collapsed'); }
+function saveKey(){
+  aiKey = document.getElementById('aiKey').value.trim();
+  if(!aiKey){ alert('请输入API Key'); return; }
+  localStorage.setItem('hy3_key', aiKey);
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+  addAIMessage('assistant','Key已保存！我是你的AI助手，可以帮你优化内容、解答问题。');
+}
+async function sendAI(){
+  if(!aiKey){ alert('请先保存API Key'); return; }
+  const input=document.getElementById('aiInput');
+  const msg=input.value.trim(); if(!msg) return;
+  addAIMessage('user',msg); input.value='';
+  aiHistory.push({role:'user',content:msg});
+  try{
+    const res=await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions',{
+      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
+      body:JSON.stringify({model:'hunyuan-pro',messages:aiHistory,stream:false})
+    });
+    const data=await res.json();
+    const reply=data.choices?.[0]?.message?.content||'AI响应失败';
+    aiHistory.push({role:'assistant',content:reply});
+    addAIMessage('assistant',reply);
+  }catch(e){ addAIMessage('assistant','调用失败：'+e.message); }
+}
+function addAIMessage(role,content){
+  const chat=document.getElementById('aiChat');
+  const div=document.createElement('div');
+  div.className='ai-msg '+role; div.textContent=content;
+  chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+}
+if(aiKey){
+  document.getElementById('aiKeySection').style.display='none';
+  document.getElementById('aiChatSection').style.display='block';
+}
+</script>
+</body>
+</html>
