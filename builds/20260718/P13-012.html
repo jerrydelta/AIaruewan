@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>PCOS 多囊卵巢专用追踪器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.sum{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.item .del{float:right;color:var(--coral);font-size:12px;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">health</span><span class="tag">pcos_dedicated_tracker</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">PCOS 多囊卵巢专用追踪器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">PCOS-dedicated tracker</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">PCOS 影响全球 5%-18% 育龄女性，确诊超 1.05 亿。但主流经期 App 为规律周期设计，PCOS 不规律周期用户「frustrating and incomplete」。机会：PCOS 专用（不规律周期+营养+症状）追踪器。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 不规律周期 + 每餐营养 + 症状</b>
+    <label>日期</label><input id="date" type="date">
+    <div class="row">
+      <div><label>本次周期天数</label><input id="len" type="number" placeholder="不规律就如实填"></div>
+      <div><label>体重 kg</label><input id="weight" type="number" placeholder="60"></div>
+    </div>
+    <label>今日一餐（碳水 / 蛋白 g）</label>
+    <div class="row">
+      <div><input id="carb" type="number" placeholder="碳水g"></div>
+      <div><input id="pro" type="number" placeholder="蛋白g"></div>
+    </div>
+    <label>症状（如 多毛/痤疮/脱发，逗号分隔）</label><input id="sym" placeholder="痤疮,脱发">
+    <button class="btn" onclick="addItem()">＋ 记录</button>
+  </div>
+
+  <div class="card" id="list"><b>📊 数据概览</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12187023/" target="_blank" style="color:var(--coral)">OvaAid / PCOS Tracker / Nutrola / Clue</a>
+  </div>
+
+<script>
+const KEY="P13-012";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+if(!document.getElementById("date").value)document.getElementById("date").valueAsDate=new Date();
+function addItem(){
+  const date=document.getElementById("date").value;
+  items.push({
+    date,
+    len:parseFloat(document.getElementById("len").value)||null,
+    weight:parseFloat(document.getElementById("weight").value)||null,
+    carb:parseFloat(document.getElementById("carb").value)||0,
+    pro:parseFloat(document.getElementById("pro").value)||0,
+    sym:document.getElementById("sym").value.trim()
+  });
+  ["len","weight","carb","pro","sym"].forEach(id=>document.getElementById(id).value="");
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  let html='<b>📊 数据概览</b>';
+  if(items.length===0)html+='<p style="font-size:13px;color:#999;margin:8px 0">还没有记录。</p>';
+  const lens=items.filter(x=>x.len).map(x=>x.len);
+  const avgLen=lens.length?(lens.reduce((a,b)=>a+b,0)/lens.length).toFixed(0):'—';
+  const totCarb=items.reduce((a,x)=>a+x.carb,0);
+  const totPro=items.reduce((a,x)=>a+x.pro,0);
+  items.slice().reverse().forEach((x,i)=>{
+    const idx=items.length-1-i;
+    html+=`<div class="item"><span class="del" onclick="del(${idx})">删除</span>
+      <b>${x.date}</b> · 周期${x.len||'?'}天 · ${x.weight||'?'}kg<br>
+      餐：碳${x.carb}g/蛋${x.pro}g ${x.sym?("· "+x.sym):""}</div>`;
+  });
+  if(items.length){
+    html+=`<div class="sum"><span>平均周期长度</span><b>${avgLen} 天</b></div>`;
+    html+=`<div class="sum"><span>累计碳水 / 蛋白</span><b>${totCarb}g / ${totPro}g</b></div>`;
+    html+=`<div class="sum"><span>蛋白占比</span><b>${totCarb?(totPro/(totCarb+totPro)*100).toFixed(0):0}%</b></div>`;
+  }
+  box.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>银发兴趣社区与课程</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.7;padding:16px;max-width:480px;margin:0 auto;font-size:17px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:16px;border:none;border-radius:14px;
+  background:var(--coral);color:#fff;font-size:19px;font-weight:700;cursor:pointer;margin-top:10px}
+.btn:active{background:var(--coral-dark)}
+.btn-ok{background:var(--ok)}
+.tag{display:inline-block;font-size:13px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:3px 11px;margin:2px 5px 2px 0}
+input,select,textarea{width:100%;padding:14px;border:1px solid var(--line);
+  border-radius:12px;font-size:17px;margin-top:8px;background:#fff;color:var(--ink)}
+label{font-size:15px;color:var(--muted);display:block;margin-top:12px;font-weight:600}
+.mini{font-size:13px;color:var(--muted)}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+.item .nm{font-size:19px;font-weight:700}
+.row{display:flex;gap:10px}.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">elderly</span><span class="tag">silver_video_social</span></div>
+    <h1 style="font-size:22px;margin:8px 0 4px">银发兴趣社区与课程</h1>
+    <p class="h-coral" style="font-size:15px;margin:0">作品分享 · 兴趣圈子 · 在线课程</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">💡 为什么需要</b>
+    <p style="font-size:15px;color:#555;margin:6px 0 0">小年糕中老年用户 1.1 亿、糖豆用户 2 亿+。银发用户高粘性但需要"社区+轻量付费课程"，而非纯流量收割。</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">🛠 分享我的作品</b>
+    <label>作品标题</label>
+    <input id="title" placeholder="如：我的广场舞视频">
+    <label>类型</label>
+    <select id="type"><option>短视频</option><option>照片相册</option><option>书法/绘画</option><option>文章</option></select>
+    <label>一句话介绍</label>
+    <textarea id="desc" rows="2" placeholder="想说的话"></textarea>
+    <button class="btn" onclick="addWork()">📤 发布作品</button>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">🎓 我的课程学习</b>
+    <label>想学的课程</label>
+    <input id="course" placeholder="如：手机摄影课">
+    <button class="btn btn-ok" onclick="addCourse()">➕ 加入学习</button>
+    <div id="courses"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b style="font-size:18px">🖼 我的作品墙</b>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:13px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.sohu.com/a/781798832_114988" target="_blank" style="color:var(--coral)">小年糕 / 美篇 / 糖豆（银发兴趣社区）</a>
+  </div>
+
+<script>
+const KEY="P7-014";
+let works=JSON.parse(localStorage.getItem(KEY)||"[]");
+let courses=JSON.parse(localStorage.getItem(KEY+"_c")||"[]");
+function addWork(){
+  const title=document.getElementById("title").value.trim();
+  if(!title){alert("请填写作品标题");return;}
+  works.unshift({id:Date.now(),title,type:document.getElementById("type").value,desc:document.getElementById("desc").value.trim()});
+  document.getElementById("title").value="";document.getElementById("desc").value="";
+  localStorage.setItem(KEY,JSON.stringify(works));renderWorks();
+}
+function addCourse(){
+  const c=document.getElementById("course").value.trim();
+  if(!c){alert("请填写课程名");return;}
+  courses.push({name:c,done:0});
+  document.getElementById("course").value="";localStorage.setItem(KEY+"_c",JSON.stringify(courses));renderCourses();
+}
+function study(i){courses[i].done++;localStorage.setItem(KEY+"_c",JSON.stringify(courses));renderCourses();}
+function delCourse(i){courses.splice(i,1);localStorage.setItem(KEY+"_c",JSON.stringify(courses));renderCourses();}
+function delW(id){works=works.filter(x=>x.id!==id);localStorage.setItem(KEY,JSON.stringify(works));renderWorks();}
+function renderWorks(){
+  const box=document.getElementById("items");
+  if(!works.length){box.innerHTML='<p class="mini" style="margin-top:8px;font-size:14px">还没有作品，分享第一个吧。</p>';return;}
+  box.innerHTML=works.map(it=>`<div class="item"><div class="nm">${esc(it.title)}</div><div class="mini" style="font-size:15px;margin-top:4px">${it.type}${it.desc?' · '+esc(it.desc):''}</div><button class="btn" style="margin-top:8px;background:#EEE;color:#888" onclick="delW(${it.id})">删除</button></div>`).join("");
+}
+function renderCourses(){
+  const box=document.getElementById("courses");
+  if(!courses.length){box.innerHTML='<p class="mini" style="margin-top:8px;font-size:14px">还没有课程。</p>';return;}
+  box.innerHTML=courses.map((c,i)=>`<div class="item"><div class="nm" style="font-size:17px">${esc(c.name)}</div><div class="mini" style="font-size:15px">已学习 ${c.done} 次</div><div class="row" style="margin-top:8px"><button class="btn btn-ok" style="margin-top:0" onclick="study(${i})">学一次</button><button class="btn" style="margin-top:0;background:#EEE;color:#888;width:auto;padding:16px 18px" onclick="delCourse(${i})">删</button></div></div>`).join("");
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+renderWorks();renderCourses();
+</script>
+</body>
+</html>

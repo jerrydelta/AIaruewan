@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>中老年一站式生活助手</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.7;padding:16px;max-width:480px;margin:0 auto;font-size:17px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:16px;border:none;border-radius:14px;
+  background:var(--coral);color:#fff;font-size:19px;font-weight:700;cursor:pointer;margin-top:10px}
+.btn:active{background:var(--coral-dark)}
+.btn-ok{background:var(--ok)}
+.tag{display:inline-block;font-size:13px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:3px 11px;margin:2px 5px 2px 0}
+input,select,textarea{width:100%;padding:14px;border:1px solid var(--line);
+  border-radius:12px;font-size:17px;margin-top:8px;background:#fff;color:var(--ink)}
+label{font-size:15px;color:var(--muted);display:block;margin-top:12px;font-weight:600}
+.mini{font-size:13px;color:var(--muted)}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+.item .nm{font-size:18px;font-weight:700}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.seg{display:flex;gap:8px;margin-top:10px}
+.seg button{flex:1;padding:14px;border:1px solid var(--line);background:#fff;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer}
+.seg button.on{background:var(--coral);color:#fff;border-color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">elderly</span><span class="tag">ai_native_elderly_superapp</span></div>
+    <h1 style="font-size:22px;margin:8px 0 4px">中老年一站式生活助手</h1>
+    <p class="h-coral" style="font-size:15px;margin:0">语音式大字 · 健康 · 生活 · 购物 · 社交</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">💡 为什么需要</b>
+    <p style="font-size:15px;color:#555;margin:6px 0 0">老人被多个割裂 App 困扰。苏宁"朝夕相伴"用 AI 语音入口整合健康/生活/购物/社交，做"一个 App 全搞定"。本工具以大字表单实现统一记录。</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">🛠 记一笔今天的事</b>
+    <div class="seg" id="seg">
+      <button class="on" data-t="健康" onclick="pick('健康')">❤ 健康</button>
+      <button data-t="服务" onclick="pick('服务')">🧹 服务</button>
+      <button data-t="购物" onclick="pick('购物')">🛒 购物</button>
+      <button data-t="社交" onclick="pick('社交')">💬 社交</button>
+    </div>
+    <label id="l1">健康记录</label>
+    <input id="v1" placeholder="如：血压 120/80">
+    <label id="l2">补充说明</label>
+    <input id="v2" placeholder="如：服药后测量">
+    <button class="btn btn-ok" onclick="save()">📥 保存</button>
+  </div>
+
+  <div class="card" id="list">
+    <b style="font-size:18px">📋 今日汇总</b>
+    <div id="summary" style="font-size:16px;font-weight:700;color:var(--coral);margin:8px 0"></div>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:13px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.toutiao.com/article/7566908470776152627" target="_blank" style="color:var(--coral)">朝夕相伴 / 中国移动 AI 健康管家（AI 原生中老年生活 App）</a>
+  </div>
+
+<script>
+const KEY="P7-017";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let cur="健康";
+const LBL={健康:["健康记录","补充说明"],服务:["需要预约的服务","时间/地址"],购物:["要买的东西","数量/备注"],社交:["想说的话/留言","给谁"]};
+function pick(t){cur=t;document.querySelectorAll("#seg button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
+  document.getElementById("l1").textContent=LBL[t][0];document.getElementById("l2").textContent=LBL[t][1];}
+function save(){
+  const v1=document.getElementById("v1").value.trim();
+  if(!v1){alert("请先填写内容");return;}
+  items.unshift({type:cur,v1,v2:document.getElementById("v2").value.trim(),date:new Date().toLocaleString("zh-CN")});
+  document.getElementById("v1").value="";document.getElementById("v2").value="";
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+}
+function render(){
+  const tk=new Date().toLocaleDateString("zh-CN");
+  const today=items.filter(x=>x.date.slice(0,10)===tk);
+  const cnt={健康:0,服务:0,购物:0,社交:0};today.forEach(x=>cnt[x.type]++);
+  document.getElementById("summary").textContent=`今天：健康 ${cnt.健康} · 服务 ${cnt.服务} · 购物 ${cnt.购物} · 社交 ${cnt.社交}`;
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p class="mini" style="margin-top:8px;font-size:14px">还没有记录。</p>';return;}
+  box.innerHTML=items.map(it=>`<div class="item"><div class="nm" style="font-size:17px">[${it.type}] ${esc(it.v1)}</div>${it.v2?`<div class="mini" style="font-size:14px">${esc(it.v2)}</div>`:""}<div class="mini" style="font-size:13px">${it.date}</div></div>`).join("");
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+</script>
+</body>
+</html>

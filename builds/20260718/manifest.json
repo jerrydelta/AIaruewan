@@ -1,0 +1,4396 @@
+{
+  "date": "20260718",
+  "total": 288,
+  "built": 288,
+  "missing": [],
+  "items": [
+    {
+      "id": "P1-001",
+      "category": "creative",
+      "subcategory": "youtube_thumbnail_generator",
+      "direction": "AI按视频内容生成高点击YouTube缩略图(批量+CTR优化)",
+      "direction_en": "AI YouTube thumbnail generator from video content (batch + CTR-optimized)",
+      "tags": [
+        "youtube",
+        "thumbnail",
+        "ctr",
+        "creator_tools",
+        "ai_image"
+      ],
+      "html": "20260718/P1-001.html",
+      "built": true
+    },
+    {
+      "id": "P1-002",
+      "category": "creative",
+      "subcategory": "ai_childrens_book_generator",
+      "direction": "AI生成儿童绘本(插画+排版)上架Etsy/KDP/小红书做被动收入",
+      "direction_en": "AI-generated children's books (illustration + layout) sold on Etsy/KDP/Xiaohongshu for passive income",
+      "tags": [
+        "childrens_book",
+        "etsy",
+        "kdp",
+        "passive_income",
+        "ai_writing"
+      ],
+      "html": "20260718/P1-002.html",
+      "built": true
+    },
+    {
+      "id": "P1-003",
+      "category": "creative",
+      "subcategory": "ai_coloring_book_generator",
+      "direction": "AI生成填色书(线稿)批量上架KDP/Etsy做被动收入",
+      "direction_en": "AI coloring-book generator (line art) batch-listed on KDP/Etsy for passive income",
+      "tags": [
+        "coloring_book",
+        "kdp",
+        "etsy",
+        "print_on_demand",
+        "passive_income"
+      ],
+      "html": "20260718/P1-003.html",
+      "built": true
+    },
+    {
+      "id": "P1-004",
+      "category": "creative",
+      "subcategory": "ai_logo_generator_gap",
+      "direction": "垂直AI Logo/品牌资产生成器(矢量导出+品牌一致性)",
+      "direction_en": "Vertical AI logo / brand-asset generator (vector export + brand consistency)",
+      "tags": [
+        "logo",
+        "branding",
+        "svg",
+        "brand_kit",
+        "vector"
+      ],
+      "html": "20260718/P1-004.html",
+      "built": true
+    },
+    {
+      "id": "P1-005",
+      "category": "creative",
+      "subcategory": "canva_alternative_gap",
+      "direction": "AI原生按量付费设计工具(图标/邮件/品牌提取,对标免费Canva)",
+      "direction_en": "AI-native pay-as-you-go design tool (icons / email / brand extraction, free Canva alternative)",
+      "tags": [
+        "canva_alternative",
+        "ai_design",
+        "icon_generator",
+        "email_builder",
+        "free_tier"
+      ],
+      "html": "20260718/P1-005.html",
+      "built": true
+    },
+    {
+      "id": "P1-006",
+      "category": "creative",
+      "subcategory": "mac_menubar_ai_tool",
+      "direction": "Mac菜单栏本地优先AI小工具(单次买断,轻量办公场景)",
+      "direction_en": "Mac menu-bar local-first AI micro-tool (one-time purchase, lightweight office use)",
+      "tags": [
+        "macos",
+        "menubar",
+        "local_first",
+        "ai_chat",
+        "indie_dev"
+      ],
+      "html": "20260718/P1-006.html",
+      "built": true
+    },
+    {
+      "id": "P1-007",
+      "category": "creative",
+      "subcategory": "ai_tattoo_design_generator",
+      "direction": "AI纹身设计生成器+AR身体试戴(解决想法到图稿瓶颈)",
+      "direction_en": "AI tattoo design generator + AR body try-on (idea-to-design bottleneck)",
+      "tags": [
+        "tattoo",
+        "ar_preview",
+        "personalization",
+        "generator",
+        "body_art"
+      ],
+      "html": "20260718/P1-007.html",
+      "built": true
+    },
+    {
+      "id": "P1-008",
+      "category": "creative",
+      "subcategory": "ai_sticker_maker_etsy",
+      "direction": "AI生成细分贴纸批量上架Redbubble/Etsy做被动收入",
+      "direction_en": "AI sticker generator batch-listed on Redbubble/Etsy for passive income",
+      "tags": [
+        "sticker",
+        "etsy",
+        "redbubble",
+        "print_on_demand",
+        "passive_income"
+      ],
+      "html": "20260718/P1-008.html",
+      "built": true
+    },
+    {
+      "id": "P1-009",
+      "category": "creative",
+      "subcategory": "ai_music_generator_indie",
+      "direction": "垂直AI音乐/beats生成器(商用授权+流媒体分发)面向创作者",
+      "direction_en": "Vertical AI music/beats generator (commercial license + streaming distribution) for creators",
+      "tags": [
+        "ai_music",
+        "suno",
+        "udio",
+        "beats",
+        "royalty",
+        "content_creator"
+      ],
+      "html": "20260718/P1-009.html",
+      "built": true
+    },
+    {
+      "id": "P1-010",
+      "category": "productivity",
+      "subcategory": "adhd_gamified_focus_timer",
+      "direction": "面向ADHD的现代游戏化专注计时器(新机制+即时奖励)",
+      "direction_en": "Modern gamified focus timer for ADHD (fresh mechanics + instant rewards)",
+      "tags": [
+        "adhd",
+        "focus_timer",
+        "gamification",
+        "pomodoro",
+        "neurodivergent"
+      ],
+      "html": "20260718/P1-010.html",
+      "built": true
+    },
+    {
+      "id": "P1-011",
+      "category": "productivity",
+      "subcategory": "personal_crm_founders",
+      "direction": "AI个人关系管理CRM(自动富集+跟进提醒)面向创始人/自由职业者",
+      "direction_en": "AI personal-relationship CRM (auto-enrich + follow-up nudges) for founders/freelancers",
+      "tags": [
+        "personal_crm",
+        "networking",
+        "founders",
+        "freelancers",
+        "follow_up"
+      ],
+      "html": "20260718/P1-011.html",
+      "built": true
+    },
+    {
+      "id": "P1-012",
+      "category": "productivity",
+      "subcategory": "ai_invoice_generator_freelancer",
+      "direction": "AI自然语言开票+收款一体工具(零抽成/买断)面向自由职业者",
+      "direction_en": "AI natural-language invoicing + payment tool (zero-fee / lifetime) for freelancers",
+      "tags": [
+        "invoice",
+        "freelancer",
+        "ai_draft",
+        "no_fee",
+        "payment_link"
+      ],
+      "html": "20260718/P1-012.html",
+      "built": true
+    },
+    {
+      "id": "P1-013",
+      "category": "productivity",
+      "subcategory": "ai_receipt_extraction_accountants",
+      "direction": "面向独立会计的AI票据数据提取SaaS(按文档计费)",
+      "direction_en": "AI receipt-data-extraction SaaS for solo accountants (per-document pricing)",
+      "tags": [
+        "accounting",
+        "receipt_ocr",
+        "bookkeeping",
+        "ai_extraction",
+        "saas"
+      ],
+      "html": "20260718/P1-013.html",
+      "built": true
+    },
+    {
+      "id": "P1-014",
+      "category": "productivity",
+      "subcategory": "minimalist_recipe_manager",
+      "direction": "极简无广告本地优先私人菜谱保管App(去SEO故事)",
+      "direction_en": "Minimalist ad-free local-first private recipe keeper (strips SEO stories)",
+      "tags": [
+        "recipe",
+        "anti_bloat",
+        "no_ads",
+        "local_first",
+        "ad_free"
+      ],
+      "html": "20260718/P1-014.html",
+      "built": true
+    },
+    {
+      "id": "P1-015",
+      "category": "productivity",
+      "subcategory": "bot_free_meeting_notes",
+      "direction": "无bot/本地优先隐私会议笔记工具(面向敏感客户场景)",
+      "direction_en": "Bot-free / local-first private meeting-notes tool (for sensitive client calls)",
+      "tags": [
+        "meeting_notes",
+        "no_bot",
+        "privacy",
+        "local_first",
+        "transcription"
+      ],
+      "html": "20260718/P1-015.html",
+      "built": true
+    },
+    {
+      "id": "P1-016",
+      "category": "productivity",
+      "subcategory": "offline_first_local_productivity",
+      "direction": "买断制离线优先本地生产力工具(iCloud/局域网同步)",
+      "direction_en": "Buy-once offline-first local productivity tool (iCloud/LAN sync, no subscription)",
+      "tags": [
+        "offline_first",
+        "local_first",
+        "anti_cloud",
+        "privacy",
+        "buy_once"
+      ],
+      "html": "20260718/P1-016.html",
+      "built": true
+    },
+    {
+      "id": "P1-017",
+      "category": "productivity",
+      "subcategory": "freelance_proposal_ai",
+      "direction": "垂直自由职业提案AI生成器(中标率追踪+平台格式)",
+      "direction_en": "Vertical freelance-proposal AI generator (win-rate tracking + platform formatting)",
+      "tags": [
+        "freelance",
+        "proposal",
+        "ai_draft",
+        "win_rate",
+        "upwork"
+      ],
+      "html": "20260718/P1-017.html",
+      "built": true
+    },
+    {
+      "id": "P1-018",
+      "category": "productivity",
+      "subcategory": "ai_receipt_scanner_consumer",
+      "direction": "拍小票/截图即自动记账的C端AI记账App",
+      "direction_en": "Consumer AI expense tracker that auto-logs from receipt photos / screenshots",
+      "tags": [
+        "receipt_scan",
+        "expense_tracker",
+        "ai_bookkeeping",
+        "consumer",
+        "multimodal"
+      ],
+      "html": "20260718/P1-018.html",
+      "built": true
+    },
+    {
+      "id": "P10-001",
+      "category": "home",
+      "subcategory": "housework_division",
+      "direction": "家事分担を可視化して夫婦で公平に割り振る共有アプリ",
+      "direction_en": "Couple housework-division visualizer & fair-sharing app",
+      "tags": [
+        "housework",
+        "couples",
+        "division_of_labor",
+        "ja"
+      ],
+      "html": "20260718/P10-001.html",
+      "built": true
+    },
+    {
+      "id": "P10-002",
+      "category": "home",
+      "subcategory": "couples_housework_share",
+      "direction": "共働き夫婦の家事をテンプレート管理し共有するアプリ",
+      "direction_en": "Working-couple housework template & shared-task manager",
+      "tags": [
+        "housework",
+        "working_couples",
+        "ja",
+        "shared_tasks"
+      ],
+      "html": "20260718/P10-002.html",
+      "built": true
+    },
+    {
+      "id": "P10-003",
+      "category": "home",
+      "subcategory": "couple_shared_finance",
+      "direction": "カップル向け共有家計簿＋共有カレンダー一元アプリ",
+      "direction_en": "Couple shared account-book + shared calendar app",
+      "tags": [
+        "shared_account",
+        "couple",
+        "ko",
+        "schedule"
+      ],
+      "html": "20260718/P10-003.html",
+      "built": true
+    },
+    {
+      "id": "P10-004",
+      "category": "home",
+      "subcategory": "split_bill_couples",
+      "direction": "同棲・ルームシェア向け無料割り勘・立て替え精算アプリ",
+      "direction_en": "Free split-bill & reimbursement app for couples/roommates",
+      "tags": [
+        "split_bill",
+        "roommate",
+        "ja",
+        "shared_account"
+      ],
+      "html": "20260718/P10-004.html",
+      "built": true
+    },
+    {
+      "id": "P10-005",
+      "category": "home",
+      "subcategory": "home_management_binder",
+      "direction": "住宅の書類・保証・修繕を一元管理するAIホームバインダー",
+      "direction_en": "AI home-binder that unifies docs/warranties/maintenance of a house",
+      "tags": [
+        "home_inventory",
+        "asset_management",
+        "cross_market",
+        "binder"
+      ],
+      "html": "20260718/P10-005.html",
+      "built": true
+    },
+    {
+      "id": "P10-006",
+      "category": "home",
+      "subcategory": "condo_rental_dx",
+      "direction": "分譲マンション/賃貸管理のDXアプリ(電子化・見える化)",
+      "direction_en": "Condo/rental management DX app (paperless & transparent)",
+      "tags": [
+        "condo_management",
+        "proptech",
+        "ja",
+        "dx"
+      ],
+      "html": "20260718/P10-006.html",
+      "built": true
+    },
+    {
+      "id": "P10-007",
+      "category": "home",
+      "subcategory": "offline_home_inventory",
+      "direction": "オフライン・端末内保存の住宅インベントリ/備品管理アプリ",
+      "direction_en": "Offline, on-device home inventory & belongings manager",
+      "tags": [
+        "home_inventory",
+        "offline_first",
+        "ja",
+        "privacy"
+      ],
+      "html": "20260718/P10-007.html",
+      "built": true
+    },
+    {
+      "id": "P10-008",
+      "category": "home",
+      "subcategory": "family_housework_gamified",
+      "direction": "ゲーム化で家族の家事参加を促す共有アプリ",
+      "direction_en": "Gamified family housework-sharing app",
+      "tags": [
+        "family",
+        "housework",
+        "ko",
+        "gamification"
+      ],
+      "html": "20260718/P10-008.html",
+      "built": true
+    },
+    {
+      "id": "P10-009",
+      "category": "home",
+      "subcategory": "deposit_fraud_protection",
+      "direction": "賃貸保証金の詐欺リスクを契約前に判定するアプリ",
+      "direction_en": "Pre-contract deposit-fraud risk checker app",
+      "tags": [
+        "rent",
+        "deposit",
+        "ko",
+        "fraud_protection"
+      ],
+      "html": "20260718/P10-009.html",
+      "built": true
+    },
+    {
+      "id": "P10-010",
+      "category": "privacy",
+      "subcategory": "on_device_ai_chat",
+      "direction": "完全オフライン・ローカルLLMのプライバシー最優先AIチャット",
+      "direction_en": "Fully offline, on-device LLM privacy-first chat",
+      "tags": [
+        "local_first",
+        "offline_ai",
+        "ja",
+        "privacy"
+      ],
+      "html": "20260718/P10-010.html",
+      "built": true
+    },
+    {
+      "id": "P10-011",
+      "category": "privacy",
+      "subcategory": "local_first_workspace",
+      "direction": "クラウド不要のローカル知識管理ワークスペース(ノート+PW+かんばん)",
+      "direction_en": "Cloudless local-first workspace (notes+pw+kanban+mindmap)",
+      "tags": [
+        "local_first",
+        "notes",
+        "passwords",
+        "privacy"
+      ],
+      "html": "20260718/P10-011.html",
+      "built": true
+    },
+    {
+      "id": "P10-012",
+      "category": "privacy",
+      "subcategory": "self_hosted_messenger",
+      "direction": "自己ホスト可能なエンドツーエンド暗号セキュアメッセンジャー",
+      "direction_en": "Self-hostable E2E-encrypted secure messenger",
+      "tags": [
+        "messenger",
+        "e2ee",
+        "self_hosted",
+        "ko"
+      ],
+      "html": "20260718/P10-012.html",
+      "built": true
+    },
+    {
+      "id": "P10-013",
+      "category": "privacy",
+      "subcategory": "self_hosting_ecosystem",
+      "direction": "SaaS代替の自己ホスト型ツールを集めたエコシステム/キュレーション",
+      "direction_en": "Self-hosting ecosystem / curation of SaaS-replacement tools",
+      "tags": [
+        "self_hosted",
+        "open_source",
+        "ko",
+        "anti_cloud"
+      ],
+      "html": "20260718/P10-013.html",
+      "built": true
+    },
+    {
+      "id": "P10-014",
+      "category": "privacy",
+      "subcategory": "self_hosted_password_manager",
+      "direction": "自宅サーバーで動かす自己ホスト型パスワードマネージャー",
+      "direction_en": "Self-hosted password manager run on your own server",
+      "tags": [
+        "password_manager",
+        "self_hosted",
+        "ko",
+        "bitwarden"
+      ],
+      "html": "20260718/P10-014.html",
+      "built": true
+    },
+    {
+      "id": "P10-015",
+      "category": "privacy",
+      "subcategory": "local_smart_home_nvr",
+      "direction": "クラウド不要・ローカル制御のDIYスマートホーム+監視NVR",
+      "direction_en": "Cloudless local-control smart home + local NVR",
+      "tags": [
+        "smart_home",
+        "local_control",
+        "ko",
+        "frigate"
+      ],
+      "html": "20260718/P10-015.html",
+      "built": true
+    },
+    {
+      "id": "P10-016",
+      "category": "privacy",
+      "subcategory": "e2e_messenger_line_alternative",
+      "direction": "LINE代替となる国内向けE2E暗号メッセンジャー啓蒙・移行",
+      "direction_en": "Domestic E2E-encrypted messenger as LINE alternative",
+      "tags": [
+        "messenger",
+        "e2ee",
+        "ja",
+        "signal"
+      ],
+      "html": "20260718/P10-016.html",
+      "built": true
+    },
+    {
+      "id": "P10-017",
+      "category": "privacy",
+      "subcategory": "antiphishing_app_surge",
+      "direction": "通信事業者不信を背景にした反ボイスフィッシング/スミッシングアプリ",
+      "direction_en": "Anti-voice-phishing & smishing protection app",
+      "tags": [
+        "antiphishing",
+        "fraud",
+        "ko",
+        "security"
+      ],
+      "html": "20260718/P10-017.html",
+      "built": true
+    },
+    {
+      "id": "P10-018",
+      "category": "privacy",
+      "subcategory": "domestic_home_cam_pbd",
+      "direction": "国内サーバ・PbD設計のプライバシー特化ホームカメラ",
+      "direction_en": "Privacy-by-Design domestic-server home camera",
+      "tags": [
+        "home_camera",
+        "privacy_by_design",
+        "ko",
+        "local_server"
+      ],
+      "html": "20260718/P10-018.html",
+      "built": true
+    },
+    {
+      "id": "P11-001",
+      "category": "plant",
+      "subcategory": "plant_identification",
+      "direction": "AI植物识别+养护App(拍照识花+病虫害+宠物毒性,订阅制全球卖)",
+      "direction_en": "AI plant ID + care app (photo ID + disease + pet-toxicity, subscription, global)",
+      "tags": [
+        "plant_id",
+        "ai_recognition",
+        "subscription",
+        "cross_border"
+      ],
+      "html": "20260718/P11-001.html",
+      "built": true
+    },
+    {
+      "id": "P11-002",
+      "category": "plant",
+      "subcategory": "indoor_care_reminder",
+      "direction": "极简植物养护提醒器(免费浇水提醒+一次性买断,避开订阅墙)",
+      "direction_en": "Minimalist plant-care reminder (free watering alerts + one-time unlock, no subscription wall)",
+      "tags": [
+        "care_reminder",
+        "paywall",
+        "watering",
+        "subscription"
+      ],
+      "html": "20260718/P11-002.html",
+      "built": true
+    },
+    {
+      "id": "P11-003",
+      "category": "plant",
+      "subcategory": "disease_diagnosis",
+      "direction": "准确透明的植物病害诊断(人类专家兜底+按次诚实付费)",
+      "direction_en": "Accurate transparent plant-disease diagnosis (human-expert fallback + honest per-use pricing)",
+      "tags": [
+        "disease_diagnosis",
+        "ai_accuracy",
+        "complaints",
+        "scam"
+      ],
+      "html": "20260718/P11-003.html",
+      "built": true
+    },
+    {
+      "id": "P11-004",
+      "category": "plant",
+      "subcategory": "edible_garden_planner",
+      "direction": "超本地化可食用菜园规划器(USDA区+天气+伴生种植)",
+      "direction_en": "Hyper-local edible garden planner (USDA zone + weather + companion planting)",
+      "tags": [
+        "edible_garden",
+        "vegetable",
+        "usda_zone",
+        "companion_planting"
+      ],
+      "html": "20260718/P11-004.html",
+      "built": true
+    },
+    {
+      "id": "P11-005",
+      "category": "plant",
+      "subcategory": "minimalist_jp_app_gap",
+      "direction": "极简植物App(合理免费额度+轻社交分享,中日互鉴)",
+      "direction_en": "Minimalist plant app (fair free tier + light social sharing, JP↔CN)",
+      "tags": [
+        "minimalist_ui",
+        "social_sharing",
+        "free_tier",
+        "cross_market"
+      ],
+      "html": "20260718/P11-005.html",
+      "built": true
+    },
+    {
+      "id": "P11-006",
+      "category": "plant",
+      "subcategory": "pet_toxic_safety",
+      "direction": "宠物优先的植物养护App(毒性数据库+安全购物清单)",
+      "direction_en": "Pet-first plant-care app (toxicity DB + pet-safe shopping list)",
+      "tags": [
+        "pet_safe",
+        "toxicity",
+        "plant_id",
+        "cross_market"
+      ],
+      "html": "20260718/P11-006.html",
+      "built": true
+    },
+    {
+      "id": "P11-007",
+      "category": "plant",
+      "subcategory": "rare_plant_db",
+      "direction": "稀有/小众植物专精App(策展库+收藏社区+交易市集)",
+      "direction_en": "Rare/exotic plant specialist app (curated DB + collector community + marketplace)",
+      "tags": [
+        "rare_plants",
+        "exotic",
+        "database_gap",
+        "collectors"
+      ],
+      "html": "20260718/P11-007.html",
+      "built": true
+    },
+    {
+      "id": "P11-008",
+      "category": "plant",
+      "subcategory": "digital_garden_journal",
+      "direction": "数字花园日记+社交+游戏化发现(跨平台)",
+      "direction_en": "Digital garden journal + social + gamified discovery (cross-platform)",
+      "tags": [
+        "garden_journal",
+        "community",
+        "photo_log",
+        "organization"
+      ],
+      "html": "20260718/P11-008.html",
+      "built": true
+    },
+    {
+      "id": "P11-009",
+      "category": "plant",
+      "subcategory": "co_parenting_share",
+      "direction": "共享植物养护(多养护人+出差交接,免费差异化)",
+      "direction_en": "Shared plant care (multi-carer + travel handoff, free differentiator)",
+      "tags": [
+        "shared_care",
+        "plant_sitter",
+        "family",
+        "account_share"
+      ],
+      "html": "20260718/P11-009.html",
+      "built": true
+    },
+    {
+      "id": "P11-010",
+      "category": "neurodiversity",
+      "subcategory": "adhd_visual_planner",
+      "direction": "ADHD视觉日计划器(时间轴+AI拆解+触觉提醒,中日本地化)",
+      "direction_en": "ADHD visual daily planner (timeline + AI breakdown + haptics, JP/CN localization)",
+      "tags": [
+        "adhd",
+        "visual_planner",
+        "time_blindness",
+        "cross_market"
+      ],
+      "html": "20260718/P11-010.html",
+      "built": true
+    },
+    {
+      "id": "P11-011",
+      "category": "neurodiversity",
+      "subcategory": "exec_function_microtools",
+      "direction": "免费执行功能微工具集(任务拆解+语气改写,亲民定价)",
+      "direction_en": "Free executive-function micro-tools (task breakdown + tone rewriter, fair pricing)",
+      "tags": [
+        "executive_dysfunction",
+        "task_breakdown",
+        "free",
+        "ai_microtools"
+      ],
+      "html": "20260718/P11-011.html",
+      "built": true
+    },
+    {
+      "id": "P11-012",
+      "category": "neurodiversity",
+      "subcategory": "body_doubling",
+      "direction": "无摄像头/环境式body doubling共作(服务社交焦虑ND用户)",
+      "direction_en": "Camera-free / ambient body-doubling coworking (for socially-anxious ND users)",
+      "tags": [
+        "body_doubling",
+        "virtual_coworking",
+        "adhd",
+        "accountability"
+      ],
+      "html": "20260718/P11-012.html",
+      "built": true
+    },
+    {
+      "id": "P11-013",
+      "category": "neurodiversity",
+      "subcategory": "adhd_digital_therapeutics",
+      "direction": "处方级游戏化ADHD数字疗法(临床验证+可报销)",
+      "direction_en": "Prescription game-based ADHD digital therapeutic (clinical + reimbursable)",
+      "tags": [
+        "digital_therapeutics",
+        "fda",
+        "game_based",
+        "japan_first"
+      ],
+      "html": "20260718/P11-013.html",
+      "built": true
+    },
+    {
+      "id": "P11-014",
+      "category": "neurodiversity",
+      "subcategory": "autism_aac_communication",
+      "direction": "AAC沟通App本地化+学校批量部署(日本DropTap模式)",
+      "direction_en": "Localized AAC communication app + school bulk deployment (Japan DropTap model)",
+      "tags": [
+        "autism",
+        "aac",
+        "communication",
+        "cross_market"
+      ],
+      "html": "20260718/P11-014.html",
+      "built": true
+    },
+    {
+      "id": "P11-015",
+      "category": "neurodiversity",
+      "subcategory": "autism_parent_platform",
+      "direction": "自闭症家长数字疗育平台(在家ABA+进度追踪,订阅/课程)",
+      "direction_en": "Digital therapy platform for autism parents (at-home ABA + progress tracking)",
+      "tags": [
+        "autism",
+        "parent",
+        "digital_therapy",
+        "aba",
+        "japan"
+      ],
+      "html": "20260718/P11-015.html",
+      "built": true
+    },
+    {
+      "id": "P11-016",
+      "category": "neurodiversity",
+      "subcategory": "adhd_focus_audio",
+      "direction": "科学背书的功能性专注音频(ADHD模式+强度滑块)",
+      "direction_en": "Science-backed functional focus audio (ADHD mode + intensity slider)",
+      "tags": [
+        "adhd",
+        "focus_music",
+        "neuroscience",
+        "subscription"
+      ],
+      "html": "20260718/P11-016.html",
+      "built": true
+    },
+    {
+      "id": "P11-017",
+      "category": "neurodiversity",
+      "subcategory": "nd_employment_support",
+      "direction": "神经多元就业支持App(AI职业教练+雇主对接,B2B2C)",
+      "direction_en": "Neurodivergent employment-support app (AI career coach + employer match, B2B2C)",
+      "tags": [
+        "neurodiversity",
+        "employment",
+        "workplace",
+        "job_coach"
+      ],
+      "html": "20260718/P11-017.html",
+      "built": true
+    },
+    {
+      "id": "P11-018",
+      "category": "neurodiversity",
+      "subcategory": "dyslexia_tts",
+      "direction": "读写障碍向文字转语音+学习App(总结/测验,高客单)",
+      "direction_en": "Dyslexia-focused text-to-speech + learning app (summarize/quiz, high ARPPU)",
+      "tags": [
+        "dyslexia",
+        "text_to_speech",
+        "learning",
+        "cross_market"
+      ],
+      "html": "20260718/P11-018.html",
+      "built": true
+    },
+    {
+      "id": "P12-001",
+      "category": "student",
+      "subcategory": "campus_app_consolidation",
+      "direction": "零广告、隐私友好的校园服务聚合门户App(课表+成绩+报修+消费一站)",
+      "direction_en": "Ad-free privacy-friendly campus-service aggregator app (timetable+grades+repair+spending in one)",
+      "tags": [
+        "campus_app",
+        "anti_ads",
+        "privacy",
+        "consolidation"
+      ],
+      "html": "20260718/P12-001.html",
+      "built": true
+    },
+    {
+      "id": "P12-002",
+      "category": "student",
+      "subcategory": "ai_exam_prep_notes",
+      "direction": "AI课堂板书转笔记+一键Anki错题卡(考研/考证垂直备考)",
+      "direction_en": "AI blackboard-to-notes + one-tap Anki wrong-question cards (exam-prep vertical)",
+      "tags": [
+        "ai_notes",
+        "anki",
+        "exam_prep",
+        "wrong_question"
+      ],
+      "html": "20260718/P12-002.html",
+      "built": true
+    },
+    {
+      "id": "P12-003",
+      "category": "student",
+      "subcategory": "campus_secondhand_lbs",
+      "direction": "校园LBS二手交易(学号实名+资金担保+当面验货)",
+      "direction_en": "Campus LBS secondhand marketplace (student-ID verification + escrow + in-person check)",
+      "tags": [
+        "secondhand",
+        "lbs",
+        "campus",
+        "trust",
+        "c2c"
+      ],
+      "html": "20260718/P12-003.html",
+      "built": true
+    },
+    {
+      "id": "P12-004",
+      "category": "student",
+      "subcategory": "study_abroad_settle",
+      "direction": "华人留学生一站式安家平台(按校租房+二手+兼职闭环)",
+      "direction_en": "One-stop settlement platform for Chinese study-abroad students (school-based rental + secondhand + jobs)",
+      "tags": [
+        "study_abroad",
+        "rental",
+        "overseas_chinese",
+        "one_stop"
+      ],
+      "html": "20260718/P12-004.html",
+      "built": true
+    },
+    {
+      "id": "P12-005",
+      "category": "student",
+      "subcategory": "korean_campus_superapp",
+      "direction": "韩式综合校园App(课表+GPA+匿名社区+二手)中韩互搬",
+      "direction_en": "Korean-style all-in-one campus app (timetable+GPA+anonymous community+secondhand), port CN/KR",
+      "tags": [
+        "korea",
+        "campus_app",
+        "timetable",
+        "anonymous_community"
+      ],
+      "html": "20260718/P12-005.html",
+      "built": true
+    },
+    {
+      "id": "P12-006",
+      "category": "student",
+      "subcategory": "study_planner_aggregator",
+      "direction": "游戏化聚合型学业规划器(课表+作业+考试+兼职一屏)",
+      "direction_en": "Gamified all-in-one study planner (timetable+homework+exam+part-time in one view)",
+      "tags": [
+        "study_planner",
+        "time_management",
+        "gamification",
+        "global"
+      ],
+      "html": "20260718/P12-006.html",
+      "built": true
+    },
+    {
+      "id": "P12-007",
+      "category": "student",
+      "subcategory": "online_study_room",
+      "direction": "多人同屏云自习室+专注数据社交化(考研/考证搭子)",
+      "direction_en": "Multi-user co-study room + socialized focus tracking (study-buddy for exam prep)",
+      "tags": [
+        "online_study_room",
+        "focus",
+        "accountability",
+        "exam_prep"
+      ],
+      "html": "20260718/P12-007.html",
+      "built": true
+    },
+    {
+      "id": "P12-008",
+      "category": "student",
+      "subcategory": "student_budgeting",
+      "direction": "学生专属记账App(学期账单+分类预算+省钱挑战)",
+      "direction_en": "Student-specific budgeting app (semester bills + category budgets + saving challenges)",
+      "tags": [
+        "student_budget",
+        "expense_tracking",
+        "personal_finance"
+      ],
+      "html": "20260718/P12-008.html",
+      "built": true
+    },
+    {
+      "id": "P12-009",
+      "category": "student",
+      "subcategory": "korean_school_specific_planner",
+      "direction": "校别定制课表App(教学楼位置/移动时间/学分)由学生社团开发",
+      "direction_en": "University-specific timetable app (building location / travel time / credits) built by student clubs",
+      "tags": [
+        "korea",
+        "university_specific",
+        "timetable",
+        "campus_nav"
+      ],
+      "html": "20260718/P12-009.html",
+      "built": true
+    },
+    {
+      "id": "P12-010",
+      "category": "business",
+      "subcategory": "transparent_pricing_inventory",
+      "direction": "透明一价全包、无广告的轻量进销存(对标本SMB)",
+      "direction_en": "Transparent all-inclusive, ad-free lightweight inventory/ERP for micro-SMBs",
+      "tags": [
+        "inventory",
+        "pos",
+        "smb",
+        "transparent_pricing",
+        "no_hidden_fee"
+      ],
+      "html": "20260718/P12-010.html",
+      "built": true
+    },
+    {
+      "id": "P12-011",
+      "category": "business",
+      "subcategory": "mobile_aggregated_pos",
+      "direction": "手机聚合收款+自动对账+离线收银的轻量收银工具",
+      "direction_en": "Mobile aggregated payment + auto-reconciliation + offline cashier tool for micro-merchants",
+      "tags": [
+        "pos",
+        "aggregated_payment",
+        "reconciliation",
+        "offline"
+      ],
+      "html": "20260718/P12-011.html",
+      "built": true
+    },
+    {
+      "id": "P12-012",
+      "category": "business",
+      "subcategory": "micro_merchant_crm",
+      "direction": "极简客户管理CRM(建档+跟进+收支台账,基础永久免费)",
+      "direction_en": "Minimalist micro-merchant CRM (profiles+follow-up+revenue ledger, free tier)",
+      "tags": [
+        "crm",
+        "customer_management",
+        "micro_business",
+        "free_tier"
+      ],
+      "html": "20260718/P12-012.html",
+      "built": true
+    },
+    {
+      "id": "P12-013",
+      "category": "business",
+      "subcategory": "smb_ai_marketing",
+      "direction": "小微商家AI客服+邮件营销助手(多语言、低门槛)",
+      "direction_en": "AI customer-service + email-marketing assistant for micro-merchants (multilingual, low-friction)",
+      "tags": [
+        "ai_marketing",
+        "ai_chatbot",
+        "small_business",
+        "multilingual"
+      ],
+      "html": "20260718/P12-013.html",
+      "built": true
+    },
+    {
+      "id": "P12-014",
+      "category": "business",
+      "subcategory": "korea_selfemployed_sales",
+      "direction": "韩国个体户매출/입금管理+카카오톡周月报(轻量)",
+      "direction_en": "Korean self-employed sales/deposit tracker + KakaoTalk weekly/monthly report (lightweight)",
+      "tags": [
+        "korea",
+        "self_employed",
+        "sales_tracking",
+        "report"
+      ],
+      "html": "20260718/P12-014.html",
+      "built": true
+    },
+    {
+      "id": "P12-015",
+      "category": "business",
+      "subcategory": "solopreneur_revenue_dashboard",
+      "direction": "一人企业多平台收入聚合仪表盘(隐私本地化+锁屏小组件)",
+      "direction_en": "Solo-business multi-platform revenue dashboard (on-device privacy + lock-screen widgets)",
+      "tags": [
+        "solopreneur",
+        "revenue_dashboard",
+        "korea",
+        "privacy"
+      ],
+      "html": "20260718/P12-015.html",
+      "built": true
+    },
+    {
+      "id": "P12-016",
+      "category": "business",
+      "subcategory": "indie_maker_mrr_dashboard",
+      "direction": "独立开发者MRR/流量/流失统一仪表盘(Stripe+AppStore+GA4)",
+      "direction_en": "Unified MRR/traffic/churn dashboard for indie makers (Stripe+AppStore+GA4)",
+      "tags": [
+        "indie_hacker",
+        "mrr",
+        "dashboard",
+        "verified_revenue"
+      ],
+      "html": "20260718/P12-016.html",
+      "built": true
+    },
+    {
+      "id": "P12-017",
+      "category": "business",
+      "subcategory": "street_vendor_toolkit",
+      "direction": "流动摊贩/夜市专用极简收银(语音播报+离线+日报表)",
+      "direction_en": "Minimal cashier toolkit for street vendors / night markets (voice alert + offline + daily report)",
+      "tags": [
+        "street_vendor",
+        "night_market",
+        "mobile_pos",
+        "offline"
+      ],
+      "html": "20260718/P12-017.html",
+      "built": true
+    },
+    {
+      "id": "P12-018",
+      "category": "business",
+      "subcategory": "all_in_one_shop_assistant",
+      "direction": "从选址到经营的全流程小店助手(基础永久免费、本土化)",
+      "direction_en": "End-to-end shop assistant from site-selection to daily ops (free core, localized)",
+      "tags": [
+        "shop_opening",
+        "smb",
+        "operations",
+        "free_tier",
+        "localization"
+      ],
+      "html": "20260718/P12-018.html",
+      "built": true
+    },
+    {
+      "id": "P13-001",
+      "category": "wedding",
+      "subcategory": "wedding_budget_vendor_spam",
+      "direction": "隐私优先·无骚扰·费用透明的婚礼规划器",
+      "direction_en": "Privacy-first, no-spam, transparent-fee wedding planner",
+      "tags": [
+        "vendor_spam",
+        "hidden_fees",
+        "rsvp_bug",
+        "transparent_pricing"
+      ],
+      "html": "20260718/P13-001.html",
+      "built": true
+    },
+    {
+      "id": "P13-002",
+      "category": "wedding",
+      "subcategory": "guest_list_manager",
+      "direction": "一体化婚礼宾客名单管理(命名+1/餐食/座位/QR离线签到)",
+      "direction_en": "All-in-one wedding guest list manager (named plus-ones/meal/seating/QR check-in)",
+      "tags": [
+        "guest_list",
+        "meal_tracking",
+        "seating",
+        "qr_checkin"
+      ],
+      "html": "20260718/P13-002.html",
+      "built": true
+    },
+    {
+      "id": "P13-003",
+      "category": "wedding",
+      "subcategory": "vendor_sequencing_commission",
+      "direction": "透明佣金披露+供应商决策排序引擎(家族婚礼)",
+      "direction_en": "Transparent-commission + vendor-sequencing engine for family weddings",
+      "tags": [
+        "vendor_sequencing",
+        "commission_transparency",
+        "family_wedding",
+        "india"
+      ],
+      "html": "20260718/P13-003.html",
+      "built": true
+    },
+    {
+      "id": "P13-004",
+      "category": "wedding",
+      "subcategory": "prewedding_emotional",
+      "direction": "婚前新娘情绪/焦虑管理伴侣 App",
+      "direction_en": "Pre-wedding bride anxiety & emotional support companion",
+      "tags": [
+        "bride_anxiety",
+        "mental_health",
+        "emotional_support",
+        "couple"
+      ],
+      "html": "20260718/P13-004.html",
+      "built": true
+    },
+    {
+      "id": "P13-005",
+      "category": "wedding",
+      "subcategory": "post_wedding_relationship",
+      "direction": "婚礼后关系延伸管家(感谢信/周年纪念订阅)",
+      "direction_en": "Post-wedding relationship concierge (thank-you/anniversary subscription)",
+      "tags": [
+        "thank_you",
+        "anniversary",
+        "retention",
+        "relationship_concierge"
+      ],
+      "html": "20260718/P13-005.html",
+      "built": true
+    },
+    {
+      "id": "P13-006",
+      "category": "wedding",
+      "subcategory": "bridesmaid_dress_tracker",
+      "direction": "伴娘礼服订购与任务追踪微工具",
+      "direction_en": "Bridesmaid dress order & wedding-party task tracker",
+      "tags": [
+        "bridesmaid",
+        "dress_order",
+        "wedding_party",
+        "task_tracker"
+      ],
+      "html": "20260718/P13-006.html",
+      "built": true
+    },
+    {
+      "id": "P13-007",
+      "category": "wedding",
+      "subcategory": "invitation_email_deliverability",
+      "direction": "婚礼邀请邮件送达率优化器",
+      "direction_en": "Wedding invitation email deliverability optimizer",
+      "tags": [
+        "email_deliverability",
+        "invitation",
+        "spam",
+        "rsvp"
+      ],
+      "html": "20260718/P13-007.html",
+      "built": true
+    },
+    {
+      "id": "P13-008",
+      "category": "wedding",
+      "subcategory": "korean_wedding_superapp",
+      "direction": "韩国超级婚礼 App+现金返现模式(搬去华语市场)",
+      "direction_en": "Korean super-wedding app + cashback model (port to Chinese markets)",
+      "tags": [
+        "korea",
+        "super_app",
+        "cashback",
+        "weddingbook"
+      ],
+      "html": "20260718/P13-008.html",
+      "built": true
+    },
+    {
+      "id": "P13-009",
+      "category": "wedding",
+      "subcategory": "korean_local_planner",
+      "direction": "城市级本地化婚礼策划 App",
+      "direction_en": "City-level localized wedding planner app",
+      "tags": [
+        "korea",
+        "local_planner",
+        "regional",
+        "city_level"
+      ],
+      "html": "20260718/P13-009.html",
+      "built": true
+    },
+    {
+      "id": "P13-010",
+      "category": "health",
+      "subcategory": "perimenopause_tracker",
+      "direction": "更年期专用症状+HRT+医生报告追踪器",
+      "direction_en": "Dedicated perimenopause symptom + HRT + doctor-report tracker",
+      "tags": [
+        "menopause",
+        "perimenopause",
+        "hrt_tracking",
+        "symptom"
+      ],
+      "html": "20260718/P13-010.html",
+      "built": true
+    },
+    {
+      "id": "P13-011",
+      "category": "health",
+      "subcategory": "privacy_first_menopause",
+      "direction": "隐私优先·不卖数据的更年期/经期追踪器",
+      "direction_en": "Privacy-first, no-data-selling menopause/period tracker",
+      "tags": [
+        "privacy",
+        "no_data_selling",
+        "femtech",
+        "consentkeys"
+      ],
+      "html": "20260718/P13-011.html",
+      "built": true
+    },
+    {
+      "id": "P13-012",
+      "category": "health",
+      "subcategory": "pcos_dedicated_tracker",
+      "direction": "PCOS 多囊卵巢专用追踪器(不规律周期+营养+症状)",
+      "direction_en": "PCOS-dedicated tracker (irregular cycles + nutrition + symptoms)",
+      "tags": [
+        "pcos",
+        "irregular_cycle",
+        "nutrition",
+        "femtech"
+      ],
+      "html": "20260718/P13-012.html",
+      "built": true
+    },
+    {
+      "id": "P13-013",
+      "category": "health",
+      "subcategory": "wearable_menopause_correlation",
+      "direction": "可穿戴+AI 相关性的更年期伴侣 App",
+      "direction_en": "Wearable + AI-correlation menopause companion",
+      "tags": [
+        "wearable",
+        "oura",
+        "ai_correlation",
+        "hormone"
+      ],
+      "html": "20260718/P13-013.html",
+      "built": true
+    },
+    {
+      "id": "P13-014",
+      "category": "health",
+      "subcategory": "telehealth_menopause",
+      "direction": "更年期远程诊疗+B2B2C(雇主买单)模式",
+      "direction_en": "Telehealth menopause + B2B2C (employer-paid) model",
+      "tags": [
+        "telehealth",
+        "menopause",
+        "b2b2c",
+        "employer"
+      ],
+      "html": "20260718/P13-014.html",
+      "built": true
+    },
+    {
+      "id": "P13-015",
+      "category": "health",
+      "subcategory": "menopause_supplement_app",
+      "direction": "更年期补充剂品牌+追踪 App 内容电商闭环",
+      "direction_en": "Menopause supplement brand + tracker app content-commerce loop",
+      "tags": [
+        "supplement",
+        "subscription",
+        "nutrition_coach",
+        "brand_app"
+      ],
+      "html": "20260718/P13-015.html",
+      "built": true
+    },
+    {
+      "id": "P13-016",
+      "category": "health",
+      "subcategory": "chronic_illness_endometriosis",
+      "direction": "慢性病(内膜异位)全身追踪+社区伴侣 App",
+      "direction_en": "Chronic-illness (endometriosis) whole-body tracker + community companion",
+      "tags": [
+        "endometriosis",
+        "chronic_illness",
+        "community",
+        "whole_body"
+      ],
+      "html": "20260718/P13-016.html",
+      "built": true
+    },
+    {
+      "id": "P13-017",
+      "category": "health",
+      "subcategory": "korean_menstrual_app_quality",
+      "direction": "临床级·医护可用报告的韩国经期健康追踪器",
+      "direction_en": "Clinical-grade, clinician-usable Korean period/health tracker",
+      "tags": [
+        "korea",
+        "menstrual_app",
+        "clinical_grade",
+        "mars"
+      ],
+      "html": "20260718/P13-017.html",
+      "built": true
+    },
+    {
+      "id": "P13-018",
+      "category": "health",
+      "subcategory": "korean_menopause_dtx",
+      "direction": "韩国临床研究验证的更年期数字疗法(DTx)App",
+      "direction_en": "Korea clinically-validated menopause digital therapeutics (DTx) app",
+      "tags": [
+        "korea",
+        "menopause",
+        "digital_therapeutics",
+        "clinical_trial"
+      ],
+      "html": "20260718/P13-018.html",
+      "built": true
+    },
+    {
+      "id": "P14-001",
+      "category": "addiction_recovery",
+      "subcategory": "quit_smoking_tracker",
+      "direction": "戒烟/电子烟极简计数器 App(实时显示抽烟成本+愧疚感驱动, TikTok 种草)",
+      "direction_en": "Minimalist quit-smoking/vape puff counter (real-time cost display + guilt trigger, TikTok seeding)",
+      "tags": [
+        "quit_smoking",
+        "counter",
+        "puff_tracking",
+        "indie"
+      ],
+      "html": "20260718/P14-001.html",
+      "built": true
+    },
+    {
+      "id": "P14-002",
+      "category": "addiction_recovery",
+      "subcategory": "alcohol_control",
+      "direction": "控酒/戒酒陪伴 App(每日心理课程+计时社区, $99.99/年订阅)",
+      "direction_en": "Alcohol-control sobriety companion app (daily psychoeducation + streak community, $99.99/yr subscription)",
+      "tags": [
+        "alcohol",
+        "sobriety",
+        "subscription",
+        "mental_health"
+      ],
+      "html": "20260718/P14-002.html",
+      "built": true
+    },
+    {
+      "id": "P14-003",
+      "category": "addiction_recovery",
+      "subcategory": "ai_sobriety_sponsor",
+      "direction": "AI 戒酒赞助者 App(24/7 对话陪伴+CBT, 对标 sobriety 版 Duolingo)",
+      "direction_en": "AI sobriety sponsor app (24/7 conversational companion + CBT, the Duolingo of recovery)",
+      "tags": [
+        "ai_sponsor",
+        "sobriety",
+        "ycombinator",
+        "chatbot"
+      ],
+      "html": "20260718/P14-003.html",
+      "built": true
+    },
+    {
+      "id": "P14-004",
+      "category": "addiction_recovery",
+      "subcategory": "porn_recovery",
+      "direction": "色情/性成瘾恢复 App(AI 个性化计划+不重置进度的恢复树, 订阅制)",
+      "direction_en": "Porn/sex addiction recovery app (AI personalized plan + non-resetting recovery tree, subscription)",
+      "tags": [
+        "porn_addiction",
+        "recovery",
+        "streak",
+        "ai_plan"
+      ],
+      "html": "20260718/P14-004.html",
+      "built": true
+    },
+    {
+      "id": "P14-005",
+      "category": "addiction_recovery",
+      "subcategory": "screen_time_addiction",
+      "direction": "手机戒断工具(解锁摩擦+屏幕时间'计价/债务'机制, 替代纯阻断)",
+      "direction_en": "Phone-detox tool (unlock friction + screen-time 'tax/debt' mechanic instead of pure blocking)",
+      "tags": [
+        "screen_time",
+        "phone_addiction",
+        "digital_wellness",
+        "blocker"
+      ],
+      "html": "20260718/P14-005.html",
+      "built": true
+    },
+    {
+      "id": "P14-006",
+      "category": "addiction_recovery",
+      "subcategory": "smoking_cessation_health",
+      "direction": "WHO 背书戒烟健康可视化 App(或日本医师处方 DTx 模式)",
+      "direction_en": "WHO-backed quit-smoking health-visualization app (or Japan Rx digital-therapeutics model)",
+      "tags": [
+        "smoking",
+        "who_based",
+        "health_metrics",
+        "digital_therapeutics"
+      ],
+      "html": "20260718/P14-006.html",
+      "built": true
+    },
+    {
+      "id": "P14-007",
+      "category": "addiction_recovery",
+      "subcategory": "gambling_blocker",
+      "direction": "赌博成瘾屏蔽 App(半永久不可卸载+本地治疗对接, 日本政策驱动)",
+      "direction_en": "Gambling-addiction blocker app (semi-permanent unremovable + local rehab linkage, Japan policy-driven)",
+      "tags": [
+        "gambling",
+        "blocker",
+        "japan",
+        "recovery"
+      ],
+      "html": "20260718/P14-007.html",
+      "built": true
+    },
+    {
+      "id": "P14-008",
+      "category": "addiction_recovery",
+      "subcategory": "sugar_craving_control",
+      "direction": "控糖/抗糖女性向戒断 App(复制戒瘾逻辑+本地化, AI 快速复刻)",
+      "direction_en": "Sugar-craving control app for women (replicate addiction-app logic + localization, AI rapid clone)",
+      "tags": [
+        "sugar",
+        "craving",
+        "localization",
+        "female_niche"
+      ],
+      "html": "20260718/P14-008.html",
+      "built": true
+    },
+    {
+      "id": "P14-009",
+      "category": "addiction_recovery",
+      "subcategory": "screen_time_exercise_exchange",
+      "direction": "运动/数学换屏幕时间 App(行为交换机制, 家长控制+教育场景)",
+      "direction_en": "Exercise/math-to-earn-screen-time app (behavioral exchange, parental-control + education use case)",
+      "tags": [
+        "screen_time",
+        "exercise",
+        "gamification",
+        "focus"
+      ],
+      "html": "20260718/P14-009.html",
+      "built": true
+    },
+    {
+      "id": "P14-010",
+      "category": "micro_saas",
+      "subcategory": "vertical_crm_niche",
+      "direction": "单一职业垂直 CRM(如纹身师/摄影师/健身教练, $19-79/月订阅)",
+      "direction_en": "Single-profession vertical CRM (e.g. tattoo artist / photographer / fitness coach, $19-79/mo)",
+      "tags": [
+        "vertical_crm",
+        "niche",
+        "solo_founders",
+        "booking"
+      ],
+      "html": "20260718/P14-010.html",
+      "built": true
+    },
+    {
+      "id": "P14-011",
+      "category": "micro_saas",
+      "subcategory": "invoice_reminder_automation",
+      "direction": "自由职业者自动催款 SaaS(升级提醒+付款链接, $29-99/月)",
+      "direction_en": "Freelancer automated collections SaaS (escalating reminders + payment links, $29-99/mo)",
+      "tags": [
+        "invoicing",
+        "collections",
+        "automation",
+        "freelancers"
+      ],
+      "html": "20260718/P14-011.html",
+      "built": true
+    },
+    {
+      "id": "P14-012",
+      "category": "micro_saas",
+      "subcategory": "testimonial_collection",
+      "direction": "自动客户证言收集展示 SaaS(免费引流+去水印付费, $19-49/月)",
+      "direction_en": "Automated testimonial collection & display SaaS (free lead + watermark-removal upsell, $19-49/mo)",
+      "tags": [
+        "testimonials",
+        "social_proof",
+        "solo_saas",
+        "seo"
+      ],
+      "html": "20260718/P14-012.html",
+      "built": true
+    },
+    {
+      "id": "P14-013",
+      "category": "micro_saas",
+      "subcategory": "privacy_analytics",
+      "direction": "隐私优先极简网站分析 SaaS(对标 Plausible 更轻更便宜, $9-29/月)",
+      "direction_en": "Privacy-first minimalist web analytics SaaS (lighter/cheaper than Plausible, $9-29/mo)",
+      "tags": [
+        "privacy",
+        "analytics",
+        "gdpr",
+        "smb"
+      ],
+      "html": "20260718/P14-013.html",
+      "built": true
+    },
+    {
+      "id": "P14-014",
+      "category": "micro_saas",
+      "subcategory": "freelancer_client_portal",
+      "direction": "自由职业者一体化客户门户 SaaS(项目+发票+审批, $10-30K MRR)",
+      "direction_en": "All-in-one freelancer client portal SaaS (projects + invoicing + approval, $10-30K MRR)",
+      "tags": [
+        "freelancer",
+        "client_portal",
+        "invoicing",
+        "workflow"
+      ],
+      "html": "20260718/P14-014.html",
+      "built": true
+    },
+    {
+      "id": "P14-015",
+      "category": "micro_saas",
+      "subcategory": "ecommerce_monitoring",
+      "direction": "电商库存/竞品价格监控 SaaS(缺货与降价预警, $19-79/月)",
+      "direction_en": "E-commerce inventory / competitor-price monitoring SaaS (stockout & price-drop alerts, $19-79/mo)",
+      "tags": [
+        "ecommerce",
+        "inventory",
+        "price_monitoring",
+        "shopify"
+      ],
+      "html": "20260718/P14-015.html",
+      "built": true
+    },
+    {
+      "id": "P14-016",
+      "category": "micro_saas",
+      "subcategory": "appointment_reminder",
+      "direction": "服务行业预约自动提醒 SaaS(降爽约率, $19-49/月)",
+      "direction_en": "Service-business automated appointment-reminder SaaS (reduce no-shows, $19-49/mo)",
+      "tags": [
+        "appointment",
+        "reminder",
+        "smb",
+        "no_show"
+      ],
+      "html": "20260718/P14-016.html",
+      "built": true
+    },
+    {
+      "id": "P14-017",
+      "category": "micro_saas",
+      "subcategory": "saas_churn_analytics",
+      "direction": "面向小 SaaS 的极简订阅/流失分析 SaaS(连 Stripe, $49-99/月)",
+      "direction_en": "Lite subscription & churn analytics SaaS for small SaaS (Stripe-connected, $49-99/mo)",
+      "tags": [
+        "churn",
+        "analytics",
+        "subscription",
+        "stripe"
+      ],
+      "html": "20260718/P14-017.html",
+      "built": true
+    },
+    {
+      "id": "P14-018",
+      "category": "micro_saas",
+      "subcategory": "solo_saas_cross_border",
+      "direction": "一人公司利基微 SaaS(跨境小卖家工具/评论分析, 中文界面差异化)",
+      "direction_en": "Solo-founder niche micro-SaaS (cross-border seller tools / review analytics, CN-UI differentiation)",
+      "tags": [
+        "solo_founder",
+        "opc",
+        "cross_border",
+        "china_seller"
+      ],
+      "html": "20260718/P14-018.html",
+      "built": true
+    },
+    {
+      "id": "P15-001",
+      "category": "postpartum",
+      "subcategory": "emotional_recognition_companion",
+      "direction": "产后情绪识别陪伴App(填补'凌晨3点孤独'的语言缺口,非治疗)",
+      "direction_en": "Postpartum emotional-recognition companion app (closes the 3am loneliness language gap, non-clinical)",
+      "tags": [
+        "postpartum_mood",
+        "emotional_recognition",
+        "non_clinical",
+        "3am_loneliness"
+      ],
+      "html": "20260718/P15-001.html",
+      "built": true
+    },
+    {
+      "id": "P15-002",
+      "category": "postpartum",
+      "subcategory": "cbt_maternal_mental_health",
+      "direction": "母亲专属CBT产后心理健康订阅App(短课程+情绪打卡)",
+      "direction_en": "Mother-focused CBT postpartum mental-health subscription (short programs + mood check-ins)",
+      "tags": [
+        "postpartum_depression",
+        "cbt",
+        "subscription",
+        "maternal_mental_health"
+      ],
+      "html": "20260718/P15-002.html",
+      "built": true
+    },
+    {
+      "id": "P15-003",
+      "category": "postpartum",
+      "subcategory": "integrated_physical_mental_monitor",
+      "direction": "盆底+C-section恢复+纵向PPD筛查+实时警报的一体化产后监测App",
+      "direction_en": "Integrated postpartum monitor: pelvic floor + C-section recovery + longitudinal PPD screening + real-time alerts",
+      "tags": [
+        "pelvic_floor",
+        "c_section",
+        "ppd_screening",
+        "real_time_alert",
+        "freemium"
+      ],
+      "html": "20260718/P15-003.html",
+      "built": true
+    },
+    {
+      "id": "P15-004",
+      "category": "postpartum",
+      "subcategory": "mother_mindfulness_meditation",
+      "direction": "妈妈专属正念冥想App(100+场景化短冥想,订阅$4/月)",
+      "direction_en": "Mother-specific mindfulness meditation app (100+ scenario meditations, $4/mo subscription)",
+      "tags": [
+        "meditation",
+        "mindfulness",
+        "maternal_mental_health",
+        "subscription"
+      ],
+      "html": "20260718/P15-004.html",
+      "built": true
+    },
+    {
+      "id": "P15-005",
+      "category": "postpartum",
+      "subcategory": "mother_recovery_tracker",
+      "direction": "母亲自身恢复追踪App(恶露/情绪/睡眠/疼痛+医生导出)",
+      "direction_en": "Mother's-own-recovery tracker (bleeding/mood/sleep/pain + doctor export)",
+      "tags": [
+        "fourth_trimester",
+        "bleeding_tracking",
+        "mood_sleep",
+        "doctor_export"
+      ],
+      "html": "20260718/P15-005.html",
+      "built": true
+    },
+    {
+      "id": "P15-006",
+      "category": "postpartum",
+      "subcategory": "clinical_pelvic_floor_core",
+      "direction": "NHS背书的临床级盆底+核心12周康复App(一次性买断)",
+      "direction_en": "NHS-endorsed clinical pelvic floor + core 12-week rehab app (lifetime purchase)",
+      "tags": [
+        "pelvic_floor",
+        "nhs_endorsed",
+        "diastasis_recti",
+        "lifetime_purchase"
+      ],
+      "html": "20260718/P15-006.html",
+      "built": true
+    },
+    {
+      "id": "P15-007",
+      "category": "postpartum",
+      "subcategory": "staged_postpartum_fitness",
+      "direction": "分阶段专家背书的产后健身订阅App(含剖腹产专项)",
+      "direction_en": "Staged expert-backed postpartum fitness subscription (incl. C-section-specific program)",
+      "tags": [
+        "postpartum_fitness",
+        "expert_backed",
+        "c_section_program",
+        "subscription"
+      ],
+      "html": "20260718/P15-007.html",
+      "built": true
+    },
+    {
+      "id": "P15-008",
+      "category": "postpartum",
+      "subcategory": "medical_grade_pelvic_hardware",
+      "direction": "二类医疗器械级盆底康复App+硬件联动(院线同源评估)",
+      "direction_en": "Class-II medical-grade pelvic rehab app + hardware sync (clinic-grade Glazer assessment)",
+      "tags": [
+        "二类医疗器械",
+        "硬件联动",
+        "glazer评估",
+        "麦澜德"
+      ],
+      "html": "20260718/P15-008.html",
+      "built": true
+    },
+    {
+      "id": "P15-009",
+      "category": "postpartum",
+      "subcategory": "software_hardware_expert",
+      "direction": "软件+硬件+三甲专家一体的个性化产后修复App(AI报告)",
+      "direction_en": "Software + hardware + tier-3-expert integrated personalized postpartum rehab app (AI reports)",
+      "tags": [
+        "软件硬件服务一体",
+        "三甲专家",
+        "AI报告",
+        "科学分阶"
+      ],
+      "html": "20260718/P15-009.html",
+      "built": true
+    },
+    {
+      "id": "P15-010",
+      "category": "postpartum",
+      "subcategory": "biofeedback_hardware_loop",
+      "direction": "Edan生物刺激反馈仪联动的居家产后康复App(硬件闭环)",
+      "direction_en": "Edan biofeedback-device-linked at-home postpartum rehab app (hardware closed loop)",
+      "tags": [
+        "理邦Edan",
+        "生物刺激反馈仪",
+        "凯格尔评估",
+        "居家产康"
+      ],
+      "html": "20260718/P15-010.html",
+      "built": true
+    },
+    {
+      "id": "P15-011",
+      "category": "postpartum",
+      "subcategory": "maternal_community_full_scene",
+      "direction": "2亿用户综合母婴社区App的产后修复模块(课程+社区)",
+      "direction_en": "2亿-user comprehensive maternal community app's postpartum rehab module (courses + community)",
+      "tags": [
+        "2亿用户",
+        "母婴社区",
+        "UGC",
+        "综合指导"
+      ],
+      "html": "20260718/P15-011.html",
+      "built": true
+    },
+    {
+      "id": "P15-012",
+      "category": "postpartum",
+      "subcategory": "research_screening_dna",
+      "direction": "研究型产后抑郁筛查App(量表+DNA数据捐献,多国扩展)",
+      "direction_en": "Research-grade PPD screening app (scale + DNA donation, multi-country)",
+      "tags": [
+        "researchkit",
+        "ppd_screening",
+        "dna_study",
+        "multi_country"
+      ],
+      "html": "20260718/P15-012.html",
+      "built": true
+    },
+    {
+      "id": "P15-013",
+      "category": "postpartum",
+      "subcategory": "clinical_epds_screening",
+      "direction": "临床机构背书的免费围产期抑郁数字筛查App(EPDS)",
+      "direction_en": "Clinician-backed free perinatal depression digital screening app (EPDS)",
+      "tags": [
+        "mgh",
+        "epds",
+        "free_screening",
+        "clinical_backed"
+      ],
+      "html": "20260718/P15-013.html",
+      "built": true
+    },
+    {
+      "id": "P15-014",
+      "category": "postpartum",
+      "subcategory": "ai_baby_sleep_tracker",
+      "direction": "AI婴儿睡眠预测+语音记录App(500万家庭,月入60万美元)",
+      "direction_en": "AI baby-sleep predictor + voice-logging app (5M families, $600k/mo)",
+      "tags": [
+        "baby_sleep",
+        "ai_prediction",
+        "voice_logging",
+        "subscription"
+      ],
+      "html": "20260718/P15-014.html",
+      "built": true
+    },
+    {
+      "id": "P15-015",
+      "category": "postpartum",
+      "subcategory": "ai_sleep_training_rival",
+      "direction": "AI婴儿睡眠训练App(对标Huckleberry,解决预测校准痛点)",
+      "direction_en": "AI baby-sleep training app (rival to Huckleberry, fixing prediction-calibration pain)",
+      "tags": [
+        "ai_sleep",
+        "competitor_gap",
+        "manual_calibration",
+        "subscription"
+      ],
+      "html": "20260718/P15-015.html",
+      "built": true
+    },
+    {
+      "id": "P15-016",
+      "category": "postpartum",
+      "subcategory": "china_rehab_market",
+      "direction": "中国千亿产后康复赛道:居家数字化+数据化反馈的普惠产康机会",
+      "direction_en": "China's ¥100B+ postpartum rehab market: at-home digitalized + data-feedback affordable rehab opportunity",
+      "tags": [
+        "千亿赛道",
+        "客单8900元",
+        "居家数字化",
+        "数据化反馈"
+      ],
+      "html": "20260718/P15-016.html",
+      "built": true
+    },
+    {
+      "id": "P15-017",
+      "category": "postpartum",
+      "subcategory": "wearable_hrv_early_warning",
+      "direction": "产后可穿戴HRV/睡眠预警+心理健康闭环App(被动生理数据)",
+      "direction_en": "Postpartum wearable HRV/sleep early-warning + mental-health loop app (passive biometrics)",
+      "tags": [
+        "oura",
+        "whoop",
+        "apple_watch",
+        "hrv",
+        "passive_biometrics"
+      ],
+      "html": "20260718/P15-017.html",
+      "built": true
+    },
+    {
+      "id": "P15-018",
+      "category": "postpartum",
+      "subcategory": "virtual_postpartum_telehealth_saas",
+      "direction": "B2B2C虚拟产后护理SaaS(雇主/健保买单,产后自动随访)",
+      "direction_en": "B2B2C virtual postpartum care SaaS (employer/payer-paid, automated postpartum follow-up)",
+      "tags": [
+        "b2b2c",
+        "telehealth",
+        "employer_benefit",
+        "virtual_care"
+      ],
+      "html": "20260718/P15-018.html",
+      "built": true
+    },
+    {
+      "id": "P16-001",
+      "category": "finance",
+      "subcategory": "budget_bank_sync_pain",
+      "direction": "连携稳定优先、资产分类精细的日本家计簿App（修补Zaim/MF同步与分类痛点）",
+      "direction_en": "Japan household-budget app with rock-solid bank sync and precise asset categorization (fixes Zaim/MF pain)",
+      "tags": [
+        "household_budget",
+        "bank_sync",
+        "japan",
+        "reliable_auto_import"
+      ],
+      "html": "20260718/P16-001.html",
+      "built": true
+    },
+    {
+      "id": "P16-002",
+      "category": "finance",
+      "subcategory": "mobile_side_business_tax",
+      "direction": "纯移动端、问卷式副业确定申告App（手机搞定记账到e-Tax提交）",
+      "direction_en": "Mobile-only conversational side-business tax-filing app (bookkeeping to e-Tax submit on phone)",
+      "tags": [
+        "tax_filing",
+        "freelance",
+        "fukugyo",
+        "japan"
+      ],
+      "html": "20260718/P16-002.html",
+      "built": true
+    },
+    {
+      "id": "P16-003",
+      "category": "finance",
+      "subcategory": "crypto_tax_calculator",
+      "direction": "多交易所自动聚合的日本加密货币税计算器（NTA格式+CARF 2026）",
+      "direction_en": "Multi-exchange Japan crypto tax calculator (NTA format + CARF 2026)",
+      "tags": [
+        "crypto",
+        "tax",
+        "japan",
+        "CARF",
+        "multi_exchange"
+      ],
+      "html": "20260718/P16-003.html",
+      "built": true
+    },
+    {
+      "id": "P16-004",
+      "category": "finance",
+      "subcategory": "furusato_nozei_optimizer",
+      "direction": "故乡税控除上限优化+返礼品对比助手App（把2000日元实负担用到极致）",
+      "direction_en": "Furusato-nozei deduction-limit optimizer + gift comparison assistant",
+      "tags": [
+        "furusato",
+        "tax_deduction",
+        "japan",
+        "simulator"
+      ],
+      "html": "20260718/P16-004.html",
+      "built": true
+    },
+    {
+      "id": "P16-005",
+      "category": "finance",
+      "subcategory": "foreign_resident_tax_korea",
+      "direction": "面向在韩外国人的报税优化App（中英文界面+扣除最大化向导）",
+      "direction_en": "Tax-filing optimizer app for foreign residents in Korea (CN/EN UI + max deductions)",
+      "tags": [
+        "korea",
+        "foreigner",
+        "tax",
+        "year_end_settlement"
+      ],
+      "html": "20260718/P16-005.html",
+      "built": true
+    },
+    {
+      "id": "P16-006",
+      "category": "finance",
+      "subcategory": "korean_micro_merchant_accounting",
+      "direction": "连携Hometax的韩国小商户极简记账+自动估税App",
+      "direction_en": "Hometax-linked micro-merchant bookkeeping + auto tax-estimate app for Korea",
+      "tags": [
+        "korea",
+        "solopreneur",
+        "small_business",
+        "vat_estimate"
+      ],
+      "html": "20260718/P16-006.html",
+      "built": true
+    },
+    {
+      "id": "P16-007",
+      "category": "finance",
+      "subcategory": "mz_gamified_micro_savings",
+      "direction": "游戏化零钱储蓄App（动画反馈+Widget+连胜，瞄准MZ）",
+      "direction_en": "Gamified micro-savings app (animation + widget + streaks for MZ)",
+      "tags": [
+        "korea",
+        "MZ",
+        "gamified_saving",
+        "neobank"
+      ],
+      "html": "20260718/P16-007.html",
+      "built": true
+    },
+    {
+      "id": "P16-008",
+      "category": "finance",
+      "subcategory": "fractional_shares_micro_investing",
+      "direction": "零股/定额微型投资App（1000韩元起买海外蓝筹，瞄准年轻人）",
+      "direction_en": "Fractional-share micro-investing app (from 1,000 KRW into global blue chips)",
+      "tags": [
+        "korea",
+        "fractional_shares",
+        "MZ",
+        "brokerage"
+      ],
+      "html": "20260718/P16-008.html",
+      "built": true
+    },
+    {
+      "id": "P16-009",
+      "category": "finance",
+      "subcategory": "low_cost_robo_nisa",
+      "direction": "低费、原生支持新NISA的日本自动投资App（替代高费Robo）",
+      "direction_en": "Low-fee robo-advisor natively supporting new NISA (replaces costly robos)",
+      "tags": [
+        "japan",
+        "robo_advisor",
+        "nisa",
+        "fee_pain"
+      ],
+      "html": "20260718/P16-009.html",
+      "built": true
+    },
+    {
+      "id": "P16-010",
+      "category": "finance",
+      "subcategory": "nisa_onboarding_simulator",
+      "direction": "新手向NISA商品匹配+金额模拟+一键开户助手",
+      "direction_en": "Beginner NISA product-matcher + amount simulator + one-tap open",
+      "tags": [
+        "japan",
+        "nisa",
+        "beginner",
+        "simulator"
+      ],
+      "html": "20260718/P16-010.html",
+      "built": true
+    },
+    {
+      "id": "P16-011",
+      "category": "finance",
+      "subcategory": "multi_card_point_optimizer",
+      "direction": "日本版多卡最优化App（按类别选卡+积分到期提醒+年费建议）",
+      "direction_en": "Japan multi-card optimizer (best-card-by-category + points expiry + annual-fee advice)",
+      "tags": [
+        "japan",
+        "credit_card",
+        "points",
+        "optimizer"
+      ],
+      "html": "20260718/P16-011.html",
+      "built": true
+    },
+    {
+      "id": "P16-012",
+      "category": "finance",
+      "subcategory": "kor_china_remittance",
+      "direction": "韩↔中走廊低费汇款App（支付宝/微信直连、2分钟到账）",
+      "direction_en": "KR↔CN corridor low-fee remittance app (Alipay/WeChat direct, 2-min)",
+      "tags": [
+        "korea",
+        "remittance",
+        "china_corridor",
+        "fintech"
+      ],
+      "html": "20260718/P16-012.html",
+      "built": true
+    },
+    {
+      "id": "P16-013",
+      "category": "finance",
+      "subcategory": "korea_single_household_finance",
+      "direction": "韩国单人户一体化财务App（预算+净资产+攒钱目标）",
+      "direction_en": "Korea single-household all-in-one finance app (budget + net worth + goals)",
+      "tags": [
+        "korea",
+        "1인가구",
+        "net_worth",
+        "budget"
+      ],
+      "html": "20260718/P16-013.html",
+      "built": true
+    },
+    {
+      "id": "P16-014",
+      "category": "finance",
+      "subcategory": "retirement_planning_coach",
+      "direction": "退休资金缺口模拟+自动储蓄教练App（组合NISA/iDeCo）",
+      "direction_en": "Retirement-gap simulator + auto-savings coach (combines NISA/iDeCo)",
+      "tags": [
+        "japan",
+        "retirement",
+        "2000万円",
+        "simulator"
+      ],
+      "html": "20260718/P16-014.html",
+      "built": true
+    },
+    {
+      "id": "P16-015",
+      "category": "finance",
+      "subcategory": "china_budget_app_to_jk",
+      "direction": "中国成熟记账App本地化搬入日韩（稳定同步+无广告+买断）",
+      "direction_en": "Localize a mature Chinese budget app into Japan/Korea (stable sync + no-ads + buyout)",
+      "tags": [
+        "cross_market",
+        "budget",
+        "china_to_japan_korea",
+        "offline_first"
+      ],
+      "html": "20260718/P16-015.html",
+      "built": true
+    },
+    {
+      "id": "P16-016",
+      "category": "finance",
+      "subcategory": "korea_housing_subscription_assistant",
+      "direction": "韩国申购资格自检+加分计算+日程追踪助手App（补官方体验短板）",
+      "direction_en": "Korea housing-subscription assistant (eligibility check + score + schedule)",
+      "tags": [
+        "korea",
+        "청약",
+        "youth_housing",
+        "eligibility"
+      ],
+      "html": "20260718/P16-016.html",
+      "built": true
+    },
+    {
+      "id": "P16-017",
+      "category": "finance",
+      "subcategory": "investment_portfolio_tracker_jp",
+      "direction": "日本散户多券商多币种投资组合追踪App（税务/特定口座感知）",
+      "direction_en": "Japan multi-broker multi-currency portfolio tracker (tax-lot / 特定口座 aware)",
+      "tags": [
+        "japan",
+        "portfolio",
+        "multi_broker",
+        "tax_lot"
+      ],
+      "html": "20260718/P16-017.html",
+      "built": true
+    },
+    {
+      "id": "P16-018",
+      "category": "finance",
+      "subcategory": "mz_alternative_asset_tracker",
+      "direction": "面向MZ的另类资产（倒卖/黄金/加密）组合追踪App",
+      "direction_en": "Alternative-asset portfolio tracker for MZ (resell / gold / crypto)",
+      "tags": [
+        "korea",
+        "MZ",
+        "resell",
+        "alternative_invest"
+      ],
+      "html": "20260718/P16-018.html",
+      "built": true
+    },
+    {
+      "id": "P2-001",
+      "category": "career",
+      "subcategory": "job_mismatch_early_resignation",
+      "direction": "入社前职位模拟+适性匹配AI(用真实日次业务预览降低早期离职与错配)",
+      "direction_en": "Pre-hire job simulation + fit-matching AI (real daily-work preview to cut early resignation & mismatch)",
+      "tags": [
+        "early_resignation",
+        "job_mismatch",
+        "career_fit",
+        "japan"
+      ],
+      "html": "20260718/P2-001.html",
+      "built": true
+    },
+    {
+      "id": "P2-002",
+      "category": "career",
+      "subcategory": "ai_jobhunting_es_resume",
+      "direction": "AI求职文书生成App(ES/简历/志望動機,免费引流+增值)",
+      "direction_en": "AI job-application document generator (ES/resume/motivation, free hook + upsell)",
+      "tags": [
+        "ai_resume",
+        "entry_sheet",
+        "job_hunting",
+        "japan"
+      ],
+      "html": "20260718/P2-002.html",
+      "built": true
+    },
+    {
+      "id": "P2-003",
+      "category": "career",
+      "subcategory": "ai_resume_maker_newgrad",
+      "direction": "对话式AI简历教练(帮学生语言化经历,非代写,免费+增值)",
+      "direction_en": "Conversational AI resume coach (helps students articulate experience, not ghostwrite; free + upsell)",
+      "tags": [
+        "ai_resume",
+        "new_graduate",
+        "line",
+        "japan"
+      ],
+      "html": "20260718/P2-003.html",
+      "built": true
+    },
+    {
+      "id": "P2-004",
+      "category": "career",
+      "subcategory": "freelance_tax_app_gap_korea",
+      "direction": "面向在韩外国人的双语自由职业税务+记账App(填补韩文-only空白)",
+      "direction_en": "Bilingual (EN/CN/JP) freelance tax + bookkeeping app for foreigners in Korea",
+      "tags": [
+        "freelance_tax",
+        "korea",
+        "foreigner_gap",
+        "fintech"
+      ],
+      "html": "20260718/P2-004.html",
+      "built": true
+    },
+    {
+      "id": "P2-005",
+      "category": "career",
+      "subcategory": "freelance_income_expense_japan",
+      "direction": "面向在日外国人/副业者的移动端工时收入+确申联动App",
+      "direction_en": "Mobile time-tracking income + tax-filing app for foreigners/side-giggers in Japan",
+      "tags": [
+        "freelance",
+        "side_income",
+        "tax_japan",
+        "expense_tracking"
+      ],
+      "html": "20260718/P2-005.html",
+      "built": true
+    },
+    {
+      "id": "P2-006",
+      "category": "career",
+      "subcategory": "foreigner_job_visa_korea",
+      "direction": "在韩外国人求职+签证+文化适配平台(英文/多语言)",
+      "direction_en": "Job + visa + culture-fit platform for foreigners in Korea (EN/multilingual)",
+      "tags": [
+        "foreigner_jobs",
+        "korea",
+        "visa",
+        "expat"
+      ],
+      "html": "20260718/P2-006.html",
+      "built": true
+    },
+    {
+      "id": "P2-007",
+      "category": "career",
+      "subcategory": "neutral_career_advisor_japan",
+      "direction": "去中介化的中立AI职业顾问(聚合多平台+匹配打分+模拟面试)",
+      "direction_en": "Disintermediated neutral AI career advisor (aggregate platforms + match scoring + mock interview)",
+      "tags": [
+        "career_agent",
+        "neutral_advice",
+        "japan",
+        "mismatch"
+      ],
+      "html": "20260718/P2-007.html",
+      "built": true
+    },
+    {
+      "id": "P2-008",
+      "category": "career",
+      "subcategory": "ai_career_coach_salary_korea",
+      "direction": "AI职业教练(韩国年薪谈判脚本+薪资对标+模拟对话)",
+      "direction_en": "AI career coach (KR salary-negotiation scripts + benchmark + mock dialogue)",
+      "tags": [
+        "career_coach",
+        "salary_negotiation",
+        "korea",
+        "ai"
+      ],
+      "html": "20260718/P2-008.html",
+      "built": true
+    },
+    {
+      "id": "P2-009",
+      "category": "career",
+      "subcategory": "regional_freelance_job_curation_japan",
+      "direction": "地域密着+自由职业特化的AI求人策展(去噪评分推送)",
+      "direction_en": "Regional + freelance-focused AI job curation (denoise, score, push)",
+      "tags": [
+        "regional_jobs",
+        "freelance",
+        "japan",
+        "curation"
+      ],
+      "html": "20260718/P2-009.html",
+      "built": true
+    },
+    {
+      "id": "P2-010",
+      "category": "tech",
+      "subcategory": "solo_saas_ai_coding_japan",
+      "direction": "面向日本上班族/教师的'下班2h副业SaaS'模板与陪跑",
+      "direction_en": "After-work 2h side-SaaS templates + coaching for Japanese salarymen/teachers",
+      "tags": [
+        "solo_saas",
+        "ai_coding",
+        "japan",
+        "mrr"
+      ],
+      "html": "20260718/P2-010.html",
+      "built": true
+    },
+    {
+      "id": "P2-011",
+      "category": "tech",
+      "subcategory": "ai_coding_enterprise_korea",
+      "direction": "面向韩国开发者的本地化AI coding辅助(韩文模板+合规+token优化)",
+      "direction_en": "Localized AI-coding aid for Korean devs (KR docs + compliance + token optimization)",
+      "tags": [
+        "ai_coding",
+        "claude_code",
+        "korea",
+        "enterprise"
+      ],
+      "html": "20260718/P2-011.html",
+      "built": true
+    },
+    {
+      "id": "P2-012",
+      "category": "tech",
+      "subcategory": "micro_saas_market",
+      "direction": "面向日韩个人的micro-SaaS选题库+落地模板(本地化垂直选题)",
+      "direction_en": "Micro-SaaS idea library + launch templates for JP/KR solo founders (localized niches)",
+      "tags": [
+        "micro_saas",
+        "solo_founder",
+        "mrr",
+        "global"
+      ],
+      "html": "20260718/P2-012.html",
+      "built": true
+    },
+    {
+      "id": "P2-013",
+      "category": "tech",
+      "subcategory": "nocode_lowcode",
+      "direction": "面向日韩中小企业的no-code内部工具模板市集(请假/采购/客户)",
+      "direction_en": "No-code internal-tool template marketplace for JP/KR SMEs (leave/procurement/CRM)",
+      "tags": [
+        "no_code",
+        "low_code",
+        "citizen_developer",
+        "global"
+      ],
+      "html": "20260718/P2-013.html",
+      "built": true
+    },
+    {
+      "id": "P2-014",
+      "category": "tech",
+      "subcategory": "vibe_coding_builder_localized",
+      "direction": "日韩本地化vibe coding builder(双语界面+本地支付+本地云)",
+      "direction_en": "Localized (JA/KO) vibe-coding builder (bilingual UI + local payments + local cloud)",
+      "tags": [
+        "vibe_coding",
+        "no_code",
+        "builder",
+        "localization"
+      ],
+      "html": "20260718/P2-014.html",
+      "built": true
+    },
+    {
+      "id": "P2-015",
+      "category": "tech",
+      "subcategory": "korea_ai_payment_localization",
+      "direction": "出海韩国的AI应用本地支付+订阅路由基建( Kakao/Naver Pay)",
+      "direction_en": "Local-payment + subscription-routing infra for AI apps entering Korea (Kakao/Naver Pay)",
+      "tags": [
+        "korea",
+        "ai_app",
+        "local_payment",
+        "subscription"
+      ],
+      "html": "20260718/P2-015.html",
+      "built": true
+    },
+    {
+      "id": "P2-016",
+      "category": "tech",
+      "subcategory": "korea_dev_digital_asset_sideincome",
+      "direction": "面向韩国开发者的数字资产( Micro SaaS)构建陪跑+模板",
+      "direction_en": "Done-with-you digital-asset (micro-SaaS) builder + templates for Korean devs",
+      "tags": [
+        "korea",
+        "developer",
+        "side_income",
+        "digital_asset"
+      ],
+      "html": "20260718/P2-016.html",
+      "built": true
+    },
+    {
+      "id": "P2-017",
+      "category": "tech",
+      "subcategory": "claude_code_token_optimizer",
+      "direction": "面向开发者的AI coding成本优化工具(上下文压缩+请求批处理)",
+      "direction_en": "AI-coding cost optimizer for devs (context compression + request batching)",
+      "tags": [
+        "claude_code",
+        "token_optimization",
+        "devtools",
+        "cost"
+      ],
+      "html": "20260718/P2-017.html",
+      "built": true
+    },
+    {
+      "id": "P2-018",
+      "category": "tech",
+      "subcategory": "japan_indie_still_viable",
+      "direction": "面向日本特定职业社群的垂直小SaaS/AI工具/模板",
+      "direction_en": "Vertical micro-SaaS / AI tools / templates for specific JP professional communities",
+      "tags": [
+        "indie_dev",
+        "japan",
+        "niche",
+        "side_income"
+      ],
+      "html": "20260718/P2-018.html",
+      "built": true
+    },
+    {
+      "id": "P3-001",
+      "category": "social",
+      "subcategory": "introvert_friendship_async",
+      "direction": "异步低压力内向者交友App(按价值观每周匹配1位好友+匹配理由)",
+      "direction_en": "Async low-pressure friendship app for introverts (weekly 1:1 values-based match with context)",
+      "tags": [
+        "introvert",
+        "friendship_app",
+        "values_match",
+        "async",
+        "low_pressure"
+      ],
+      "html": "20260718/P3-001.html",
+      "built": true
+    },
+    {
+      "id": "P3-002",
+      "category": "social",
+      "subcategory": "mbti_personality_friendship",
+      "direction": "MBTI性格匹配交友/约会App(全球,内向者友好)",
+      "direction_en": "MBTI personality-matching friendship/dating app (global, introvert-friendly)",
+      "tags": [
+        "mbti",
+        "personality_match",
+        "friendship",
+        "global",
+        "dating"
+      ],
+      "html": "20260718/P3-002.html",
+      "built": true
+    },
+    {
+      "id": "P3-003",
+      "category": "social",
+      "subcategory": "voice_first_friendship",
+      "direction": "语音优先深度交友App(声音连接,无照片焦虑)",
+      "direction_en": "Voice-first deep-friendship app (audio connection, no photo anxiety)",
+      "tags": [
+        "voice_first",
+        "audio_social",
+        "deep_talk",
+        "global",
+        "introvert"
+      ],
+      "html": "20260718/P3-003.html",
+      "built": true
+    },
+    {
+      "id": "P3-004",
+      "category": "social",
+      "subcategory": "moms_friendship",
+      "direction": "按育儿阶段匹配的妈妈交友App(产后社交隔离刚需)",
+      "direction_en": "Mom friendship app matched by parenting stage (postpartum isolation pain point)",
+      "tags": [
+        "moms",
+        "parenting",
+        "friendship",
+        "isolation",
+        "support"
+      ],
+      "html": "20260718/P3-004.html",
+      "built": true
+    },
+    {
+      "id": "P3-005",
+      "category": "social",
+      "subcategory": "curated_group_dinner",
+      "direction": "结构化饭局交友App(每周5人契合饭局,消除1对1压力)",
+      "direction_en": "Curated group-dinner friendship app (weekly 5-person compatible table)",
+      "tags": [
+        "dinner",
+        "irl_meetup",
+        "stranger",
+        "curated",
+        "structured"
+      ],
+      "html": "20260718/P3-005.html",
+      "built": true
+    },
+    {
+      "id": "P3-006",
+      "category": "social",
+      "subcategory": "mbti_introvert_community_cn",
+      "direction": "I人/内向者MBTI性格社交App(200万+档案,慢社交)",
+      "direction_en": "MBTI introvert (I-person) social community app (2M+ profiles, slow social)",
+      "tags": [
+        "introvert",
+        "mbti",
+        "i_person",
+        "china",
+        "community"
+      ],
+      "html": "20260718/P3-006.html",
+      "built": true
+    },
+    {
+      "id": "P3-007",
+      "category": "social",
+      "subcategory": "concierge_matchmaking_jp",
+      "direction": "人+AI伴走型婚恋App(专属顾问陪跑,日本验证)",
+      "direction_en": "Human+AI concierge matchmaking app (dedicated supporter, validated in Japan)",
+      "tags": [
+        "japan",
+        "matchmaking",
+        "concierge",
+        "supporter",
+        "u25"
+      ],
+      "html": "20260718/P3-007.html",
+      "built": true
+    },
+    {
+      "id": "P3-008",
+      "category": "social",
+      "subcategory": "language_exchange_cross_culture",
+      "direction": "语言交换+跨文化交友App(中日韩互学刚需,加严肃语伴筛选)",
+      "direction_en": "Language-exchange + cross-cultural friendship app (CN/JP/KR demand, serious-partner filter)",
+      "tags": [
+        "language_exchange",
+        "cross_culture",
+        "global",
+        "china",
+        "friendship"
+      ],
+      "html": "20260718/P3-008.html",
+      "built": true
+    },
+    {
+      "id": "P3-009",
+      "category": "social",
+      "subcategory": "senior_silver_social_jp",
+      "direction": "50+银发社交App(AI伴侣+兴趣群聊+线下活动,日本验证)",
+      "direction_en": "Senior (50+) social app (AI companion + interest groups + offline, validated in Japan)",
+      "tags": [
+        "senior",
+        "silver",
+        "japan",
+        "aging",
+        "loneliness"
+      ],
+      "html": "20260718/P3-009.html",
+      "built": true
+    },
+    {
+      "id": "P3-010",
+      "category": "pet",
+      "subcategory": "smart_hardware_fragmentation",
+      "direction": "统一宠物健康中枢App(聚合多品牌智能硬件数据,破数据孤岛)",
+      "direction_en": "Unified pet-health hub app (aggregates multi-brand smart-hardware data, breaks silos)",
+      "tags": [
+        "smart_pet",
+        "data_silo",
+        "fragmentation",
+        "pain_point",
+        "hub"
+      ],
+      "html": "20260718/P3-010.html",
+      "built": true
+    },
+    {
+      "id": "P3-011",
+      "category": "pet",
+      "subcategory": "ai_collar_overpromise",
+      "direction": "非侵入低误报隐私安全宠物健康工具(修正AI项圈翻车)",
+      "direction_en": "Non-invasive low-false-alarm privacy-safe pet health tool (fix AI-collar backlash)",
+      "tags": [
+        "ai_collar",
+        "overpromise",
+        "cat_stress",
+        "privacy",
+        "misjudge"
+      ],
+      "html": "20260718/P3-011.html",
+      "built": true
+    },
+    {
+      "id": "P3-012",
+      "category": "pet",
+      "subcategory": "pet_grief_memorial",
+      "direction": "宠物哀伤纪念App(数字纪念堂+引导日记,情感刚需)",
+      "direction_en": "Pet grief & memorial app (digital shrine + guided journaling, emotional need)",
+      "tags": [
+        "pet_loss",
+        "grief",
+        "memorial",
+        "mental_health",
+        "market_growth"
+      ],
+      "html": "20260718/P3-012.html",
+      "built": true
+    },
+    {
+      "id": "P3-013",
+      "category": "pet",
+      "subcategory": "pet_sitting_marketplace",
+      "direction": "宠物看护/遛狗双边平台(搬去中日韩,亚洲渗透低)",
+      "direction_en": "Pet sitting / dog-walking marketplace (bring to CN/JP/KR, low Asia penetration)",
+      "tags": [
+        "pet_sitting",
+        "marketplace",
+        "dog_walking",
+        "gig",
+        "global"
+      ],
+      "html": "20260718/P3-013.html",
+      "built": true
+    },
+    {
+      "id": "P3-014",
+      "category": "pet",
+      "subcategory": "dog_content_app_jp",
+      "direction": "内容+社区+电商宠物媒体App(日本Benesse验证,搬去中国)",
+      "direction_en": "Content + community + e-commerce pet media app (Benesse-validated, bring to China)",
+      "tags": [
+        "japan",
+        "dog_app",
+        "content",
+        "benesse",
+        "no1"
+      ],
+      "html": "20260718/P3-014.html",
+      "built": true
+    },
+    {
+      "id": "P3-015",
+      "category": "pet",
+      "subcategory": "shared_pet_health_record_jp",
+      "direction": "家庭共享宠物健康档案App(疫苗/就医/趋势,搬去中国)",
+      "direction_en": "Family-shared pet health-record app (vaccine/visit/trends, bring to China)",
+      "tags": [
+        "japan",
+        "health_record",
+        "family_share",
+        "vaccine",
+        "no2"
+      ],
+      "html": "20260718/P3-015.html",
+      "built": true
+    },
+    {
+      "id": "P3-016",
+      "category": "pet",
+      "subcategory": "pet_photo_sns_jp",
+      "direction": "宠物照片UGC社区App(日本验证,加本地社交/聚会变现)",
+      "direction_en": "Pet photo UGC community app (JP-validated, add local social/meetup monetization)",
+      "tags": [
+        "japan",
+        "pet_sns",
+        "photo",
+        "community",
+        "free"
+      ],
+      "html": "20260718/P3-016.html",
+      "built": true
+    },
+    {
+      "id": "P3-017",
+      "category": "pet",
+      "subcategory": "dog_walking_health_jp",
+      "direction": "导航×宠物遛狗健康App(路线+体调记录,搬去中国地图App)",
+      "direction_en": "Navigation × dog-walking health app (routes + condition log, bring to CN maps)",
+      "tags": [
+        "japan",
+        "dog_walking",
+        "health_management",
+        "navigation",
+        "premium"
+      ],
+      "html": "20260718/P3-017.html",
+      "built": true
+    },
+    {
+      "id": "P3-018",
+      "category": "pet",
+      "subcategory": "smart_pet_feeder_market",
+      "direction": "App控制智能喂食硬件+喂食数据汇入统一宠物健康中枢",
+      "direction_en": "App-controlled smart feeder + feed data into unified pet-health hub",
+      "tags": [
+        "smart_feeder",
+        "auto_feeding",
+        "market_growth",
+        "hardware",
+        "app_control"
+      ],
+      "html": "20260718/P3-018.html",
+      "built": true
+    },
+    {
+      "id": "P4-001",
+      "category": "fitness",
+      "subcategory": "keep_user_churn",
+      "direction": "轻量无套路健身记录+计划工具(真免费、不弹会员、AI不空壳)",
+      "direction_en": "Lightweight no-gimmick fitness tracker & planner (truly free, no membership pop-ups, real AI)",
+      "tags": [
+        "keep",
+        "subscription_fatigue",
+        "ai_coach_failure",
+        "china"
+      ],
+      "html": "20260718/P4-001.html",
+      "built": true
+    },
+    {
+      "id": "P4-002",
+      "category": "fitness",
+      "subcategory": "fitness_tracker_shame",
+      "direction": "反羞耻、重整体健康的温和健身追踪App",
+      "direction_en": "Anti-shame, whole-wellbeing gentle fitness tracker",
+      "tags": [
+        "shame",
+        "mental_health",
+        "rigid_calorie",
+        "wellbeing"
+      ],
+      "html": "20260718/P4-002.html",
+      "built": true
+    },
+    {
+      "id": "P4-003",
+      "category": "fitness",
+      "subcategory": "strength_logging_free",
+      "direction": "免费+本地优先+可导出CSV的极简力量训练记录App",
+      "direction_en": "Free, local-first, CSV-exportable minimalist strength logging app",
+      "tags": [
+        "strength_training",
+        "workout_log",
+        "free_tier",
+        "hevy_strong"
+      ],
+      "html": "20260718/P4-003.html",
+      "built": true
+    },
+    {
+      "id": "P4-004",
+      "category": "fitness",
+      "subcategory": "ai_trainer_gap",
+      "direction": "AI+真人混合健身教练(问责优先的轻社交陪伴)",
+      "direction_en": "AI + human hybrid personal training (accountability-first light social coaching)",
+      "tags": [
+        "ai_trainer",
+        "accountability",
+        "adherence",
+        "hybrid"
+      ],
+      "html": "20260718/P4-004.html",
+      "built": true
+    },
+    {
+      "id": "P4-005",
+      "category": "fitness",
+      "subcategory": "running_gps_accuracy",
+      "direction": "高精度无广告的纯净跑步记录App(GPS校准+离线)",
+      "direction_en": "High-accuracy ad-free clean running tracker (GPS calibration + offline)",
+      "tags": [
+        "running",
+        "gps_accuracy",
+        "data_trust",
+        "china"
+      ],
+      "html": "20260718/P4-005.html",
+      "built": true
+    },
+    {
+      "id": "P4-006",
+      "category": "fitness",
+      "subcategory": "korea_fitness_market",
+      "direction": "韩语本地化+三星可穿戴整合的垂直健身App(走路赚钱/AI教练)",
+      "direction_en": "Korean-localized, Samsung-wearable-integrated vertical fitness app (step-rewards / AI coach)",
+      "tags": [
+        "korea",
+        "fitness_app_market",
+        "planfit",
+        "cashwalk",
+        "growth"
+      ],
+      "html": "20260718/P4-006.html",
+      "built": true
+    },
+    {
+      "id": "P4-007",
+      "category": "fitness",
+      "subcategory": "health_app_ads_ai",
+      "direction": "无广告+AI饮食/计划一体+轻社交组队的纯净运动健康App",
+      "direction_en": "Ad-free, AI diet/plan integrated, light-social workout health app",
+      "tags": [
+        "honor_health",
+        "ads_complaint",
+        "ai_features",
+        "china"
+      ],
+      "html": "20260718/P4-007.html",
+      "built": true
+    },
+    {
+      "id": "P4-008",
+      "category": "fitness",
+      "subcategory": "emotional_value_social",
+      "direction": "情绪激励+深度组队社交+动态个性化的健身社区App",
+      "direction_en": "Emotionally-encouraging, deep team-social, dynamically-personalized fitness community app",
+      "tags": [
+        "emotional_value",
+        "social_connection",
+        "college_students",
+        "china"
+      ],
+      "html": "20260718/P4-008.html",
+      "built": true
+    },
+    {
+      "id": "P4-009",
+      "category": "fitness",
+      "subcategory": "planfit_crash_gap",
+      "direction": "稳定可靠+隐私尊重的AI健身房教练App(对标Planfit补体验短板)",
+      "direction_en": "Stable, privacy-respecting AI gym coach app (Planfit-style, fixing UX gaps)",
+      "tags": [
+        "planfit",
+        "korea_ai_coach",
+        "crash",
+        "subscription_lock"
+      ],
+      "html": "20260718/P4-009.html",
+      "built": true
+    },
+    {
+      "id": "P4-010",
+      "category": "relationship",
+      "subcategory": "couple_communication_apps",
+      "direction": "聚焦'冲突当下'的实时AI情侣沟通调解App",
+      "direction_en": "Real-time AI couple-communication mediator app (for moments of conflict)",
+      "tags": [
+        "couple_communication",
+        "lovefix",
+        "paired",
+        "lasted",
+        "subscription"
+      ],
+      "html": "20260718/P4-010.html",
+      "built": true
+    },
+    {
+      "id": "P4-011",
+      "category": "relationship",
+      "subcategory": "dating_app_fatigue",
+      "direction": "反swipe的慢约会/兴趣小众/视频验证约会App",
+      "direction_en": "Anti-swipe slow-dating / niche-interest / video-verified dating app",
+      "tags": [
+        "dating_fatigue",
+        "swipe",
+        "monetization",
+        "churn"
+      ],
+      "html": "20260718/P4-011.html",
+      "built": true
+    },
+    {
+      "id": "P4-012",
+      "category": "relationship",
+      "subcategory": "china_dating_scam",
+      "direction": "合规透明、反套路的严肃婚恋/脱单平台",
+      "direction_en": "Compliant, transparent, anti-scam serious matchmaking platform",
+      "tags": [
+        "china_dating",
+        "scam",
+        "paywall_trap",
+        "emotional_fraud"
+      ],
+      "html": "20260718/P4-012.html",
+      "built": true
+    },
+    {
+      "id": "P4-013",
+      "category": "relationship",
+      "subcategory": "korea_dating_trust",
+      "direction": "强验证+少而精匹配的严肃韩式约会App(可中韩跨境)",
+      "direction_en": "Trust-verified, few-quality-matches serious Korean-style dating app (CN-KR cross-border)",
+      "tags": [
+        "korea_dating",
+        "trust",
+        "verification",
+        "amanda",
+        "noondate"
+      ],
+      "html": "20260718/P4-013.html",
+      "built": true
+    },
+    {
+      "id": "P4-014",
+      "category": "relationship",
+      "subcategory": "long_distance_watch",
+      "direction": "支持多国流媒体+网盘+弹幕的跨国异地恋同步观影App",
+      "direction_en": "Cross-border LDR synced-watch app (multi-streaming + cloud-drive + live chat)",
+      "tags": [
+        "long_distance",
+        "sync_watch",
+        "teleparty",
+        "cross_market"
+      ],
+      "html": "20260718/P4-014.html",
+      "built": true
+    },
+    {
+      "id": "P4-015",
+      "category": "relationship",
+      "subcategory": "couple_memory_app",
+      "direction": "中韩/中日双语情侣记忆+日常连接一体化App",
+      "direction_en": "CN-KR/JP-KR bilingual couple memory + daily-connection all-in-one app",
+      "tags": [
+        "couple_memory",
+        "between",
+        "amora",
+        "korea",
+        "cross_market"
+      ],
+      "html": "20260718/P4-015.html",
+      "built": true
+    },
+    {
+      "id": "P4-016",
+      "category": "relationship",
+      "subcategory": "ai_conflict_mediator",
+      "direction": "实时中立+隐私加密的AI情侣吵架调解App",
+      "direction_en": "Real-time neutral + E2EE AI couple-conflict mediator app",
+      "tags": [
+        "ai_mediator",
+        "couple_conflict",
+        "realtime",
+        "lovefix",
+        "rayzz"
+      ],
+      "html": "20260718/P4-016.html",
+      "built": true
+    },
+    {
+      "id": "P4-017",
+      "category": "relationship",
+      "subcategory": "shared_finance",
+      "direction": "本地化情侣共享财务+透明沟通App(中韩货币/支付)",
+      "direction_en": "Localized couple shared-finance + transparent-money-talk app (CN/KR currency & payments)",
+      "tags": [
+        "shared_finance",
+        "budget",
+        "honeydue",
+        "couple_money"
+      ],
+      "html": "20260718/P4-017.html",
+      "built": true
+    },
+    {
+      "id": "P4-018",
+      "category": "relationship",
+      "subcategory": "couple_conflict_replay",
+      "direction": "隐私优先的夫妻冲突复盘+成长工具(可视化+AI建议)",
+      "direction_en": "Privacy-first couple conflict-replay & growth tool (visualization + AI advice)",
+      "tags": [
+        "conflict_replay",
+        "ai_analysis",
+        "lovesync",
+        "connected",
+        "emotion"
+      ],
+      "html": "20260718/P4-018.html",
+      "built": true
+    },
+    {
+      "id": "P5-001",
+      "category": "digital_product",
+      "subcategory": "etsy_digital_planner",
+      "direction": "垂直超链接数字规划器(GoodNotes 适配)+ 细分套组,上架 Etsy",
+      "direction_en": "Vertical hyperlinked digital planners (GoodNotes-compatible) + niche bundles on Etsy",
+      "tags": [
+        "digital_planner",
+        "goodnotes",
+        "etsy",
+        "passive_income"
+      ],
+      "html": "20260718/P5-001.html",
+      "built": true
+    },
+    {
+      "id": "P5-002",
+      "category": "digital_product",
+      "subcategory": "notion_templates",
+      "direction": "垂直 Notion 模板店(内容创作/自由职业/理财)+ 套组变现",
+      "direction_en": "Vertical Notion template store (content/freelance/finance) + bundle monetization",
+      "tags": [
+        "notion",
+        "gumroad",
+        "templates",
+        "passive_income"
+      ],
+      "html": "20260718/P5-002.html",
+      "built": true
+    },
+    {
+      "id": "P5-003",
+      "category": "digital_product",
+      "subcategory": "resume_cv_templates",
+      "direction": "细分行业 ATS 简历模板+求职追踪套组,上架 Etsy",
+      "direction_en": "Niche ATS-friendly resume templates + job-tracker bundle on Etsy",
+      "tags": [
+        "resume",
+        "ats",
+        "etsy",
+        "job_search"
+      ],
+      "html": "20260718/P5-003.html",
+      "built": true
+    },
+    {
+      "id": "P5-004",
+      "category": "digital_product",
+      "subcategory": "wedding_event_printables",
+      "direction": "可编辑 Canva 婚礼套件(请柬/座位卡/欢迎牌)旺季前置上架",
+      "direction_en": "Editable Canva wedding suites (invites/seating/welcome signs) listed before peak season",
+      "tags": [
+        "wedding",
+        "invitation",
+        "canva",
+        "etsy"
+      ],
+      "html": "20260718/P5-004.html",
+      "built": true
+    },
+    {
+      "id": "P5-005",
+      "category": "digital_product",
+      "subcategory": "budget_finance_trackers",
+      "direction": "细分理财追踪器(ADHD/零基预算/储蓄挑战)Excel+PDF 双格式",
+      "direction_en": "Niche finance trackers (ADHD/zero-based/savings challenge) in Excel+PDF",
+      "tags": [
+        "budget",
+        "finance",
+        "excel",
+        "etsy"
+      ],
+      "html": "20260718/P5-005.html",
+      "built": true
+    },
+    {
+      "id": "P5-006",
+      "category": "digital_product",
+      "subcategory": "coloring_pages",
+      "direction": "细分主题可打印涂色页矩阵(数百 SKU)上架 Etsy",
+      "direction_en": "Niche printable coloring-page matrix (hundreds of SKUs) on Etsy",
+      "tags": [
+        "coloring",
+        "printable",
+        "etsy",
+        "ai_art"
+      ],
+      "html": "20260718/P5-006.html",
+      "built": true
+    },
+    {
+      "id": "P5-007",
+      "category": "digital_product",
+      "subcategory": "goodnotes_marketplace_adhd",
+      "direction": "垂直 GoodNotes ADHD/学生规划器+贴纸生态(韩中本地化上架)",
+      "direction_en": "Vertical GoodNotes ADHD/student planners + sticker ecosystem (KR/CN localization)",
+      "tags": [
+        "goodnotes",
+        "adhd",
+        "planner",
+        "marketplace"
+      ],
+      "html": "20260718/P5-007.html",
+      "built": true
+    },
+    {
+      "id": "P5-008",
+      "category": "digital_product",
+      "subcategory": "kmong_digital_goods",
+      "direction": "借鉴 Kmong 做垂直数字商品+服务撮合平台(中国对标猪八戒小微版)",
+      "direction_en": "Kmong-style vertical digital-goods + services marketplace (CN analog of ZBJ micro-version)",
+      "tags": [
+        "kmong",
+        "korea",
+        "freelance",
+        "digital_services"
+      ],
+      "html": "20260718/P5-008.html",
+      "built": true
+    },
+    {
+      "id": "P5-009",
+      "category": "digital_product",
+      "subcategory": "lightroom_presets_brushes",
+      "direction": "垂直 Lightroom 预设+Procreate 笔刷套装(婚礼/胶片/手绘)",
+      "direction_en": "Vertical Lightroom presets + Procreate brush packs (wedding/film/hand-drawn)",
+      "tags": [
+        "lightroom",
+        "procreate",
+        "presets",
+        "design_assets"
+      ],
+      "html": "20260718/P5-009.html",
+      "built": true
+    },
+    {
+      "id": "P5-010",
+      "category": "digital_product",
+      "subcategory": "virtual_backgrounds",
+      "direction": "垂直 AI 虚拟背景包(职场/演讲/播客),抢占早期市场",
+      "direction_en": "Vertical AI virtual-background packs (work/speaking/podcast), early-mover play",
+      "tags": [
+        "virtual_background",
+        "zoom",
+        "ai_art",
+        "remote_work"
+      ],
+      "html": "20260718/P5-010.html",
+      "built": true
+    },
+    {
+      "id": "P5-011",
+      "category": "lifestyle",
+      "subcategory": "ai_voice_journaling",
+      "direction": "垂直场景(康复/创始人/产后)AI 语音日记+周报",
+      "direction_en": "Vertical-scenario (recovery/founder/postpartum) AI voice journaling + weekly recap",
+      "tags": [
+        "ai_journaling",
+        "voice",
+        "mental_health",
+        "subscription"
+      ],
+      "html": "20260718/P5-011.html",
+      "built": true
+    },
+    {
+      "id": "P5-012",
+      "category": "lifestyle",
+      "subcategory": "korean_routine_app",
+      "direction": "K-日常 Routine 习惯管理 App(韩中互搬,做'韩系自律'助手)",
+      "direction_en": "K-routine habit/self-management app (KR↔CN cross-port, 'K-style discipline' assistant)",
+      "tags": [
+        "korea",
+        "routine",
+        "habit",
+        "self_management"
+      ],
+      "html": "20260718/P5-012.html",
+      "built": true
+    },
+    {
+      "id": "P5-013",
+      "category": "lifestyle",
+      "subcategory": "habit_tracker_gap",
+      "direction": "垂直(ADHD/戒断)高可靠习惯追踪器,补齐坏习追踪+可穿戴+iCloud",
+      "direction_en": "Vertical (ADHD/quit) reliable habit tracker: bad-habit tracking + wearable + iCloud",
+      "tags": [
+        "habit_tracker",
+        "adhd",
+        "apple_watch",
+        "reliability"
+      ],
+      "html": "20260718/P5-013.html",
+      "built": true
+    },
+    {
+      "id": "P5-014",
+      "category": "lifestyle",
+      "subcategory": "hrv_stress_monitor",
+      "direction": "HRV/压力/睡眠垂直健康 App(韩中互搬,本土化+社群运营)",
+      "direction_en": "Vertical HRV/stress/sleep health app (KR↔CN cross-port, localization + community)",
+      "tags": [
+        "hrv",
+        "stress",
+        "health",
+        "korea"
+      ],
+      "html": "20260718/P5-014.html",
+      "built": true
+    },
+    {
+      "id": "P5-015",
+      "category": "lifestyle",
+      "subcategory": "reward_fitness_app",
+      "direction": "游戏化运动/任务奖励 App(去区块链化纯积分商城),韩中互搬",
+      "direction_en": "Gamified fitness/task-reward app (de-blockchained points mall), KR↔CN cross-port",
+      "tags": [
+        "korea",
+        "reward",
+        "walking",
+        "app_tech"
+      ],
+      "html": "20260718/P5-015.html",
+      "built": true
+    },
+    {
+      "id": "P5-016",
+      "category": "lifestyle",
+      "subcategory": "smart_alarm",
+      "direction": "强交互唤醒+睡眠追踪组合闹钟 App(韩中互搬)",
+      "direction_en": "Strong-interaction wake-up + sleep-tracking alarm app (KR↔CN cross-port)",
+      "tags": [
+        "korea",
+        "alarm",
+        "sleep",
+        "wakeup"
+      ],
+      "html": "20260718/P5-016.html",
+      "built": true
+    },
+    {
+      "id": "P5-017",
+      "category": "lifestyle",
+      "subcategory": "lost_pet_finder",
+      "direction": "本地化走失宠物警报+社区协同+科学找回指南 App",
+      "direction_en": "Localized lost-pet alert + community search + science-based recovery guide app",
+      "tags": [
+        "pet",
+        "lost_pet",
+        "community",
+        "lifestyle"
+      ],
+      "html": "20260718/P5-017.html",
+      "built": true
+    },
+    {
+      "id": "P5-018",
+      "category": "lifestyle",
+      "subcategory": "ai_meal_planner",
+      "direction": "垂直 AI 膳食规划(家庭多档案/冰箱扫描/GLP-1 友好),韩中互搬",
+      "direction_en": "Vertical AI meal planner (household multi-profile / fridge scan / GLP-1 friendly), KR↔CN",
+      "tags": [
+        "ai",
+        "meal_planner",
+        "nutrition",
+        "household"
+      ],
+      "html": "20260718/P5-018.html",
+      "built": true
+    },
+    {
+      "id": "P6-001",
+      "category": "parenting",
+      "subcategory": "ad_free_kids_content",
+      "direction": "无广告、家长可控付费的纯净儿童早教/儿歌App(去广告、防误触、护眼)",
+      "direction_en": "Ad-free, parent-controlled paid clean kids edutainment / nursery-rhyme app (no ads, anti-mistap, eye-care)",
+      "tags": [
+        "kids_app",
+        "ad_free",
+        "clean_ui",
+        "child_safety"
+      ],
+      "html": "20260718/P6-001.html",
+      "built": true
+    },
+    {
+      "id": "P6-002",
+      "category": "parenting",
+      "subcategory": "minimal_baby_log",
+      "direction": "极简单手育儿记录工具(无社区无广告,打开即记、家人共享)",
+      "direction_en": "Minimal single-hand baby log tool (no community, no ads, open-and-log, family share)",
+      "tags": [
+        "baby_log",
+        "minimal",
+        "single_hand",
+        "no_ads"
+      ],
+      "html": "20260718/P6-002.html",
+      "built": true
+    },
+    {
+      "id": "P6-003",
+      "category": "parenting",
+      "subcategory": "feeding_alarm",
+      "direction": "基于喂奶记录自动推算并推送喂养闹钟的智能提醒功能",
+      "direction_en": "Smart feeding-alarm that auto-schedules next feed from logged nursing history",
+      "tags": [
+        "feeding_reminder",
+        "alarm",
+        "baby_log",
+        "user_wish"
+      ],
+      "html": "20260718/P6-003.html",
+      "built": true
+    },
+    {
+      "id": "P6-004",
+      "category": "parenting",
+      "subcategory": "local_gov_parenting_app",
+      "direction": "好用的地方政务育儿App(健診在线预约+问询表数字化+成长记录一体)",
+      "direction_en": "Usable local-government parenting app (online health-check booking + digital questionnaire + growth log)",
+      "tags": [
+        "local_gov",
+        "child_health_check",
+        "usability",
+        "online_booking"
+      ],
+      "html": "20260718/P6-004.html",
+      "built": true
+    },
+    {
+      "id": "P6-005",
+      "category": "parenting",
+      "subcategory": "cross_market_baby_log",
+      "direction": "内置WHO+各国生长曲线、跨平台家人共享的本地化育儿记录App(中日互搬)",
+      "direction_en": "Localized baby-log app with WHO + local growth charts and cross-platform co-parent sharing (JP↔CN)",
+      "tags": [
+        "who_standard",
+        "co_parenting_share",
+        "localization",
+        "cross_market"
+      ],
+      "html": "20260718/P6-005.html",
+      "built": true
+    },
+    {
+      "id": "P6-006",
+      "category": "parenting",
+      "subcategory": "co_parenting_app",
+      "direction": "面向中国/亚洲的可信共同养育App(防篡改沟通+监护日历+费用分摊)",
+      "direction_en": "Trustworthy co-parenting app for Asia (tamper-proof chat + custody calendar + expense split)",
+      "tags": [
+        "co_parenting",
+        "divorce",
+        "court_admissible",
+        "subscription"
+      ],
+      "html": "20260718/P6-006.html",
+      "built": true
+    },
+    {
+      "id": "P6-007",
+      "category": "parenting",
+      "subcategory": "weaning_meal_planner",
+      "direction": "视频化、按龄、带购物清单的离乳食(辅食)周计划App",
+      "direction_en": "Video-based, age-staged baby-weaning meal planner with shopping list",
+      "tags": [
+        "weaning",
+        "baby_food",
+        "recipe_video",
+        "meal_planner"
+      ],
+      "html": "20260718/P6-007.html",
+      "built": true
+    },
+    {
+      "id": "P6-008",
+      "category": "parenting",
+      "subcategory": "kids_screen_time",
+      "direction": "带家长可控屏幕时间锁定与护眼提醒的儿童内容平台(含网页版)",
+      "direction_en": "Kids content platform with parent-controlled screen-time lock, eye-care alert and web version",
+      "tags": [
+        "screen_time",
+        "eye_care",
+        "kids_content",
+        "timer"
+      ],
+      "html": "20260718/P6-008.html",
+      "built": true
+    },
+    {
+      "id": "P6-009",
+      "category": "parenting",
+      "subcategory": "ai_parenting_assistant",
+      "direction": "0-18岁全程AI育儿记录+分析+决策推演平台",
+      "direction_en": "0-18 full-lifecycle AI parenting log + analysis + decision-simulation platform",
+      "tags": [
+        "ai",
+        "parenting_anxiety",
+        "0_18",
+        "decision_support"
+      ],
+      "html": "20260718/P6-009.html",
+      "built": true
+    },
+    {
+      "id": "P6-010",
+      "category": "food",
+      "subcategory": "calorie_ai_accuracy",
+      "direction": "以验证数据库+更准AI拍照取胜的卡路里追踪App(解决误差与信任)",
+      "direction_en": "Calorie tracker that wins on verified DB + accurate AI photo estimation (fixes error & trust)",
+      "tags": [
+        "calorie",
+        "ai_photo",
+        "accuracy",
+        "database"
+      ],
+      "html": "20260718/P6-010.html",
+      "built": true
+    },
+    {
+      "id": "P6-011",
+      "category": "food",
+      "subcategory": "ad_free_calorie_log",
+      "direction": "无广告、轻量、坚持友好的纯饮食热量记录工具",
+      "direction_en": "Ad-free, lightweight, stickiness-friendly pure calorie/food log tool",
+      "tags": [
+        "ad_free",
+        "simple",
+        "calorie_log",
+        "china"
+      ],
+      "html": "20260718/P6-011.html",
+      "built": true
+    },
+    {
+      "id": "P6-012",
+      "category": "food",
+      "subcategory": "small_base_women_fasting",
+      "direction": "面向小基数女性的温和减脂+轻断食工具(无身材焦虑)",
+      "direction_en": "Gentle fat-loss + intermittent-fasting tool for small-base women (no body-anxiety)",
+      "tags": [
+        "small_base",
+        "women",
+        "intermittent_fasting",
+        "16_8"
+      ],
+      "html": "20260718/P6-012.html",
+      "built": true
+    },
+    {
+      "id": "P6-013",
+      "category": "food",
+      "subcategory": "added_sugar_tracker",
+      "direction": "条码扫糖+添加糖追踪的轻量减糖助手(方糖可视化)",
+      "direction_en": "Light sugar-reduction aide: barcode sugar-scan + added-sugar tracking (cube visualization)",
+      "tags": [
+        "added_sugar",
+        "sugar_reduction",
+        "barcode",
+        "health"
+      ],
+      "html": "20260718/P6-013.html",
+      "built": true
+    },
+    {
+      "id": "P6-014",
+      "category": "food",
+      "subcategory": "food_waste_fridge",
+      "direction": "AI冰箱/保质期管理App+临期食谱推荐(减浪费又省钱)",
+      "direction_en": "AI fridge / expiry-manager app + near-expiry recipe recs (cut waste, save money)",
+      "tags": [
+        "food_waste",
+        "fridge",
+        "expiry",
+        "sustainability"
+      ],
+      "html": "20260718/P6-014.html",
+      "built": true
+    },
+    {
+      "id": "P6-015",
+      "category": "food",
+      "subcategory": "low_carb_sugar_restriction",
+      "direction": "AI按库存生成低糖质菜单+服药/过敏排除的糖质限制助手",
+      "direction_en": "AI low-carb menu generator from fridge inventory with med/allergy exclusion",
+      "tags": [
+        "low_carb",
+        "sugar_restriction",
+        "japan",
+        "recipe"
+      ],
+      "html": "20260718/P6-015.html",
+      "built": true
+    },
+    {
+      "id": "P6-016",
+      "category": "food",
+      "subcategory": "cgm_diabetes_nutrition",
+      "direction": "连接CGM/碳水计数的糖尿病与消化敏感人群专业营养App",
+      "direction_en": "Pro nutrition app for diabetics & GI-sensitive users, linked to CGM / carb-counting",
+      "tags": [
+        "cgm",
+        "diabetes",
+        "glucose",
+        "premium"
+      ],
+      "html": "20260718/P6-016.html",
+      "built": true
+    },
+    {
+      "id": "P6-017",
+      "category": "food",
+      "subcategory": "takeout_calorie_gap",
+      "direction": "针对外卖/餐厅场景的高精度热量识别(对接营养标签+家常菜个性化)",
+      "direction_en": "High-accuracy calorie ID for takeout/restaurant scenes (nutrition-label sync + home-cook personalization)",
+      "tags": [
+        "takeout",
+        "restaurant",
+        "calorie_error",
+        "china"
+      ],
+      "html": "20260718/P6-017.html",
+      "built": true
+    },
+    {
+      "id": "P6-018",
+      "category": "food",
+      "subcategory": "weekly_meal_plan_leftover",
+      "direction": "家庭周菜单规划器(按库存/临期生成菜单+自动购物清单+可离线)",
+      "direction_en": "Family weekly meal planner (menu from inventory/expiry + auto shopping list + offline)",
+      "tags": [
+        "meal_plan",
+        "leftover",
+        "shopping_list",
+        "recipe_link"
+      ],
+      "html": "20260718/P6-018.html",
+      "built": true
+    },
+    {
+      "id": "P7-001",
+      "category": "spirituality",
+      "subcategory": "catholic_prayer_app",
+      "direction": "垂直信仰祈祷 App(祷告+圣经诵读+玫瑰经,季节性拉新+教区 B2B)",
+      "direction_en": "Vertical faith-based prayer app (prayers + Scripture + rosary, seasonal acquisition + parish B2B)",
+      "tags": [
+        "prayer_app",
+        "catholic",
+        "faith_tech",
+        "subscription",
+        "seasonal_spike"
+      ],
+      "html": "20260718/P7-001.html",
+      "built": true
+    },
+    {
+      "id": "P7-002",
+      "category": "spirituality",
+      "subcategory": "ai_bible_chatbot",
+      "direction": "AI 信仰问答助手(圣经/佛经/古兰经对话,带 RAG 防幻觉)",
+      "direction_en": "AI faith Q&A assistant (Bible/Quran/sutra chatbot with RAG to prevent hallucination)",
+      "tags": [
+        "ai_chatbot",
+        "bible",
+        "faith_tech",
+        "gpt",
+        "freemium"
+      ],
+      "html": "20260718/P7-002.html",
+      "built": true
+    },
+    {
+      "id": "P7-003",
+      "category": "spirituality",
+      "subcategory": "non_abrahamic_scripture_ai",
+      "direction": "多语种经文 AI 对话(佛经/ Bhagavad Gita/ 古兰经,白话+对话)",
+      "direction_en": "Multilingual scripture AI chatbot (Buddhist/Hindu/Islamic texts, vernacular + dialogue)",
+      "tags": [
+        "buddhist_ai",
+        "hindu_ai",
+        "scripture_chatbot",
+        "cross_culture",
+        "localization"
+      ],
+      "html": "20260718/P7-003.html",
+      "built": true
+    },
+    {
+      "id": "P7-004",
+      "category": "spirituality",
+      "subcategory": "astrology_tarot_apps",
+      "direction": "占星/塔罗社交 App(每日星盘+合盘+真人占卜 marketplace)",
+      "direction_en": "Astrology/tarot social app (daily chart + synastry + human reader marketplace)",
+      "tags": [
+        "astrology",
+        "tarot",
+        "co_star",
+        "the_pattern",
+        "freemium",
+        "daily_habit"
+      ],
+      "html": "20260718/P7-004.html",
+      "built": true
+    },
+    {
+      "id": "P7-005",
+      "category": "spirituality",
+      "subcategory": "manifestation_soulmate",
+      "direction": "显化 Soulmate App(画像+地图+打卡的'信念验证闭环',主攻东南亚)",
+      "direction_en": "Manifestation soulmate app (portrait + map + check-in 'belief-verification loop', SE Asia focus)",
+      "tags": [
+        "manifestation",
+        "law_of_attraction",
+        "soulmate",
+        "se_asia",
+        "subscription"
+      ],
+      "html": "20260718/P7-005.html",
+      "built": true
+    },
+    {
+      "id": "P7-006",
+      "category": "spirituality",
+      "subcategory": "breathwork_coaching",
+      "direction": "HRV 自适应呼吸训练 App(引导呼吸+生物反馈+穿戴联动)",
+      "direction_en": "HRV-adaptive breathwork coaching app (guided breathing + biofeedback + wearable sync)",
+      "tags": [
+        "breathwork",
+        "hrv",
+        "wellness",
+        "subscription",
+        "wearable"
+      ],
+      "html": "20260718/P7-006.html",
+      "built": true
+    },
+    {
+      "id": "P7-007",
+      "category": "spirituality",
+      "subcategory": "ai_grief_healing",
+      "direction": "合规 AI 哀伤疗愈 App(亲人声音复刻+安全陪伴,避免'复活'伦理风险)",
+      "direction_en": "Compliant AI grief-healing app (late-loved-one voice clone + safe companionship, avoiding 'resurrection' ethics risk)",
+      "tags": [
+        "grief",
+        "bereavement",
+        "ai_companion",
+        "mental_health",
+        "voice_clone"
+      ],
+      "html": "20260718/P7-007.html",
+      "built": true
+    },
+    {
+      "id": "P7-008",
+      "category": "spirituality",
+      "subcategory": "ai_dream_interpretation",
+      "direction": "AI 多框架解梦+梦境社区 App(弗洛伊德/周公/科学+日记+模式追踪)",
+      "direction_en": "AI multi-framework dream interpreter + dream community (Freud/Zhougong/science + journal + pattern tracking)",
+      "tags": [
+        "dream",
+        "ai_interpretation",
+        "jung_freud",
+        "community",
+        "mental_health"
+      ],
+      "html": "20260718/P7-008.html",
+      "built": true
+    },
+    {
+      "id": "P7-009",
+      "category": "spirituality",
+      "subcategory": "honest_meditation_no_trap",
+      "direction": "透明定价无套路的冥想 App(先免费体验、明确价格、尊重退订)",
+      "direction_en": "Honest-pricing no-trap meditation app (free trial first, clear price, respects cancellation)",
+      "tags": [
+        "meditation",
+        "transparent_pricing",
+        "anti_subscription_trap",
+        "china"
+      ],
+      "html": "20260718/P7-009.html",
+      "built": true
+    },
+    {
+      "id": "P7-010",
+      "category": "elderly",
+      "subcategory": "senior_med_reminder",
+      "direction": "极简适老用药提醒 App(超大字+语音+家属远程+离线隐私)",
+      "direction_en": "Ultra-simple senior med-reminder app (huge text + voice + remote caregiver + offline privacy)",
+      "tags": [
+        "medication_reminder",
+        "elderly_ux",
+        "caregiver",
+        "offline",
+        "china"
+      ],
+      "html": "20260718/P7-010.html",
+      "built": true
+    },
+    {
+      "id": "P7-011",
+      "category": "elderly",
+      "subcategory": "companionship_marketplace",
+      "direction": "老年非医疗陪伴撮合平台(大学生/邻里上门,保险支付降本)",
+      "direction_en": "Senior non-medical companionship marketplace (students/neighbors on-demand, insurance-paid)",
+      "tags": [
+        "loneliness",
+        "non_medical_care",
+        "marketplace",
+        "insurance_pay",
+        "unicorn"
+      ],
+      "html": "20260718/P7-011.html",
+      "built": true
+    },
+    {
+      "id": "P7-012",
+      "category": "elderly",
+      "subcategory": "senior_social_community",
+      "direction": "50+ 实名陪伴社区(兴趣团体+线下活动+保险合作导流)",
+      "direction_en": "50+ verified companionship community (interest groups + offline events + insurance partnership)",
+      "tags": [
+        "social",
+        "55_plus",
+        "offline_activities",
+        "local_life",
+        "dating"
+      ],
+      "html": "20260718/P7-012.html",
+      "built": true
+    },
+    {
+      "id": "P7-013",
+      "category": "elderly",
+      "subcategory": "fall_detection",
+      "direction": "毫米波雷达非穿戴跌倒监测(吸顶灯/相机+APP 报警,居家浴室)",
+      "direction_en": "mmWave-radar non-wearable fall detection (ceiling light/camera + app alert, home/bathroom)",
+      "tags": [
+        "fall_detection",
+        "mmwave_radar",
+        "aging_in_place",
+        "safety",
+        "hardware_app"
+      ],
+      "html": "20260718/P7-013.html",
+      "built": true
+    },
+    {
+      "id": "P7-014",
+      "category": "elderly",
+      "subcategory": "silver_video_social",
+      "direction": "银发兴趣社区+轻量付费课程(相册/短视频+在线老年大学先学后付)",
+      "direction_en": "Silver interest community + light paid courses (album/short-video + online senior university, pay-after-learn)",
+      "tags": [
+        "silver_economy",
+        "short_video",
+        "ugc",
+        "photo_album",
+        "community"
+      ],
+      "html": "20260718/P7-014.html",
+      "built": true
+    },
+    {
+      "id": "P7-015",
+      "category": "elderly",
+      "subcategory": "anti_fraud_elderly",
+      "direction": "适老化反诈守护 App(亲情代管+AI 识诈+转账冻结+远程挂断)",
+      "direction_en": "Elderly-optimized anti-fraud guardian app (family co-manage + AI scam detect + transfer freeze + remote hang-up)",
+      "tags": [
+        "anti_fraud",
+        "scam",
+        "elderly_safety",
+        "digital_literacy",
+        "china"
+      ],
+      "html": "20260718/P7-015.html",
+      "built": true
+    },
+    {
+      "id": "P7-016",
+      "category": "elderly",
+      "subcategory": "brain_training_dementia",
+      "direction": "适老认知训练 App(脑游戏+生命故事回忆+家属进度看板)",
+      "direction_en": "Senior cognitive-training app (brain games + life-story reminiscence + family progress dashboard)",
+      "tags": [
+        "brain_training",
+        "dementia",
+        "cognitive_decline",
+        "healthy_aging",
+        "reminiscence"
+      ],
+      "html": "20260718/P7-016.html",
+      "built": true
+    },
+    {
+      "id": "P7-017",
+      "category": "elderly",
+      "subcategory": "ai_native_elderly_superapp",
+      "direction": "AI 原生中老年一站式生活 App(语音入口整合健康/生活/购物/社交)",
+      "direction_en": "AI-native one-stop senior life app (voice entry unifying health / life services / shopping / social)",
+      "tags": [
+        "ai_native",
+        "silver_economy",
+        "voice_assistant",
+        "one_stop",
+        "health_management"
+      ],
+      "html": "20260718/P7-017.html",
+      "built": true
+    },
+    {
+      "id": "P7-018",
+      "category": "elderly",
+      "subcategory": "remote_family_guardian",
+      "direction": "跨品牌家庭守护 App(定位+用药+健康+反诈,子女端统一看板)",
+      "direction_en": "Cross-brand family guardian app (location + meds + health + anti-fraud, unified child-side dashboard)",
+      "tags": [
+        "family_connection",
+        "remote_care",
+        "location",
+        "cross_market",
+        "peace_of_mind"
+      ],
+      "html": "20260718/P7-018.html",
+      "built": true
+    },
+    {
+      "id": "P8-001",
+      "category": "education",
+      "subcategory": "exam_vocab_app",
+      "direction": "受験生向け'再生記憶特化+友達共有'英単語帳アプリ",
+      "direction_en": "Exam-student vocabulary app focused on recall-level memory + friend sharing (Japan)",
+      "tags": [
+        "exam_prep",
+        "vocabulary",
+        "japan",
+        "high_school"
+      ],
+      "html": "20260718/P8-001.html",
+      "built": true
+    },
+    {
+      "id": "P8-002",
+      "category": "education",
+      "subcategory": "kids_coding_education",
+      "direction": "低学年から本格まで段階対応する子ども向けコーディング学習アプリ（ブロック→テキスト→ハード連動）",
+      "direction_en": "Kids coding app with staged progression (block → text → hardware, Japan)",
+      "tags": [
+        "kids_coding",
+        "stem",
+        "japan",
+        "school_mandatory"
+      ],
+      "html": "20260718/P8-002.html",
+      "built": true
+    },
+    {
+      "id": "P8-003",
+      "category": "education",
+      "subcategory": "korean_kids_homeschool",
+      "direction": "遊び感覚で国語＋算数＋コーディングを一括提供する韓国キッズ・ホームスクール教材",
+      "direction_en": "Korean kids homeschool bundle: play-based language + math + coding (subscription)",
+      "tags": [
+        "kids_coding",
+        "korean_language",
+        "homeschool",
+        "korea"
+      ],
+      "html": "20260718/P8-003.html",
+      "built": true
+    },
+    {
+      "id": "P8-004",
+      "category": "education",
+      "subcategory": "ssw_exam_prep",
+      "direction": "外国人向け技能試験対策アプリ（母国語＋AI弱点分析＋就労支援）",
+      "direction_en": "License-exam prep app for foreign workers (native language + AI weak-point analysis + job support)",
+      "tags": [
+        "certification",
+        "foreign_workers",
+        "japan",
+        "multilingual"
+      ],
+      "html": "20260718/P8-004.html",
+      "built": true
+    },
+    {
+      "id": "P8-005",
+      "category": "education",
+      "subcategory": "jlpt_prep_app",
+      "direction": "JLPT特化の'真题×AI弱点分析×学習コミュニティ'統合アプリ",
+      "direction_en": "JLPT-focused all-in-one app (past papers + AI weak-point analysis + study community)",
+      "tags": [
+        "japanese_study",
+        "jlpt",
+        "language_test",
+        "japan"
+      ],
+      "html": "20260718/P8-005.html",
+      "built": true
+    },
+    {
+      "id": "P8-006",
+      "category": "education",
+      "subcategory": "korean_csat_prep",
+      "direction": "高校全科（内申＋修能）AI弱点分析×公式問題集eBook学習アプリ",
+      "direction_en": "Korean high-school all-subject exam app (AI weak-point analysis + official problem-book eBooks)",
+      "tags": [
+        "csat",
+        "suneung",
+        "high_school",
+        "korea",
+        "ai_prep"
+      ],
+      "html": "20260718/P8-006.html",
+      "built": true
+    },
+    {
+      "id": "P8-007",
+      "category": "education",
+      "subcategory": "japanese_for_koreans",
+      "direction": "K-culture文脈＋JLPT試験対策を融合した韓国人向け日本語学習アプリ",
+      "direction_en": "Japanese-learning app for Koreans blending K-culture context + JLPT exam prep",
+      "tags": [
+        "language_learning",
+        "japanese",
+        "korean_learners",
+        "cross_market"
+      ],
+      "html": "20260718/P8-007.html",
+      "built": true
+    },
+    {
+      "id": "P8-008",
+      "category": "education",
+      "subcategory": "korean_for_japanese",
+      "direction": "K-culture×AI会話の日本人向け韓国語学習アプリ",
+      "direction_en": "Korean-learning app for Japanese blending K-culture + AI speaking practice",
+      "tags": [
+        "language_learning",
+        "korean",
+        "kculture",
+        "japan_learners"
+      ],
+      "html": "20260718/P8-008.html",
+      "built": true
+    },
+    {
+      "id": "P8-009",
+      "category": "education",
+      "subcategory": "ai_college_application",
+      "direction": "中国検証済みAI志願先アドバイザーを日本・韓国の進学指導へ横展開",
+      "direction_en": "Bring China-validated AI college-admission advisor model to Japan/Korea admission guidance",
+      "tags": [
+        "college_admission",
+        "ai_advisory",
+        "cross_market",
+        "japan_korea_gap"
+      ],
+      "html": "20260718/P8-009.html",
+      "built": true
+    },
+    {
+      "id": "P8-010",
+      "category": "hobby",
+      "subcategory": "book_tracking_japan",
+      "direction": "読書記録×SNS×EC連携の日本最大級ブックログ統合アプリ",
+      "direction_en": "Japan's largest reading-log app combining tracking + SNS + e-commerce",
+      "tags": [
+        "reading_log",
+        "book_management",
+        "japan",
+        "community"
+      ],
+      "html": "20260718/P8-010.html",
+      "built": true
+    },
+    {
+      "id": "P8-011",
+      "category": "hobby",
+      "subcategory": "reading_sns_japan",
+      "direction": "数値評価のない'いい加減でいい'読書SNS（いいね非表示・自由タグ）",
+      "direction_en": "Pressure-free reading SNS with no like/follower counts and free tagging",
+      "tags": [
+        "reading_sns",
+        "no_pressure",
+        "japan",
+        "demand_gap"
+      ],
+      "html": "20260718/P8-011.html",
+      "built": true
+    },
+    {
+      "id": "P8-012",
+      "category": "hobby",
+      "subcategory": "korea_one_day_class",
+      "direction": "全国工房の원데이클래스予約＋ハンドメイド作品ECのローカル・マーケットプレイス",
+      "direction_en": "Korea local marketplace: book one-day craft classes + buy handmade goods",
+      "tags": [
+        "one_day_class",
+        "handmade_market",
+        "korea",
+        "local"
+      ],
+      "html": "20260718/P8-012.html",
+      "built": true
+    },
+    {
+      "id": "P8-013",
+      "category": "hobby",
+      "subcategory": "hobby_meetup_korea",
+      "direction": "位置情報ベースの趣味ソモ임・원데이클래ス発見コミュニティアプリ",
+      "direction_en": "Location-based hobby meetup & one-day class discovery community (Korea)",
+      "tags": [
+        "hobby_meetup",
+        "community",
+        "korea",
+        "demand_gap"
+      ],
+      "html": "20260718/P8-013.html",
+      "built": true
+    },
+    {
+      "id": "P8-014",
+      "category": "hobby",
+      "subcategory": "worker_online_class",
+      "direction": "会社員向け継続型趣味オンラインクラス＋準備物キット配送",
+      "direction_en": "Subscription hobby classes for workers with delivered supply kits (Korea)",
+      "tags": [
+        "online_class",
+        "workers",
+        "korea",
+        "kit_delivery"
+      ],
+      "html": "20260718/P8-014.html",
+      "built": true
+    },
+    {
+      "id": "P8-015",
+      "category": "hobby",
+      "subcategory": "ai_garden_design",
+      "direction": "和風・韓国風庭園テンプレ付きAI庭園設計アプリ（写真→レイアウト生成）",
+      "direction_en": "AI garden-design app with Japanese/Korean style templates (photo to layout)",
+      "tags": [
+        "gardening",
+        "ai_design",
+        "cross_market",
+        "japan_korea_gap"
+      ],
+      "html": "20260718/P8-015.html",
+      "built": true
+    },
+    {
+      "id": "P8-016",
+      "category": "hobby",
+      "subcategory": "collection_asset_mgmt",
+      "direction": "ジャンル横断のコレクション資産管理＋オークション価格連動アプリ",
+      "direction_en": "Cross-genre collection asset manager with live auction-price tracking (Japan)",
+      "tags": [
+        "collection",
+        "asset_management",
+        "japan",
+        "demand_gap"
+      ],
+      "html": "20260718/P8-016.html",
+      "built": true
+    },
+    {
+      "id": "P8-017",
+      "category": "hobby",
+      "subcategory": "ai_workout_tracker",
+      "direction": "韓国発のジム初心者向けAIパーソナルトレーニング＋進捗可視化アプリ",
+      "direction_en": "Korea-born AI personal trainer for gym beginners with progress tracking",
+      "tags": [
+        "workout",
+        "fitness",
+        "ai_trainer",
+        "korea"
+      ],
+      "html": "20260718/P8-017.html",
+      "built": true
+    },
+    {
+      "id": "P8-018",
+      "category": "hobby",
+      "subcategory": "art_practice_tracker",
+      "direction": "圧力なしのイラスト練習記録＋上達可視化アプリ（ストリーク不要）",
+      "direction_en": "Stress-free illustration practice tracker with progress visualization (no streaks)",
+      "tags": [
+        "illustration",
+        "practice_tracker",
+        "japan",
+        "demand_gap"
+      ],
+      "html": "20260718/P8-018.html",
+      "built": true
+    },
+    {
+      "id": "P9-001",
+      "category": "gig_economy",
+      "subcategory": "ai_tax_deduction",
+      "direction": "面向自由职业者的AI全年自动扣税发现App(美国验证,海外空白)",
+      "direction_en": "AI year-round tax-deduction discovery app for freelancers (validated in US, gap overseas)",
+      "tags": [
+        "1099",
+        "freelancer_tax",
+        "ai_deduction",
+        "usa"
+      ],
+      "html": "20260718/P9-001.html",
+      "built": true
+    },
+    {
+      "id": "P9-002",
+      "category": "gig_economy",
+      "subcategory": "gig_expense_stack",
+      "direction": "零工一站式费用+里程+税务预留聚合App",
+      "direction_en": "All-in-one expense + mileage + tax-setaside aggregator for gig workers",
+      "tags": [
+        "expense_tracking",
+        "mileage",
+        "schedule_c",
+        "gig_workers"
+      ],
+      "html": "20260718/P9-002.html",
+      "built": true
+    },
+    {
+      "id": "P9-003",
+      "category": "gig_economy",
+      "subcategory": "multi_app_automation",
+      "direction": "网约车司机多平台并行接单自动化助手(已验证增收30%)",
+      "direction_en": "Multi-platform rideshare auto-accept assistant for drivers (proven +30% earnings)",
+      "tags": [
+        "rideshare",
+        "multi_apping",
+        "earnings_boost",
+        "automation"
+      ],
+      "html": "20260718/P9-003.html",
+      "built": true
+    },
+    {
+      "id": "P9-004",
+      "category": "gig_economy",
+      "subcategory": "health_insurance_gap",
+      "direction": "零工者医保比价+补贴预警+便携福利App",
+      "direction_en": "Health-insurance comparison + subsidy-alert + portable-benefits app for gig workers",
+      "tags": [
+        "health_insurance",
+        "gig_benefits",
+        "aca",
+        "usa"
+      ],
+      "html": "20260718/P9-004.html",
+      "built": true
+    },
+    {
+      "id": "P9-005",
+      "category": "gig_economy",
+      "subcategory": "china_freelance_tax_refund",
+      "direction": "面向灵活就业者的个税退税自查与自动填报工具",
+      "direction_en": "Tax-refund self-check & auto-filing tool for China's gig/freelance workers",
+      "tags": [
+        "中国",
+        "灵活就业",
+        "个税退税",
+        "社保抵扣"
+      ],
+      "html": "20260718/P9-005.html",
+      "built": true
+    },
+    {
+      "id": "P9-006",
+      "category": "gig_economy",
+      "subcategory": "china_low_education_gig_tax",
+      "direction": "适老无障碍的零工报税引导式轻应用",
+      "direction_en": "Accessible (low-literacy friendly) tax-filing micro-app for gig workers",
+      "tags": [
+        "中国",
+        "低学历",
+        "灵活就业",
+        "无障碍"
+      ],
+      "html": "20260718/P9-006.html",
+      "built": true
+    },
+    {
+      "id": "P9-007",
+      "category": "gig_economy",
+      "subcategory": "delivery_income_dashboard",
+      "direction": "免费多平台配送零工收入仪表盘+税务预留",
+      "direction_en": "Free multi-platform delivery-gig income dashboard + tax set-aside",
+      "tags": [
+        "delivery",
+        "income_dashboard",
+        "quarterly_tax",
+        "set_aside"
+      ],
+      "html": "20260718/P9-007.html",
+      "built": true
+    },
+    {
+      "id": "P9-008",
+      "category": "gig_economy",
+      "subcategory": "china_rideshare_multi_app",
+      "direction": "中国版网约车多平台接单聚合助手",
+      "direction_en": "China-local multi-platform rideshare order aggregator assistant",
+      "tags": [
+        "中国",
+        "网约车",
+        "多平台接单",
+        "收入管理"
+      ],
+      "html": "20260718/P9-008.html",
+      "built": true
+    },
+    {
+      "id": "P9-009",
+      "category": "gig_economy",
+      "subcategory": "portable_benefits_retirement",
+      "direction": "零工者便携福利与退休储蓄聚合平台",
+      "direction_en": "Portable-benefits & retirement savings aggregator for gig workers",
+      "tags": [
+        "portable_benefits",
+        "retirement",
+        "gig_protections",
+        "usa"
+      ],
+      "html": "20260718/P9-009.html",
+      "built": true
+    },
+    {
+      "id": "P9-010",
+      "category": "travel",
+      "subcategory": "solo_female_safety_network",
+      "direction": "已验证女性旅行者安全社交+实时守护一体化App",
+      "direction_en": "Verified women-traveler safety-social + real-time guardian app",
+      "tags": [
+        "solo_female",
+        "travel_safety",
+        "verified_network",
+        "community"
+      ],
+      "html": "20260718/P9-010.html",
+      "built": true
+    },
+    {
+      "id": "P9-011",
+      "category": "travel",
+      "subcategory": "china_solo_female_safety",
+      "direction": "隐私安全优先的独行女性轻守护App",
+      "direction_en": "Privacy-first lightweight safety guardian for Chinese solo female travelers",
+      "tags": [
+        "中国",
+        "独行女性",
+        "安全",
+        "定位漏洞"
+      ],
+      "html": "20260718/P9-011.html",
+      "built": true
+    },
+    {
+      "id": "P9-012",
+      "category": "travel",
+      "subcategory": "luggage_storage",
+      "direction": "跨境行李寄存网络+提前显址+配送增值",
+      "direction_en": "Cross-border luggage storage network + upfront address + delivery add-on",
+      "tags": [
+        "luggage_storage",
+        "travel",
+        "global",
+        "china"
+      ],
+      "html": "20260718/P9-012.html",
+      "built": true
+    },
+    {
+      "id": "P9-013",
+      "category": "travel",
+      "subcategory": "nomad_budget_multicurrency",
+      "direction": "数字游民多币种行程预算+成本洞察App",
+      "direction_en": "Multi-currency trip-budget & cost-insight app for digital nomads",
+      "tags": [
+        "digital_nomad",
+        "budget",
+        "multi_currency",
+        "travel"
+      ],
+      "html": "20260718/P9-013.html",
+      "built": true
+    },
+    {
+      "id": "P9-014",
+      "category": "travel",
+      "subcategory": "cross_border_rail_bus",
+      "direction": "面向中文旅客的跨境火车巴士一站式比价App",
+      "direction_en": "One-stop cross-border train/bus price-comparison app for Chinese travelers",
+      "tags": [
+        "train",
+        "bus",
+        "cross_border",
+        "booking"
+      ],
+      "html": "20260718/P9-014.html",
+      "built": true
+    },
+    {
+      "id": "P9-015",
+      "category": "travel",
+      "subcategory": "china_train_ticket_hidden_fees",
+      "direction": "无捆绑透明的火车票购票助手(官方候补优先)",
+      "direction_en": "Transparent no-bundling train-ticket assistant (official waitlist first)",
+      "tags": [
+        "中国",
+        "火车票",
+        "隐性消费",
+        "抢票"
+      ],
+      "html": "20260718/P9-015.html",
+      "built": true
+    },
+    {
+      "id": "P9-016",
+      "category": "travel",
+      "subcategory": "group_travel_split",
+      "direction": "结伴出游行程+分账一体化协作App",
+      "direction_en": "Group-travel itinerary + expense-split collaboration app",
+      "tags": [
+        "group_travel",
+        "expense_split",
+        "itinerary",
+        "collaboration"
+      ],
+      "html": "20260718/P9-016.html",
+      "built": true
+    },
+    {
+      "id": "P9-017",
+      "category": "travel",
+      "subcategory": "china_outbound_one_stop",
+      "direction": "中文出境游一站式轻助手(上网/导航/订票/支付)",
+      "direction_en": "One-stop Chinese outbound-travel assistant (connectivity / nav / booking / pay)",
+      "tags": [
+        "中国",
+        "出境游",
+        "一站式",
+        "上网导航支付"
+      ],
+      "html": "20260718/P9-017.html",
+      "built": true
+    },
+    {
+      "id": "P9-018",
+      "category": "travel",
+      "subcategory": "slow_travel_cost_planner",
+      "direction": "基于真实成本数据的慢旅行/环球规划器",
+      "direction_en": "Slow-travel / round-the-world planner with real cost-of-living data",
+      "tags": [
+        "slow_travel",
+        "cost_of_living",
+        "planning",
+        "digital_nomad"
+      ],
+      "html": "20260718/P9-018.html",
+      "built": true
+    }
+  ]
+}

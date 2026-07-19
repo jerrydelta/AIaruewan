@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>外国人向け技能試験対策・弱点分析</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#FFF0F0;color:var(--coral)}
+.weak{background:#FFF4F4;border-color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">education</span><span class="tag">ssw_exam_prep</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">外国人向け技能試験対策・弱点分析</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">License-exam prep for foreign workers (native language + AI weak-point analysis)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本の運輸業「特定技能」評価試験は、母国語（日・英・中・越・ミャンマー語）対応の約5,000問が必要だが、言語の壁が高い。合格支援ツールが不足し、自分の苦手分野を効率よく潰せないのが痛点。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:4px 0 0">母国語で解いた問題を記録。AI風弱点分析で「間違いが多い分野」を自動で教えます。</p>
+    <label>分野（カテゴリ）</label>
+    <input id="q-cat" placeholder="例：交通ルール・荷物の固定・法定速度">
+    <label>問題メモ（任意）</label>
+    <input id="q-text" placeholder="例：トンネル内の速度制限">
+    <label>解いた結果</label>
+    <div class="row">
+      <button class="mini ok" onclick="addQ(true)" style="padding:13px">○ 正解</button>
+      <button class="mini bad" onclick="addQ(false)" style="padding:13px">× 不正解</button>
+    </div>
+    <div id="weak" style="margin-top:14px"></div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P8-004">
+    <div class="collapse-header" id="aiHeader_P8-004" onclick="toggleAI('P8-004')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P8-004" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P8-004">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P8-004" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P8-004')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P8-004" style="display:none;margin-top:10px">
+        <div id="aiMessages_P8-004" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P8-004" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P8-004')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://prtimes.jp/main/html/rd/p/000000009.000147614.html" target="_blank" style="color:var(--coral)">GOLDs for SSWドライバー</a>
+  </div>
+
+<script>
+const KEY="P8-004";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addQ(ok){
+  const cat=document.getElementById("q-cat").value.trim();
+  const text=document.getElementById("q-text").value.trim();
+  if(!cat){alert("分野を入力してください");return;}
+  items.push({cat,text,ok,id:Date.now()});
+  document.getElementById("q-cat").value="";
+  document.getElementById("q-text").value="";
+  save();
+}
+function render(){
+  const cats={};
+  items.forEach(i=>{cats[i.cat]=cats[i.cat]||{t:0,c:0};cats[i.cat].t++;if(i.ok)cats[i.cat].c++;});
+  const rows=Object.keys(cats).map(c=>({c,...cats[c],rate:cats[c].c/cats[c].t}));
+  rows.sort((a,b)=>a.rate-b.rate);
+  let html="<b>🤖 AI弱点分析（正答率低い順）</b>";
+  if(!rows.length)html+="<p style='font-size:13px;color:var(--muted);margin:6px 0 0'>まだデータがありません。</p>";
+  rows.forEach(r=>{
+    const warn=r.rate<0.7;
+    html+=`<div class='item ${warn?'weak':''}' style='padding:8px 10px'><div class='row' style='margin:0'>
+      <span class='pill'>${esc(r.c)}</span>
+      <b style='flex:2'>${esc(r.c)}</b>
+      <span style='color:${warn?'var(--coral)':'var(--ok)'};font-size:13px'>${Math.round(r.rate*100)}% (${r.c}/${r.t})</span></div>
+      ${warn?"<div style='font-size:12px;color:var(--coral);margin-top:4px'>⚠ 優先出題すべき苦手分野</div>":""}</div>`;
+  });
+  document.getElementById("weak").innerHTML=html;
+
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>📝 解いた問題</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>まだ記録がありません。</p>";return;}
+  box.innerHTML="<b>📝 解いた問題（"+items.length+"問）</b>"+items.slice().reverse().map((i,ri)=>{
+    const idx=items.length-1-ri;
+    return `<div class='item' style='padding:8px 10px'><span class='pill'>${esc(i.cat)}</span>
+      <span style='color:${i.ok?'var(--ok)':'var(--coral)'};font-weight:700'>${i.ok?'○':'×'}</span>
+      <span style='font-size:13px;color:var(--muted)'>${esc(i.text)||'ー'}</span>
+      <button class='mini' style='margin-top:4px' onclick='del(${idx})'>削除</button></div>`;
+  }).join("");
+}
+function del(idx){items.splice(idx,1);save();}
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

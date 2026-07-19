@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>分阶段专家背书产后健身</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.tab{display:flex;gap:6px;margin-top:8px}
+.tab button{flex:1;padding:9px 0;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:13px;cursor:pointer}
+.tab button.on{background:var(--coral);color:#fff;border-color:var(--coral)}
+.ex{border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-top:8px}
+.ex .t{font-weight:600}
+.ex .d{font-size:12px;color:var(--muted);margin-top:2px}
+.ex.done{background:#F0FFF6;border-color:#C7EFD6}
+.bar{height:10px;background:#FFE3E3;border-radius:999px;overflow:hidden;margin-top:10px}
+.bar>i{display:block;height:100%;background:var(--coral);width:0}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:14px}
+.item .meta{font-size:11px;color:var(--muted);margin-top:4px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">postpartum</span><span class="tag">fitness</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">分阶段专家背书产后健身</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Staged expert-backed · 含剖腹产专项 4 周</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">产后运动需分阶段、由专家背书。SWEAT（3000 万+ 下载）产后编程领先：核心修复 12 周、渐进力量 20 周、剖腹产专属 4 周基础（产科 + 运动生理专家背书）。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 选阶段练起来</b>
+    <div class="tab" id="tabs"></div>
+    <div id="plan"></div>
+    <div class="bar"><i id="prog"></i></div>
+    <p style="font-size:13px;color:#555;margin-top:6px" id="progTxt"></p>
+    <label>今日自测：今天第几天产后？</label>
+    <input id="daypp" type="number" min="0" value="30">
+    <button class="btn" onclick="suggest()">💡 推荐我现在练哪阶段</button>
+    <div id="sug" style="font-size:14px;color:#555;margin-top:8px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://fitnessdrum.com/best-postpartum-fitness-workout-programs-apps/" target="_blank" style="color:var(--coral)">SWEAT（分阶段产后健身）</a>
+  </div>
+
+<script>
+const KEY="P15-007";
+const STAGES={
+  "剖腹产专项 4 周":["第1周 呼吸+盆骨底激活","第2周 轻柔腹横肌唤醒","第3周 侧卧抬腿/臀桥","第4周 站立核心稳定"],
+  "产后核心 12 周":["W1-3 腹式呼吸+凯格尔","W4-6 死虫式","W7-9 鸟狗式","W10-12 改良平板支撑"],
+  "渐进力量 20 周":["W1-5 自重深蹲/臀桥","W6-10 哑铃划船","W11-15 臀推进阶","W16-20 复合力量循环"]
+};
+let cur="剖腹产专项 4 周";
+let done=JSON.parse(localStorage.getItem(KEY)||"{}");
+function save(){localStorage.setItem(KEY,JSON.stringify(done));render();}
+function renderTabs(){const t=document.getElementById("tabs");t.innerHTML="";Object.keys(STAGES).forEach(s=>{const b=document.createElement("button");b.textContent=s.split(" ")[0];if(s===cur)b.className="on";b.onclick=()=>{cur=s;render();};t.appendChild(b);});}
+function toggle(stage,i){const key=stage+"#"+i;if(done[key])delete done[key];else done[key]=1;save();}
+function render(){
+  renderTabs();
+  const box=document.getElementById("plan");box.innerHTML="<p style='font-size:13px;color:#666;margin:8px 0 0'>"+cur+"</p>";
+  STAGES[cur].forEach((ex,i)=>{const key=cur+"#"+i;const d=document.createElement("div");d.className="ex"+(done[key]?" done":"");d.innerHTML='<div class="t">'+(done[key]?"✅ ":"○ ")+ex+'</div>';d.onclick=()=>toggle(cur,i);box.appendChild(d);});
+  let total=0,did=0;Object.keys(STAGES).forEach(s=>STAGES[s].forEach((_,i)=>{total++;if(done[s+"#"+i])did++;}));
+  document.getElementById("prog").style.width=Math.round(did/total*100)+"%";
+  document.getElementById("progTxt").textContent="全部阶段累计 "+did+"/"+total+" 项完成";
+}
+function suggest(){
+  const d=+document.getElementById("daypp").value;
+  let s = d<28? "剖腹产专项 4 周（或遵医嘱先休息）" : d<84? "产后核心 12 周" : "渐进力量 20 周";
+  document.getElementById("sug").innerHTML="根据 "+d+" 天，建议进入：<b class='h-coral'>"+s+"</b>";
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

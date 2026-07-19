@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>统一宠物健康中枢</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item b{color:var(--ink)}.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.pill{display:inline-block;font-size:11px;background:#FFF0F0;color:var(--coral);border-radius:999px;padding:1px 8px;margin:2px 3px 0 0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">pet</span><span class="tag">smart_hardware_fragmentation</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">统一宠物健康中枢</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Unified pet-health hub · 多品牌聚合</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">智能养宠火爆但暴露"伪智能"：用户手机里3个不同App分别控制猫砂盆、喂食器、饮水机，每个品牌独立系统、数据不互通、界面不同，实际是需分别管理的矛盾体。机会：统一中枢，聚合多品牌硬件数据、跨设备健康时间线。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">把各品牌设备的数据汇入统一时间线，按宠物聚合，打破数据孤岛。</p>
+    <label>宠物名</label>
+    <input id="pet" placeholder="例如：豆豆">
+    <label>设备 / 数据源</label>
+    <select id="dev"><option>智能猫砂盆</option><option>自动喂食器</option><option>智能饮水机</option><option>摄像头</option><option>项圈</option></select>
+    <div class="row">
+      <div><label>记录内容</label><input id="val" placeholder="如：排便2次/进食50g"></div>
+      <div><label>状态</label><select id="status"><option>正常</option><option>需关注</option><option>异常</option></select></div>
+    </div>
+    <button class="btn" onclick="add()">汇入时间线</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 健康时间线</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">本地保存，多设备一屏看。</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.chinaso.com/link.html?f=3&url=39424c383374494e6478357470664f436b39766e50516e593949614334566d7637586b764847784c4b253242584f5045346f38624e523974415346413849487741386b734a47664676253246337364754d6e336173586f536b412533442533442e587578416145305678477256744b63784536462532466c412533442533442e4552576f4f6668667654253246664b7a614152415425324252672533442533442e4e4a684554454f716f35396459667953776e673666412533442533442e384e62387535544149694d4e304d38313134736157672533442533442e72386c694e4f55524255785664444b3375386b7856424376747a6a484e497078547048644a315963685649574b6f526e497178714c6e4b7a32564f454c6f5457333747766d6753743243556378253242316349364b324f412533442533442e3664466725374225334255383936253542332535436b752533422e382533417a547837742533426c25374433512537424e3551" target="_blank" style="color:var(--coral)">小佩 · 多品牌智能宠物设备</a>
+  </div>
+
+<script>
+const KEY="P3-010";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const pet=document.getElementById("pet").value.trim();
+  if(!pet){alert("先填宠物名");return;}
+  const dev=document.getElementById("dev").value;
+  const val=document.getElementById("val").value.trim()||"—";
+  const status=document.getElementById("status").value;
+  items.unshift({pet,dev,val,status,t:new Date().toLocaleString("zh-CN")});
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+  document.getElementById("val").value="";
+}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const el=document.getElementById("list");
+  let h='<b>📋 健康时间线</b><p style="font-size:12px;color:var(--muted);margin:4px 0 0">本地保存，多设备一屏看。</p>';
+  if(!items.length){h+='<p style="font-size:13px;color:var(--muted);margin-top:8px">还没有数据。</p>';}
+  items.forEach((it,i)=>{
+    const c=it.status==="异常"?"#E85555":it.status==="需关注"?"#E8A33D":"var(--ok)";
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除 ✕</span>'+
+       '<b>'+it.pet+'</b> <span class="pill">'+it.dev+'</span><br>'+
+       '<span style="font-size:13px;color:#555">'+it.val+'</span> '+
+       '<span style="font-size:12px;color:'+c+'">● '+it.status+'</span><br>'+
+       '<span style="font-size:11px;color:var(--muted)">'+it.t+'</span></div>';
+  });
+  el.innerHTML=h;
+}
+render();
+</script>
+</body>
+</html>

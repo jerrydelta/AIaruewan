@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>无bot本地优先隐私会议笔记</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.mt{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;font-size:13px}
+.mt b{color:var(--ink)}.del{color:var(--coral);font-size:12px;float:right;cursor:pointer}
+.out{background:#FFF8F8;border:1px dashed var(--coral);border-radius:10px;padding:10px;margin-top:10px;font-size:13px;white-space:pre-wrap}
+small{color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">productivity</span><span class="tag">bot_free_meeting_notes</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">无 bot 隐私会议笔记</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Bot-free / local-first private meeting notes</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Otter/Fireflies 需以 bot 加入会议、云端存储、默认训练模型，对法律/医疗/敏感客户场景有摩擦。Granola 本地优先、无 bot、$14/月。本工具完全本地：你手动记下要点（或粘贴转写），AI 式结构化总结+待办提取，零上传、不训练。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 本地记录（不上云）</b>
+    <label>会议主题</label>
+    <input id="title" placeholder="例如：A轮投资人会议">
+    <label>参会人</label>
+    <input id="who" placeholder="例如：李总、王律师、我">
+    <label>要点 / 转写（每行一条，含"待办/行动/TODO/[ ]"的行会被自动提取）</label>
+    <textarea id="raw" rows="5" placeholder="确认估值 5000万&#10;待办：周三前发尽调清单&#10;行动：王律师起草SPA&#10;风险：竞品也在接触"></textarea>
+    <button class="btn" id="gen">本地生成结构化纪要</button>
+    <div class="out" id="out" style="display:none"></div>
+    <button class="btn sub" id="save" style="display:none">存入笔记库</button>
+    <p style="font-size:12px;color:var(--muted);margin:6px 0 0">🔒 隐私：所有内容仅存本机 localStorage，无录音 bot、不上传、不用于训练。</p>
+  </div>
+
+  <div class="card" id="list"><b>📝 我的笔记库</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://nesyona.com/articles/best-ai-note-taking-apps" target="_blank" style="color:var(--coral)">Granola · Bluedot · Tactiq · Otter.ai · Fireflies.ai</a>
+  </div>
+
+<script>
+const KEY="P1-015";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let last=null;
+function gen(){
+  const title=document.getElementById("title").value||"未命名会议";
+  const who=document.getElementById("who").value||"—";
+  const raw=document.getElementById("raw").value;
+  const lines=raw.split("\n").map(s=>s.trim()).filter(Boolean);
+  const todos=lines.filter(l=>/^(待办|行动|TODO|\[ \])/i.test(l));
+  const summary=`【${title}】\n参会：${who}\n时间：${new Date().toLocaleString("zh")}\n\n— 要点 —\n${lines.filter(l=>!/^(待办|行动|TODO|\[ \])/i.test(l)).map(l=>"· "+l).join("\n")||"（无）"}\n\n— 行动项 —\n${todos.map(l=>"☐ "+l.replace(/^(待办|行动|TODO|\[ \]|\[x\])\s*/i,"")).join("\n")||"（无）"}`;
+  last={title,who,summary,t:new Date().toLocaleString("zh")};
+  const o=document.getElementById("out");o.style.display="block";o.textContent=summary;
+  document.getElementById("save").style.display="block";
+}
+function save(){if(!last)return;items.push(last);localStorage.setItem(KEY,JSON.stringify(items));render();
+  document.getElementById("out").style.display="none";document.getElementById("save").style.display="none";
+  document.getElementById("raw").value="";last=null;}
+function render(){
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">暂无笔记。</p>';return;}
+  box.innerHTML=items.slice().reverse().map((r,i)=>`<div class="mt"><span class="del" data-i="${i}">删除</span>
+    <b>${r.title}</b> · ${r.who}<br><small>${r.t}</small>
+    <div class="out" style="margin-top:6px">${r.summary.replace(/</g,"&lt;")}</div></div>`).join("");
+  box.querySelectorAll(".del").forEach(e=>e.onclick=()=>{items.splice(+e.dataset.i,1);localStorage.setItem(KEY,JSON.stringify(items));render();});
+}
+document.getElementById("gen").onclick=gen;document.getElementById("save").onclick=save;render();
+</script>
+</body>
+</html>

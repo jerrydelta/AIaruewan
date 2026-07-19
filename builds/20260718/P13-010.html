@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>更年期症状+HRT+医生报告追踪器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#fff;cursor:pointer}
+.chip.on{background:var(--coral);color:#fff;border-color:var(--coral)}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.item .del{float:right;color:var(--coral);font-size:12px;cursor:pointer}
+.report{background:#f4f8ff;border:1px solid #d6e4ff;border-radius:10px;padding:12px;font-size:13px;white-space:pre-wrap;margin-top:10px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">health</span><span class="tag">perimenopause_tracker</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">更年期症状+HRT+医生报告追踪器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Perimenopause symptom + HRT + doctor-report</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">围绝经期周期变乱（24→60 天→停），30+ 症状（潮热/夜汗/脑雾/关节痛）。现有 App 要么为规律周期、要么为孕产设计。Balance 为最下载的更年期专用 App。机会：更年期专用症状+HRT+医生报告追踪器。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 症状记录 + HRT 用药 + 医生报告</b>
+    <label>日期</label><input id="date" type="date">
+    <label>今日症状（可多选）</label>
+    <div class="chips" id="syms"></div>
+    <div class="row">
+      <div><label>周期第几天（乱也可填）</label><input id="cyc" type="number" placeholder="不规则填估计"></div>
+      <div><label>情绪 1-5</label><input id="mood" type="number" min="1" max="5" placeholder="3"></div>
+    </div>
+    <label>HRT / 用药记录</label><input id="med" placeholder="如 雌激素贴 1片">
+    <button class="btn" onclick="addItem()">＋ 记录今天</button>
+  </div>
+
+  <div class="card">
+    <b>📄 生成医生报告</b>
+    <button class="btn" onclick="genReport()">生成可打印报告</button>
+    <div class="report" id="report" style="display:none"></div>
+  </div>
+
+  <div class="card" id="list"><b>📈 近期记录</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.go-go-gaia.com/blog/best-perimenopause-tracking-app.html" target="_blank" style="color:var(--coral)">Balance / Caria / Go Go Gaia</a>
+  </div>
+
+<script>
+const KEY="P13-010";
+const SYM=["潮热","夜汗","脑雾","关节痛","心悸","失眠","情绪波动","头痛","口干","脱发"];
+let sel=new Set();
+const symBox=document.getElementById("syms");
+SYM.forEach(s=>{
+  const c=document.createElement("div");c.className="chip";c.innerText=s;
+  c.onclick=()=>{if(sel.has(s)){sel.delete(s);c.className="chip";}else{sel.add(s);c.className="chip on";}};
+  symBox.appendChild(c);
+});
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+if(!document.getElementById("date").value)document.getElementById("date").valueAsDate=new Date();
+function addItem(){
+  const date=document.getElementById("date").value;
+  items.push({date,syms:[...sel],cyc:document.getElementById("cyc").value,mood:document.getElementById("mood").value,med:document.getElementById("med").value.trim()});
+  sel.clear();document.querySelectorAll(".chip").forEach(c=>c.className="chip");
+  ["cyc","mood","med"].forEach(id=>document.getElementById(id).value="");
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function genReport(){
+  const r=document.getElementById("report");
+  if(items.length===0){r.style.display="block";r.innerText="暂无数据，请先记录。";return;}
+  const freq={};items.forEach(x=>x.syms.forEach(s=>freq[s]=(freq[s]||0)+1));
+  const top=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([s,n])=>`${s}（${n}次）`).join("、");
+  r.style.display="block";
+  r.innerText=`更年期症状追踪报告（共 ${items.length} 天记录）\n`+
+    `记录区间：${items[0].date} ~ ${items[items.length-1].date}\n`+
+    `高频症状：${top||"无"}\n`+
+    `最近用药：${items[items.length-1].med||"未记录"}\n`+
+    `建议携带本报告与医生沟通 HRT 方案。`;
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  let html='<b>📈 近期记录</b>';
+  if(items.length===0)html+='<p style="font-size:13px;color:#999;margin:8px 0">还没有记录。</p>';
+  [...items].reverse().slice(0,10).forEach((x,i)=>{
+    const idx=items.length-1-i;
+    html+=`<div class="item"><span class="del" onclick="del(${idx})">删除</span>
+      <b>${x.date}</b> · 周期${x.cyc||'?'} · 情绪${x.mood||'?'}/5<br>
+      ${x.syms.length?x.syms.join("、"):"无症状"} ${x.med?("· 💊"+x.med):""}</div>`;
+  });
+  box.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

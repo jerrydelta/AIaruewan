@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>每日星盘与塔罗抽牌</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ok{background:var(--ok)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.mini{font-size:12px;color:var(--muted)}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.tarot{display:flex;gap:8px;margin-top:10px}
+.tarot>div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;padding:10px;text-align:center}
+.tarot .n{font-size:15px;font-weight:700;color:var(--coral)}
+.chart{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;padding:12px;margin-top:10px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">spirituality</span><span class="tag">astrology_tarot_apps</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">每日星盘与塔罗抽牌</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Astrology/tarot social app (daily chart + tarot draw)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">占星/塔罗是 60 亿美元级精神消费赛道（2026 年 spiritual app 市场 >$6B）。Co-Star 月收入约 $401K，用户要的是"每日星座 + 社交比较 + 情感洞察"的习惯，而非一次性占卜。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 每日星盘 + 塔罗三张</b>
+    <label>你的生日</label>
+    <input type="date" id="birth">
+    <button class="btn" onclick="genChart()">🌟 生成今日星盘</button>
+    <div class="chart" id="chart"></div>
+    <button class="btn btn-ok" onclick="drawTarot()">🃏 抽三张塔罗</button>
+    <div class="tarot" id="tarot"></div>
+    <label>今日心情 / 反思</label>
+    <textarea id="mood" rows="2" placeholder="写下今天抽到牌后的感受……"></textarea>
+    <button class="btn" onclick="save()">📥 保存今日记录</button>
+  </div>
+
+  <div class="card" id="list"><b>✨ 我的星历记录</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.appkittie.com/app/app-co-star-personalized-astrology-id1264782561" target="_blank" style="color:var(--coral)">Co-Star / The Pattern / Sanctuary（占星社交 App）</a>
+  </div>
+
+<script>
+const KEY="P7-004";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const ZODIAC=["摩羯","水瓶","双鱼","白羊","金牛","双子","巨蟹","狮子","处女","天秤","天蝎","射手"];
+const TONE=["适合主动沟通，表达真实想法","留意情绪起伏，给自己留点独处时间","事业运上扬，把握一个展示机会","财运平稳，避免冲动消费","感情有暖意，主动关心在意的人","健康是重点，早点休息充电","创意灵感强，适合开启新计划","旧识重逢，重温一段关系","学习运佳，适合补短板","需耐心，慢即是快","直觉敏锐，相信第一感觉","适合整理收纳，断舍离"];
+const TAROT=[
+  ["愚人","新的开始，带着好奇出发，别怕未知"],
+  ["魔术师","你拥有把想法变成现实的能力"],
+  ["女祭司","倾听内在声音，答案在静默里"],
+  ["皇后","丰盛与滋养，照顾好自己与他人"],
+  ["皇帝","建立秩序，用行动掌控局面"],
+  ["恋人","关系与选择，跟随心的方向"],
+  ["战车","专注目标，勇往直前可突破"],
+  ["力量","以柔克刚，温柔也是力量"],
+  ["隐者","独处自省，寻找内在指引"],
+  ["命运之轮","转折将至，顺势而为"],
+  ["正义","因果平衡，公平会到来"],
+  ["星星","希望重现，保持信念"],
+  ["月亮","面对恐惧与迷雾，勿妄下判断"],
+  ["太阳","光明喜悦，好运环绕"],
+  ["世界","圆满达成，一个周期的结束"],
+  ["塔","突发变动，破后而立"],
+  ["死神","结束与重生，放下才能前行"],
+  ["节制","平衡调和，凡事有度"],
+  ["高塔","突发变动，破后而立，旧结构崩塌预示重生"],
+  ["审判","觉醒与召唤，是时候做出抉择"],
+  ["愚者的旅程","整合一切经历，回归本心"],
+  ["太阳逆","光明暂被云遮蔽，别急着下结论，转机正在酝酿"]
+];
+function zodiac(b){const d=new Date(b);if(isNaN(d))return -1;const m=d.getMonth()+1,day=d.getDate();
+  const cut=[[1,20],[2,19],[3,21],[4,20],[5,21],[6,22],[7,23],[8,23],[9,23],[10,24],[11,23],[12,22]];
+  for(let i=0;i<12;i++){if((m>i+1)||(m===i+1&&day>=cut[i][1]))return i;}
+  return 0;}
+function genChart(){
+  const b=document.getElementById("birth").value;const z=zodiac(b);
+  if(z<0){alert("请先选择生日");return;}
+  const seed=(new Date().getDate()+z)%TONE.length;
+  document.getElementById("chart").innerHTML=`<b>☀ 你的星座：${ZODIAC[z]}</b><div style="margin-top:6px;font-size:14px">${TONE[seed]}</div><div class="mini" style="margin-top:6px">※ 基于生日与日期的规则化解读，仅供娱乐参考</div>`;
+}
+function drawTarot(){
+  const pool=[...TAROT].filter(x=>x.length>=2);
+  const pick=[];while(pick.length<3){const c=pool[Math.floor(Math.random()*pool.length)];if(!pick.includes(c))pick.push(c);}
+  const rev=pick.map(c=>Math.random()<0.4);
+  document.getElementById("tarot").innerHTML=pick.map((c,i)=>`
+    <div><div class="n">${c[0]}</div><div class="mini" style="margin-top:4px">${rev[i]?"逆位":"正位"}</div><div style="font-size:11px;margin-top:4px">${rev[i]?c[1]+"（反向提醒）":c[1]}</div></div>`).join("");
+}
+function save(){
+  const b=document.getElementById("birth").value;const z=zodiac(b);
+  const mood=document.getElementById("mood").value.trim();
+  if(z<0&&!mood){alert("请先生成星盘或写下心情");return;}
+  items.unshift({sign:z>=0?ZODIAC[z]:"-",mood,date:new Date().toLocaleDateString("zh-CN")});
+  document.getElementById("mood").value="";localStorage.setItem(KEY,JSON.stringify(items));render();
+}
+function render(){
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p class="mini" style="margin-top:8px">还没有记录，今天先抽一卦吧。</p>';return;}
+  box.innerHTML=items.map(it=>`
+    <div class="item"><div style="font-size:14px"><b>${it.sign}</b> · ${it.date}</div>${it.mood?`<div class="mini" style="margin-top:4px">${esc(it.mood)}</div>`:""}</div>`).join("");
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+</script>
+</body>
+</html>

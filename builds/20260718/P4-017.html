@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>情侣共享财务（透明聊钱）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none;float:right}
+.stat{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;text-align:center;padding:10px}
+.stat b{display:block;font-size:18px;color:var(--coral)}
+.bar{height:10px;background:#FFE3E3;border-radius:999px;overflow:hidden;margin-top:6px}
+.bar>span{display:block;height:100%;background:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">relationship</span><span class="tag">shared_finance</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">情侣共享财务（透明聊钱）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Couple shared-finance app</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">钱是关系头号冲突源之一。Honeydue连接双方账户、隐藏前四位保护隐私、设支出上限、App内聊钱、账单提醒，评分4.4/5；Splitwise做公平分摊。痛点：传统记账App非情侣场景（无"共同目标储蓄""谁付了啥"透明化）。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">谁付了啥、共同目标攒多少，一目了然。中韩货币/支付场景也能记。</p>
+    <div class="row">
+      <div><label>谁付的</label><select id="who"><option>我</option><option>TA</option><option>共担</option></select></div>
+      <div><label>金额</label><input id="amt" type="number" min="0" placeholder="100"></div>
+    </div>
+    <label>用途</label>
+    <input id="cat" placeholder="如：晚餐 / 房租 / 电影票">
+    <button class="btn" onclick="add()">＋ 记一笔</button>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <div class="stat"><b id="me">0</b>我付</div>
+      <div class="stat"><b id="ta">0</b>TA付</div>
+      <div class="stat"><b id="bal">0</b>差额</div>
+    </div>
+    <label>共同储蓄目标（元）</label>
+    <input id="goal" type="number" min="0" value="5000">
+    <button class="btn" onclick="setGoal()">🎯 设定目标</button>
+    <div class="bar"><span id="gbar" style="width:0%"></span></div>
+    <div style="font-size:12px;color:var(--muted);margin-top:6px">已攒 <span id="gsaved">0</span> / <span id="gtotal">5000</span></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>💰 支出记录</b>
+    <div id="logs" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.bonobology.com/ko?p=483101" target="_blank" style="color:var(--coral)">Honeydue / Splitwise</a>
+  </div>
+
+<script>
+const KEY="P4-017";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let goal=parseInt(localStorage.getItem(KEY+"_g")||"5000");
+document.getElementById("goal").value=goal;
+document.getElementById("gtotal").textContent=goal;
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function setGoal(){goal=parseInt(document.getElementById("goal").value)||0;localStorage.setItem(KEY+"_g",goal);render();}
+function add(){
+  const who=document.getElementById("who").value;
+  const amt=parseFloat(document.getElementById("amt").value)||0;
+  const cat=document.getElementById("cat").value.trim();
+  if(!amt){alert("填个金额");return;}
+  items.unshift({who,amt,cat,d:new Date().toISOString().slice(0,10)});
+  document.getElementById("amt").value="";document.getElementById("cat").value="";
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function render(){
+  const me=items.filter(x=>x.who==="我").reduce((s,x)=>s+x.amt,0);
+  const ta=items.filter(x=>x.who==="TA").reduce((s,x)=>s+x.amt,0);
+  document.getElementById("me").textContent=Math.round(me);
+  document.getElementById("ta").textContent=Math.round(ta);
+  document.getElementById("bal").textContent=Math.round(Math.abs(me-ta))+(me>=ta?" TA补":" 我补");
+  const saved=Math.round(me+ta);
+  document.getElementById("gsaved").textContent=saved;
+  document.getElementById("gbar").style.width=Math.min(100,saved/goal*100)+"%";
+  document.getElementById("logs").innerHTML=items.length?items.map((x,i)=>
+    `<div class="item"><button class="del" onclick="del(${i})">删除</button>${x.d} · ${x.who} · ${x.cat} · ${x.amt}元</div>`
+  ).join(""):`<p style="color:var(--muted);font-size:13px">还没有支出记录。</p>`;
+}
+render();
+</script>
+</body>
+</html>

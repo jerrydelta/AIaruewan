@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>无广告轻量热量记录</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.total{background:#FFF0F0;border-radius:10px;padding:12px;font-size:16px;font-weight:700;text-align:center;margin-top:8px}
+.timer{font-size:34px;font-weight:700;text-align:center;color:var(--coral);margin:6px 0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">food</span><span class="tag">ad_free_calorie_log</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">无广告轻量热量记录</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Ad-free, lightweight, stickiness-friendly calorie log</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">薄荷健康"食物搜索被限制、界面花哨全是广告、拍照算热量会员专属"；食卡卡则"简洁清爽没广告、大部分功能免费、推荐热量合理可调缺口"，用户因"功能实用简单反而更容易坚持"留下。痛点：主流热量 App 广告多、付费墙深、功能过载。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">极简无广告：食物名+热量一键记 → 当日合计；另带 16:8 轻断食进食窗口计时（设开始时间，显示可进食倒计时/已 fasting）。</p>
+    <label>食物名称</label><input id="name" placeholder="如：午餐 糙米饭">
+    <label>热量（kcal）</label><input id="kcal" type="number" placeholder="350">
+    <button class="btn" onclick="add()">＋ 记录</button>
+    <div class="total" id="total">今日合计：0 kcal</div>
+
+    <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px">
+      <b style="color:var(--coral)">⏱ 16:8 轻断食</b>
+      <label>进食窗口开始时间</label><input id="eatStart" type="time" value="12:00">
+      <label>窗口长度（小时）</label><input id="winLen" type="number" value="8" min="1" max="12">
+      <button class="btn" onclick="startFast()">▶ 开始计时</button>
+      <div class="timer" id="fastTimer">--:--</div>
+      <p id="fastTxt" style="font-size:13px;color:var(--muted);text-align:center;margin:0"></p>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>🍽 今日饮食</b>
+    <div id="foodList"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.yeyulingfeng.com/261488.html" target="_blank" style="color:var(--coral)">食卡卡·薄荷健康 中文测评对比</a>
+  </div>
+
+<script>
+const KEY="P6-011";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+let ftick=null;
+function add(){
+  const name=document.getElementById('name').value.trim(), k=parseFloat(document.getElementById('kcal').value);
+  if(!name||isNaN(k)){alert('请填写名称和热量');return;}
+  items.unshift({name,kcal:Math.round(k),t:Date.now()});
+  document.getElementById('name').value='';document.getElementById('kcal').value='';
+  save();
+}
+function del(i){ items.splice(i,1); save(); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function fmt(t){return new Date(t).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function render(){
+  const el=document.getElementById('foodList');
+  const sum=items.reduce((a,b)=>a+b.kcal,0);
+  document.getElementById('total').textContent='今日合计：'+sum+' kcal';
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有记录。</p>';return;}
+  el.innerHTML=items.map((x,i)=>`<div class="item"><span>🍴 ${x.name}<br><span style="font-size:11px;color:var(--muted)">${fmt(x.t)}</span></span><b>${x.kcal} kcal</b><button onclick="del(${i})" style="border:none;background:#FFF0F0;color:var(--coral);border-radius:8px;padding:4px 10px;margin-left:6px">删</button></div>`).join('');
+}
+function startFast(){
+  const s=document.getElementById('eatStart').value, len=parseFloat(document.getElementById('winLen').value)||8;
+  const [h,m]=s.split(':').map(Number);
+  const now=new Date(); const startMins=now.getHours()*60+now.getMinutes();
+  const eatMins=h*60+m, endMins=(eatMins+len*60)%1440;
+  clearInterval(ftick);
+  const upd=()=>{
+    const cur=new Date(); const curM=cur.getHours()*60+cur.getMinutes();
+    let remain;
+    if(curM>=eatMins && curM<endMins) remain=endMins-curM; // 进食窗口内
+    else if(curM<eatMins) remain=(eatMins-curM); // 距进食开始
+    else remain=(1440-curM)+eatMins; // 跨天
+    const inWindow = curM>=eatMins && curM<endMins;
+    const hh=String(Math.floor(remain/60)).padStart(2,'0'), mm=String(remain%60).padStart(2,'0');
+    document.getElementById('fastTimer').textContent=hh+':'+mm;
+    document.getElementById('fastTxt').textContent=inWindow?'✅ 进食窗口中，放心吃':'🌙  fasting 中，距进食开始 '+hh+':'+mm;
+  };
+  upd(); ftick=setInterval(upd,1000*30);
+}
+render();
+</script>
+</body>
+</html>

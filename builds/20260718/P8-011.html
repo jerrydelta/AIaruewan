@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>いい加減でいい読書SNS</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#FFF0F0;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">hobby</span><span class="tag">reading_sns_japan</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">いい加減でいい読書SNS</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Pressure-free reading SNS with no like/follower counts</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">読書は「ちゃんと理解して感想を書かないと」という規範意識（不全感）が多くの人を遠ざける。既存SNSの「いいね数・フォロワー数の数値化・炎上不安」から解放された「本の話だけの穏やかなSNS」が求められている。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:4px 0 0">数値評価なし。読了してなくても、感想以外のなんでも書いてOK。自由タグと公開範囲だけつけて記録。</p>
+    <label>本のタイトル（任意）</label><input id="r-book" placeholder="例：読まかけの本でもOK">
+    <label>自由タグ（カンマ区切り）</label><input id="r-tags" placeholder="例：よみかけ,寝る前,泣けた">
+    <label>公開範囲</label>
+    <select id="r-scope"><option>公開</option><option>フォロワーだけ</option><option>自分だけ</option></select>
+    <label>場所・きっかけ（任意）</label><input id="r-place" placeholder="例：カフェ・駅の本屋">
+    <label>なんでもメモ</label><textarea id="r-text" placeholder="例：3ページだけど面白い。続きは明日。"></textarea>
+    <button class="btn" onclick="addR()">そっと投稿</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://prtimes.jp/main/html/rd/p/000000006.000103260.html" target="_blank" style="color:var(--coral)">Reads</a>
+  </div>
+
+<script>
+const KEY="P8-011";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addR(){
+  const book=document.getElementById("r-book").value.trim();
+  const tags=document.getElementById("r-tags").value.split(",").map(s=>s.trim()).filter(Boolean);
+  const scope=document.getElementById("r-scope").value;
+  const place=document.getElementById("r-place").value.trim();
+  const text=document.getElementById("r-text").value.trim();
+  if(!text&&!book){alert("本かメモのどちらか入力してください");return;}
+  items.push({book,tags,scope,place,text,date:new Date().toLocaleDateString("ja-JP"),id:Date.now()});
+  document.getElementById("r-book").value="";document.getElementById("r-tags").value="";document.getElementById("r-place").value="";document.getElementById("r-text").value="";
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>🍃 穏やかなタイムライン</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>まだ投稿がありません。いい加減でいいので書いてみましょう。</p>";return;}
+  box.innerHTML="<b>🍃 穏やかなタイムライン（"+items.length+"投稿）</b>"+items.slice().reverse().map((i,ri)=>{
+    const idx=items.length-1-ri;
+    return `<div class='item'><div style='font-size:12px;color:var(--muted)'>${i.scope} ・ ${i.date}</div>
+      ${i.book?`<b>${esc(i.book)}</b>`:`<span style='color:var(--muted)'>（本なし）</span>`}
+      ${i.tags.length?`<div style='margin-top:4px'>`+i.tags.map(t=>`<span class='pill'>#${esc(t)}</span>`).join("")+`</div>`:""}
+      ${i.place?`<div style='font-size:12px;color:var(--muted);margin-top:4px'>📍 ${esc(i.place)}</div>`:""}
+      ${i.text?`<div style='font-size:14px;margin-top:4px'>${esc(i.text)}</div>`:""}
+      <button class='mini' style='margin-top:6px' onclick='del(${idx})'>削除</button></div>`;
+  }).join("");
+}
+function del(idx){items.splice(idx,1);save();}
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+</script>
+</body>
+</html>

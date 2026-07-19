@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>B2B2C虚拟产后护理</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.task{border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-top:8px}
+.task.done{background:#F0FFF6;border-color:#C7EFD6}
+.task .t{font-weight:600;font-size:14px}
+.task .d{font-size:12px;color:var(--muted);margin-top:2px}
+.bar{height:10px;background:#FFE3E3;border-radius:999px;overflow:hidden;margin-top:10px}
+.bar>i{display:block;height:100%;background:var(--coral);width:0}
+.sum{background:#FFF8F0;border:1px solid #FFE6CC;border-radius:12px;padding:12px;font-size:14px;margin-top:10px}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:14px}
+.item .meta{font-size:11px;color:var(--muted);margin-top:4px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">postpartum</span><span class="tag">telehealth_saas</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">虚拟产后护理 · 自动随访</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">B2B2C · 雇主/健保买单，产后自动随访</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">产后护理在出院后断裂，企业/险方愿为降低 NICU 入院（降 28-40%）与复工率（90% vs 全国 57%）买单。Maven Clinic 是 B2B2C 虚拟妇幼平台，产后自动触发哺乳支持、康复指导、抑郁风险筛查，ARR 约 2.68 亿美元。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 创建一位妈妈的护理计划</b>
+    <label>妈妈姓名</label>
+    <input id="mom" placeholder="例如：李婷">
+    <label>产后第几天</label>
+    <input id="daypp" type="number" min="0" value="7">
+    <button class="btn" onclick="createPlan()">➕ 生成自动随访计划</button>
+    <div id="plans"></div>
+  </div>
+
+  <div class="card">
+    <b>📋 工具 · 今日随访任务</b>
+    <div id="tasks"></div>
+    <div class="bar"><i id="prog"></i></div>
+    <div id="roi" class="sum"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.sacra.com/c/maven-clinic" target="_blank" style="color:var(--coral)">Maven Clinic（B2B2C 虚拟产后护理）</a>
+  </div>
+
+<script>
+const KEY="P15-018";
+const TASKS=[
+  {t:"哺乳支持 · 评估衔乳与频次",d:"产后 0-2 周"},
+  {t:"盆底 / 伤口康复指导",d:"产后 2-6 周"},
+  {t:"产后抑郁风险筛查（EPDS）",d:"产后 6 周"},
+  {t:"复工适应与弹性安排",d:"产后 8-12 周"}
+];
+let plans=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(plans));render();}
+function createPlan(){
+  const mom=document.getElementById("mom").value.trim(),day=+document.getElementById("daypp").value;
+  if(!mom){alert("填妈妈姓名");return;}
+  const due=TASKS.filter(x=>{const w=+x.d.match(/\d+/g).slice(-1)[0];return day<=w;});
+  const list=due.length?due:TASKS.slice(-1);
+  plans.unshift({mom,day,tasks:list.map(x=>({t:x.t,done:false})),created:new Date().toLocaleDateString("zh-CN")});
+  document.getElementById("mom").value="";save();
+}
+function toggle(p,i){plans[p].tasks[i].done=!plans[p].tasks[i].done;save();}
+function delP(p){plans.splice(p,1);save();}
+function render(){
+  const pb=document.getElementById("plans");pb.innerHTML=plans.length?'<p style="font-size:13px;color:#666;margin-top:10px"><b>已建计划</b></p>':'';
+  plans.forEach((pl,p)=>{const d=document.createElement("div");d.className="item";
+    d.innerHTML='<span style="float:right;color:var(--coral);font-size:12px;cursor:pointer" onclick="delP('+p+')">删除</span><b>'+pl.mom+'</b> · 产后第 '+pl.day+' 天<div class="meta">'+pl.created+' ｜ '+pl.tasks.length+' 项随访</div>';pb.appendChild(d);});
+  const tb=document.getElementById("tasks");tb.innerHTML="";
+  let total=0,done=0;
+  plans.forEach((pl,p)=>pl.tasks.forEach((tk,i)=>{total++;if(tk.done)done++;
+    const e=document.createElement("div");e.className="task"+(tk.done?" done":"");
+    e.innerHTML=(tk.done?"✅ ":"○ ")+tk.t;e.onclick=()=>toggle(p,i);tb.appendChild(e);}));
+  document.getElementById("prog").style.width=total?Math.round(done/total*100)+"%":"0%";
+  document.getElementById("roi").innerHTML=total?("随访完成度 "+done+"/"+total+" ｜ 护理越连续，NICU 入院与离职风险越低（雇主 ROI 可达 2:1~4:1）"):"创建计划后，自动随访任务会出现在这里。";
+}
+render();
+</script>
+</body>
+</html>

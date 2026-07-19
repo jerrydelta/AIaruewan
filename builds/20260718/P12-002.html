@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI板书转笔记+Anki错题卡</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.mini{font-size:14px;margin:14px 0 4px;font-weight:600;color:var(--ink);
+  border-left:4px solid var(--coral);padding-left:8px}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.del{color:var(--coral);float:right;font-size:13px;cursor:pointer}
+.due{color:var(--coral);font-weight:600}
+.ok{color:var(--ok);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">student</span><span class="tag">ai_exam_prep_notes</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI板书转笔记 · 错题卡</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI blackboard-to-notes + one-tap Anki wrong-question cards</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">考研/考证党高频刚需：课堂板书转可编辑笔记+一键Anki卡+错题举一反三。痛点：现有笔记/题库工具割裂，AI整合薄弱。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <div class="mini">📒 录入错题（拍板书/手写转笔记）</div>
+    <label>科目</label><input id="q_sub" placeholder="如 考研数学">
+    <label>题目/知识点</label><textarea id="q_q" rows="2" placeholder="粘贴或输入题目"></textarea>
+    <label>我的错因 / 答案</label><textarea id="q_a" rows="2" placeholder="错在哪、正确解法"></textarea>
+    <label>难度</label><select id="q_diff"><option>易</option><option>中</option><option>难</option></select>
+    <button class="btn" onclick="addQ()">生成错题卡</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的错题卡（艾宾浩斯复习）</b>
+    <div id="box"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://so.html5.qq.com/page/real/search_news?docid=70000021_78568c046c298452" target="_blank" style="color:var(--coral)">伴学笔记 · 闪卡 · flomo浮墨笔记</a>
+  </div>
+
+<script>
+const K="P12-002_cards";
+let items=JSON.parse(localStorage.getItem(K)||"[]");
+function addQ(){
+  const sub=document.getElementById("q_sub").value.trim();
+  const q=document.getElementById("q_q").value.trim();
+  const a=document.getElementById("q_a").value.trim();
+  const diff=document.getElementById("q_diff").value;
+  if(!sub||!q){alert("请填科目和题目");return;}
+  const intervals=[1,2,4,7,15,30]; // 天
+  items.push({sub,q,a,diff,idx:0,next:Date.now()+86400000,created:Date.now()});
+  localStorage.setItem(K,JSON.stringify(items));render();
+}
+function review(i){
+  let x=items[i];x.idx=Math.min(x.idx+1,5);
+  const iv=[1,2,4,7,15,30];
+  x.next=Date.now()+iv[x.idx]*86400000;
+  localStorage.setItem(K,JSON.stringify(items));render();
+}
+function del(i){items.splice(i,1);localStorage.setItem(K,JSON.stringify(items));render();}
+function fmt(t){const d=new Date(t);return (d.getMonth()+1)+"/"+d.getDate();}
+function render(){
+  if(!items.length){document.getElementById("box").innerHTML="<p style='font-size:13px;color:var(--muted)'>还没有错题卡，录一张吧。</p>";return;}
+  document.getElementById("box").innerHTML=items.map((x,i)=>{
+    const due=Date.now()>=x.next;
+    return `<div class="item"><span class="del" onclick="del(${i})">删</span>
+      <b>${x.sub}</b> <span style="font-size:12px;color:var(--muted)">[${x.diff}]</span><br>
+      ${x.q.replace(/</g,"&lt;")}<br>
+      <span style="color:var(--muted);font-size:13px">${x.a.replace(/</g,"&lt;")}</span><br>
+      下次复习：<span class="${due?'due':'ok'}">${fmt(x.next)}</span>
+      ${due?`<button class="btn" style="margin-top:6px;padding:9px" onclick="review(${i})">✓ 已复习</button>`:""}
+    </div>`;
+  }).join("");
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>中国千亿产后康复追踪</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.summary{background:#FFF8F0;border:1px solid #FFE6CC;border-radius:12px;padding:12px;font-size:14px;margin-top:8px}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:14px}
+.item .meta{font-size:11px;color:var(--muted);margin-top:4px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">postpartum</span><span class="tag">china_market</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">千亿产后康复 · 我的花费追踪</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">居家数字化 + 数据化反馈的普惠产康记账</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">中国每年新增产后女性超 1000 万，70% 盆底功能障碍、40% 腹直肌分离；2024 年母婴产后康复市场 826 亿元，客单价达 8900 元（较 2020 +120%）。痛点：价格不透明、专业康复师缺口超 15 万。机会：居家 + 数字化 + 数据化反馈的普惠产康。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 记一笔康复花费</b>
+    <label>项目</label>
+    <input id="proj" placeholder="例如：盆底修复疗程 / 腹直肌修复仪">
+    <label>金额（元）</label>
+    <input id="amt" type="number" min="0" value="3000">
+    <label>渠道</label>
+    <input id="chan" placeholder="例如：月子中心 / 上门康复 / 自购设备">
+    <button class="btn" onclick="addSpend()">💰 记录</button>
+    <div id="sum"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📒 花费明细</b>
+    <div id="items"></div>
+    <p style="font-size:12px;color:#aaa;margin-top:8px">行业参考客单价约 8900 元，可作对比锚点。</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.bigxun.com/view/1958054119265636354" target="_blank" style="color:var(--coral)">中国产后康复赛道行业报告</a>
+  </div>
+
+<script>
+const KEY="P15-016";
+let spends=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(spends));render();}
+function nowStr(){const d=new Date();const p=n=>(""+n).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());}
+function addSpend(){
+  const proj=document.getElementById("proj").value.trim(),amt=+document.getElementById("amt").value,chan=document.getElementById("chan").value.trim();
+  if(!proj||!amt){alert("填好项目和金额");return;}
+  spends.unshift({proj,amt,chan,date:nowStr()});document.getElementById("proj").value="";document.getElementById("chan").value="";save();
+}
+function delS(i){spends.splice(i,1);save();}
+function render(){
+  const total=spends.reduce((a,b)=>a+b.amt,0);
+  const avg=spends.length?Math.round(total/spends.length):0;
+  document.getElementById("sum").innerHTML='<div class="summary">累计花费：<b>'+total.toLocaleString()+' 元</b><br>笔均：'+avg.toLocaleString()+' 元 ｜ 对比行业客单 8900 元'+(total>8900?'（已超）':'（尚可）')+'</div>';
+  const box=document.getElementById("items");box.innerHTML=spends.length?'':'<p style="font-size:13px;color:#aaa;margin:8px 0 0">记录第一笔，看清你的康复投入。</p>';
+  spends.forEach((s,i)=>{const d=document.createElement("div");d.className="item";
+    d.innerHTML='<span style="float:right;color:var(--coral);font-size:12px;cursor:pointer" onclick="delS('+i+')">删除</span><b>'+s.proj+'</b> · '+s.amt.toLocaleString()+' 元<div class="meta">'+s.chan+' ｜ '+s.date+'</div>';
+    box.appendChild(d);});
+}
+render();
+</script>
+</body>
+</html>

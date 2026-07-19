@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>每日祈祷与代祷 App</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ok{background:var(--ok)}
+.btn-ok:active{background:#2f9e6c}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item.done{opacity:.6}
+.item .t{font-size:15px;font-weight:600}
+.mini{font-size:12px;color:var(--muted)}
+.chip{display:inline-block;font-size:12px;background:#FFF0F0;color:var(--coral);
+  border:1px solid #FFD9D9;border-radius:999px;padding:4px 10px;margin:4px 6px 0 0;cursor:pointer}
+.stat{display:flex;gap:10px;text-align:center;margin-top:8px}
+.stat>div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;padding:10px}
+.stat b{display:block;font-size:22px;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">spirituality</span><span class="tag">catholic_prayer_app</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">每日祈祷与代祷 App</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Vertical faith-based prayer app (prayers + Scripture + rosary)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">现有冥想 App（Headspace/Calm）不服务有信仰的祈祷人群，祷告/玫瑰经/圣经诵读是刚需却被 secular 工具忽略。Hallow 验证了这个细分能撑起 9 位数收入，但用户仍缺乏一个轻量、可离线的个人祈祷记录工具。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 祈祷意向 + 每日打卡</b>
+    <p class="mini">快速添加常用经文，或自定义你的代祷/感恩/祈求意向：</p>
+    <div>
+      <span class="chip" onclick="quick('主祷文：愿你的国降临')">主祷文</span>
+      <span class="chip" onclick="quick('圣母经：为我等罪人祈')">圣母经</span>
+      <span class="chip" onclick="quick('玫瑰经：欢喜五端')">玫瑰经</span>
+      <span class="chip" onclick="quick('圣经诵读：诗篇 23 篇')">诗篇23篇</span>
+    </div>
+    <label>意向内容</label>
+    <textarea id="text" rows="2" placeholder="例如：为生病的外婆代祷 / 感恩今日平安"></textarea>
+    <label>类型</label>
+    <select id="type">
+      <option value="代祷">代祷（为别人）</option>
+      <option value="感恩">感恩</option>
+      <option value="祈求">祈求（为自己）</option>
+    </select>
+    <button class="btn" onclick="add()">➕ 添加意向</button>
+    <div class="stat">
+      <div><b id="sTotal">0</b>意向总数</div>
+      <div><b id="sPray">0</b>今日已祈祷</div>
+      <div><b id="sStreak">0</b>连续天数</div>
+    </div>
+    <button class="btn btn-ok" onclick="checkIn()">☀ 今日祈祷打卡</button>
+  </div>
+
+  <div class="card" id="list"><b>📿 我的祈祷清单</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://appfigures.com/resources/insights/hallow-lent-surge-prayer-app-revenue/amp" target="_blank" style="color:var(--coral)">Hallow（天主教/基督教祈祷 App，年净收入约 $40M）</a>
+  </div>
+
+<script>
+const KEY="P7-001";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let streak=JSON.parse(localStorage.getItem(KEY+"_streak")||"{}");
+function todayKey(){return new Date().toISOString().slice(0,10);}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function add(){
+  const text=document.getElementById("text").value.trim();
+  if(!text){alert("请先填写意向内容");return;}
+  const type=document.getElementById("type").value;
+  items.unshift({id:Date.now(),text,type,prayed:false,prayedAt:null});
+  document.getElementById("text").value="";
+  save();
+}
+function quick(t){document.getElementById("text").value=t;}
+function markPray(id){
+  const it=items.find(x=>x.id===id);if(!it)return;
+  it.prayed=!it.prayed;it.prayedAt=it.prayed?todayKey():null;save();
+}
+function del(id){items=items.filter(x=>x.id!==id);save();}
+function checkIn(){
+  const k=todayKey();
+  if(streak[k]){alert("今天已经打卡啦，明天再来 ☀");return;}
+  const y=new Date(Date.now()-864e5).toISOString().slice(0,10);
+  streak[k]=y in streak?streak[y]+1:1;
+  localStorage.setItem(KEY+"_streak",JSON.stringify(streak));
+  render();alert("打卡成功！已连续祈祷 "+streak[k]+" 天 🙏");
+}
+function render(){
+  const tk=todayKey();
+  document.getElementById("sTotal").textContent=items.length;
+  document.getElementById("sPray").textContent=items.filter(x=>x.prayedAt===tk).length;
+  document.getElementById("sStreak").textContent=streak[tk]||0;
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p class="mini" style="margin-top:8px">还没有意向，先添加一条吧。</p>';return;}
+  box.innerHTML=items.map(it=>`
+    <div class="item ${it.prayed?'done':''}">
+      <div class="t">${esc(it.text)}</div>
+      <div class="mini">类型：${it.type} · ${it.prayed?'✅ 已祈祷':'⏳ 待祈祷'}</div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn ${it.prayed?'btn-ok':''}" style="margin-top:0" onclick="markPray(${it.id})">${it.prayed?'已祈祷':'标记为已祈祷'}</button>
+        <button class="btn" style="margin-top:0;background:#EEE;color:#888" onclick="del(${it.id})">删除</button>
+      </div>
+    </div>`).join("");
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+</script>
+</body>
+</html>

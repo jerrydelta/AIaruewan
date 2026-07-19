@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>在韩外国人 自由职业税务·记账</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.out{background:#FFF7F7;border:1px solid #FFE2E2;border-radius:10px;padding:12px;margin-top:10px;font-size:14px}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:13px}
+.item .del{float:right;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">career</span><span class="tag">freelance_tax</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">在韩外国人 自由职业税务·记账</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Bilingual Freelance Tax (EN/CN/JP)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国人气税务 App「삼쩜삼」累计超 2000 万人使用，但界面全韩文无英文，外国人/境外收入/超简单费率门槛（₩2400万）的复杂 case 只能找 세무사（基础申报 ₩10–30万）。母语界面是空白。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 退税 / 税金估算</b>
+    <label>年度毛收入（원）</label>
+    <input id="income" type="number" placeholder="如 30000000">
+    <label>可抵扣费用（원，发票/经费用）</label>
+    <input id="exp" type="number" placeholder="如 5000000">
+    <button class="btn" onclick="calc()">估算税金</button>
+    <div class="out" id="out" style="display:none"></div>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px">* 简化估算：프리랜서 常用 3.3% 事业所得税率，仅作参考，正式申报请咨询 세무사。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 费用 / 发票台账</b>
+    <div class="row">
+      <input id="led_date" type="date">
+      <input id="led_cat" placeholder="类别(差旅/工具/餐)">
+    </div>
+    <input id="led_amt" type="number" placeholder="金额 원" style="margin-top:8px">
+    <button class="btn" onclick="addLed()">记一笔</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的台账</b>
+    <p style="font-size:12px;color:var(--muted);margin:6px 0 0">合计 <b class="h-coral" id="sum">0</b> 원</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://localnomad.club/zh-cn/blog/tax/korea-freelancer-tax-filing-guide-2026" target="_blank" style="color:var(--coral)">在韩自由职业报税指南 2026</a>
+  </div>
+
+<script>
+const KEY="P2-004";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function fmt(n){ return (n||0).toLocaleString(); }
+function calc(){
+  const inc=+document.getElementById("income").value||0;
+  const ex=+document.getElementById("exp").value||0;
+  const taxable=Math.max(0,inc-ex);
+  const tax=Math.round(taxable*0.033);
+  const net=inc-tax;
+  const o=document.getElementById("out");
+  o.style.display="block";
+  o.innerHTML="课税所得：<b>"+fmt(taxable)+"</b> 원<br>估算税金(3.3%)：<b class='h-coral'>"+fmt(tax)+"</b> 원<br>税后净收：<b>"+fmt(net)+"</b> 원";
+}
+function addLed(){
+  const d=document.getElementById("led_date").value||new Date().toISOString().slice(0,10);
+  const c=document.getElementById("led_cat").value.trim()||"其他";
+  const a=+document.getElementById("led_amt").value||0;
+  if(!a){ alert("请输入金额"); return; }
+  items.unshift({d,c,a,t:Date.now()});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("led_amt").value=""; document.getElementById("led_cat").value="";
+  render();
+}
+function render(){
+  const box=document.getElementById("list");
+  let sum=0;
+  let h='<b>📋 我的台账</b><p style="font-size:12px;color:var(--muted);margin:6px 0 0">合计 <b class="h-coral" id="sum">'+fmt(items.reduce((s,x)=>s+x.a,0))+'</b> 원</p>';
+  if(items.length===0){ h+='<p style="font-size:13px;color:var(--muted)">还没有记录。</p>'; }
+  items.forEach((it,i)=>{
+    sum+=it.a;
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除</span>'+it.d+' · '+it.c+'<br><b class="h-coral">'+fmt(it.a)+'</b> 원</div>';
+  });
+  box.innerHTML=h;
+}
+function del(i){ items.splice(i,1); localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+render();
+</script>
+</body>
+</html>

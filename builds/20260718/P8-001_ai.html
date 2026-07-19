@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>受験生英単語帳・再生記憶特化</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.item .t{font-weight:600}
+.item .m{font-size:13px;color:var(--muted)}
+.mini{font-size:12px;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}
+.mini.ok{color:var(--ok);border-color:#bfe9d4}
+.mini.bad{color:var(--coral);border-color:#ffd9d9}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">education</span><span class="tag">exam_vocab_app</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">受験生英単語帳・再生記憶特化</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Exam-student vocabulary app focused on recall-level memory + friend sharing</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">既存単語帳アプリは「テスト前提」で、卒業までの限られた時間で「覚える（再生レベルの記憶）」用途に特化したものが少ない。最大の不満は単語の登録がめんどくさいこと。友人間で単語帳を共有できれば登録負担が減る。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:4px 0 0">単語を登録して「英作文・読解で出せる」再生レベル記憶を鍛えよう。テストモードで意味を隠し、出せたかで仕分け。</p>
+    <label>英単語（が出てくる形）</label>
+    <input id="w-en" placeholder="例：accomplish">
+    <label>意味（再生したい形）</label>
+    <input id="w-jp" placeholder="例：達成する">
+    <label>例文（任意）</label>
+    <input id="w-ex" placeholder="例：She accomplished her goal.">
+    <button class="btn" onclick="addWord()">単語を登録</button>
+
+    <div class="row" style="margin-top:12px">
+      <button class="mini" onclick="startTest()">🎯 テスト開始</button>
+      <button class="mini" onclick="exportShare()">📤 友達へ共有</button>
+      <button class="mini" onclick="importShare()">📥 取り込む</button>
+    </div>
+    <div id="testBox" style="display:none;margin-top:12px;border:1px dashed var(--coral);border-radius:12px;padding:12px">
+      <div id="tQ" style="font-weight:700;font-size:16px"></div>
+      <div id="tA" style="font-size:14px;color:var(--ok);margin-top:4px;display:none"></div>
+      <button class="mini" onclick="reveal()" style="margin-top:8px">答えを見る</button>
+      <div class="row" style="margin-top:8px">
+        <button class="mini ok" onclick="grade(true)">出せた ✓</button>
+        <button class="mini bad" onclick="grade(false)">出せず ✗</button>
+      </div>
+    </div>
+    <p id="stat" style="font-size:13px;color:var(--muted);margin:10px 0 0">登録：0語 ／ 覚えた：0語</p>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P8-001">
+    <div class="collapse-header" id="aiHeader_P8-001" onclick="toggleAI('P8-001')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P8-001" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P8-001">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P8-001" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P8-001')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P8-001" style="display:none;margin-top:10px">
+        <div id="aiMessages_P8-001" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P8-001" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P8-001')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/ec/app/%E5%8F%97%E9%A8%93%E7%94%9F%E3%81%AE%E3%81%9F%E3%82%81%E3%81%AE%E8%8B%B1%E5%8D%98%E8%AA%9E%E5%B8%B3-%E3%83%9C%E3%82%AD%E3%83%A3%E3%83%AA%E3%83%B3/id1617473616" target="_blank" style="color:var(--coral)">ボキャリン（受験生のための英単語帳）</a>
+  </div>
+
+<script>
+const KEY="P8-001";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let tIdx=-1;
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addWord(){
+  const en=document.getElementById("w-en").value.trim();
+  const jp=document.getElementById("w-jp").value.trim();
+  const ex=document.getElementById("w-ex").value.trim();
+  if(!en||!jp){alert("英単語と意味は必須です");return;}
+  items.push({en,jp,ex,learned:false,id:Date.now()});
+  document.getElementById("w-en").value="";
+  document.getElementById("w-jp").value="";
+  document.getElementById("w-ex").value="";
+  save();
+}
+function render(){
+  const box=document.getElementById("list");
+  const learned=items.filter(i=>i.learned).length;
+  document.getElementById("stat").textContent=`登録：${items.length}語 ／ 覚えた：${learned}語`;
+  if(!items.length){box.innerHTML="<b>📚 単語帳</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>まだ単語がありません。上から登録してください。</p>";return;}
+  box.innerHTML="<b>📚 単語帳（"+items.length+"語）</b>"+items.map((i,idx)=>
+    `<div class='item'><div class='t'>${esc(i.en)} <span style='font-size:12px;color:${i.learned?'var(--ok)':'var(--muted)'}'>${i.learned?'✓覚えた':'・学習中'}</span></div>
+     <div class='m'>${esc(i.jp)}${i.ex?' ／ '+esc(i.ex):''}</div>
+     <div class='row' style='margin-top:6px'>
+       <button class='mini ${i.learned?'bad':'ok'}' onclick='toggle(${idx})'>${i.learned?'覚えてないに戻す':'覚えた！'}</button>
+       <button class='mini' onclick='del(${idx})'>削除</button>
+     </div></div>`).join("");
+}
+function toggle(idx){items[idx].learned=!items[idx].learned;save();}
+function del(idx){items.splice(idx,1);save();}
+function startTest(){
+  const pool=items;
+  if(!pool.length){alert("先に単語を登録してください");return;}
+  tIdx=Math.floor(Math.random()*pool.length);
+  document.getElementById("testBox").style.display="block";
+  document.getElementById("tQ").textContent=pool[tIdx].en;
+  const a=document.getElementById("tA");a.style.display="none";a.textContent=pool[tIdx].jp+(pool[tIdx].ex?" ／ "+pool[tIdx].ex:"");
+}
+function reveal(){document.getElementById("tA").style.display="block";}
+function grade(ok){
+  if(tIdx<0)return;
+  items[tIdx].learned=ok;save();
+  startTest();
+}
+function exportShare(){
+  const data=encodeURIComponent(JSON.stringify(items));
+  navigator.clipboard?navigator.clipboard.writeText(data).then(()=>alert("共有用データをコピーしました（友達に送って取り込んでください）")):alert(data);
+}
+function importShare(){
+  const s=prompt("友達から受け取った共有データを貼り付けてください：");
+  if(!s)return;
+  try{const arr=JSON.parse(decodeURIComponent(s));items=items.concat(arr);save();alert(arr.length+"語を取り込みました");}
+  catch(e){alert("データが読み込めませんでした");}
+}
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI庭園設計・和風/韓国風</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#FFF0F0;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">hobby</span><span class="tag">ai_garden_design</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI庭園設計・和風/韓国風</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI garden-design app with Japanese/Korean style templates</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本・韓国でもベランダ/庭・菜園需要は高いが、AI設計（写真→和風/韓国風庭園）のローカル対応アプリが不足。Gardenly/iScape等のグローバルモデルを和風・韓国風へローカライズしたい。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:4px 0 0">スタイル・面積・日当たり・予算から、植栽リストとレイアウトのヒントを自動生成（参考モデル）。</p>
+    <label>スタイル</label>
+    <select id="g-style"><option>和風（日本庭園）</option><option>韓国風（韓屋庭）</option><option>地中海風</option></select>
+    <div class="row">
+      <div><label>面積(㎡)</label><input id="g-area" type="number" min="1" placeholder="10"></div>
+      <div><label>予算(円)</label><input id="g-bud" type="number" min="0" placeholder="30000"></div>
+    </div>
+    <label>日当たり</label>
+    <select id="g-sun"><option>日当たり良</option><option>半日陰</option><option>日陰</option></select>
+    <button class="btn" onclick="gen()">レイアウトを生成</button>
+    <div id="out" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://gardenly.app/blog/garden-design-apps-ranked" target="_blank" style="color:var(--coral)">Gardenly / iScape / Garden Design (AI)</a>
+  </div>
+
+<script>
+const KEY="P8-015";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const TPL={
+  "和風（日本庭園）":{plants:["シダレザクラ","アジサイ","コケ","ショウブ","ツツジ"],tip:"飛石と蹲踞で水と石の対比。コケで層を演出。"},
+  "韓国風（韓屋庭）":{plants:["ムクゲ（国花）","マノス（朝鮮松）","ハマナス","ソウルソウ"],tip:"直線的で整然とした石庭。ムクゲを中心に配置。"},
+  "地中海風":{plants:["オリーブ","ラベンダー","ローズマリー","ヒイラギ"],tip:"白い砂利とテラコッタ鉢。香り草本を手前に。"}
+};
+function gen(){
+  const style=document.getElementById("g-style").value;
+  const area=parseInt(document.getElementById("g-area").value)||0;
+  const bud=parseInt(document.getElementById("g-bud").value)||0;
+  const sun=document.getElementById("g-sun").value;
+  if(!area){alert("面積を入力してください");return;}
+  const t=TPL[style];
+  const sunTip={ "日当たり良":"日当たりを好む花木を全面に", "半日陰":"半日陰向けを混植", "日陰":"日陰耐性のコケ・シダ中心" }[sun];
+  const count=Math.max(3,Math.min(8,Math.round(area/3)));
+  const pick=t.plants.slice(0,count);
+  const plan={style,area,bud,sun,plants:pick,tip:t.tip+" "+sunTip,id:Date.now()};
+  let html=`<b>🌿 あなたのレイアウト（${style}）</b>`;
+  html+=`<div class='item'><div style='font-size:13px;color:var(--muted)'>面積${area}㎡ ・ 予算${bud.toLocaleString()}円 ・ ${sun}</div>`;
+  html+=`<div style='margin-top:6px'><b>植栽リスト</b><br>${pick.map(p=>`<span class='pill'>${p}</span>`).join(" ")}</div>`;
+  html+=`<div style='font-size:13px;margin-top:6px'>💡 ${esc(plan.tip)}</div></div>`;
+  html+=`<p style='font-size:12px;color:var(--muted)'>※参考モデル。実際の気候・土壌は現地で確認を。</p>`;
+  document.getElementById("out").innerHTML=html;
+  items.push(plan);localStorage.setItem(KEY,JSON.stringify(items));renderList();
+}
+function renderList(){
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>🪴 保存した設計</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>まだ設計がありません。</p>";return;}
+  box.innerHTML="<b>🪴 保存した設計（"+items.length+"）</b>"+items.slice().reverse().map((i,ri)=>{
+    const idx=items.length-1-ri;
+    return `<div class='item'><b>${esc(i.style)}</b>
+      <div style='font-size:13px;color:var(--muted)'>${i.area}㎡ ・ ${i.bud.toLocaleString()}円 ・ ${i.sun}</div>
+      <button class='mini' style='margin-top:6px' onclick='del(${idx})'>削除</button></div>`;
+  }).join("");
+}
+function del(idx){items.splice(idx,1);localStorage.setItem(KEY,JSON.stringify(items));renderList();}
+renderList();
+</script>
+</body>
+</html>

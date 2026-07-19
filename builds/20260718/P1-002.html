@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI儿童绘本生成器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.book{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;font-size:13px}
+.book b{color:var(--ink)}.del{color:var(--coral);font-size:12px;float:right;cursor:pointer}
+.out{background:#FFF8F8;border:1px dashed var(--coral);border-radius:10px;padding:10px;margin-top:10px;font-size:13px;white-space:pre-wrap}
+small{color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag">ai_childrens_book_generator</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI 儿童绘本生成器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI-generated children's books (illustration + layout) for passive income</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">家长想要个性化/定制故事，传统出版慢且贵。AI 拆解插画/排版/营销门槛，数字商品零库存可无限售（案例：AI 绘本月入 $10,000）。本工具离线生成故事大纲+逐页插画提示词+排版清单，可直接进 Canva/KDP/小红书。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>孩子名字（个性化定制）</label>
+    <input id="name" placeholder="例如：小宇">
+    <div class="row">
+      <div><label>主题</label>
+      <select id="theme">
+        <option>勇敢冒险</option><option>友情</option><option>睡前</option>
+        <option>动物朋友</option><option>太空探索</option><option>魔法</option>
+      </select></div>
+      <div><label>适读年龄</label>
+      <select id="age"><option>2-4</option><option>4-6</option><option>6-8</option></select></div>
+    </div>
+    <label>页数</label>
+    <select id="pages"><option>8</option><option>12</option><option>16</option><option>24</option></select>
+    <button class="btn" id="gen">生成故事大纲+插画提示词</button>
+    <div class="out" id="out" style="display:none"></div>
+    <button class="btn sub" id="save" style="display:none">保存此书到项目列表</button>
+  </div>
+
+  <div class="card" id="list"><b>📚 我的绘本项目</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://payingassets.com/how-i-made-8000-in-45-days-selling-ai-generated-childrens-books" target="_blank" style="color:var(--coral)">Brko AI绘本 · Ohanashi AI Gen · ChatGPT+Midjourney+Canva</a>
+  </div>
+
+<script>
+const KEY="P1-002";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let last=null;
+const scenes={
+  "勇敢冒险":["出发","遇到小挫折","鼓起勇气","战胜恐惧","凯旋"],
+  "友情":["遇见新朋友","发生误会","互相帮助","和好","永远朋友"],
+  "睡前":["天黑了","洗漱","听故事","数羊","甜甜睡"],
+  "动物朋友":["森林相遇","一起玩耍","迷路","互助回家","庆祝"],
+  "太空探索":["坐飞船","看见星球","登陆月球","遇到外星人","返回地球"],
+  "魔法":["发现魔杖","念错咒语","搞笑混乱","学会控制","快乐结局"]
+};
+function gen(){
+  const name=document.getElementById("name").value||"小主角";
+  const theme=document.getElementById("theme").value;
+  const age=document.getElementById("age").value;
+  const n=+document.getElementById("pages").value;
+  const sc=scenes[theme];
+  let outline=`【书名】《${name}的${theme}之旅》（适读 ${age} 岁，共 ${n} 页）\n\n`;
+  for(let i=1;i<=n;i++){
+    const s=sc[(i-1)%sc.length];
+    outline+=`P${i}｜情节：${name}${s}\n  插画提示词：children's book illustration, ${theme} style, character ${name}, ${s}, flat vector, soft pastel, page ${i}\n`;
+  }
+  outline+=`\n【排版】用 Canva A4 横版，每页左图右文，导出 PDF 上架 KDP/Etsy/小红书。`;
+  last={name,theme,age,n,outline};
+  const o=document.getElementById("out");o.style.display="block";o.textContent=outline;
+  document.getElementById("save").style.display="block";
+}
+function save(){
+  if(!last)return;
+  items.push({...last,t:new Date().toLocaleString("zh")});
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+  document.getElementById("out").style.display="none";document.getElementById("save").style.display="none";last=null;
+}
+function render(){
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">暂无项目，生成后保存。</p>';return;}
+  box.innerHTML=items.map((r,i)=>`<div class="book"><span class="del" data-i="${i}">删除</span>
+    <b>《${r.name}的${r.theme}之旅》</b> · ${r.age}岁/${r.n}页<br><small>${r.t}</small></div>`).join("");
+  box.querySelectorAll(".del").forEach(e=>e.onclick=()=>{items.splice(+e.dataset.i,1);localStorage.setItem(KEY,JSON.stringify(items));render();});
+}
+document.getElementById("gen").onclick=gen;
+document.getElementById("save").onclick=save;
+render();
+</script>
+</body>
+</html>

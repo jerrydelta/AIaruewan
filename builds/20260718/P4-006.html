@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>走路赚钱健身激励（韩语风·三星生态）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none;float:right}
+.badge{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:14px;padding:14px;text-align:center;margin:10px 0}
+.badge b{font-size:26px;color:var(--coral)}
+.bar{height:10px;background:#FFE3E3;border-radius:999px;overflow:hidden;margin-top:6px}
+.bar>span{display:block;height:100%;background:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">fitness</span><span class="tag">korea_fitness_market</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">走路赚钱·每日步数激励</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Korean-localized step-rewards fitness</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国健身App市场2024年1.51亿美元，预计CAGR 19.17%，2035年达10.39亿美元。驱动：智能手机+可穿戴渗透、健康意识上升。机会：韩语本地化、与三星可穿戴深度整合的垂直健身App（如Planfit类AI教练、CashWalk类走路赚钱）。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">每天走够步数攒金币，金币升级解锁"健康徽章"。像 CashWalk 一样，但数据全留你手机。</p>
+    <label>今天走了多少步？</label>
+    <input id="steps" type="number" min="0" placeholder="如：8000">
+    <button class="btn" onclick="add()">🪙 同步步数赚金币</button>
+    <div class="badge">
+      <div>累计金币</div><b id="coin">0</b>
+      <div class="bar"><span id="lvbar" style="width:0%"></span></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">距下一级还需 <span id="need">100</span> 金币</div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>👟 每日步数</b>
+    <div id="logs" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.sphericalinsights.com/zh/reports/south-korea-fitness-app-market" target="_blank" style="color:var(--coral)">Planfit / CashWalk / Samsung Health</a>
+  </div>
+
+<script>
+const KEY="P4-006";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function lvl(c){return Math.floor(c/100)+1;}      // 每100金币升1级
+function need(c){return 100-(c%100);}
+function add(){
+  const s=parseInt(document.getElementById("steps").value)||0;
+  if(!s){alert("填一下今天的步数");return;}
+  const coin=Math.floor(s/100);   // 每100步=1金币
+  items.unshift({s,coin,d:new Date().toISOString().slice(0,10)});
+  document.getElementById("steps").value="";
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const total=items.reduce((a,x)=>a+x.coin,0);
+  document.getElementById("coin").textContent=total;
+  document.getElementById("lvbar").style.width=(total%100)+"%";
+  document.getElementById("need").textContent=need(total);
+  document.getElementById("logs").innerHTML=items.length?items.map((x,i)=>
+    `<div class="item"><button class="del" onclick="del(${i})">删除</button>${x.d} · ${x.s}步 · +${x.coin}🪙 <span style="color:var(--muted)">(Lv.${lvl(total)})</span></div>`
+  ).join(""):`<p style="color:var(--muted);font-size:13px">还没有步数记录。</p>`;
+}
+render();
+</script>
+</body>
+</html>

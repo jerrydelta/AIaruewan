@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩国小商户极简记账+自动估税</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.res{font-size:14px;margin-top:8px;padding:10px;border-radius:10px;background:#FFF7F7}
+.res b{color:var(--coral)}
+li{list-style:none;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+ul{padding:0;margin:6px 0 0}
+.del{color:var(--muted);font-size:12px;border:none;background:none;cursor:pointer;float:right}
+.pill{font-size:11px;padding:1px 7px;border-radius:999px;background:#FFF0F0;color:var(--coral);margin-right:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">finance</span><span class="tag">korean_micro_merchant_accounting</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩国小商户·记账+自动估税</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Hometax-linked micro-merchant bookkeeping + VAT estimate</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国소상공인缺会计知识却要管增值税(부가가치세)与综合所得税(종합소득세)预估。캔디캐시定位「简便事业管理」，一次连携 Hometax/信用卡/配送流水，无会计知识也能看预计税额。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#777;margin:6px 0 0">记一笔売上/仕入 → 自动算预计 VAT 与综合所得税（简易）。</p>
+    <label>月份</label>
+    <input type="month" id="ym" value="">
+    <label>类型</label>
+    <select id="type"><option value="売上">売上（销售额，含稅）</option><option value="仕入">仕入（采购/经费，含稅）</option></select>
+    <label>金额（万 KRW，含稅）</label>
+    <input type="number" id="amt" placeholder="例 500" inputmode="numeric" step="any">
+    <button class="btn" onclick="add()">＋ 记一笔</button>
+    <div class="res" id="res"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📒 事业账簿</b>
+    <ul id="ul"></ul>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/br/app/%EC%BA%94%EB%94%94%EC%BA%90%EC%8B%9C/id1603776504" target="_blank" style="color:var(--coral)">캔디캐시 (CandyCash) / BCFi / 세무사 대행</a>
+  </div>
+
+<script>
+const KEY="P16-006";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function fmt(n){return (n||0).toLocaleString("ko-KR")+" 万 KRW";}
+function add(){
+  const ym=document.getElementById("ym").value||new Date().toISOString().slice(0,7);
+  const type=document.getElementById("type").value;
+  const amt=parseFloat(document.getElementById("amt").value);
+  if(!amt||amt<=0){alert("请输入金额");return;}
+  items.unshift({ym,type,amt,t:Date.now()});
+  document.getElementById("amt").value="";
+  save();
+}
+function del(t){items=items.filter(x=>x.t!==t);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const ul=document.getElementById("ul");ul.innerHTML="";
+  let sales=0,purch=0;
+  items.forEach(x=>{ if(x.type==="売上")sales+=x.amt; else purch+=x.amt;
+    const li=document.createElement("li");
+    li.innerHTML=`<button class="del" onclick="del(${x.t})">删除</button>
+      <span class="pill">${x.type}</span>${x.ym} · ${fmt(x.amt)}`;
+    ul.appendChild(li);
+  });
+  // VAT = 売上税額 - 仕入税額 = (sales-purch)*0.1/1.1 近似 (含稅→税額)
+  const vat=Math.max((sales-purch),0)*0.1/1.1;
+  // 综合所得税：事业所得=売上-仕入，简易累进
+  const biz=Math.max(sales-purch,0);
+  const taxBiz=estBiz(biz);
+  document.getElementById("res").innerHTML=
+    `累计売上 <b>${fmt(sales)}</b> ｜ 仕入 <b>${fmt(purch)}</b><br>`+
+    `预计 VAT(付): <b>${fmt(vat)}</b><br>`+
+    `事业所得 <b>${fmt(biz)}</b> → 预计 종합소득세 <b>${fmt(taxBiz)}</b>`;
+}
+function estBiz(b){ // 万KRW, 简易所得税累进(近似,未扣基礎控除)
+  const tbl=[[1400,0.06],[4600,0.15],[8800,0.24],[15000,0.35],[30000,0.38],[50000,0.40],[100000,0.42],[Infinity,0.45]];
+  let prev=0,t=0;
+  for(const [cap,rate] of tbl){ if(b<=prev)break; const seg=Math.min(b,cap)-prev; if(seg>0)t+=seg*rate; prev=cap; }
+  return t*1.10;
+}
+render();
+</script>
+</body>
+</html>

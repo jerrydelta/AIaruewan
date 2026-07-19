@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>产后可穿戴HRV预警</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.alert{background:#FFEFEF;border:1px solid #FFC9C9;color:#C0392B;border-radius:12px;padding:12px;font-size:14px;margin-top:10px}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:14px}
+.item .meta{font-size:11px;color:var(--muted);margin-top:4px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">postpartum</span><span class="tag">wearable_hrv</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">产后可穿戴 HRV 预警</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">HRV / 静息心率 / 睡眠效率 · 被动生物特征闭环</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">产后亚急性期 HRV 可降 20-30%、静息心率攀升，这些信号常在抑郁/焦虑发作前数天出现。Oura/WHOOP/Apple Watch 可客观呈现"身体负荷"，对抗"我太弱"的认知扭曲。痛点：产后情绪 App 只问主观情绪，缺被动预警。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 同步今日生理数据</b>
+    <p style="font-size:13px;color:#666;margin:6px 0 0">手动录入手表数据（模拟被动采集），低于基线即预警（非治疗）。</p>
+    <label>HRV（ms，越高越好，基线参考 ≥50）</label>
+    <input id="hrv" type="number" value="45">
+    <label>静息心率（bpm，越低越好，基线参考 ≤70）</label>
+    <input id="rhr" type="number" value="72">
+    <label>睡眠效率（%，≥85 为优）</label>
+    <input id="se" type="number" value="80">
+    <button class="btn" onclick="addBio()">📡 同步今日数据</button>
+    <div id="alertBox"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📉 生理负荷趋势</b>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://joinphoenixhealth.com/resourcecenter/top-10-best-apps-for-maternal-mental-health-support" target="_blank" style="color:var(--coral)">Oura / WHOOP / Apple Watch 产后 HRV 预警</a>
+    <p style="margin:6px 0 0">预警仅为自我观察提示，非医疗诊断。</p>
+  </div>
+
+<script>
+const KEY="P15-017";
+let bios=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(bios));render();}
+function nowStr(){const d=new Date();const p=n=>(""+n).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());}
+function addBio(){
+  const hrv=+document.getElementById("hrv").value,rhr=+document.getElementById("rhr").value,se=+document.getElementById("se").value;
+  bios.unshift({date:nowStr(),hrv,rhr,se});save();
+}
+function delB(i){bios.splice(i,1);save();}
+function render(){
+  const ab=document.getElementById("alertBox");ab.innerHTML="";
+  if(bios.length){
+    const t=bios[0];
+    const flags=[];
+    if(t.hrv<50)flags.push("HRV 偏低（"+t.hrv+"ms），身体负荷可能偏高");
+    if(t.rhr>70)flags.push("静息心率偏高（"+t.rhr+"bpm）");
+    if(t.se<85)flags.push("睡眠效率偏低（"+t.se+"%）");
+    if(flags.length)ab.innerHTML='<div class="alert">⚠️ 今日被动信号提醒：<br>· '+flags.join("<br>· ")+'<br>这不是你"太弱"，是身体在提醒你慢一点。</div>';
+    else ab.innerHTML='<div class="alert" style="background:#F0FFF6;border-color:#C7EFD6;color:#2E8B57">✅ 今日生理信号在舒适区，照顾好自己。</div>';
+  }
+  const box=document.getElementById("items");box.innerHTML=bios.length?'':'<p style="font-size:13px;color:#aaa;margin:8px 0 0">同步第一次数据，建立你的基线。</p>';
+  bios.forEach((b,i)=>{const d=document.createElement("div");d.className="item";
+    d.innerHTML='<span style="float:right;color:var(--coral);font-size:12px;cursor:pointer" onclick="delB('+i+')">删除</span><b>'+b.date+'</b><div class="meta">HRV '+b.hrv+'ms ｜ 静息 '+b.rhr+'bpm ｜ 睡眠 '+b.se+'%</div>';
+    box.appendChild(d);});
+}
+render();
+</script>
+</body>
+</html>

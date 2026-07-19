@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>自由职业者AI全年自动扣税发现</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;font-size:14px}
+.item:first-child{border-top:none}
+.del{background:none;border:none;color:var(--coral);font-size:13px;cursor:pointer;float:right;margin-top:-2px}
+.sumbox{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:10px;font-size:13px}
+.badge{display:inline-block;font-size:11px;background:#EAF7F0;color:var(--ok);border-radius:6px;padding:1px 6px;margin-left:4px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">gig_economy</span><span class="tag">ai_tax_deduction</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">自由职业者 AI 全年自动扣税发现</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI year-round tax-deduction discovery app for freelancers</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Keeper 为美国自由职业者打造的 AI 税务软件，年费 $192 且仅支持美国。自由职业者 $25k+ 的 1099 收入全年混合个人/业务支出，主流报税软件对自雇复杂回报收费高且需手动分类；欧盟/英国缺乏本地合规 AI 替代。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 扣税记录与自动归类</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">录入每笔支出，AI 按描述关键词自动归类可抵扣类别，并估算全年可省税款（按 25% 边际税率）。</p>
+    <label>支出金额（$）</label>
+    <input id="amt" type="number" inputmode="decimal" placeholder="如 49.9">
+    <label>描述（自动识别类别：餐/车/家/软件/差旅…）</label>
+    <input id="desc" placeholder="如 客户午餐 / 油费 / 软件订阅 / 机票">
+    <label>日期（可选）</label>
+    <input id="date" type="date">
+    <button class="btn" onclick="add()">＋ 添加扣税记录</button>
+    <div class="sumbox">累计可抵扣：<b id="sum" class="h-coral">$0.00</b> ｜ 预计省税：<b id="saved" class="h-coral">$0.00</b></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://ladabo.com/ai-tax-software/keeper-review" target="_blank" style="color:var(--coral)">Keeper · FlyFin · TurboTax Self-Employed</a>
+  </div>
+
+<script>
+const KEY="P9-001";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const catMap=[
+ {k:["餐","meal","food","咖啡","coffee","lunch","饭"],c:"餐饮"},
+ {k:["车","car","油","gas","mile","里程","停车","park","uber","lyft"],c:"车马交通"},
+ {k:["家","home","office","办公","房租","rent","水电","网"],c:"家庭办公"},
+ {k:["软件","software","subscription","订阅","saas","app","工具"],c:"软件工具"},
+ {k:["差旅","travel","酒店","hotel","flight","机票","train","火车"],c:"差旅"},
+ {k:["广告","ad","marketing","推广","营销"],c:"营销网络"}
+];
+function detectCat(desc){
+  desc=(desc||"").toLowerCase();
+  for(const m of catMap){ if(m.k.some(w=>desc.includes(w))) return m.c; }
+  return "其他";
+}
+function add(){
+  const amt=parseFloat(document.getElementById("amt").value);
+  const desc=document.getElementById("desc").value.trim();
+  if(!amt||amt<=0){alert("请输入有效金额");return;}
+  items.push({amt,desc,cat:detectCat(desc),date:document.getElementById("date").value||""});
+  document.getElementById("amt").value="";document.getElementById("desc").value="";document.getElementById("date").value="";
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);save();}
+function render(){
+  let sum=0,html="";
+  items.forEach((it,i)=>{ sum+=it.amt;
+    html+=`<div class='item'><button class='del' onclick='del(${i})'>删除</button><b>$${it.amt.toFixed(2)}</b> <span class='tag'>${it.cat}</span><div style='font-size:13px;color:#555'>${it.desc||"—"} ${it.date?"· "+it.date:""}</div></div>`;
+  });
+  document.getElementById("list").innerHTML = items.length
+    ? "<b style='font-size:14px'>📒 扣税记录（"+items.length+" 笔）</b>"+html
+    : "<p style='color:#999;font-size:13px'>暂无记录，添加第一笔可抵扣支出。</p>";
+  document.getElementById("sum").textContent="$"+sum.toFixed(2);
+  document.getElementById("saved").textContent="$"+(sum*0.25).toFixed(2);
+}
+render();
+</script>
+</body>
+</html>

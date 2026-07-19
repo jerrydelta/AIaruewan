@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>低费Robo·原生支持新NISA</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.res{font-size:14px;margin-top:8px;padding:10px;border-radius:10px;background:#FFF7F7}
+.res b{color:var(--coral)}
+li{list-style:none;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+ul{padding:0;margin:6px 0 0}
+.del{color:var(--muted);font-size:12px;border:none;background:none;cursor:pointer;float:right}
+.pill{font-size:11px;padding:1px 7px;border-radius:999px;background:#FFF0F0;color:var(--coral);margin-right:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">finance</span><span class="tag">low_cost_robo_nisa</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">低费 Robo·原生新 NISA</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Low-fee robo-advisor natively supporting new NISA</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本 Robo 手续费高（WealthNavi 1.1%、THEO 最高 1.10%）且 THEO 不支持 NISA，用户直言「不如自己买 ETF（信托报酬 &lt;0.5%）」。新 NISA 非税持有无限期、终身上限 1800 万，正是 Robo 天然载体却被忽视。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#777;margin:6px 0 0">对比低费(≤0.5%) vs 高费(1.1%) Robo 的长期差距（新 NISA 免税）。</p>
+    <div class="row">
+      <div><label>每月积立(円)</label><input type="number" id="m" placeholder="30000" inputmode="numeric"></div>
+      <div><label>年数</label><input type="number" id="y" placeholder="20" inputmode="numeric"></div>
+    </div>
+    <label>预期年化收益 %（税前）</label>
+    <input type="number" id="r" placeholder="5" step="any">
+    <button class="btn" onclick="sim()">对比费用差距</button>
+    <div class="res" id="res"></div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <label>记一笔NISA积立</label>
+    <div class="row">
+      <div><input type="number" id="amt" placeholder="30000" inputmode="numeric"></div>
+      <button class="btn" style="margin-top:6px" onclick="add()">＋ 记</button>
+    </div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P16-009">
+    <div class="collapse-header" id="aiHeader_P16-009" onclick="toggleAI('P16-009')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P16-009" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P16-009">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P16-009" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P16-009')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P16-009" style="display:none;margin-top:10px">
+        <div id="aiMessages_P16-009" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P16-009" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P16-009')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📊 积立记录</b>
+    <ul id="ul"></ul>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.a-tm.co.jp/top/securities/robo-advisor/theo/" target="_blank" style="color:var(--coral)">WealthNavi / THEO+docomo</a>
+  </div>
+
+<script>
+const KEY="P16-009";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function fmt(n){return Math.round(n||0).toLocaleString("ja-JP")+" 円";}
+function sim(){
+  const m=parseFloat(document.getElementById("m").value);
+  const y=parseFloat(document.getElementById("y").value);
+  const r=parseFloat(document.getElementById("r").value)/100;
+  if(!m||!y){alert("请填每月积立与年数");return;}
+  const months=y*12, rm=r/12;
+  const gross=m*((Math.pow(1+rm,months)-1)/rm);
+  const paid=m*months;
+  // 低费0.5%: 净收益= (1+ (r-0.005)/12)^n
+  const rLow=(r-0.005);
+  const fvLow=m*((Math.pow(1+rLow/12,months)-1)/(rLow/12));
+  const rHigh=(r-0.011);
+  const fvHigh=m*((Math.pow(1+rHigh/12,months)-1)/(rHigh/12));
+  document.getElementById("res").innerHTML=
+    `投入本金 <b>${fmt(paid)}</b><br>`+
+    `低费(0.5%) 终值 <b>${fmt(fvLow)}</b><br>`+
+    `高费(1.1%) 终值 <b>${fmt(fvHigh)}</b><br>`+
+    `费用差（新NISA免税白赚）<b>${fmt(fvLow-fvHigh)}</b>`;
+}
+function add(){
+  const amt=parseFloat(document.getElementById("amt").value);
+  if(!amt||amt<=0){alert("请输入金额");return;}
+  items.unshift({amt,d:new Date().toISOString().slice(0,10),t:Date.now()});
+  document.getElementById("amt").value="";save();
+}
+function del(t){items=items.filter(x=>x.t!==t);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const ul=document.getElementById("ul");ul.innerHTML="";
+  let sum=0;
+  items.forEach(x=>{sum+=x.amt;const li=document.createElement("li");
+    li.innerHTML=`<button class="del" onclick="del(${x.t})">删除</button>
+      <span class="pill">NISA</span>${x.d} · +${fmt(x.amt)}`;
+    ul.appendChild(li);});
+  ul.insertAdjacentHTML("beforeend",`<li style="border:none">累计积立 <b>${fmt(sum)}</b> / 上限 1800万</li>`);
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

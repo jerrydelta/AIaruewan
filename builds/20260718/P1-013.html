@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>独立会计AI票据提取工具</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.rec{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;font-size:13px}
+.rec b{color:var(--ink)}.del{color:var(--coral);font-size:12px;float:right;cursor:pointer}
+.sum{display:flex;justify-content:space-between;font-weight:700;padding:8px 0;border-top:2px solid var(--coral);margin-top:6px}
+small{color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">productivity</span><span class="tag">ai_receipt_extraction_accountants</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">独立会计 AI 票据提取</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI receipt-data-extraction for solo accountants</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">美国 140 万会计每人月处理 200-500 单据、30% 工时耗在手工录入。Dext 用 AI 30 秒提取 vendor/金额/税、准确率 95-98%，省 10-15 小时/月。本工具离线模拟"拍照→结构化录入"工作流：逐张填 vendor/金额/税/类别，批量汇总+导出 CSV。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 单张票据录入</b>
+    <div class="row">
+      <div><label>商户 vendor</label><input id="v" placeholder="如：OfficeMax"></div>
+      <div><label>日期</label><input id="d" type="date"></div>
+    </div>
+    <div class="row">
+      <div><label>金额</label><input id="amt" type="number" step="0.01" placeholder="120.00"></div>
+      <div><label>税额</label><input id="tax" type="number" step="0.01" placeholder="9.60"></div>
+    </div>
+    <label>类别</label>
+    <select id="cat"><option>办公用品</option><option>差旅</option><option>餐饮</option><option>软件订阅</option><option>服务费</option><option>其他</option></select>
+    <button class="btn" id="add">提取并保存这条</button>
+    <button class="btn sub" id="csv">导出 CSV（可推 Xero/QuickBooks）</button>
+  </div>
+
+  <div class="card" id="list"><b>🧾 本月票据（<span id="cnt">0</span> 张）</b><div id="items"></div>
+    <div class="sum"><span>合计金额</span><span class="h-coral" id="tot">0.00</span></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://thriveonz360.com/dext-review-2026/" target="_blank" style="color:var(--coral)">Dext · ReceiptsAI · Hubdoc · Expensify</a>
+  </div>
+
+<script>
+const KEY="P1-013";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const v=document.getElementById("v").value.trim();const amt=parseFloat(document.getElementById("amt").value);
+  if(!v||isNaN(amt)){alert("请填商户和金额");return;}
+  const tax=parseFloat(document.getElementById("tax").value)||0;
+  const cat=document.getElementById("cat").value;
+  const d=document.getElementById("d").value||new Date().toISOString().slice(0,10);
+  items.push({v,amt,tax,cat,d});localStorage.setItem(KEY,JSON.stringify(items));
+  ["v","amt","tax"].forEach(id=>document.getElementById(id).value="");
+  render();
+}
+function csv(){
+  if(!items.length)return;
+  let s="date,vendor,category,amount,tax\n";
+  items.forEach(r=>s+=`${r.d},${r.v},${r.cat},${r.amt},${r.tax}\n`);
+  const blob=new Blob(["\ufeff"+s],{type:"text/csv"});const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download="receipts.csv";a.click();
+}
+function render(){
+  document.getElementById("cnt").textContent=items.length;
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">暂无票据，录入第一张。</p>';return;}
+  const tot=items.reduce((a,r)=>a+r.amt,0);
+  document.getElementById("tot").textContent=tot.toFixed(2);
+  box.innerHTML=items.slice().reverse().map((r,i)=>`<div class="rec"><span class="del" data-i="${i}">删除</span>
+    <b>${r.v}</b> <span class="tag">${r.cat}</span><br>
+    ${r.d} · 金额 ${r.amt} · 税 ${r.tax}</div>`).join("");
+  box.querySelectorAll(".del").forEach(e=>e.onclick=()=>{items.splice(+e.dataset.i,1);localStorage.setItem(KEY,JSON.stringify(items));render();});
+}
+document.getElementById("add").onclick=add;
+document.getElementById("csv").onclick=csv;
+render();
+</script>
+</body>
+</html>

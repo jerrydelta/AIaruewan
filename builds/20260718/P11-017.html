@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>神经多元就业教练</title>
+<style>
+:root{
+  --coral:#FF6B6B;        --coral-dark:#E85555;
+  --ink:#2D2D2D;          --muted:#8A8A8A;
+  --bg:#F7F7F7;           --card:#FFFFFF;
+  --line:#ECECEC;         --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-sm{padding:7px 10px;font-size:13px;border-radius:9px;margin-top:0;width:auto}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item h3{margin:0 0 4px;font-size:15px}
+.mini{font-size:12px;color:var(--muted)}
+.out{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:6px;font-size:14px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">neurodiversity</span><span class="tag">nd_employment_support</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">神经多元就业教练</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">ND employment support (AI career coach + jobs)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Mentra 的 Manatee 是 ND 职业 App（AI 路径+每日职位）；Brain in Hand 赋能 2.5 万+员工，留任 +26%。中国 84.7% 大龄孤独症患者从未就业。本工具：AI 式职业路径拆解 + 求职追踪，帮 ND 求职者把"找工作"变可执行的步骤。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 职业路径</b>
+    <input id="goal" placeholder="如：做数据录入员">
+    <button class="btn" onclick="plan()">生成路径</button>
+    <div id="plan"></div>
+
+    <h4 style="margin:14px 0 0;font-size:14px;color:var(--coral)">📋 求职追踪</h4>
+    <div class="row">
+      <div><label>公司</label><input id="co" placeholder="如：XX科技"></div>
+      <div><label>岗位</label><input id="role" placeholder="如：文书助理"></div>
+    </div>
+    <label>状态</label>
+    <select id="st"><option>想投</option><option>已投</option><option>面试中</option><option>录用</option><option>不合适</option></select>
+    <button class="btn" onclick="addJob()">＋ 记录</button>
+    <div id="list"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.mentra.com/manatee" target="_blank" style="color:var(--coral)">Mentra Manatee / Brain in Hand</a>
+  </div>
+
+<script>
+const KEY="P11-017";
+let jobs=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){ localStorage.setItem(KEY,JSON.stringify(jobs)); render(); }
+const PLAN={
+  "数据":["学 Excel/表格基础","找适配的远程录入岗","准备简洁简历","模拟一次面试","每周投 3 个"],
+  "文书":["梳理文字处理能力","学公文格式","准备作品样例","投递行政岗","跟进反馈"],
+  "设计":["选一个工具(如Canva)","做2个小作品","建作品集","投初级岗","约模拟面试"]
+};
+function plan(){
+  const g=document.getElementById('goal').value.trim(); if(!g){alert('请填职业目标');return;}
+  let steps=PLAN["数据"];
+  for(const k in PLAN){ if(g.includes(k)){steps=PLAN[k];break;} }
+  if(steps===PLAN["数据"]&&!g.includes("数据")) steps=["先写1句你想做的事","拆成3个能学的点","本周完成1个小练习","找1个包容雇主","投出第1份"];
+  const box=document.getElementById('plan'); box.innerHTML='<div class="mini" style="margin-top:6px">「'+g+'」路径：</div>';
+  steps.forEach((s,i)=>{ const d=document.createElement('div'); d.className='out'; d.style.marginTop='6px'; d.textContent=(i+1)+'. '+s; box.appendChild(d); });
+  localStorage.setItem(KEY+'_plan', JSON.stringify({goal:g,steps}));
+}
+function addJob(){
+  const co=document.getElementById('co').value.trim(), role=document.getElementById('role').value.trim();
+  if(!co||!role){ alert('请填公司和岗位'); return; }
+  jobs.unshift({id:Date.now(),co,role,st:document.getElementById('st').value});
+  document.getElementById('co').value='';document.getElementById('role').value='';
+  save();
+}
+function setSt(id,s){ const j=jobs.find(x=>x.id===id); if(j){j.st=s; save();} }
+function del(id){ jobs=jobs.filter(x=>x.id!==id); save(); }
+const COL={想投:'#ccc',已投:'#2B7FC4',面试中:'var(--coral)',录用:'var(--ok)',不合适:'#999'};
+function render(){
+  const box=document.getElementById('list'); box.innerHTML='';
+  jobs.forEach(j=>{
+    const el=document.createElement('div'); el.className='item';
+    el.innerHTML='<h3>'+j.role+' @ '+j.co+'</h3>'+
+      '<span class="mini" style="color:'+COL[j.st]+';font-weight:600">● '+j.st+'</span>'+
+      '<div class="row" style="margin-top:6px">'+
+      '<select onchange="setSt('+j.id+',this.value)" style="margin-top:0">'+Object.keys(COL).map(s=>'<option '+(s===j.st?'selected':'')+'>'+s+'</option>').join('')+'</select>'+
+      '<button class="btn btn-sm" style="background:#ccc;width:auto" onclick="del('+j.id+')">删</button></div>';
+    box.appendChild(el);
+  });
+}
+render();
+</script>
+</body>
+</html>

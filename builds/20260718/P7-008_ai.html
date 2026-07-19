@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>多框架解梦与梦境日记</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ok{background:var(--ok)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.mini{font-size:12px;color:var(--muted)}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.interpret{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;padding:12px;margin-top:10px}
+.pattern{background:#F3FFF7;border:1px solid #D6F3E3;border-radius:12px;padding:10px;margin-top:10px;font-size:13px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">spirituality</span><span class="tag">ai_dream_interpretation</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">多框架解梦与梦境日记</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI multi-framework dream interpreter + journal</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">AI 解梦是"轻心理"新爆点。Dreamore AI 两月超 5 万用户、周留存 >45%；多数 AI 解梦 App 只是"梦词典"单层解释。机会在于多框架 + 梦境日记 + 长期重复模式追踪。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 解梦 + 日记 + 模式追踪</b>
+    <label>梦的内容</label>
+    <textarea id="dream" rows="3" placeholder="例如：我梦见自己在飞，又掉进水里"></textarea>
+    <label>解读框架</label>
+    <select id="frame">
+      <option value="freud">弗洛伊德（欲望与潜意识）</option>
+      <option value="zhou">周公解梦（传统象征）</option>
+      <option value="sci">现代科学（大脑整理记忆）</option>
+    </select>
+    <button class="btn" onclick="interpret()">🔮 解读这个梦</button>
+    <div class="interpret" id="out"></div>
+    <button class="btn btn-ok" id="saveBtn" style="display:none" onclick="save()">📥 存入梦境日记</button>
+    <div class="pattern" id="pattern"></div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P7-008">
+    <div class="collapse-header" id="aiHeader_P7-008" onclick="toggleAI('P7-008')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P7-008" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P7-008">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P7-008" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P7-008')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P7-008" style="display:none;margin-top:10px">
+        <div id="aiMessages_P7-008" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P7-008" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P7-008')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>🌙 我的梦境日记</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.forbeschina.com/fga/66834" target="_blank" style="color:var(--coral)">Dreamore AI / Onira / Dreamoo（多框架 AI 解梦）</a>
+  </div>
+
+<script>
+const KEY="P7-008";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const SYM={
+  freud:{
+    "飞":["飞行常象征对自由与掌控的渴望，或现实中想「超越」某种束缚。"],
+    "水":["水多与情绪、潜意识有关，落水可能代表被某种情绪淹没。"],
+    "掉":["坠落常反映对失控或失败的焦虑。"],
+    "牙":["掉牙常与对形象、表达或衰老的担忧相关。"],
+    "追":["被追通常指向你在逃避的某个现实问题或情绪。"]
+  },
+  zhou:{
+    "飞":["梦见飞翔，主得势升迁、心想事成之兆。"],
+    "水":["梦见涉水，主出行或财运；清水吉，浊水慎。"],
+    "掉":["梦见跌落，主失财或小人口舌，宜谨慎。"],
+    "牙":["梦见掉牙，主骨肉分离之忧，多思亲眷。"],
+    "追":["梦见被逐，主小人近身，凡事忍让为安。"]
+  },
+  sci:{
+    "飞":["飞行梦多见于 REM 睡眠，大脑在整合「能力感」相关记忆。"],
+    "水":["水相关意象常来自睡眠中体温、触觉等身体信号的映射。"],
+    "掉":["坠落感常因入睡时肌肉放松引发的「入眠抽动」，并非预兆。"],
+    "牙":["牙齿梦多与面部神经在睡眠中的微弱活动有关。"],
+    "追":["被追梦反映白天未处理完的压力仍在大脑后台运行。"]
+  }
+};
+const LABEL={freud:"弗洛伊德",zhou:"周公",sci:"科学"};
+let last=null;
+function interpret(){
+  const d=document.getElementById("dream").value.trim();
+  if(!d){alert("请先描述你的梦");return;}
+  const f=document.getElementById("frame").value;const base=SYM[f];
+  const hits=Object.keys(base).filter(k=>d.includes(k));
+  let txt;
+  if(hits.length){
+    txt=hits.map(k=>"· "+k+"："+base[k][0]).join("<br>");
+  }else{
+    txt="这个梦里没匹配到预设象征词。通用视角："+base["飞"][0].replace(/飞行/g,"此梦");
+  }
+  last={dream:d,frame:f,out:txt,date:new Date().toLocaleDateString("zh-CN")};
+  document.getElementById("out").innerHTML=`<b>${LABEL[f]}视角</b><div style="font-size:14px;margin-top:6px">${txt}</div><div class="mini" style="margin-top:6px">※ 来自内置象征词典，非医疗诊断</div>`;
+  document.getElementById("saveBtn").style.display="block";
+  trackPattern(d);
+}
+function trackPattern(d){
+  const all=items.map(x=>x.dream).join(" ");
+  const keys=["飞","水","掉","牙","追"];
+  const rep=keys.filter(k=>{const c=(all.match(new RegExp(k,"g"))||[]).length+(d.includes(k)?1:0);return c>=2;});
+  document.getElementById("pattern").innerHTML=rep.length?`🔁 重复模式提醒：你多次梦到「${rep.join("、")}」，可在日记中留意它们的变化。`:"";
+}
+function save(){
+  if(!last)return;items.unshift(last);last=null;
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("out").innerHTML="";document.getElementById("saveBtn").style.display="none";
+  document.getElementById("dream").value="";render();
+}
+function render(){
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p class="mini" style="margin-top:8px">还没有梦境记录，今晚试试。</p>';return;}
+  box.innerHTML=items.map(it=>`
+    <div class="item"><div style="font-size:14px">${esc(it.dream)}</div>
+    <div class="mini" style="margin-top:4px">${LABEL[it.frame]} · ${it.date}</div></div>`).join("");
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

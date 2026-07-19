@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Claude Code 降本 · Token 成本看板</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.kpi{display:flex;gap:8px;margin-top:8px}
+.kpi>div{flex:1;background:#FFF7F7;border:1px solid #FFE2E2;border-radius:10px;padding:10px;text-align:center}
+.kpi b{font-size:18px;color:var(--coral);display:block}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:13px}
+.item .del{float:right;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">token_optimization</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">Claude Code 降本看板</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI-Coding Cost Optimizer</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">WOZCODE 面向重度 Claude Code 用户，用智能上下文压缩与请求优化减少 Token 消耗，可省超 $113K API 成本，登 ProductHunt 前 10。痛点：AI coding token 成本高、上下文管理弱。机会在面向开发者的成本优化工具。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 记录一次会话</b>
+    <input id="task" placeholder="任务（如：重构支付模块）">
+    <div class="row">
+      <input id="before" type="number" placeholder="优化前 token">
+      <input id="after" type="number" placeholder="优化后 token">
+    </div>
+    <label>单价（$ / 百万 token）</label>
+    <input id="unit" type="number" step="0.1" value="3" placeholder="如 3">
+    <button class="btn" onclick="log()">记录</button>
+  </div>
+
+  <div class="card">
+    <b>📊 成本看板</b>
+    <div class="kpi">
+      <div><b id="kTok">0</b>累计省 token</div>
+      <div><b id="kCost">$0</b>累计省 $</div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 会话记录</b>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://neodrop.ai/post/gAVpKDVWY8k" target="_blank" style="color:var(--coral)">WOZCODE · Token 优化</a>
+  </div>
+
+<script>
+const KEY="P2-017";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function log(){
+  const task=document.getElementById("task").value.trim();
+  if(!task){ alert("填写任务"); return; }
+  const before=+document.getElementById("before").value||0;
+  const after=+document.getElementById("after").value||0;
+  const unit=+document.getElementById("unit").value||0;
+  const saveTok=Math.max(0,before-after);
+  const saveCost=+(saveTok/1e6*unit).toFixed(2);
+  items.unshift({task,before,after,saveTok,saveCost,t:Date.now()});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("task").value=""; document.getElementById("before").value=""; document.getElementById("after").value="";
+  render();
+}
+function render(){
+  const box=document.getElementById("list");
+  const totTok=items.reduce((s,x)=>s+x.saveTok,0);
+  const totCost=items.reduce((s,x)=>s+x.saveCost,0);
+  document.getElementById("kTok").textContent=totTok.toLocaleString();
+  document.getElementById("kCost").textContent="$"+totCost.toFixed(2);
+  let h='<b>📋 会话记录</b>';
+  if(items.length===0){ h+='<p style="font-size:13px;color:var(--muted)">还没有记录。</p>'; }
+  items.forEach((it,i)=>{
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除</span><b>'+it.task+'</b><br>'+
+       '省 '+it.saveTok.toLocaleString()+' token · 省 $'+it.saveCost.toFixed(2)+'</div>';
+  });
+  box.innerHTML=h;
+}
+function del(i){ items.splice(i,1); localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+render();
+</script>
+</body>
+</html>

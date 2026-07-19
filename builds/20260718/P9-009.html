@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>零工者便携福利与退休储蓄聚合</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;font-size:14px}
+.item:first-child{border-top:none}
+.del{background:none;border:none;color:var(--coral);font-size:13px;cursor:pointer;float:right;margin-top:-2px}
+.sumbox{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:10px;font-size:13px}
+.sumbox b{color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">gig_economy</span><span class="tag">portable_benefits_retirement</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">零工便携福利与退休储蓄</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Portable-benefits &amp; retirement savings aggregator</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">1099 零工者无雇主福利：无失业、无工伤、无带薪病假、无 401k 配捐，中位利润仅 $8.55/小时。各州试点"便携福利基金"，平台按单缴费进池。零工者需自管退休储蓄。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 退休自动扣缴 + 福利池记录</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">设定周收入与退休扣缴比例，自动算出年储蓄；再记录你的医保/意外/失业等便携福利月缴。</p>
+    <div class="row">
+      <div><label>周收入($)</label><input id="wk" type="number" inputmode="decimal" placeholder="如 600"></div>
+      <div><label>退休扣缴比例(%)</label><input id="rate" type="number" inputmode="decimal" value="10"></div>
+    </div>
+    <button class="btn" onclick="calcRet()">算年退休储蓄</button>
+    <div class="sumbox" id="retRes">填写后点击测算。</div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <div class="row">
+      <div><label>福利类型</label>
+        <select id="ftype"><option>医保</option><option>意外/工伤</option><option>失业保障</option></select></div>
+      <div><label>月缴($)</label><input id="famt" type="number" inputmode="decimal" placeholder="如 60"></div>
+    </div>
+    <button class="btn" onclick="addBenefit()">＋ 记录福利</button>
+    <div class="sumbox">便携福利年缴合计：<b id="fYear">$0</b></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://compens.ai/en/articles/gig-worker-misclassification-uber-lyft-settlements-2025" target="_blank" style="color:var(--coral)">Catch · Steady</a>
+  </div>
+
+<script>
+const KEY="P9-009";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function calcRet(){
+  const wk=parseFloat(document.getElementById("wk").value)||0;
+  const rate=parseFloat(document.getElementById("rate").value)||0;
+  const year=wk*rate/100*52;
+  document.getElementById("retRes").innerHTML=`按周收入 $${wk} × ${rate}% 扣缴，预计 <b>年退休储蓄 $${year.toFixed(0)}</b>（≈${(year/12).toFixed(0)}/月）。`;
+}
+function addBenefit(){
+  const ftype=document.getElementById("ftype").value;
+  const famt=parseFloat(document.getElementById("famt").value);
+  if(!famt||famt<=0){alert("请输入月缴金额");return;}
+  items.push({ftype,famt});
+  document.getElementById("famt").value="";
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);save();}
+function render(){
+  let year=0,html="";
+  items.forEach((it,i)=>{ year+=it.famt*12;
+    html+=`<div class='item'><button class='del' onclick='del(${i})'>删除</button><b>${it.ftype}</b> <span class='tag'>$${it.famt}/月</span><div style='font-size:13px;color:#555'>年缴 $${(it.famt*12).toFixed(0)}</div></div>`;
+  });
+  document.getElementById("list").innerHTML = items.length
+    ? "<b style='font-size:14px'>📒 便携福利记录（"+items.length+" 项）</b>"+html
+    : "<p style='color:#999;font-size:13px'>暂无记录，开始积累你的保障。</p>";
+  document.getElementById("fYear").textContent="$"+year.toFixed(0);
+}
+render();
+</script>
+</body>
+</html>

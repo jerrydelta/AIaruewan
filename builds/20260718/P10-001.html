@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>夫妻家事分担可视化</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:none}
+.item .name{flex:1;font-size:15px}
+.item .who{font-size:12px;color:var(--muted)}
+.done{text-decoration:line-through;color:var(--muted)}
+.bar{height:24px;border-radius:999px;overflow:hidden;display:flex;margin-top:10px;background:var(--line)}
+.bar .me{background:var(--coral)}
+.bar .pt{background:#6BA8FF}
+.mini{font-size:12px;color:var(--muted);margin-top:6px;text-align:center}
+.del{color:var(--muted);font-size:18px;background:none;border:none;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">home</span><span class="tag">housework_division</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">夫妻家事分担可视化</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Couple housework-division visualizer &amp; fair-sharing app</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">双职工家庭「看不见的家事不均衡」是夫妻吵架主因。日本 Yieto 用 100+ 细分家事任务把负担可视化、彩色地图共享，4.9/5 高分。需要把谁做了多少「看得见」。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 家事录入与公平分配</b>
+    <label>家事任务</label>
+    <input id="t" placeholder="如：洗碗 / 倒垃圾 / 陪娃写作业">
+    <div class="row">
+      <div>
+        <label>负责人</label>
+        <select id="who">
+          <option value="me">我</option>
+          <option value="partner">伴侣</option>
+        </select>
+      </div>
+      <div>
+        <label>频率</label>
+        <select id="freq">
+          <option value="每日">每日</option>
+          <option value="每周">每周</option>
+          <option value="偶尔">偶尔</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn" onclick="add()">＋ 添加家事</button>
+
+    <div id="balance" style="margin-top:14px"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://yieto.andro.io" target="_blank" style="color:var(--coral)">Yieto（日本夫妻家事分担可视化）</a>
+  </div>
+
+<script>
+const KEY="P10-001";
+let tasks = JSON.parse(localStorage.getItem(KEY) || "[]");
+function save(){ localStorage.setItem(KEY, JSON.stringify(tasks)); render(); }
+function add(){
+  const name=document.getElementById('t').value.trim();
+  const who=document.getElementById('who').value;
+  const freq=document.getElementById('freq').value;
+  if(!name) return;
+  tasks.push({id:Date.now(),name,who,freq,done:false});
+  document.getElementById('t').value='';
+  save();
+}
+function toggle(id){const t=tasks.find(x=>x.id==id);if(t)t.done=!t.done;save();}
+function del(id){tasks=tasks.filter(x=>x.id!=id);save();}
+function render(){
+  const total=tasks.length;
+  const meN=tasks.filter(t=>t.who=='me').length;
+  const ptN=total-meN;
+  const pa=total?Math.round(meN/total*100):0, pb=100-pa;
+  document.getElementById('balance').innerHTML=
+    '<div class="bar"><div class="me" style="width:'+pa+'%"></div><div class="pt" style="width:'+pb+'%"></div></div>'+
+    '<div class="mini">我 '+meN+' 项（'+pa+'%） · 伴侣 '+ptN+' 项（'+pb+'%）'+(Math.abs(pa-pb)>=30?' ⚠️ 分担偏斜，建议再平衡':' ✅ 较均衡')+'</div>';
+  const el=document.getElementById('list');
+  if(!total){el.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有家事记录，先添加一条吧。</p>';return;}
+  el.innerHTML='<b>📋 家事清单（'+tasks.filter(t=>t.done).length+'/'+total+' 已完成）</b>'+
+    tasks.map(t=>'<div class="item"><input type="checkbox" '+(t.done?'checked':'')+' onchange="toggle('+t.id+')">'+
+    '<span class="name '+(t.done?'done':'')+'">'+esc(t.name)+'</span>'+
+    '<span class="who">'+whoLabel(t.who)+'·'+t.freq+'</span>'+
+    '<button class="del" onclick="del('+t.id+')">✕</button></div>').join('');
+}
+function whoLabel(w){return w=='me'?'我':'伴侣';}
+function esc(s){return s.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+render();
+</script>
+</body>
+</html>

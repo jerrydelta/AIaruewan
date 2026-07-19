@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>隐私优先·不卖数据的经期/更年期追踪</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.item .del{float:right;color:var(--coral);font-size:12px;cursor:pointer}
+.lock{background:#EAF7F0;color:#1f7a52;border:1px solid #c8ecd9;border-radius:10px;padding:10px;font-size:13px;margin-top:10px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">health</span><span class="tag">privacy_first_menopause</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">隐私优先 · 不卖数据的经期/更年期追踪</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Privacy-first, no-data-selling tracker</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Flo 与 Google/Meta 共享月经与性健康数据，2024/25 和解金 $59.5M。美国已用经期数据作堕胎刑事证据。Menotracker 成为首个「永不存储用户个人数据」的女性健康 App。机会：隐私优先、不卖数据的追踪器。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 本地记录（数据不出本机）</b>
+    <label>日期</label><input id="date" type="date">
+    <label>记录类型</label>
+    <select id="type"><option>经期</option><option>更年期症状</option><option>排卵</option><option>情绪</option></select>
+    <label>说明（症状/流量/备注）</label><input id="desc" placeholder="潮热 中度">
+    <button class="btn" onclick="addItem()">＋ 记录</button>
+    <div class="lock">🔒 本工具采用隐私优先设计：所有数据仅存于你这台设备的浏览器 localStorage，不上传任何服务器、不共享给第三方、不出售。清除浏览器数据即可彻底删除。</div>
+  </div>
+
+  <div class="card" id="list"><b>📅 记录</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://tech.eu/2026/02/02/menotracker-wants-to-fix-menopause-symptom-tracking-without-selling-user-data/" target="_blank" style="color:var(--coral)">Menotracker / ConsentKeys</a>
+  </div>
+
+<script>
+const KEY="P13-011";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+if(!document.getElementById("date").value)document.getElementById("date").valueAsDate=new Date();
+function addItem(){
+  const date=document.getElementById("date").value;
+  const desc=document.getElementById("desc").value.trim();
+  if(!desc){alert("请填写说明");return;}
+  items.push({date,type:document.getElementById("type").value,desc});
+  document.getElementById("desc").value="";
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  let html='<b>📅 记录</b>';
+  if(items.length===0)html+='<p style="font-size:13px;color:#999;margin:8px 0">还没有记录。</p>';
+  [...items].reverse().forEach((x,i)=>{
+    const idx=items.length-1-i;
+    html+=`<div class="item"><span class="del" onclick="del(${idx})">删除</span>
+      <b>${x.date}</b> · ${x.type}<br>${x.desc}</div>`;
+  });
+  html+=`<div class="lock" style="margin-top:10px">已本地保存 ${items.length} 条 · 仅你可见</div>`;
+  box.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

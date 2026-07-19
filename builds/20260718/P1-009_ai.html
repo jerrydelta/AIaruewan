@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>垂直AI音乐/beats生成器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.out{background:#FFF8F8;border:1px dashed var(--coral);border-radius:10px;padding:10px;margin-top:10px;font-size:13px;white-space:pre-wrap}
+.track{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;font-size:13px}
+.track b{color:var(--ink)}.del{color:var(--coral);font-size:12px;float:right;cursor:pointer}
+small{color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">creative</span><span class="tag">ai_music_generator_indie</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">垂直 AI 音乐 / beats 生成器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Vertical AI music/beats generator (commercial license)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Suno v4/Udio 接近人类水平，内容创作者/独立音乐人需无技能出 BGM 与歌曲。痛点：缺商用授权与情绪/时长精准控制。本工具离线生成歌曲/beats 规格（情绪、BPM、结构、乐器、歌词提示词），可直接喂给 Suno/Udio 并管理曲库+授权状态。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>主题 / 歌词关键词</label>
+    <input id="theme" placeholder="例如：深夜城市漫步，孤独但自由">
+    <div class="row">
+      <div><label>情绪</label><select id="mood"><option>开心</option><option>治愈</option><option>燃</option><option>伤感</option><option>放松</option></select></div>
+      <div><label>类型</label><select id="type"><option>背景音乐</option><option> beats</option><option>完整歌曲</option></select></div>
+    </div>
+    <div class="row">
+      <div><label>时长(秒)</label><input id="dur" type="number" value="60"></div>
+      <div><label>授权</label><select id="lic"><option>个人</option><option>商用</option><option>独家买断</option></select></div>
+    </div>
+    <button class="btn" id="gen">生成音乐规格</button>
+    <div class="out" id="out" style="display:none"></div>
+    <button class="btn sub" id="save" style="display:none">保存到曲库</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P1-009">
+    <div class="collapse-header" id="aiHeader_P1-009" onclick="toggleAI('P1-009')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P1-009" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P1-009">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P1-009" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P1-009')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P1-009" style="display:none;margin-top:10px">
+        <div id="aiMessages_P1-009" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P1-009" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P1-009')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>🎵 我的曲库</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://toolchase.com/blog/best-ai-music-generators" target="_blank" style="color:var(--coral)">Suno · Udio · Boomy · Soundraw · AIVA · Mubert</a>
+  </div>
+
+<script>
+const KEY="P1-009";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let last=null;
+const cfg={开心:{bpm:120,key:"C大调",inst:"木吉他+鼓+口风琴"},治愈:{bpm:90,key:"G大调",inst:"钢琴+弦乐+风铃"},
+  燃:{bpm:140,key:"E小调",inst:"电吉他+合成器+鼓"},伤感:{bpm:75,key:"A小调",inst:"钢琴+大提琴"},放松:{bpm:65,key:"D大调",inst:"环境 pad+轻打击"}};
+function gen(){
+  const theme=document.getElementById("theme").value||"城市夜色";
+  const mood=document.getElementById("mood").value,type=document.getElementById("type").value;
+  const dur=+document.getElementById("dur").value,lic=document.getElementById("lic").value;
+  const c=cfg[mood];
+  const struct=type==="beats"?"Intro 4s → Loop 32s → Break 8s → Loop 16s":type==="背景音乐"?"Pad 8s → Theme 44s → Outro 8s":"Verse → Chorus → Verse → Chorus → Bridge → Outro";
+  const txt=`【${type}】${theme}\n情绪：${mood}｜${dur}秒｜授权：${lic}\nBPM：${c.bpm}｜调性：${c.key}｜乐器：${c.inst}\n结构：${struct}\n\n歌词/提示词：\n"${theme}"，${mood}氛围，${c.inst}，适合短视频 BGM，商用友好的旋律，无版权人声。`;
+  last={theme,mood,type,dur,lic,txt};
+  const o=document.getElementById("out");o.style.display="block";o.textContent=txt;
+  document.getElementById("save").style.display="block";
+}
+function save(){if(!last)return;items.push({...last,t:new Date().toLocaleString("zh")});localStorage.setItem(KEY,JSON.stringify(items));render();
+  document.getElementById("out").style.display="none";document.getElementById("save").style.display="none";last=null;}
+function render(){
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">暂无曲目。</p>';return;}
+  box.innerHTML=items.map((r,i)=>`<div class="track"><span class="del" data-i="${i}">删除</span>
+    <b>${r.theme}</b> · ${r.type}/${r.mood}/${r.lic}<br><small>${r.dur}秒 · ${r.t}</small></div>`).join("");
+  box.querySelectorAll(".del").forEach(e=>e.onclick=()=>{items.splice(+e.dataset.i,1);localStorage.setItem(KEY,JSON.stringify(items));render();});
+}
+document.getElementById("gen").onclick=gen;document.getElementById("save").onclick=save;render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

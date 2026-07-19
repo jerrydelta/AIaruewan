@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韓国人向け日本語学習・K-culture</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#FFF0F0;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">education</span><span class="tag">japanese_for_koreans</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韓国人向け日本語学習・K-culture</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Japanese for Koreans blending K-culture context + JLPT prep</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韓国人学習者は「日本語の敬語・漢字・試験（N4/N3）」の実用会話と資格の両立を求める。K-drama・アニメの文脈で覚えたいが、既存アプリは教科書的で「生きた表現」が不足している。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:4px 0 0">K-culture文脈付きで表現を集め、JLPTレベルで管理。「今日の一文」でランダム復習。</p>
+    <label>表現（日本語）</label><input id="j-jp" placeholder="例：本当にありがとう">
+    <label>意味（韓国語）</label><input id="j-ko" placeholder="예: 정말 고마워">
+    <label>文脈（K-culture）</label><input id="j-ctx" placeholder="例：ドラマ『鬼滅の刃』で">
+    <label>JLPTレベル</label>
+    <select id="j-lv"><option>N5</option><option>N4</option><option>N3</option><option>N2</option><option>N1</option></select>
+    <button class="btn" onclick="addJ()">表現を保存</button>
+    <button class="mini" style="margin-top:8px" onclick="pickOne()">🎲 今日の一文</button>
+    <div id="pick" style="margin-top:10px;font-size:15px"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/app/bunpo-learn-japanese-korean/id1279720052" target="_blank" style="color:var(--coral)">LingoDeer / Bunpo / YuSpeak</a>
+  </div>
+
+<script>
+const KEY="P8-007";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addJ(){
+  const jp=document.getElementById("j-jp").value.trim();
+  const ko=document.getElementById("j-ko").value.trim();
+  const ctx=document.getElementById("j-ctx").value.trim();
+  const lv=document.getElementById("j-lv").value;
+  if(!jp||!ko){alert("表現と意味は必須です");return;}
+  items.push({jp,ko,ctx,lv,id:Date.now()});
+  document.getElementById("j-jp").value="";document.getElementById("j-ko").value="";document.getElementById("j-ctx").value="";
+  save();
+}
+function pickOne(){
+  if(!items.length){document.getElementById("pick").textContent="まだ表現がありません。";return;}
+  const i=items[Math.floor(Math.random()*items.length)];
+  document.getElementById("pick").innerHTML=`<b>${esc(i.jp)}</b> <span class='pill'>${i.lv}</span><br><span style='color:var(--muted);font-size:13px'>${esc(i.ko)}${i.ctx?' ／ '+esc(i.ctx):''}</span>`;
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>📘 マイ表現帳（"+items.length+"）</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>まだ表現がありません。</p>";return;}
+  box.innerHTML="<b>📘 マイ表現帳（"+items.length+"）</b>"+items.slice().reverse().map((i,ri)=>{
+    const idx=items.length-1-ri;
+    return `<div class='item' style='padding:8px 10px'><b>${esc(i.jp)}</b> <span class='pill'>${i.lv}</span>
+      <div style='font-size:13px;color:var(--muted)'>${esc(i.ko)}${i.ctx?' ／ '+esc(i.ctx):''}</div>
+      <button class='mini' style='margin-top:4px' onclick='del(${idx})'>削除</button></div>`;
+  }).join("");
+}
+function del(idx){items.splice(idx,1);save();}
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+</script>
+</body>
+</html>

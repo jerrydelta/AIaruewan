@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>WHO 生长曲线评估</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:8px}
+.ok{background:#E7F8F0;color:var(--ok)} .warn{background:#FFF3E0;color:#E8993A} .bad{background:#FFEDED;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">parenting</span><span class="tag">cross_market_baby_log</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">WHO 生长曲线评估</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Localized baby-log with WHO + local growth charts</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">中国用户测评日本 Piyo 日誌指出"死穴"：生长曲线用日本标准而非 WHO 标准，看不到孩子同月龄位置；家人共享需对方也装 App 且付费。痛点：跨文化育儿记录的标准差异与共享门槛。机会：内置 WHO + 各国生长曲线标准的本地化记录。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">输入月龄/性别/身高/体重 → 按内置 WHO 中位数+标准差估算 Z 评分与百分位，判定是否在正常范围（±2SD）。数据本地保存，可随时回看。</p>
+    <label>性别</label>
+    <select id="sex"><option value="boy">男宝</option><option value="girl">女宝</option></select>
+    <label>月龄（0-24）</label><input id="age" type="number" min="0" max="24" value="6">
+    <div class="row"><div><label>身高(cm)</label><input id="h" type="number" placeholder="67.6"></div>
+    <div><label>体重(kg)</label><input id="w" type="number" placeholder="7.9"></div></div>
+    <button class="btn" onclick="evalG()">📊 评估生长</button>
+    <div id="result"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📈 成长档案</b>
+    <div id="gList"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.sohu.com/a/1046001651_122897977" target="_blank" style="color:var(--coral)">Piyo日誌·一木宝宝·トモニテ 中日互搬测评</a>
+  </div>
+
+<script>
+const KEY="P6-005";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+const AGES=[0,3,6,9,12,18,24];
+const WHO={
+  boy:{ weight:{m:[3.3,6.4,7.9,9.0,9.6,10.9,12.2],sd:[0.4,0.7,0.8,0.9,1.0,1.1,1.2]},
+         height:{m:[49.9,61.4,67.6,72.0,75.7,82.3,87.1],sd:[1.9,2.1,2.2,2.3,2.4,2.6,2.8]} },
+  girl:{ weight:{m:[3.2,5.8,7.3,8.2,8.9,10.2,11.5],sd:[0.4,0.7,0.8,0.9,0.9,1.0,1.1]},
+         height:{m:[49.1,59.8,65.7,70.1,74.0,80.7,85.7],sd:[1.8,2.0,2.1,2.2,2.3,2.5,2.7]} }
+};
+function interp(arr,age){
+  if(age<=AGES[0])return arr[0];
+  if(age>=AGES[AGES.length-1])return arr[arr.length-1];
+  for(let i=0;i<AGES.length-1;i++){
+    if(age>=AGES[i]&&age<=AGES[i+1]){
+      const r=(age-AGES[i])/(AGES[i+1]-AGES[i]);
+      return arr[i]+(arr[i+1]-arr[i])*r;
+    }
+  }
+  return arr[arr.length-1];
+}
+function erf(x){const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);
+  const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return s*y;}
+function pct(z){return Math.round((0.5*(1+erf(z/Math.SQRT2)))*100);}
+function assess(metric,val,sex,age){
+  const med=interp(WHO[sex][metric].m,age);
+  const sd=interp(WHO[sex][metric].sd,age);
+  const z=(val-med)/sd;
+  const p=pct(z);
+  let cls='ok',txt='正常';
+  if(z<-2||z>2){cls='bad';txt='偏离（±2SD外）';}
+  else if(z<-1||z>1){cls='warn';txt='偏'+(z<0?'低':'高');}
+  return {z:z.toFixed(1),p,cls,txt,med:med.toFixed(1)};
+}
+function evalG(){
+  const sex=document.getElementById('sex').value;
+  const age=parseFloat(document.getElementById('age').value);
+  const h=parseFloat(document.getElementById('h').value);
+  const w=parseFloat(document.getElementById('w').value);
+  if(isNaN(age)||isNaN(h)||isNaN(w)){alert('请完整填写月龄/身高/体重');return;}
+  const rh=assess('height',h,sex,age), rw=assess('weight',w,sex,age);
+  document.getElementById('result').innerHTML=
+    `<div style="margin-top:10px;font-size:14px">身高：WHO 中位 ${rh.med}cm，Z=${rh.z}，百分位 <b>${rh.p}%</b> <span class="badge ${rh.cls}">${rh.txt}</span></div>`+
+    `<div style="margin-top:6px;font-size:14px">体重：WHO 中位 ${rw.med}kg，Z=${rw.z}，百分位 <b>${rw.p}%</b> <span class="badge ${rw.cls}">${rw.txt}</span></div>`;
+  items.unshift({age,sex:sex==='boy'?'男':'女',h,w,rh:rh.p,rw:rw.p,t:Date.now()});
+  save();
+}
+function del(i){ items.splice(i,1); save(); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function fmt(t){return new Date(t).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function render(){
+  const el=document.getElementById('gList');
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有评估记录。</p>';return;}
+  el.innerHTML=items.map((x,i)=>`<div class="item"><span>${x.sex} ${x.age}月龄 · 身高${x.h}cm(${x.rh}%) · 体重${x.w}kg(${x.rw}%)<br><span style="font-size:11px;color:var(--muted)">${fmt(x.t)}</span></span><button onclick="del(${i})" style="border:none;background:#FFF0F0;color:var(--coral);border-radius:8px;padding:4px 10px">删除</button></div>`).join('');
+}
+render();
+</script>
+</body>
+</html>

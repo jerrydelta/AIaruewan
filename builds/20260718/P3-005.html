@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>结构化饭局交友规划器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item b{color:var(--ink)}.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.seat{font-size:12px;color:var(--ok)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">social</span><span class="tag">curated_group_dinner</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">结构化饭局交友规划器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Curated group-dinner friendship app</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">自由约会App压力太大、匹配质量低。结构化偶遇正在替代滑卡：做性格测试→报名每周一顿饭→算法把5位契合饭友分在一桌，到店才知道同桌是谁。消除了1对1见面的压力。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">创建你的饭局（主题/日期/城市），并报名想找的几类人，自动统计5人席位，本地保存。</p>
+    <label>饭局主题</label>
+    <input id="theme" placeholder="例如：创业者桌 / 创意行业夜 / 安静读书局">
+    <div class="row">
+      <div><label>日期</label><input id="date" type="date"></div>
+      <div><label>城市</label><input id="city" placeholder="例如：上海"></div>
+    </div>
+    <label>我想找的饭友类型（逗号分隔）</label>
+    <input id="seek" placeholder="例如：做产品的、爱旅行的、刚搬家">
+    <label>已确认人数</label>
+    <input id="num" type="number" min="0" max="5" value="1">
+    <button class="btn" onclick="add()">创建 / 报名饭局</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的饭局</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">本地保存，目标5人一桌。</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.bubblic.app/blog/best-apps-to-make-friends-2026.html" target="_blank" style="color:var(--coral)">Timeleft · 结构化饭局</a>
+  </div>
+
+<script>
+const KEY="P3-005";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const theme=document.getElementById("theme").value.trim();
+  if(!theme){alert("先写饭局主题");return;}
+  const date=document.getElementById("date").value||"未定";
+  const city=document.getElementById("city").value.trim()||"未定";
+  const seek=document.getElementById("seek").value.trim();
+  let num=parseInt(document.getElementById("num").value)||1;
+  if(num>5)num=5;
+  const left=5-num;
+  items.unshift({theme,date,city,seek,num,left,t:new Date().toLocaleString("zh-CN")});
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+  document.getElementById("theme").value="";document.getElementById("seek").value="";document.getElementById("city").value="";
+}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const el=document.getElementById("list");
+  let h='<b>📋 我的饭局</b><p style="font-size:12px;color:var(--muted);margin:4px 0 0">本地保存，目标5人一桌。</p>';
+  if(!items.length){h+='<p style="font-size:13px;color:var(--muted);margin-top:8px">还没有饭局。</p>';}
+  items.forEach((it,i)=>{
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除 ✕</span>'+
+       '<b>'+it.theme+'</b><br>'+
+       '<span style="font-size:13px;color:#555">'+it.date+' · '+it.city+'</span><br>'+
+       (it.seek?'<span style="font-size:13px;color:#555">找：'+it.seek+'</span><br>':'')+
+       '<span class="seat">已确认 '+it.num+' 人，还差 '+it.left+' 席</span><br>'+
+       '<span style="font-size:11px;color:var(--muted)">'+it.t+'</span></div>';
+  });
+  el.innerHTML=h;
+}
+render();
+</script>
+</body>
+</html>

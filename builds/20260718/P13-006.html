@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>伴娘礼服订购与任务追踪</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.item .del{float:right;color:var(--coral);font-size:12px;cursor:pointer}
+.warn{color:#E85555;font-weight:600}
+.ok{color:#3FB984}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">wedding</span><span class="tag">bridesmaid_dress_tracker</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">伴娘礼服订购与任务追踪</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Bridesmaid dress order & task tracker</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Reddit r/weddingplanning 验证痛点（75/100）：「我 3 个闺蜜还没订礼服，截止日已过我跟进她们仍没订」。现有 App 无伴娘礼服的统一订购/催单/尺码追踪。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 礼服订购追踪 + 婚礼派对任务</b>
+    <label>伴娘姓名</label><input id="bname" placeholder="小美">
+    <div class="row">
+      <div><label>尺码</label><input id="size" placeholder="M"></div>
+      <div><label>订购日</label><input id="odate" type="date"></div>
+    </div>
+    <label>到货截止日</label><input id="ddate" type="date">
+    <label>状态</label>
+    <select id="bstat"><option>未订购</option><option>已下单</option><option>已到货</option><option>已试穿</option></select>
+    <button class="btn" onclick="addItem()">＋ 添加伴娘</button>
+
+    <div style="margin-top:14px;border-top:1px dashed var(--line);padding-top:12px">
+      <b>📝 婚礼派对任务</b>
+      <input id="task" placeholder="统一买伴手礼" style="margin-top:8px">
+      <button class="btn" onclick="addTask()">＋ 添加任务</button>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>👗 伴娘 & 任务</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.saasniche.com/professions/Wedding%20Planners" target="_blank" style="color:var(--coral)">SaaSNiche 婚礼策划痛点库</a>
+  </div>
+
+<script>
+const KEY="P13-006";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"maids":[],"tasks":[]}');
+function addItem(){
+  const bname=document.getElementById("bname").value.trim();
+  if(!bname){alert("请填写伴娘姓名");return;}
+  data.maids.push({
+    bname,
+    size:document.getElementById("size").value.trim(),
+    odate:document.getElementById("odate").value,
+    ddate:document.getElementById("ddate").value,
+    bstat:document.getElementById("bstat").value,
+    done:false
+  });
+  ["bname","size","odate","ddate"].forEach(id=>document.getElementById(id).value="");
+  save();
+}
+function addTask(){
+  const t=document.getElementById("task").value.trim();
+  if(!t){alert("请填写任务");return;}
+  data.tasks.push({t,done:false});
+  document.getElementById("task").value="";
+  save();
+}
+function delM(i){data.maids.splice(i,1);save();}
+function delT(i){data.tasks.splice(i,1);save();}
+function togM(i){data.maids[i].done=!data.maids[i].done;save();}
+function togT(i){data.tasks[i].done=!data.tasks[i].done;save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function render(){
+  const box=document.getElementById("list");
+  const today=new Date().toISOString().slice(0,10);
+  let html='<b>👗 伴娘礼服</b>';
+  if(data.maids.length===0)html+='<p style="font-size:13px;color:#999;margin:8px 0">还没有伴娘。</p>';
+  let overdue=0;
+  data.maids.forEach((m,i)=>{
+    let flag= m.ddate && m.ddate<today && m.bstat!=='已到货' ? `<span class="warn"> ⚠逾期</span>`:'';
+    if(flag)overdue++;
+    html+=`<div class="item"><span class="del" onclick="delM(${i})">删除</span>
+      <span style="cursor:pointer" onclick="togM(${i})">${m.done?'✅':'○'}</span>
+      <b>${m.bname}</b> · 尺码 ${m.size||'—'} · ${m.bstat}${flag}<br>
+      订购 ${m.odate||'—'} → 截止 ${m.ddate||'—'}</div>`;
+  });
+  html+=`<div style="font-size:13px;color:${overdue?'#E85555':'#3FB984'};padding-top:6px">逾期未到货：${overdue} 人</div>`;
+  html+='<b style="display:block;margin-top:12px">📝 婚礼派对任务</b>';
+  if(data.tasks.length===0)html+='<p style="font-size:13px;color:#999;margin:8px 0">还没有任务。</p>';
+  data.tasks.forEach((t,i)=>{
+    html+=`<div class="item"><span class="del" onclick="delT(${i})">删除</span>
+      <span style="cursor:pointer" onclick="togT(${i})">${t.done?'✅':'○'}</span> ${t.t}</div>`;
+  });
+  box.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

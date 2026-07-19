@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI原生按量付费设计工具</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.icon-box{text-align:center;margin-top:10px}.icon-box svg{width:120px;height:120px}
+.kit{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;font-size:13px}
+.kit b{color:var(--ink)}.del{color:var(--coral);font-size:12px;float:right;cursor:pointer}
+.swatch{display:inline-block;width:20px;height:20px;border-radius:5px;vertical-align:middle;margin-right:5px;border:1px solid #ddd}
+small{color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">creative</span><span class="tag">canva_alternative_gap</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI 原生按量付费设计工具</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI-native pay-as-you-go design tool (icons / email / brand)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Canva Pro 涨价后用户抱怨"隐性收费、AI 功能浅"。细分空白：专用图标生成、HTML 邮件模板、自动品牌提取它都不做。本工具离线提供 AI 图标生成 + 品牌色板提取 + token 按量计费估算，打"不为 20% 功能付 100% 价格"的卖点。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>① 品牌关键词（自动提取色板）</label>
+    <input id="kw" placeholder="例如：森林有机咖啡">
+    <button class="btn sub" id="brand">提取品牌色板</button>
+    <div id="pal" style="margin-top:8px"></div>
+
+    <label>② AI 图标生成</label>
+    <div class="row">
+      <div><label>形状</label><select id="shape"><option>圆形</option><option>方形</option><option>三角</option><option>星形</option></select></div>
+      <div><label>主色</label><input id="ic" type="color" value="#FF6B6B" style="height:42px"></div>
+    </div>
+    <div class="icon-box" id="icon"></div>
+    <button class="btn" id="save">保存图标到我的素材库</button>
+  </div>
+
+  <div class="card">
+    <b>💰 token 按量计费估算</b>
+    <div class="row">
+      <div><label>本月生成次数</label><input id="uses" type="number" value="50"></div>
+      <div><label>单次 token 成本($)</label><input id="cost" type="number" value="0.02" step="0.01"></div>
+    </div>
+    <p class="h-coral" id="bill" style="font-weight:700"></p>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P1-005">
+    <div class="collapse-header" id="aiHeader_P1-005" onclick="toggleAI('P1-005')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P1-005" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P1-005">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P1-005" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P1-005')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P1-005" style="display:none;margin-top:10px">
+        <div id="aiMessages_P1-005" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P1-005" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P1-005')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>🎯 我的素材库</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.producthunt.com/p/fluer/fluer" target="_blank" style="color:var(--coral)">Fluer · Iconly · VistaCreate · Playyy</a>
+  </div>
+
+<script>
+const KEY="P1-005";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function hashHue(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return h;}
+function brand(){
+  const kw=document.getElementById("kw").value||"品牌";
+  const base=hashHue(kw);
+  const pal=[base,(base+40)%360,(base+200)%360,(base+120)%360].map(h=>`hsl(${h},70%,55%)`);
+  document.getElementById("pal").innerHTML=pal.map(c=>`<span class="swatch" style="background:${c}"></span>`).join("")+`<br><small>由"${kw}"提取的 4 色调色板</small>`;
+}
+const shapes={圆形:`<circle cx="60" cy="60" r="50"/>`,方形:`<rect x="12" y="12" width="96" height="96" rx="16"/>`,
+  三角:`<polygon points="60,12 108,108 12,108"/>`,星形:`<polygon points="60,8 73,46 112,46 80,70 92,108 60,84 28,108 40,70 8,46 47,46"/>`};
+function drawIcon(){
+  const col=document.getElementById("ic").value;const sh=shapes[document.getElementById("shape").value];
+  document.getElementById("icon").innerHTML=`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><g fill="${col}">${sh}</g></svg>`;
+}
+function save(){
+  const col=document.getElementById("ic").value,sh=document.getElementById("shape").value;
+  items.push({shape:sh,color:col,t:new Date().toLocaleString("zh")});localStorage.setItem(KEY,JSON.stringify(items));render();
+}
+function render(){
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">暂无，生成图标后保存。</p>';return;}
+  box.innerHTML=items.map((r,i)=>`<div class="kit"><span class="del" data-i="${i}">删除</span>
+    <span class="swatch" style="background:${r.color}"></span><b>${r.shape}图标</b><br><small>${r.t}</small></div>`).join("");
+  box.querySelectorAll(".del").forEach(e=>e.onclick=()=>{items.splice(+e.dataset.i,1);localStorage.setItem(KEY,JSON.stringify(items));render();});
+}
+function bill(){
+  const u=+document.getElementById("uses").value||0,c=+document.getElementById("cost").value||0;
+  document.getElementById("bill").textContent=`预估成本 $${(u*c).toFixed(2)} / 月（对比 Canva Pro $15 订阅）`;
+}
+document.getElementById("brand").onclick=brand;
+document.getElementById("shape").onchange=drawIcon;
+document.getElementById("ic").oninput=drawIcon;
+document.getElementById("save").onclick=save;
+document.getElementById("uses").oninput=bill;document.getElementById("cost").oninput=bill;
+drawIcon();bill();render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

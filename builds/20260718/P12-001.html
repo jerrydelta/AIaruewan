@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>零广告校园服务聚合门户</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.mini{font-size:14px;margin:14px 0 4px;font-weight:600;color:var(--ink);
+  border-left:4px solid var(--coral);padding-left:8px}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.del{color:var(--coral);float:right;font-size:13px;cursor:pointer}
+.warn{color:#E85555;font-weight:600}
+.ok{color:var(--ok);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">student</span><span class="tag">campus_app_consolidation</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">零广告校园服务聚合门户</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Ad-free privacy-friendly campus-service aggregator (timetable+grades+repair+spending)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">97.72%学生日常离不开校园App，但67.63%盼"瘦身"；痛点排序——商业广告多67.08%、所需App数过多64.87%、运行不稳定55.96%。学生手机常装10-22个校园App，强制摇一摇广告、强制授权定位引发隐私焦虑。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <div class="mini">📅 我的课表</div>
+    <div class="row">
+      <div><label>星期</label><select id="t_day"><option>周一</option><option>周二</option><option>周三</option><option>周四</option><option>周五</option><option>周六</option><option>周日</option></select></div>
+      <div><label>节次/时间</label><input id="t_time" placeholder="如 1-2节 / 8:00"></div>
+    </div>
+    <label>课程名</label><input id="t_name" placeholder="如 高等数学">
+    <label>地点</label><input id="t_loc" placeholder="如 教三-201">
+    <button class="btn" onclick="addT()">添加课表</button>
+
+    <div class="mini">🎓 成绩 / GPA</div>
+    <div class="row">
+      <div><label>课程</label><input id="g_name" placeholder="如 线代"></div>
+      <div><label>学分</label><input id="g_credit" type="number" placeholder="3"></div>
+    </div>
+    <label>百分制成绩</label><input id="g_score" type="number" placeholder="85">
+    <button class="btn" onclick="addG()">添加成绩</button>
+    <p id="gpa" style="font-size:14px;margin:8px 0 0"></p>
+
+    <div class="mini">💳 校园卡消费预警</div>
+    <label>本月预算(元)</label><input id="sp_budget" type="number" placeholder="1000">
+    <button class="btn" onclick="setBudget()">设置预算</button>
+    <div class="row" style="margin-top:8px">
+      <div><label>项目</label><input id="sp_item" placeholder="如 食堂"></div>
+      <div><label>金额</label><input id="sp_amt" type="number" placeholder="15"></div>
+    </div>
+    <button class="btn" onclick="addSpend()">记一笔</button>
+    <p id="sp_stat" style="font-size:14px;margin:8px 0 0"></p>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的数据</b>
+    <div id="timetable_box"></div>
+    <div id="grades_box"></div>
+    <div id="spend_box"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://share.app3.jyb.cn/news_d/9ab7087164084177bb926b33a31ac353" target="_blank" style="color:var(--coral)">小应校园 · 超级课程表（中国青年报·中青校媒调研）</a>
+  </div>
+
+<script>
+const KT="P12-001_timetable", KG="P12-001_grades", KS="P12-001_spend", KB="P12-001_budget";
+let T=JSON.parse(localStorage.getItem(KT)||"[]");
+let G=JSON.parse(localStorage.getItem(KG)||"[]");
+let S=JSON.parse(localStorage.getItem(KS)||"[]");
+let B=parseFloat(localStorage.getItem(KB)||"0");
+
+function addT(){const d=document.getElementById("t_day").value,n=document.getElementById("t_name").value.trim(),tm=document.getElementById("t_time").value.trim(),l=document.getElementById("t_loc").value.trim();
+  if(!n){alert("请填课程名");return;}
+  T.push({d,tm,n,l});localStorage.setItem(KT,JSON.stringify(T));render();}
+function addG(){const n=document.getElementById("g_name").value.trim(),c=parseFloat(document.getElementById("g_credit").value),s=parseFloat(document.getElementById("g_score").value);
+  if(!n||isNaN(c)||isNaN(s)){alert("请填完整");return;}
+  let p=s>=90?4:s>=85?3.7:s>=82?3.3:s>=78?3:s>=75?2.7:s>=72?2.3:s>=68?2:s>=64?1.5:s>=60?1:0;
+  G.push({n,c,s,p});localStorage.setItem(KG,JSON.stringify(G));render();}
+function setBudget(){B=parseFloat(document.getElementById("sp_budget").value)||0;localStorage.setItem(KB,B);render();}
+function addSpend(){const it=document.getElementById("sp_item").value.trim(),a=parseFloat(document.getElementById("sp_amt").value);
+  if(!it||isNaN(a)){alert("请填完整");return;}
+  S.push({it,a,t:new Date().toLocaleDateString()});localStorage.setItem(KS,JSON.stringify(S));render();}
+function del(k,arr,key,i){arr.splice(i,1);localStorage.setItem(key,JSON.stringify(arr));render();}
+
+function render(){
+  const order=["周一","周二","周三","周四","周五","周六","周日"];
+  T.sort((a,b)=>order.indexOf(a.d)-order.indexOf(b.d));
+  document.getElementById("timetable_box").innerHTML="<div style='font-size:13px;color:var(--muted);margin-top:6px'>课表 ("+T.length+")</div>"+
+    T.map((x,i)=>`<div class="item"><span class="del" onclick="del('t',T,'${KT}',${i})">删</span><b>${x.d} ${x.tm}</b> · ${x.n}<br><span style="color:var(--muted);font-size:12px">${x.l}</span></div>`).join("");
+  let totC=0,totP=0;G.forEach(x=>{totC+=x.c;totP+=x.c*x.p;});
+  document.getElementById("gpa").innerHTML=G.length?`已录 ${G.length} 门 · <span class="ok">GPA ≈ ${(totP/totC).toFixed(2)}</span>（4.0制）`:"";
+  document.getElementById("grades_box").innerHTML=G.map((x,i)=>`<div class="item"><span class="del" onclick="del('g',G,'${KG}',${i})">删</span>${x.n} · ${x.c}学分 · ${x.s}分 → 绩点${x.p}</div>`).join("");
+  let sum=S.reduce((a,b)=>a+b.a,0);
+  document.getElementById("sp_stat").innerHTML=S.length?`本月已花 <b>${sum.toFixed(0)}</b> 元 / 预算 ${B||"未设"} 元 `+(B&&sum>B?`<span class="warn">⚠ 已超支 ${(sum-B).toFixed(0)} 元</span>`:`<span class="ok">✓ 预算内</span>`):"";
+  document.getElementById("spend_box").innerHTML=S.slice().reverse().map((x,i)=>`<div class="item"><span class="del" onclick="del('s',S,'${KS}',${S.length-1-i})">删</span>${x.t} · ${x.it} · <b>${x.a}</b>元</div>`).join("");
+}
+render();
+</script>
+</body>
+</html>

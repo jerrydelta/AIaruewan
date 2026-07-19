@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>低糖质菜单生成器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;padding:5px 0}
+.recipe{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px}
+.recipe b{color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">food</span><span class="tag">low_carb_sugar_restriction</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">低糖质菜单生成器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI low-carb menu from inventory with med/allergy exclusion</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本"糖质限制(ロカボ)"是成熟垂直赛道：あすけん（10 万+ 数据）、カロミル（照片解析 4 万+件）、ポケット糖質量（方糖换算）。痛点：现有 App 多为记录型，缺"按冰箱现有食材自动搜低糖菜单"与"服药/过敏排除"的智能。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">勾选现有食材（库存）→ 勾选需排除的过敏/服药食材 → 从低糖食谱库筛选可用菜单，并换算方糖颗数。</p>
+    <label>① 现有食材（库存）</label>
+    <div id="invBox"></div>
+    <label>② 排除项（过敏/服药）</label>
+    <div id="exBox"></div>
+    <button class="btn" onclick="gen()">🍽 生成低糖菜单</button>
+    <div id="out"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📌 说明</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">本工具为离线 MVP：内置低糖食谱库与方糖换算（4g 糖质≈1 粒方糖），所有选择仅本地保存偏好，可长期使用。</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://my-best.com/13911" target="_blank" style="color:var(--coral)">カロミル·あすけん·ポケット糖質量·Wellmira カロママプラス</a>
+  </div>
+
+<script>
+const KEY="P6-015";
+let pref = JSON.parse(localStorage.getItem(KEY) || "{}");
+const ING=['鸡蛋','鸡胸肉','豆腐','菠菜','西兰花','番茄','黄瓜','牛油果','三文鱼','牛肉','生菜','蘑菇','胡萝卜','虾','酸奶'];
+const RECIPES=[
+  {n:'玉子烧',carb:2,ing:['鸡蛋']},
+  {n:'鸡胸沙拉',carb:5,ing:['鸡胸肉','生菜','番茄','黄瓜']},
+  {n:'照烧豆腐',carb:8,ing:['豆腐','酱油']},
+  {n:'西兰花炒虾仁',carb:6,ing:['西兰花','虾']},
+  {n:'牛油果沙拉',carb:4,ing:['牛油果','生菜']},
+  {n:'味噌三文鱼',carb:3,ing:['三文鱼']},
+  {n:'牛肉生菜包',carb:5,ing:['牛肉','生菜']},
+  {n:'蘑菇炒蛋',carb:4,ing:['蘑菇','鸡蛋']},
+  {n:'凉拌黄瓜',carb:3,ing:['黄瓜']},
+  {n:'番茄豆腐汤',carb:6,ing:['番茄','豆腐']}
+];
+function buildBox(){
+  document.getElementById('invBox').innerHTML=ING.map(i=>`<label class="chk"><input type="checkbox" class="inv" value="${i}" ${pref.inv&&pref.inv.includes(i)?'checked':''} style="width:auto;margin:0"> ${i}</label>`).join('');
+  document.getElementById('exBox').innerHTML=ING.map(i=>`<label class="chk"><input type="checkbox" class="ex" value="${i}" ${pref.ex&&pref.ex.includes(i)?'checked':''} style="width:auto;margin:0"> ${i}</label>`).join('');
+}
+function gen(){
+  const inv=[...document.querySelectorAll('.inv')].filter(c=>c.checked).map(c=>c.value);
+  const ex=[...document.querySelectorAll('.ex')].filter(c=>c.checked).map(c=>c.value);
+  pref={inv,ex}; localStorage.setItem(KEY,JSON.stringify(pref));
+  if(!inv.length){document.getElementById('out').innerHTML='<p style="font-size:13px;color:var(--muted)">请至少勾选一种现有食材。</p>';return;}
+  const hit=RECIPES.filter(r=>r.ing.every(x=>inv.includes(x)) && !r.ing.some(x=>ex.includes(x)));
+  const out=document.getElementById('out');
+  if(!hit.length){out.innerHTML='<div class="recipe">暂无完全匹配的食谱，试着多选几种食材～</div>';return;}
+  out.innerHTML=hit.map(r=>`<div class="recipe"><b>${r.n}</b> <span class="tag">糖质 ${r.carb}g ≈ ${Math.ceil(r.carb/4)} 方糖</span><div style="font-size:12px;color:var(--muted);margin-top:3px">食材：${r.ing.join('、')}</div></div>`).join('');
+}
+buildBox();
+</script>
+</body>
+</html>

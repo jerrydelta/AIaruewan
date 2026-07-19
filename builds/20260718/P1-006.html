@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Mac菜单栏本地优先AI小工具</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.note{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;font-size:13px}
+.note b{color:var(--ink)}.del{color:var(--coral);font-size:12px;float:right;cursor:pointer}
+.chip{display:inline-block;font-size:12px;background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9;border-radius:999px;padding:4px 10px;margin:3px 4px 0 0;cursor:pointer}
+small{color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag">mac_menubar_ai_tool</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">Mac 菜单栏本地优先 AI 小工具</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Mac menu-bar local-first AI micro-tool (one-time purchase)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">办公人群需要轻量、本地优先、随时唤起的 AI 助手但不愿付订阅。SwiftUI 一周做出菜单栏工具，30 元/份首周卖出 120 份。本工具模拟"菜单栏常驻+快捷键唤起"的本地写作/速记助手，零联网、数据只存本地。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 本地速记（点输入框即唤起）</b>
+    <label>快捷指令提示词库（点一下填入）</label>
+    <div id="chips"></div>
+    <textarea id="note" rows="3" placeholder="按 ⌘+K 思路：在此速记或写提示词…"></textarea>
+    <button class="btn" id="save">保存到本地剪贴本</button>
+    <p style="font-size:12px;color:var(--muted);margin:6px 0 0">本地优先隐私：所有内容仅存浏览器 localStorage，不上传任何服务器，可随时导出。</p>
+  </div>
+
+  <div class="card" id="list"><b>📋 我的剪贴本</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.toutiao.com/article/7616613765299077666" target="_blank" style="color:var(--coral)">Mac菜单栏AI工具 · MenubarX · Motiff妙多</a>
+  </div>
+
+<script>
+const KEY="P1-006";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const prompts=["总结这段要点：","把下面改写成更口语：","给 3 个标题备选：","翻译成英文：","列出执行步骤：","润色成专业语气："];
+document.getElementById("chips").innerHTML=prompts.map(p=>`<span class="chip">${p}</span>`).join("");
+document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{document.getElementById("note").value+=c.textContent+" ";document.getElementById("note").focus();});
+function save(){
+  const v=document.getElementById("note").value.trim();if(!v)return;
+  items.unshift({text:v,t:new Date().toLocaleString("zh")});localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("note").value="";render();
+}
+function render(){
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">暂无速记。</p>';return;}
+  box.innerHTML=items.map((r,i)=>`<div class="note"><span class="del" data-i="${i}">删除</span>
+    <b>${r.text.slice(0,40)}${r.text.length>40?"…":""}</b><br><small>${r.t}</small>
+    <div style="margin-top:4px"><span class="chip" data-copy="${i}">复制</span></div></div>`).join("");
+  box.querySelectorAll(".del").forEach(e=>e.onclick=()=>{items.splice(+e.dataset.i,1);localStorage.setItem(KEY,JSON.stringify(items));render();});
+  box.querySelectorAll("[data-copy]").forEach(e=>e.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(items[+e.dataset.copy].text);e.textContent="已复制";});
+}
+document.getElementById("save").onclick=save;
+document.getElementById("note").addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter")save();});
+render();
+</script>
+</body>
+</html>

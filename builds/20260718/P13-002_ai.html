@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>一体化婚礼宾客名单管理</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.sum{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.item .del{float:right;color:var(--coral);font-size:12px;cursor:pointer}
+.badge{display:inline-block;font-size:11px;border-radius:999px;padding:1px 7px;margin-left:4px}
+.b-y{background:#EAF7F0;color:#1f7a52}.b-n{background:#FFF0F0;color:#E85555}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">wedding</span><span class="tag">guest_list_manager</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">一体化婚礼宾客名单管理</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">All-in-one wedding guest list manager</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">婚礼宾客名单是所有活动里最复杂的：要记录每位 +1 的姓名、饮食、座位、餐食；普通表格和票务平台都做不了。Joy 不与座位/餐数同步，常需导出另一工具导致错误。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 宾客名单（含 +1/餐食/座位/签到）</b>
+    <label>宾客姓名</label><input id="name" placeholder="张三">
+    <label>带 +1 姓名（无则留空）</label><input id="plus" placeholder="李四">
+    <div class="row">
+      <div><label>餐食</label>
+        <select id="meal"><option>标准餐</option><option>素食</option><option>儿童餐</option><option>清真</option></select></div>
+      <div><label>桌号</label><input id="seat" placeholder="3"></div>
+    </div>
+    <label>饮食限制（如 海鲜过敏）</label><input id="diet" placeholder="海鲜过敏">
+    <label>RSVP 状态</label>
+    <select id="rsvp"><option value="y">已确认</option><option value="n">已拒绝</option><option value="w">待回复</option></select>
+    <button class="btn" onclick="addItem()">＋ 添加宾客</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P13-002">
+    <div class="collapse-header" id="aiHeader_P13-002" onclick="toggleAI('P13-002')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P13-002" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P13-002">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P13-002" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P13-002')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P13-002" style="display:none;margin-top:10px">
+        <div id="aiMessages_P13-002" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P13-002" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P13-002')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>📋 宾客名单</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.guestlistonline.com/blog/guest-list-app-guide" target="_blank" style="color:var(--coral)">GuestlistOnline / iDoTogether / Stellanza</a>
+  </div>
+
+<script>
+const KEY="P13-002";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addItem(){
+  const name=document.getElementById("name").value.trim();
+  if(!name){alert("请填写宾客姓名");return;}
+  items.push({
+    name,
+    plus:document.getElementById("plus").value.trim(),
+    meal:document.getElementById("meal").value,
+    seat:document.getElementById("seat").value.trim(),
+    diet:document.getElementById("diet").value.trim(),
+    rsvp:document.getElementById("rsvp").value,
+    checkin:false
+  });
+  ["name","plus","seat","diet"].forEach(id=>document.getElementById(id).value="");
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function toggle(i){items[i].checkin=!items[i].checkin;save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  let confirmed=0,veg=0,seated=0;
+  let html='<b>📋 宾客名单</b>';
+  if(items.length===0){html+='<p style="font-size:13px;color:#999;margin:8px 0">还没有宾客，先添加一位。</p>';}
+  items.forEach((g,i)=>{
+    if(g.rsvp==='y')confirmed++;
+    if(g.meal==='素食')veg++;
+    if(g.seat)seated++;
+    const rb=g.rsvp==='y'?'<span class="badge b-y">已确认</span>':g.rsvp==='n'?'<span class="badge b-n">拒绝</span>':'<span class="badge">待回复</span>';
+    html+=`<div class="item"><span class="del" onclick="del(${i})">删除</span>
+      <b>${g.name}</b>${g.plus?` ＋ ${g.plus}`:''}${rb}<br>
+      餐食：${g.meal} · 桌号：${g.seat||'—'} · 饮食：${g.diet||'无'}<br>
+      <span style="font-size:12px;color:${g.checkin?'#3FB984':'#999'};cursor:pointer" onclick="toggle(${i})">
+      ${g.checkin?'✅ 已签到':'○ 点击签到'}</span></div>`;
+  });
+  html+=`<div class="sum"><span>宾客总数（含+1）</span><b>${items.reduce((s,g)=>s+1+(g.plus?1:0),0)}</b></div>`;
+  html+=`<div class="sum"><span>已确认</span><b>${confirmed}</b></div>`;
+  html+=`<div class="sum"><span>素食需求</span><b>${veg}</b></div>`;
+  html+=`<div class="sum"><span>已排座</span><b>${seated}</b></div>`;
+  box.innerHTML=html;
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

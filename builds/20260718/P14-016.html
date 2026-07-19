@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>服务行业预约自动提醒</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ghost{background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{text-align:center;padding:10px 4px}
+.stat b{display:block;font-size:20px;color:var(--coral)}
+.stat span{font-size:12px;color:var(--muted)}
+.ap{font-size:13px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.warn{color:#E85555}.ok{color:var(--ok)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">micro_saas</span><span class="tag">appointment_reminder</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">服务行业预约自动提醒</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Service appointment reminder SaaS</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">客户未按约到场每年给服务型企业造成数千美元损失。预约提醒在预约前自动发短信/邮件，面向沙龙、牙医、治疗师、顾问，定价 $19-49/月。极轻量单点工具，可扩展至"预约+提醒+押金"闭环。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 预约登记 + 提醒倒计时 + 爽约率</b>
+    <label>客户名</label><input id="client" placeholder="如：张女士">
+    <div class="row">
+      <div><label>服务</label><input id="svc" placeholder="如：染发"></div>
+      <div><label>预约时间</label><input id="when" type="datetime-local"></div>
+    </div>
+    <label>提前提醒（小时前）</label>
+    <select id="lead"><option value="24">24 小时前</option><option value="4">4 小时前</option><option value="2">2 小时前</option><option value="1">1 小时前</option></select>
+    <button class="btn" id="add">登记预约</button>
+    <div class="row" style="margin-top:10px">
+      <div class="stat"><b id="cnt">0</b><span>总预约</span></div>
+      <div class="stat"><b id="rate">—</b><span>爽约率</span></div>
+      <div class="stat"><b id="due">0</b><span>待提醒</span></div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 预约列表</b>
+    <p id="empty" style="font-size:13px;color:var(--muted);margin:6px 0 0">还没有预约。</p>
+    <div id="log"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.nxcode.io/zh/resources/news/micro-saas-ideas-2026" target="_blank" style="color:var(--coral)">预约提醒服务 / Appointment Reminder</a>
+  </div>
+
+<script>
+const KEY="P14-016";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const $=id=>document.getElementById(id);
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function add(){
+  if(!client.value.trim()||!when.value)return;
+  items.push({client:client.value.trim(),svc:svc.value.trim(),when:when.value,lead:+lead.value,status:"待赴约"});
+  client.value=svc.value="";save();
+}
+function setStatus(i,s){items[i].status=s;save();}
+function del(i){items.splice(i,1);save();}
+function render(){
+  cnt.textContent=items.length;
+  const done=items.filter(x=>x.status!=="待赴约");
+  rate.textContent=done.length?Math.round(done.filter(x=>x.status==="爽约").length/done.length*100)+"%":"—";
+  const now=Date.now();
+  due.textContent=items.filter(x=>x.status==="待赴约"&&new Date(x.when)-now<=x.lead*36e5&&new Date(x.when)>now).length;
+  if(items.length)empty.style.display="none";else empty.style.display="block";
+  log.innerHTML=items.slice().reverse().map(x=>{
+    const idx=items.indexOf(x);
+    const t=new Date(x.when).getTime();
+    const diff=t-now;
+    let badge;
+    if(x.status==="爽约")badge='<span class="warn">爽约</span>';
+    else if(x.status==="已完成")badge='<span class="ok">已完成</span>';
+    else if(diff<=0)badge='<span class="warn">已过时间未确认</span>';
+    else if(diff<=x.lead*36e5)badge='<span class="warn">⏰ 该发提醒了</span>';
+    else badge=`<span style="color:var(--muted)">${Math.round(diff/36e5)}h 后</span>`;
+    return `<div class="ap"><span style="float:right;color:var(--coral);cursor:pointer" data-del="${idx}">✕</span>
+      <b>${esc(x.client)}</b> · ${esc(x.svc)} ${badge}<br>
+      <span style="font-size:12px;color:#666">${x.when.replace("T"," ")}（提前 ${x.lead}h 提醒）</span><br>
+      <span style="font-size:12px">
+        <span style="color:var(--ok);cursor:pointer" data-ok="${idx}">已完成</span> ·
+        <span class="warn" style="cursor:pointer" data-no="${idx}">爽约</span>
+      </span></div>`;
+  }).join("");
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>del(+b.dataset.del));
+  document.querySelectorAll("[data-ok]").forEach(b=>b.onclick=()=>setStatus(+b.dataset.ok,"已完成"));
+  document.querySelectorAll("[data-no]").forEach(b=>b.onclick=()=>setStatus(+b.dataset.no,"爽约"));
+}
+function esc(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+const cnt=document.getElementById("cnt"),rate=document.getElementById("rate"),due=document.getElementById("due");
+add.onclick=add;
+render();
+</script>
+</body>
+</html>

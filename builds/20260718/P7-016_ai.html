@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>适老认知训练与回忆</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.7;padding:16px;max-width:480px;margin:0 auto;font-size:17px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:16px;border:none;border-radius:14px;
+  background:var(--coral);color:#fff;font-size:19px;font-weight:700;cursor:pointer;margin-top:10px}
+.btn:active{background:var(--coral-dark)}
+.btn-ok{background:var(--ok)}
+.tag{display:inline-block;font-size:13px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:3px 11px;margin:2px 5px 2px 0}
+input,textarea{width:100%;padding:14px;border:1px solid var(--line);
+  border-radius:12px;font-size:17px;margin-top:8px;background:#fff;color:var(--ink)}
+label{font-size:15px;color:var(--muted);display:block;margin-top:12px;font-weight:600}
+.mini{font-size:13px;color:var(--muted)}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+.games{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.games button{height:64px;font-size:30px;border:1px solid var(--line);border-radius:14px;background:#fff;cursor:pointer}
+.games button.open{background:#FFE3E3}
+.games button.matched{background:#E6F7EF;color:var(--ok)}
+.stat{display:flex;gap:10px;text-align:center;margin-top:10px}
+.stat>div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;padding:10px}
+.stat b{display:block;font-size:24px;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">elderly</span><span class="tag">brain_training_dementia</span></div>
+    <h1 style="font-size:22px;margin:8px 0 4px">适老认知训练与回忆</h1>
+    <p class="h-coral" style="font-size:15px;margin:0">脑游戏 · 生命故事 · 家属看板</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">💡 为什么需要</b>
+    <p style="font-size:15px;color:#555;margin:6px 0 0">MindMate 定位"健康大脑"，脑游戏+回忆日记+提醒，全球 100 万+ 用户。回忆疗法对活跃老人尤其有益，家属也需可监测进度的工具。</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">🧠 记忆翻牌游戏</b>
+    <p class="mini" style="font-size:14px">点开两张相同的图案即可配对，锻炼记忆力。</p>
+    <div class="games" id="board"></div>
+    <p class="mini" id="gstat" style="margin-top:10px;font-size:15px"></p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">📖 生命故事回忆</b>
+    <label>今天想起的一段往事</label>
+    <textarea id="story" rows="3" placeholder="如：想起小时候过年，妈妈做的饺子……"></textarea>
+    <button class="btn btn-ok" onclick="saveStory()">📥 存入回忆册</button>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">👨‍👩‍👧 家属进度看板</b>
+    <div class="stat">
+      <div><b id="sGame">0</b>游戏完成</div>
+      <div><b id="sStory">0</b>回忆篇数</div>
+    </div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P7-016">
+    <div class="collapse-header" id="aiHeader_P7-016" onclick="toggleAI('P7-016')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P7-016" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P7-016">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P7-016" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P7-016')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P7-016" style="display:none;margin-top:10px">
+        <div id="aiMessages_P7-016" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P7-016" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P7-016')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b style="font-size:18px">📔 回忆册</b>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:13px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/si/app/mindmate-for-a-healthy-brain/id1030422375" target="_blank" style="color:var(--coral)">MindMate（适老认知训练 + 回忆日记）</a>
+  </div>
+
+<script>
+const KEY="P7-016";
+let stories=JSON.parse(localStorage.getItem(KEY)||"[]");
+let gameDone=+localStorage.getItem(KEY+"_g")||0;
+const EMO=["🌸","⭐","🍎","🌿","🐱","🔔"];
+let deck=[],open=[],matched=0,lock=false;
+function newGame(){
+  deck=[];EMO.forEach(e=>deck.push(e,e));
+  deck.sort(()=>Math.random()-0.5);
+  open=[];matched=0;lock=false;
+  document.getElementById("board").innerHTML=deck.map((e,i)=>`<button id="c${i}" onclick="flip(${i})">？</button>`).join("");
+  document.getElementById("gstat").textContent="找出所有相同的图案吧！";
+}
+function flip(i){
+  if(lock)return;const b=document.getElementById("c"+i);
+  if(b.classList.contains("matched")||open.includes(i))return;
+  b.textContent=deck[i];b.classList.add("open");open.push(i);
+  if(open.length===2){
+    lock=true;
+    if(deck[open[0]]===deck[open[1]]){
+      open.forEach(x=>document.getElementById("c"+x).classList.add("matched"));
+      matched++;open=[];lock=false;
+      if(matched===EMO.length){gameDone++;localStorage.setItem(KEY+"_g",gameDone);renderStat();document.getElementById("gstat").textContent="🎉 太棒了，全部配对完成！";}
+    }else{
+      setTimeout(()=>{open.forEach(x=>{const c=document.getElementById("c"+x);c.textContent="？";c.classList.remove("open");});open=[];lock=false;},800);
+    }
+  }
+}
+function saveStory(){
+  const t=document.getElementById("story").value.trim();
+  if(!t){alert("请先写一段回忆");return;}
+  stories.unshift({text:t,date:new Date().toLocaleDateString("zh-CN")});
+  document.getElementById("story").value="";localStorage.setItem(KEY,JSON.stringify(stories));render();
+}
+function renderStat(){document.getElementById("sGame").textContent=gameDone;document.getElementById("sStory").textContent=stories.length;}
+function render(){
+  const box=document.getElementById("items");
+  if(!stories.length){box.innerHTML='<p class="mini" style="margin-top:8px;font-size:14px">回忆册还空着，写第一段往事吧。</p>';return;}
+  box.innerHTML=stories.map(it=>`<div class="item"><div style="font-size:15px;white-space:pre-wrap">${esc(it.text)}</div><div class="mini" style="font-size:14px;margin-top:4px">${it.date}</div></div>`).join("");
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+newGame();renderStat();render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

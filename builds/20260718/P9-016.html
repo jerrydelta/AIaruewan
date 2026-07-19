@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>结伴出游行程+分账协作</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;font-size:14px}
+.item:first-child{border-top:none}
+.del{background:none;border:none;color:var(--coral);font-size:13px;cursor:pointer;float:right;margin-top:-2px}
+.sumbox{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:10px;font-size:13px}
+.sumbox b{color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">travel</span><span class="tag">group_travel_split</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">结伴出游行程 + 分账</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Group-travel itinerary + expense-split</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">结伴/家庭出游的"共享账本 + 行程协作"是高频痛点。通用分账工具不按行程归集、多人实时同步弱。行程 + 分账一体化协作是缺口。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 共享账本 + 分账结算</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">记录每笔支出的付款人、项目与均摊人数，自动算出各付款人应收回多少。</p>
+    <label>目的地 / 行程</label><input id="dest" placeholder="如 大阪 5 日">
+    <div class="row">
+      <div><label>付款人</label><input id="payer" placeholder="如 阿杰"></div>
+      <div><label>项目</label><input id="item" placeholder="如 住宿"></div>
+    </div>
+    <div class="row">
+      <div><label>金额(元)</label><input id="amt" type="number" inputmode="decimal" placeholder="如 2000"></div>
+      <div><label>均摊人数</label><input id="split" type="number" inputmode="numeric" placeholder="如 3"></div>
+    </div>
+    <button class="btn" onclick="add()">＋ 记一笔</button>
+    <div class="sumbox" id="sum"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://getfinny.app/blog/best-travel-budget-apps-2026" target="_blank" style="color:var(--coral)">Spendee · Splitwise · NomadPurse</a>
+  </div>
+
+<script>
+const KEY="P9-016";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const dest=document.getElementById("dest").value.trim();
+  const payer=document.getElementById("payer").value.trim();
+  const item=document.getElementById("item").value.trim();
+  const amt=parseFloat(document.getElementById("amt").value);
+  const split=parseInt(document.getElementById("split").value)||1;
+  if(!payer||!item){alert("请填写付款人与项目");return;}
+  if(!amt||amt<=0){alert("请输入有效金额");return;}
+  items.push({dest,payer,item,amt,split});
+  document.getElementById("payer").value="";document.getElementById("item").value="";
+  document.getElementById("amt").value="";document.getElementById("split").value="";
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);save();}
+function render(){
+  let html=""; const net={}; let total=0;
+  items.forEach((it,i)=>{
+    total+=it.amt;
+    net[it.payer]=net[it.payer]||{paid:0,back:0};
+    net[it.payer].paid+=it.amt;
+    net[it.payer].back+=it.amt*(it.split-1)/it.split;
+    html+=`<div class='item'><button class='del' onclick='del(${i})'>删除</button><b>${it.payer}</b> <span class='tag'>${it.dest}</span><div style='font-size:13px;color:#555'>${it.item} ¥${it.amt} · 均摊${it.split}人</div></div>`;
+  });
+  document.getElementById("list").innerHTML = items.length
+    ? "<b style='font-size:14px'>📒 共享账本（"+items.length+" 笔）</b>"+html
+    : "<p style='color:#999;font-size:13px'>暂无记录，记下第一笔共同支出。</p>";
+  let sum=`总支出 <b>¥${total.toFixed(0)}</b><br>`;
+  for(const p in net){ sum+=`${p}：垫付 ¥${net[p].paid.toFixed(0)}，应收回 <b>¥${net[p].back.toFixed(0)}</b><br>`; }
+  document.getElementById("sum").innerHTML=sum;
+}
+render();
+</script>
+</body>
+</html>

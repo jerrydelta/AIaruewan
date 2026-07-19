@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>本地化 Vibe Coding Builder（日/韩）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.out{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:10px;font-size:13px;white-space:pre-wrap}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:13px}
+.item .del{float:right;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">tech</span><span class="tag">vibe_coding</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">本地化 Vibe Coding Builder</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">JA/KO Natural-Language App Spec</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Replit/Bolt.new/Cursor 成熟，但英文界面为主，缺日韩本地化、本地支付与本地部署合规。日韩非技术者想造 App 但语言/支付门槛高。机会在双语界面 + 本地支付(Kakao/Naver Pay) + 本地云的 vibe coding builder。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 一句话生成 App 规格</b>
+    <select id="lang">
+      <option value="ja">日本語</option>
+      <option value="ko">한국어</option>
+      <option value="zh">中文</option>
+    </select>
+    <textarea id="idea" rows="2" placeholder="用母语描述你想做的 App，如：料理教室的预约+会员管理"></textarea>
+    <label>目标用户群</label>
+    <input id="user" placeholder="如：主妇 / 小店老板">
+    <button class="btn" onclick="gen()">生成规格书</button>
+    <div class="out" id="out" style="display:none"></div>
+    <button class="btn" id="saveBtn" style="display:none" onclick="save()">存档</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P2-014">
+    <div class="collapse-header" id="aiHeader_P2-014" onclick="toggleAI('P2-014')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P2-014" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P2-014">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P2-014" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P2-014')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P2-014" style="display:none;margin-top:10px">
+        <div id="aiMessages_P2-014" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P2-014" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P2-014')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的规格书</b>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://pixso.net/articles/best-vibe-coding-tools" target="_blank" style="color:var(--coral)">Best Vibe Coding Tools</a>
+  </div>
+
+<script>
+const KEY="P2-014";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+let last=null;
+function gen(){
+  const lang=document.getElementById("lang").value;
+  const idea=document.getElementById("idea").value.trim()||"（请描述）";
+  const user=document.getElementById("user").value.trim()||"（目标用户）";
+  const L={
+    ja:{t:"アプリ仕様書",f:"機能",u:"対象ユーザー",p:"決済",n:"次のステップ"},
+    ko:{t:"앱 사양서",f:"기능",u:"대상 사용자",p:"결제",n:"다음 단계"},
+    zh:{t:"App 规格书",f:"功能",u:"目标用户",p:"支付",n:"下一步"}
+  }[lang];
+  const text="【"+L.t+"】\n"+L.u+"："+user+"\n概要："+idea+"\n\n"+L.f+"：\n・核心：录入/展示/本地保存闭环\n・账号：邮箱或社交登录\n・"+L.p+"：本地钱包(Kakao/Naver Pay / 支付代行)\n\n"+L.n+"：\n1. 用自然语言生成 MVP 页面\n2. 接本地支付与本地云\n3. 灰度发布给 "+user;
+  last={lang,idea,text,t:Date.now()};
+  const o=document.getElementById("out"); o.style.display="block"; o.textContent=text;
+  document.getElementById("saveBtn").style.display="block";
+}
+function save(){
+  if(!last) return;
+  items.unshift(last); localStorage.setItem(KEY,JSON.stringify(items)); last=null;
+  document.getElementById("out").style.display="none"; document.getElementById("saveBtn").style.display="none";
+  render();
+}
+function render(){
+  const box=document.getElementById("list");
+  let h='<b>📋 我的规格书</b>';
+  if(items.length===0){ h+='<p style="font-size:13px;color:var(--muted)">还没有存档。</p>'; }
+  items.forEach((it,i)=>{
+    const ln={ja:"日",ko:"韩",zh:"中"}[it.lang];
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除</span>['+ln+'] '+it.idea.slice(0,18)+'…<br><span style="color:var(--coral)" onclick="show('+i+')">查看</span></div>';
+  });
+  box.innerHTML=h;
+}
+function show(i){ alert(items[i].text); }
+function del(i){ items.splice(i,1); localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

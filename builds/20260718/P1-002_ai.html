@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI儿童绘本生成器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.book{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;font-size:13px}
+.book b{color:var(--ink)}.del{color:var(--coral);font-size:12px;float:right;cursor:pointer}
+.out{background:#FFF8F8;border:1px dashed var(--coral);border-radius:10px;padding:10px;margin-top:10px;font-size:13px;white-space:pre-wrap}
+small{color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">creative</span><span class="tag">ai_childrens_book_generator</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI 儿童绘本生成器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI-generated children's books (illustration + layout) for passive income</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">家长想要个性化/定制故事，传统出版慢且贵。AI 拆解插画/排版/营销门槛，数字商品零库存可无限售（案例：AI 绘本月入 $10,000）。本工具离线生成故事大纲+逐页插画提示词+排版清单，可直接进 Canva/KDP/小红书。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>孩子名字（个性化定制）</label>
+    <input id="name" placeholder="例如：小宇">
+    <div class="row">
+      <div><label>主题</label>
+      <select id="theme">
+        <option>勇敢冒险</option><option>友情</option><option>睡前</option>
+        <option>动物朋友</option><option>太空探索</option><option>魔法</option>
+      </select></div>
+      <div><label>适读年龄</label>
+      <select id="age"><option>2-4</option><option>4-6</option><option>6-8</option></select></div>
+    </div>
+    <label>页数</label>
+    <select id="pages"><option>8</option><option>12</option><option>16</option><option>24</option></select>
+    <button class="btn" id="gen">生成故事大纲+插画提示词</button>
+    <div class="out" id="out" style="display:none"></div>
+    <button class="btn sub" id="save" style="display:none">保存此书到项目列表</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P1-002">
+    <div class="collapse-header" id="aiHeader_P1-002" onclick="toggleAI('P1-002')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P1-002" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P1-002">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P1-002" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P1-002')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P1-002" style="display:none;margin-top:10px">
+        <div id="aiMessages_P1-002" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P1-002" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P1-002')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>📚 我的绘本项目</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://payingassets.com/how-i-made-8000-in-45-days-selling-ai-generated-childrens-books" target="_blank" style="color:var(--coral)">Brko AI绘本 · Ohanashi AI Gen · ChatGPT+Midjourney+Canva</a>
+  </div>
+
+<script>
+const KEY="P1-002";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let last=null;
+const scenes={
+  "勇敢冒险":["出发","遇到小挫折","鼓起勇气","战胜恐惧","凯旋"],
+  "友情":["遇见新朋友","发生误会","互相帮助","和好","永远朋友"],
+  "睡前":["天黑了","洗漱","听故事","数羊","甜甜睡"],
+  "动物朋友":["森林相遇","一起玩耍","迷路","互助回家","庆祝"],
+  "太空探索":["坐飞船","看见星球","登陆月球","遇到外星人","返回地球"],
+  "魔法":["发现魔杖","念错咒语","搞笑混乱","学会控制","快乐结局"]
+};
+function gen(){
+  const name=document.getElementById("name").value||"小主角";
+  const theme=document.getElementById("theme").value;
+  const age=document.getElementById("age").value;
+  const n=+document.getElementById("pages").value;
+  const sc=scenes[theme];
+  let outline=`【书名】《${name}的${theme}之旅》（适读 ${age} 岁，共 ${n} 页）\n\n`;
+  for(let i=1;i<=n;i++){
+    const s=sc[(i-1)%sc.length];
+    outline+=`P${i}｜情节：${name}${s}\n  插画提示词：children's book illustration, ${theme} style, character ${name}, ${s}, flat vector, soft pastel, page ${i}\n`;
+  }
+  outline+=`\n【排版】用 Canva A4 横版，每页左图右文，导出 PDF 上架 KDP/Etsy/小红书。`;
+  last={name,theme,age,n,outline};
+  const o=document.getElementById("out");o.style.display="block";o.textContent=outline;
+  document.getElementById("save").style.display="block";
+}
+function save(){
+  if(!last)return;
+  items.push({...last,t:new Date().toLocaleString("zh")});
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+  document.getElementById("out").style.display="none";document.getElementById("save").style.display="none";last=null;
+}
+function render(){
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">暂无项目，生成后保存。</p>';return;}
+  box.innerHTML=items.map((r,i)=>`<div class="book"><span class="del" data-i="${i}">删除</span>
+    <b>《${r.name}的${r.theme}之旅》</b> · ${r.age}岁/${r.n}页<br><small>${r.t}</small></div>`).join("");
+  box.querySelectorAll(".del").forEach(e=>e.onclick=()=>{items.splice(+e.dataset.i,1);localStorage.setItem(KEY,JSON.stringify(items));render();});
+}
+document.getElementById("gen").onclick=gen;
+document.getElementById("save").onclick=save;
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

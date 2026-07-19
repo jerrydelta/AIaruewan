@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>执行功能微工具集</title>
+<style>
+:root{
+  --coral:#FF6B6B;        --coral-dark:#E85555;
+  --ink:#2D2D2D;          --muted:#8A8A8A;
+  --bg:#F7F7F7;           --card:#FFFFFF;
+  --line:#ECECEC;         --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-sm{padding:7px 10px;font-size:13px;border-radius:9px;margin-top:8px}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.out{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px;white-space:pre-wrap}
+.mini{font-size:12px;color:var(--muted)}
+h4{margin:14px 0 0;font-size:14px;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">neurodiversity</span><span class="tag">exec_function_microtools</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">执行功能微工具集</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Free executive-function micro-tools (Goblin Tools 风格)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Goblin Tools 是面向神经多元的免费 AI 微工具集（Magic ToDo 任务拆解带"辣度"滑块、Formalizer 语气改写），TikTok/Reddit 爆火。ADHD/自闭症常卡在"任务瘫痪"。本工具把拆解+语气改写+时长估算做成中文免费版。</p>
+  </div>
+
+  <div class="card">
+    <h4>🔥 Magic ToDo · 任务拆解（辣度滑块）</h4>
+    <input id="task" placeholder="如：给客户做演示">
+    <label>辣度（拆解颗粒度）</label>
+    <input id="spice" type="range" min="1" max="5" value="3">
+    <button class="btn" onclick="breakdown()">拆解</button>
+    <div id="sub"></div>
+
+    <h4>✍️ Formalizer · 语气改写</h4>
+    <textarea id="text" rows="2" placeholder="如：你这方案不行，重做"></textarea>
+    <select id="tone">
+      <option value="formal">正式 professional</option>
+      <option value="friendly">友好 friendly</option>
+      <option value="soft">温和 soft</option>
+      <option value="short">简短 terse</option>
+    </select>
+    <button class="btn" onclick="rewrite()">改写</button>
+    <div id="rw" class="out"></div>
+
+    <h4>⏱ Estimator · 时长估算</h4>
+    <input id="est" placeholder="如：写3页报告">
+    <button class="btn" onclick="estimate()">估算</button>
+    <div id="et" class="out"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://uk.pcmag.com/ai/165028/i-have-mild-adhd-these-free-ai-powered-goblin-tools-helped-me-crush-my-task-paralysis" target="_blank" style="color:var(--coral)">Goblin Tools</a>
+  </div>
+
+<script>
+const KEY="P11-011";
+let saved=JSON.parse(localStorage.getItem(KEY)||'{"subs":[],"rw":[],"et":[]}');
+function save(){ localStorage.setItem(KEY,JSON.stringify(saved)); }
+const TPL={
+  "演示":["定受众与核心信息","列 slides 大纲","做每页要点","加图与案例","彩排计时"],
+  "报告":["列大纲","找数据","写初稿","校格式","提交"],
+  "清洁":["收杂物","擦台面","拖地","倒垃圾","喷香"],
+  "学习":["定目标","分章节","笔记","自测","复盘"]
+};
+function breakdown(){
+  const t=document.getElementById('task').value.trim(); if(!t){alert('请填任务');return;}
+  const spice=+document.getElementById('spice').value;
+  let base=TPL["报告"];
+  for(const k in TPL){ if(t.includes(k)){base=TPL[k];break;} }
+  if(base===TPL["报告"]&&!t.includes("报告")) base=["只做第1小步","设25分钟番茄钟","完成即停","奖励一下"];
+  let subs=base.slice(0,Math.max(1,Math.min(5,spice+1)));
+  if(spice>=4) subs=subs.concat(["检查是否卡住","需要就求助"]);
+  const box=document.getElementById('sub'); box.innerHTML='';
+  subs.forEach((s,i)=>{
+    const d=document.createElement('div'); d.className='out'; d.style.marginTop='6px';
+    d.textContent=(i+1)+'. '+s; box.appendChild(d);
+  });
+  saved.subs=subs; save();
+}
+function rewrite(){
+  const txt=document.getElementById('text').value.trim(); if(!txt){alert('请填文字');return;}
+  const tone=document.getElementById('tone').value;
+  const map={
+    formal:'关于该方案，现有版本尚有调整空间，烦请按修订意见重新产出一版。',
+    friendly:'这个方案咱们再一起改改会更好哦，一起加油～',
+    soft:'也许这个方案还可以再打磨一下，别着急，我们慢慢来。',
+    short:'方案需重做。'
+  };
+  const out=map[tone]||txt;
+  document.getElementById('rw').textContent=out;
+  saved.rw.push(out); save();
+}
+function estimate(){
+  const t=document.getElementById('est').value.trim(); if(!t){alert('请填任务');return;}
+  const n=(t.match(/[0-9]+/)||[3])[0];
+  const base=Math.max(15,Math.round(+n*20));
+  const out='预计 '+base+'–'+(base+30)+' 分钟（含 10 分钟缓冲）。建议拆成 25 分钟一段。';
+  document.getElementById('et').textContent=out;
+  saved.et.push({t,out}); save();
+}
+</script>
+</body>
+</html>

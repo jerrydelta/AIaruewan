@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>ATS 简历模板 + 求职追踪套组</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;font-size:13px}
+.item b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.kpi{display:flex;gap:8px;margin-top:8px}
+.kpi div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:8px;text-align:center}
+.kpi b{display:block;font-size:18px;color:var(--coral)}
+.note{font-size:13px;color:#555;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">digital_product</span><span class="tag">resume_cv_templates</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">ATS 简历模板 + 求职追踪套组</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Niche ATS-friendly resume templates + job-tracker bundle on Etsy</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Etsy 简历/求职信模板是高转化常青品类:某 Etsy 店铺售出 37,000+ 份简历、单价 $7.95,累计销售额近 $400,000;用 AI 生成 ATS 友好内容+设计可规模化。痛点:求职者急需即时专业的简历但请不起猎头。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:4px 0 10px">记录每一次投递,追踪求职漏斗;附 ATS 简历自检清单。</p>
+    <label>公司与岗位</label>
+    <input id="role" placeholder="如 Acme · 远程前端">
+    <div class="row">
+      <div><label>行业细分</label>
+        <select id="ind"><option>远程</option><option>科技</option><option>创意</option><option>通用</option></select>
+      </div>
+      <div><label>状态</label>
+        <select id="st"><option>已投</option><option>面试中</option><option>Offer</option><option>已拒</option></select>
+      </div>
+    </div>
+    <button class="btn" onclick="add()">添加投递</button>
+    <div class="kpi">
+      <div><b id="kTotal">0</b>总投递</div>
+      <div><b id="kInt">0</b>面试中</div>
+      <div><b id="kOffer">0</b>Offer</div>
+    </div>
+    <div class="note"><b>ATS 自检清单</b><br>
+      ✓ 单栏无表格/文本框 ✓ 标准字体无图标 ✓ 关键词匹配 JD ✓ 文件名含姓名岗位 ✓ 导出 PDF 含文本层</div>
+  </div>
+
+  <div class="card" id="list"><b>📮 求职追踪</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://dicloak.com/tc/blog-detail/1166day-best-10-digital-products-you-can-sell-using-ai--make-money-online" target="_blank" style="color:var(--coral)">Etsy · Canva ATS 简历模板案例</a>
+  </div>
+
+<script>
+const KEY="P5-003";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function calc(){kTotal.textContent=items.length;
+  kInt.textContent=items.filter(i=>i.st==="面试中").length;
+  kOffer.textContent=items.filter(i=>i.st==="Offer").length;}
+function add(){const role=role_.value.trim(); if(!role){alert("请填写公司与岗位");return;}
+  items.unshift({role,ind:ind.value,st:st.value,date:new Date().toLocaleDateString()});
+  localStorage.setItem(KEY,JSON.stringify(items)); role_.value=""; render(); calc();}
+function setSt(i,s){items[i].st=s;localStorage.setItem(KEY,JSON.stringify(items));render();calc();}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();calc();}
+function render(){if(!items.length){items_.innerHTML='<p style="font-size:13px;color:#555;margin:6px 0 0">还没有投递记录。</p>';return;}
+  const opts=["已投","面试中","Offer","已拒"];
+  items_.innerHTML=items.map((it,i)=>`<div class="item"><span class="del" onclick="del(${i})">删除</span>
+    <b>${it.role}</b> · ${it.ind}<br>${opts.map(o=>`<span onclick="setSt(${i},'${o}')" style="cursor:pointer;font-size:12px;padding:2px 6px;border-radius:8px;margin-right:4px;${it.st===o?'background:var(--coral);color:#fff':'background:#f0f0f0;color:#666'}">${o}</span>`).join("")}
+    <span style="font-size:12px;color:#999"> ${it.date}</span></div>`).join("");}
+const role_=document.getElementById("role");
+render(); calc();
+</script>
+</body>
+</html>

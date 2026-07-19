@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>透明婚礼预算规划器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.sum{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.sum b{color:var(--coral)}
+.note{background:#EAF7F0;color:#1f7a52;border:1px solid #c8ecd9;border-radius:10px;
+  padding:10px;font-size:13px;margin-top:10px}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.item .del{float:right;color:var(--coral);font-size:12px;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">wedding</span><span class="tag">wedding_budget_vendor_spam</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">透明婚礼预算规划器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Privacy-first, no-spam, transparent-fee wedding planner</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">The Knot/WeddingWire 一次询单会触发 10-20 个供应商骚扰电话；Zola 对现金礼物收隐藏 2.5% 手续费；预算工具更新后竟会重置数据。新人需要隐私优先、零骚扰、费用完全透明、永远不丢数据的规划器。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 透明预算（永不清零）</b>
+    <label>预算类目（如 场地/摄影/餐饮）</label>
+    <input id="cat" placeholder="场地">
+    <div class="row">
+      <div><label>预算金额 ¥</label><input id="budget" type="number" placeholder="20000"></div>
+      <div><label>已花 ¥</label><input id="spent" type="number" placeholder="5000"></div>
+    </div>
+    <button class="btn" onclick="addItem()">＋ 添加预算项</button>
+    <div class="note">✅ 本工具不出售任何数据、不推送供应商；所有金额仅存你本机，刷新/关闭都不会丢失。</div>
+  </div>
+
+  <div class="card" id="list"><b>📊 预算总览</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://unstar.app/ru/blog/zola-the-knot-joy-weddingwire-minted-wedding-planning-apps-ranked-2026" target="_blank" style="color:var(--coral)">The Knot / WeddingWire / Zola 竞品分析</a>
+  </div>
+
+<script>
+const KEY="P13-001";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addItem(){
+  const cat=document.getElementById("cat").value.trim();
+  const budget=parseFloat(document.getElementById("budget").value)||0;
+  const spent=parseFloat(document.getElementById("spent").value)||0;
+  if(!cat){alert("请填写预算类目");return;}
+  items.push({cat,budget,spent});
+  document.getElementById("cat").value="";
+  document.getElementById("budget").value="";
+  document.getElementById("spent").value="";
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  let totalB=0,totalS=0;
+  let html='<b>📊 预算总览</b>';
+  if(items.length===0){html+='<p style="font-size:13px;color:#999;margin:8px 0">还没有预算项，先添加一项吧。</p>';}
+  items.forEach((it,i)=>{
+    totalB+=it.budget;totalS+=it.spent;
+    const left=it.budget-it.spent;
+    html+=`<div class="item"><span class="del" onclick="del(${i})">删除</span>
+      <b>${it.cat}</b><br>
+      预算 ¥${it.budget.toLocaleString()} · 已花 ¥${it.spent.toLocaleString()} · 
+      <span class="${left<0?'h-coral':''}">剩余 ¥${left.toLocaleString()}</span></div>`;
+  });
+  const rem=totalB-totalS;
+  html+=`<div class="sum"><span>总预算</span><b>¥${totalB.toLocaleString()}</b></div>`;
+  html+=`<div class="sum"><span>总已花</span><b>¥${totalS.toLocaleString()}</b></div>`;
+  html+=`<div class="sum"><span>总剩余</span><b style="color:${rem<0?'#E85555':'#3FB984'}">¥${rem.toLocaleString()}</b></div>`;
+  html+='<div class="note">💡 无隐藏 2.5% 礼金手续费 —— 你看到的每一分钱都是真实数字。</div>';
+  box.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

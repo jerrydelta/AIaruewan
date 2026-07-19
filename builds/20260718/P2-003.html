@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>对话式 AI 简历教练（经验语言化）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.q{background:#FFF7F7;border:1px solid #FFE2E2;border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.ans{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:10px;font-size:14px;white-space:pre-wrap}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:13px}
+.item .del{float:right;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">career</span><span class="tag">new_graduate</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">对话式 AI 简历教练</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI と書き上げろ · 经验语言化</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">新卒学生无职历、不会表达经验，地域/大学间支援资源不均。"AI に書かせるな、AI と書き上げろ"——通过对话深挖经历帮助学生语言化，3 分钟完成、JIS 样式对应，已被大厂验证。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 经验深掘对话</b>
+    <div class="q" id="q">Q1. 你做过最有成就感的一件事是什么？（社团/打工/课程都行）</div>
+    <textarea id="a1" rows="2" placeholder="写下这件事"></textarea>
+    <div class="q" id="q2">Q2. 你在这件事里具体承担了什么角色？</div>
+    <textarea id="a2" rows="2" placeholder="如：从0策划、统筹5人小组"></textarea>
+    <div class="q" id="q3">Q3. 最后带来了什么可量化的结果？</div>
+    <textarea id="a3" rows="2" placeholder="如：参与人数+40%、成本降2成"></textarea>
+    <label>想强调的能力标签</label>
+    <input id="tag" placeholder="如：企划力 / 领导力 / 数据敏感">
+    <button class="btn" onclick="build()">生成简历要点</button>
+    <div class="ans" id="out" style="display:none"></div>
+    <button class="btn" id="saveBtn" style="display:none" onclick="saveItem()">存入我的简历库</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的简历库</b>
+    <p style="font-size:12px;color:var(--muted);margin:6px 0 0">对话生成，本地保存。</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://pdf.irpocket.com/C6549/xoA3/SFxs/VhaV/rGjo.pdf" target="_blank" style="color:var(--coral)">新卒版 AI 履歴書つくる君</a>
+  </div>
+
+<script>
+const KEY="P2-003";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+let last=null;
+function build(){
+  const a1=document.getElementById("a1").value.trim()||"（补充经历）";
+  const a2=document.getElementById("a2").value.trim()||"（补充角色）";
+  const a3=document.getElementById("a3").value.trim()||"（补充结果）";
+  const tag=document.getElementById("tag").value.trim()||"综合能力";
+  const text="【"+tag+"】\n"+a1+"。我负责"+a2+"，最终"+a3+"。\n→ 一句话简历：以「"+tag+"」为强项，曾"+a2+"，达成"+a3+"。";
+  last={text,t:Date.now()};
+  const o=document.getElementById("out");
+  o.style.display="block"; o.textContent=text;
+  document.getElementById("saveBtn").style.display="block";
+}
+function saveItem(){
+  if(!last) return;
+  items.unshift(last); localStorage.setItem(KEY,JSON.stringify(items)); last=null;
+  document.getElementById("out").style.display="none";
+  document.getElementById("saveBtn").style.display="none";
+  render();
+}
+function render(){
+  const box=document.getElementById("list");
+  let h='<b>📋 我的简历库</b><p style="font-size:12px;color:var(--muted);margin:6px 0 0">对话生成，本地保存。</p>';
+  if(items.length===0){ h+='<p style="font-size:13px;color:var(--muted)">还没有条目。</p>'; }
+  items.forEach((it,i)=>{
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除</span>'+
+       it.text.replace(/\n/g,"<br>")+'<br><span style="color:#777">'+new Date(it.t).toLocaleString()+'</span></div>';
+  });
+  box.innerHTML=h;
+}
+function del(i){ items.splice(i,1); localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+render();
+</script>
+</body>
+</html>

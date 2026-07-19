@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>校别定制课表</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.mini{font-size:14px;margin:14px 0 4px;font-weight:600;color:var(--ink);
+  border-left:4px solid var(--coral);padding-left:8px}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.del{color:var(--coral);float:right;font-size:13px;cursor:pointer}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.ok{color:var(--ok);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">student</span><span class="tag">korean_school_specific_planner</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">校别定制课表</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">University-specific timetable (building / travel time / credits)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国出现"校别定制化"课表App：UOScheduler由首尔市立大学本科生开发，特色是考虑教学楼位置/楼间移动时间/预计学分。痛点：综合课表App不考虑校园地理/校历差异。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>学校</label><input id="sch" placeholder="如 首尔市立大学">
+    <div class="mini">📚 录入课程（含教学楼 & 移动时间）</div>
+    <label>课程名</label><input id="c_name" placeholder="如 数据结构">
+    <div class="row">
+      <div><label>教学楼</label><input id="c_bld" placeholder="如 工学院A"></div>
+      <div><label>学分</label><input id="c_cr" type="number" placeholder="3"></div>
+    </div>
+    <div class="row">
+      <div><label>移动时间(分)</label><input id="c_mv" type="number" placeholder="10"></div>
+      <div><label>星期</label><select id="c_d"><option>周一</option><option>周二</option><option>周三</option><option>周四</option><option>周五</option></select></div>
+    </div>
+    <label>节次</label><input id="c_t" placeholder="如 3-4节">
+    <button class="btn" onclick="addC()">加课</button>
+    <p id="credit" style="font-size:14px;margin:8px 0 0"></p>
+  </div>
+
+  <div class="card" id="list"><b>📋 我的课表 & 校园导航</b><div id="box"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="http://uoscheduler.appstor.io/" target="_blank" style="color:var(--coral)">UOScheduler · Damda · Daily Schedule</a>
+  </div>
+
+<script>
+const K="P12-009_courses";
+let items=JSON.parse(localStorage.getItem(K)||"[]");
+function addC(){
+  const sch=document.getElementById("sch").value.trim();
+  const n=document.getElementById("c_name").value.trim();
+  const b=document.getElementById("c_bld").value.trim();
+  const cr=parseFloat(document.getElementById("c_cr").value);
+  const mv=parseFloat(document.getElementById("c_mv").value)||0;
+  const d=document.getElementById("c_d").value;
+  const t=document.getElementById("c_t").value.trim();
+  if(!n||isNaN(cr)){alert("填课程和学分");return;}
+  items.push({sch,n,b,cr,mv,d,t});
+  localStorage.setItem(K,JSON.stringify(items));
+  if(sch)localStorage.setItem("P12-009_school",sch);
+  render();
+}
+function del(i){items.splice(i,1);localStorage.setItem(K,JSON.stringify(items));render();}
+function render(){
+  const sc=localStorage.getItem("P12-009_school");
+  if(sc)document.getElementById("sch").value=sc;
+  const tot=items.reduce((s,x)=>s+x.cr,0);
+  document.getElementById("credit").innerHTML=items.length?`已排 ${items.length} 门 · <span class="ok">预计学分 ${tot}</span>`:"";
+  const order=["周一","周二","周三","周四","周五"];
+  let h="";
+  order.forEach(d=>{
+    const cs=items.filter(x=>x.d===d);
+    if(cs.length)h+=`<div style="font-size:13px;font-weight:600;margin-top:8px">${d}</div>`+cs.map(x=>{
+      const i=items.indexOf(x);
+      return `<div class="item"><span class="del" onclick="del(${i})">删</span><b>${x.n}</b> · ${x.t}<br><span style="font-size:12px;color:var(--muted)">📍${x.b} · 移动${x.mv}分 · ${x.cr}学分</span></div>`;
+    }).join("");
+  });
+  document.getElementById("box").innerHTML=h||"<p style='font-size:13px;color:var(--muted)'>还没有课。</p>";
+}
+render();
+</script>
+</body>
+</html>

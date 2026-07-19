@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>双语情侣记忆+日常连接（中韩/中日）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,textarea,select{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none;float:right}
+.tab{display:flex;gap:6px;margin-bottom:6px}
+.tab>button{flex:1;padding:9px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:13px;cursor:pointer}
+.tab>button.on{background:var(--coral);color:#fff;border-color:var(--coral)}
+.cnt{color:var(--coral);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">relationship</span><span class="tag">couple_memory_app</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">双语情侣记忆+日常连接</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">CN-KR/JP bilingual couple memory</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国情侣重度用Between（私密相册/日程/纪念日）、Amora（每日一问+共享日记+19语言含中韩）。痛点：多数情侣App偏"日常连接"轻"冲突"，且跨文化情侣（中韩/中日）缺双语、缺共同记忆空间。机会：双语情侣记忆+日常连接一体化。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">纪念日倒计时、每日一问、共同记忆——跨文化情侣也能用（界面中文，内容随意）。</p>
+    <div class="tab">
+      <button id="t0" class="on" onclick="sw(0)">📅 纪念日</button>
+      <button id="t1" onclick="sw(1)">💬 每日一问</button>
+      <button id="t2" onclick="sw(2)">🌟 记忆</button>
+    </div>
+    <div id="pane"></div>
+  </div>
+
+  <div class="card" id="list"><div id="logs"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.bonobology.com/ko?p=483101" target="_blank" style="color:var(--coral)">Between / Amora / Paired</a>
+  </div>
+
+<script>
+const KEY="P4-015";
+let tab=0;
+let data=JSON.parse(localStorage.getItem(KEY)||"{}");
+data.ann=data.ann||[];data.q=data.q||[];data.mem=data.mem||[];
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function sw(t){tab=t;document.querySelectorAll(".tab button").forEach((b,i)=>b.classList.toggle("on",i===t));renderPane();render();}
+function daysLeft(d){const r=Math.ceil((new Date(d)-Date.now())/86400000);return r;}
+function renderPane(){
+  const p=document.getElementById("pane");
+  if(tab===0){
+    p.innerHTML=`<label>纪念日名称</label><input id="an" placeholder="如：在一起 / 첫만남(初见)">
+      <label>日期</label><input id="ad" type="date">
+      <button class="btn" onclick="addAnn()">＋ 加纪念日</button>`;
+  }else if(tab===1){
+    p.innerHTML=`<label>今日一问</label><input id="qq" placeholder="如：今天最开心的一刻？">
+      <label>我的回答</label><textarea id="qa" rows="2" placeholder="写下你的答案"></textarea>
+      <button class="btn" onclick="addQ()">💞 记一问一答</button>`;
+  }else{
+    p.innerHTML=`<label>记忆标题</label><input id="mt" placeholder="如：首尔那晚的烤肉">
+      <label>记录</label><textarea id="md" rows="2" placeholder="写下共同记忆"></textarea>
+      <button class="btn" onclick="addMem()">🌟 存记忆</button>`;
+  }
+}
+function addAnn(){const an=document.getElementById("an").value.trim(),ad=document.getElementById("ad").value;if(!an||!ad){alert("填名称和日期");return;}data.ann.unshift({an,ad});document.getElementById("an").value="";document.getElementById("ad").value="";save();}
+function addQ(){const qq=document.getElementById("qq").value.trim(),qa=document.getElementById("qa").value.trim();if(!qq){alert("写个问题");return;}data.q.unshift({qq,qa});document.getElementById("qq").value="";document.getElementById("qa").value="";save();}
+function addMem(){const mt=document.getElementById("mt").value.trim(),md=document.getElementById("md").value.trim();if(!mt){alert("写个标题");return;}data.mem.unshift({mt,md});document.getElementById("mt").value="";document.getElementById("md").value="";save();}
+function delA(i){data.ann.splice(i,1);save();}
+function delQ(i){data.q.splice(i,1);save();}
+function delM(i){data.mem.splice(i,1);save();}
+function render(){
+  const box=document.getElementById("logs");
+  if(tab===0){
+    box.innerHTML=`<b>📅 纪念日（<span class="cnt">${data.ann.length}</span>）</b>`+
+      (data.ann.length?data.ann.map((x,i)=>`<div class="item"><button class="del" onclick="delA(${i})">删除</button>${x.an} · ${x.ad}<br><small style="color:var(--muted)">还剩 ${daysLeft(x.ad)} 天</small></div>`).join(""):`<p style="color:var(--muted);font-size:13px">还没有纪念日。</p>`);
+  }else if(tab===1){
+    box.innerHTML=`<b>💬 每日一问（<span class="cnt">${data.q.length}</span>）</b>`+
+      (data.q.length?data.q.map((x,i)=>`<div class="item"><button class="del" onclick="delQ(${i})">删除</button>Q：${x.qq}${x.qa?`<br><small style="color:var(--muted)">A：${x.qa}</small>`:""}</div>`).join(""):`<p style="color:var(--muted);font-size:13px">还没有一问一答。</p>`);
+  }else{
+    box.innerHTML=`<b>🌟 共同记忆（<span class="cnt">${data.mem.length}</span>）</b>`+
+      (data.mem.length?data.mem.map((x,i)=>`<div class="item"><button class="del" onclick="delM(${i})">删除</button>${x.mt}${x.md?`<br><small style="color:var(--muted)">${x.md}</small>`:""}</div>`).join(""):`<p style="color:var(--muted);font-size:13px">还没有记忆。</p>`);
+  }
+}
+renderPane();render();
+</script>
+</body>
+</html>

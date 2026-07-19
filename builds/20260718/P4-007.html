@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>无广告运动健康（AI饮食+计划一体）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none;float:right}
+.stat{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;text-align:center;padding:10px}
+.stat b{display:block;font-size:20px;color:var(--coral)}
+.pln{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.pln input{width:auto;margin:0}
+.done{text-decoration:line-through;color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">fitness</span><span class="tag">health_app_ads_ai</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">无广告运动健康（饮食+计划）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Ad-free AI diet/plan integrated app</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">荣耀运动健康建议广场高频投诉：每个界面都有无法关闭的广告、消息红点强迫症难受；同时强烈需求：AI定制健身计划（同步日程）、AI拍照识别食物热量、一起运动组队。痛点：大厂运动App广告泛滥+基础智能功能缺失。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具（纯净·无广告）</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">饮食录入 + 每日训练计划勾选，合一页，零广告。</p>
+    <label>吃了什么（食物名）</label>
+    <input id="food" placeholder="如：鸡胸肉 / 米饭一碗">
+    <div class="row">
+      <div><label>估算热量(kcal)</label><input id="kcal" type="number" min="0" placeholder="200"></div>
+      <div><label>餐次</label><select id="meal"><option>早餐</option><option>午餐</option><option>晚餐</option><option>加餐</option></select></div>
+    </div>
+    <button class="btn" onclick="addFood()">＋ 记饮食</button>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <div class="stat"><b id="kToday">0</b>今日kcal</div>
+      <div class="stat"><b id="kAll">0</b>累计kcal</div>
+    </div>
+    <b style="font-size:14px;display:block;margin-top:14px">📋 今日训练计划（勾选完成）</b>
+    <div id="plan"></div>
+    <div class="row" style="margin-top:6px">
+      <input id="pn" placeholder="加计划项，如：深蹲3组">
+      <button class="btn" style="margin-top:6px;flex:0 0 80px" onclick="addPlan()">添加</button>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>🍱 今日饮食</b>
+    <div id="logs" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://club.honor.com/opinion_thread-list.html?filter=joinvotes&type=20&fid=455&page=2&mobile=no" target="_blank" style="color:var(--coral)">荣耀运动健康 / 小米运动健康</a>
+  </div>
+
+<script>
+const KEY="P4-007";
+let foods=JSON.parse(localStorage.getItem(KEY+"_f")||"[]");
+const DEF=["热身5分","力量训练","有氧20分","拉伸放松"];
+let plan=JSON.parse(localStorage.getItem(KEY+"_p")||"null")||DEF.map(t=>({t,done:false}));
+function today(){return new Date().toISOString().slice(0,10);}
+function saveF(){localStorage.setItem(KEY+"_f",JSON.stringify(foods));renderF();}
+function saveP(){localStorage.setItem(KEY+"_p",JSON.stringify(plan));renderP();}
+function addFood(){
+  const food=document.getElementById("food").value.trim();
+  const kcal=parseInt(document.getElementById("kcal").value)||0;
+  const meal=document.getElementById("meal").value;
+  if(!food){alert("写个食物名");return;}
+  foods.unshift({food,kcal,meal,d:today()});
+  document.getElementById("food").value="";document.getElementById("kcal").value="";
+  saveF();
+}
+function delF(i){foods.splice(i,1);saveF();}
+function addPlan(){const v=document.getElementById("pn").value.trim();if(!v)return;plan.push({t:v,done:false});document.getElementById("pn").value="";saveP();}
+function toggleP(i){plan[i].done=!plan[i].done;saveP();}
+function renderF(){
+  const t=foods.filter(x=>x.d===today()).reduce((s,x)=>s+x.kcal,0);
+  document.getElementById("kToday").textContent=t;
+  document.getElementById("kAll").textContent=foods.reduce((s,x)=>s+x.kcal,0);
+  document.getElementById("logs").innerHTML=foods.length?foods.map((x,i)=>
+    `<div class="item"><button class="del" onclick="delF(${i})">删除</button>${x.d} · <b>${x.food}</b> · ${x.meal} · ${x.kcal}kcal</div>`
+  ).join(""):`<p style="color:var(--muted);font-size:13px">今天还没记饮食。</p>`;
+}
+function renderP(){
+  document.getElementById("plan").innerHTML=plan.map((p,i)=>
+    `<div class="pln"><input type="checkbox" ${p.done?"checked":""} onchange="toggleP(${i})"><span class="${p.done?"done":""}">${p.t}</span></div>`
+  ).join("");
+}
+renderF();renderP();
+</script>
+</body>
+</html>

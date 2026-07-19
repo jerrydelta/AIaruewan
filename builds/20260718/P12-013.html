@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>小微AI客服+邮件营销</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.mini{font-size:14px;margin:14px 0 4px;font-weight:600;color:var(--ink);
+  border-left:4px solid var(--coral);padding-left:8px}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.del{color:var(--coral);float:right;font-size:13px;cursor:pointer}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.boxout{background:#FFF7F7;border:1px solid #FFD9D9;border-radius:10px;padding:10px;margin-top:8px;font-size:14px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">business</span><span class="tag">smb_ai_marketing</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">小微AI客服+邮件营销</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI customer-service + email-marketing assistant (multilingual)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">小微商家AI营销/客服需求爆发：Tidio的Lyro用多语言回答客户咨询、无法回答转人工；Mailchimp可快速生成个性化邮件。痛点：小微没专人做营销/客服，回复慢丢单。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <div class="mini">🤖 AI客服话术生成</div>
+    <label>客户问题</label><textarea id="q" rows="2" placeholder="如 Do you ship to US?"></textarea>
+    <label>语言</label><select id="lang"><option>中文</option><option>English</option><option>한국어</option><option>日本語</option></select>
+    <button class="btn" onclick="genReply()">生成回复</button>
+    <div class="boxout" id="reply" style="display:none"></div>
+
+    <div class="mini">📧 邮件营销模板</div>
+    <label>产品/活动</label><input id="prod" placeholder="如 春季新品8折">
+    <button class="btn" onclick="genMail()">生成邮件</button>
+    <div class="boxout" id="mail" style="display:none"></div>
+  </div>
+
+  <div class="card" id="list"><b>📋 历史</b><div id="box"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://roapp.io/blog/ai-tools-for-small-businesses/" target="_blank" style="color:var(--coral)">Tidio(Lyro) · Mailchimp Intuit Assist</a>
+  </div>
+
+<script>
+const K="P12-013_hist";
+let items=JSON.parse(localStorage.getItem(K)||"[]");
+const replies={
+  "中文":"您好，感谢咨询！关于您的问题我们正在为您确认，通常1-2个工作日内回复，也可直接留言您的联系方式，我们会尽快联系您。",
+  "English":"Hi, thanks for reaching out! We've received your question and will get back to you within 1-2 business days. Feel free to leave your contact and we'll follow up promptly.",
+  "한국어":"안녕하세요, 문의 감사합니다! 확인 후 1~2 영업일 이내에 답변드리겠습니다. 연락처를 남겨주시면 빠르게 회신드리겠습니다.",
+  "日本語":"お問い合わせありがとうございます。1〜2営業日以内にご返信いたします。連絡先をご記入いただければ迅速に対応いたします。"
+};
+const mailTpls=[
+  "主题：{p} 🎉\n亲爱的顾客，我们为您准备了{p}的专属福利！点击查看详情，限时优惠不要错过～",
+  "主题：好消息｜{p}\nHi 您好，{p}现已开启！老客户专享，回复本邮件即可锁定名额。",
+  "主题：{p} · 本周精选\n本周主推{p}，库存有限先到先得，感谢一路支持的小店❤"
+];
+function genReply(){const q=document.getElementById("q").value.trim(),l=document.getElementById("lang").value;
+  if(!q){alert("填客户问题");return;}
+  const r=replies[l];document.getElementById("reply").style.display="block";
+  document.getElementById("reply").textContent="💬 "+r;
+  items.push({type:"客服",q,t:new Date().toLocaleString()});localStorage.setItem(K,JSON.stringify(items));render();}
+function genMail(){const p=document.getElementById("prod").value.trim();if(!p){alert("填产品/活动");return;}
+  const t=mailTpls[Math.floor(Math.random()*mailTpls.length)].replace(/{p}/g,p);
+  document.getElementById("mail").style.display="block";document.getElementById("mail").textContent=t;
+  items.push({type:"邮件",q:p,t:new Date().toLocaleString()});localStorage.setItem(K,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);localStorage.setItem(K,JSON.stringify(items));render();}
+function render(){document.getElementById("box").innerHTML=items.slice().reverse().map((x,i)=>`<div class="item"><span class="del" onclick="del(${items.length-1-i})">删</span>[${x.type}] ${x.q.replace(/</g,"&lt;")} <span style="font-size:12px;color:var(--muted)">${x.t}</span></div>`).join("")||"<p style='font-size:13px;color:var(--muted)'>暂无历史。</p>";}
+render();
+</script>
+</body>
+</html>

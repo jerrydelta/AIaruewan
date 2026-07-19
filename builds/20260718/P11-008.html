@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>数字花园日记</title>
+<style>
+:root{
+  --coral:#FF6B6B;        --coral-dark:#E85555;
+  --ink:#2D2D2D;          --muted:#8A8A8A;
+  --bg:#F7F7F7;           --card:#FFFFFF;
+  --line:#ECECEC;         --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-sm{padding:7px 10px;font-size:13px;border-radius:9px;margin-top:0}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item h3{margin:0 0 4px;font-size:15px}
+.mini{font-size:12px;color:var(--muted)}
+.zone{display:inline-block;font-size:11px;background:#EAF6FF;color:#2B7FC4;border-radius:999px;padding:1px 8px;margin-right:4px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">plant</span><span class="tag">digital_garden_journal</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">数字花园日记</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Digital garden journal + social + gamified</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Gardenize 是数字花园日记，记录植物/分区/活动+照片，面向认真园丁；Plantfie 用"已发现植物"收集做游戏化。纯提醒类 App 忽略了记录生长与社区交流的乐趣。本工具：分区日记 + 照片链接 + 游戏化发现计数。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 写一条日记</b>
+    <div class="row">
+      <div><label>分区</label>
+        <select id="zone"><option>阳台</option><option>客厅</option><option>庭院</option><option>菜畦</option><option>其他</option></select></div>
+      <div><label>植物/主题</label><input id="plant" placeholder="如：月季"></div>
+    </div>
+    <label>活动</label>
+    <select id="act"><option>浇水</option><option>施肥</option><option>修剪</option><option>换盆</option><option>播种</option><option>观察/开花</option><option>病虫害</option></select>
+    <label>记录 & 照片链接</label>
+    <textarea id="note" rows="2" placeholder="如：今日初花！照片 https://..."></textarea>
+    <button class="btn" onclick="add()">＋ 记一笔</button>
+    <div id="list"></div>
+  </div>
+
+  <div class="card">
+    <b>🎮 发现统计</b>
+    <p id="stat" class="mini"></p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://tendra-app.com/blog/the-12-best-free-gardening-apps-to-elevate-your-green-thumb-in-2025-1" target="_blank" style="color:var(--coral)">Gardenize / Planta / Plantfie</a>
+  </div>
+
+<script>
+const KEY="P11-008";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){ localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function add(){
+  const plant=document.getElementById('plant').value.trim();
+  if(!plant){ alert('请填植物/主题'); return; }
+  items.unshift({id:Date.now(),zone:document.getElementById('zone').value,plant,
+    act:document.getElementById('act').value,note:document.getElementById('note').value.trim(),date:today()});
+  document.getElementById('plant').value='';document.getElementById('note').value='';
+  save();
+}
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function render(){
+  const box=document.getElementById('list'); box.innerHTML='';
+  const found=new Set();
+  items.forEach(d=>{
+    found.add(d.plant);
+    const el=document.createElement('div'); el.className='item';
+    let noteHtml=d.note?('<div style="font-size:13px;margin-top:4px">'+linkify(d.note)+'</div>'):'';
+    el.innerHTML='<h3>'+d.plant+'</h3>'+
+      '<div class="mini"><span class="zone">'+d.zone+'</span>'+d.act+' · '+d.date+'</div>'+
+      noteHtml+
+      '<button class="btn btn-sm" style="background:#ccc;width:auto;margin-top:8px" onclick="del('+d.id+')">删除</button>';
+    box.appendChild(el);
+  });
+  document.getElementById('stat').textContent='日记 '+items.length+' 条 · 已发现 '+found.size+' 种植物 🌿';
+}
+function linkify(t){
+  return t.replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" style="color:var(--coral)">🔗照片</a>');
+}
+render();
+</script>
+</body>
+</html>

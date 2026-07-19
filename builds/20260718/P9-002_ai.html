@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>零工一站式费用+里程+税务预留聚合</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;font-size:14px}
+.item:first-child{border-top:none}
+.del{background:none;border:none;color:var(--coral);font-size:13px;cursor:pointer;float:right;margin-top:-2px}
+.sumbox{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:10px;font-size:13px}
+.sumbox b{color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">gig_economy</span><span class="tag">gig_expense_stack</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">零工一站式费用 + 里程 + 税务预留</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">All-in-one expense + mileage + tax-setaside aggregator</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">多平台零工（同时跑 3 个 App）仍需在多个工具间切换，跨币种/跨境零工支持弱。针对"混合作战"零工的一站式免费/低价聚合仍是空白。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 费用 / 里程 / 收入聚合 + 季度税预留</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">按平台记录收入、费用或里程（里程按 $0.725/英里折算），自动汇总并给出季度税预留与每周应存金额。</p>
+    <div class="row">
+      <div><label>平台</label>
+        <select id="platform">
+          <option>Uber</option><option>Lyft</option><option>DoorDash</option>
+          <option>Instacart</option><option>其他</option>
+        </select></div>
+      <div><label>类型</label>
+        <select id="type">
+          <option value="income">收入($)</option>
+          <option value="expense">费用($)</option>
+          <option value="mileage">里程(mi)</option>
+        </select></div>
+    </div>
+    <label>金额 / 里程数</label>
+    <input id="val" type="number" inputmode="decimal" placeholder="收入/费用填美元，里程填英里">
+    <label>日期（可选）</label>
+    <input id="date" type="date">
+    <button class="btn" onclick="add()">＋ 记录一笔</button>
+    <div class="sumbox">
+      总收入 <b id="inc">$0</b> ｜ 总抵扣 <b id="ded">$0</b><br>
+      估算季度税(15.3%) <b id="tax">$0</b> ｜ 每周预留 <b id="wk">$0</b>
+    </div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P9-002">
+    <div class="collapse-header" id="aiHeader_P9-002" onclick="toggleAI('P9-002')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P9-002" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P9-002">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P9-002" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P9-002')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P9-002" style="display:none;margin-top:10px">
+        <div id="aiMessages_P9-002" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P9-002" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P9-002')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://primerate.com/best-expense-tracking-apps-gig-workers" target="_blank" style="color:var(--coral)">Hurdlr · Solo · Stride · QuickBooks Self-Employed · Everlance</a>
+  </div>
+
+<script>
+const KEY="P9-002";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const platform=document.getElementById("platform").value;
+  const type=document.getElementById("type").value;
+  const raw=parseFloat(document.getElementById("val").value);
+  if(!raw||raw<=0){alert("请输入有效数值");return;}
+  const amt = type==="mileage" ? raw*0.725 : raw;
+  items.push({platform,type,raw,amt,date:document.getElementById("date").value||""});
+  document.getElementById("val").value="";document.getElementById("date").value="";
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);save();}
+function render(){
+  let inc=0,ded=0,html="";
+  const typeName={income:"收入",expense:"费用",mileage:"里程"};
+  items.forEach((it,i)=>{
+    if(it.type==="income") inc+=it.amt; else ded+=it.amt;
+    const detail = it.type==="mileage" ? it.raw+"mi→$"+it.amt.toFixed(2) : "$"+it.amt.toFixed(2);
+    html+=`<div class='item'><button class='del' onclick='del(${i})'>删除</button><b>${it.platform}</b> <span class='tag'>${typeName[it.type]}</span><div style='font-size:13px;color:#555'>${detail} ${it.date?"· "+it.date:""}</div></div>`;
+  });
+  document.getElementById("list").innerHTML = items.length
+    ? "<b style='font-size:14px'>📒 聚合记录（"+items.length+" 笔）</b>"+html
+    : "<p style='color:#999;font-size:13px'>暂无记录，开始聚合你的多平台数据。</p>";
+  const tax=Math.max(0,(inc-ded))*0.153;
+  document.getElementById("inc").textContent="$"+inc.toFixed(0);
+  document.getElementById("ded").textContent="$"+ded.toFixed(0);
+  document.getElementById("tax").textContent="$"+tax.toFixed(0);
+  document.getElementById("wk").textContent="$"+(tax/13).toFixed(0);
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

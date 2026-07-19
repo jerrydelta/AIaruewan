@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>研究型产后抑郁筛查+DNA</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.q{border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-top:8px}
+.q .t{font-size:14px;font-weight:600}
+.q select{margin-top:6px}
+.result{background:#FFF8F0;border:1px solid #FFE6CC;border-radius:12px;padding:12px;font-size:14px;margin-top:10px}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:14px}
+.item .meta{font-size:11px;color:var(--muted);margin-top:4px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">postpartum</span><span class="tag">research</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">研究型产后抑郁筛查</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">EPDS 式量表 + DNA 捐献登记（模拟）</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">PPD 诊断靠量表、假阳性约 25%，缺大规模基因研究。PPD ACT（UNC，Apple ResearchKit）筛查症状并征集 DNA，首年约 14,000 名女性入组，目标全球 5 万份样本。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · EPDS 式 10 题筛查</b>
+    <p style="font-size:13px;color:#666;margin:6px 0 0">过去 7 天，每题选最符合的程度（0 没有 → 3 总是）。</p>
+    <div id="qs"></div>
+    <button class="btn" onclick="score()">📊 计算我的筛查分</button>
+    <div id="res"></div>
+  </div>
+
+  <div class="card">
+    <b>🧬 工具 · 参与基因研究登记（模拟）</b>
+    <label>是否愿意被邀请捐献 DNA 样本？</label>
+    <select id="dna"><option>暂不愿意</option><option>愿意了解</option><option>已同意（模拟）</option></select>
+    <button class="btn" onclick="addStudy()">📝 登记参与意向</button>
+    <div id="study"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://postpartum.net/ppd-act/" target="_blank" style="color:var(--coral)">PPD ACT（研究型筛查 + DNA 研究）</a>
+    <p style="margin:6px 0 0">本工具为教育/模拟用途，非真实医学筛查。分数偏高请及时联系医生。</p>
+  </div>
+
+<script>
+const KEY="P15-012";
+const QS=["我能笑对生活","我对未来感到乐观","当事情出错我会自责","我无故焦虑","我无缘无故害怕","事情压得我喘不过气","我睡不好","我难过或想哭","我伤害自己的想法","我觉得自己不够好"];
+let ans=Array(QS.length).fill(0);
+let studies=JSON.parse(localStorage.getItem(KEY)||"[]");
+const qsBox=document.getElementById("qs");
+QS.forEach((q,i)=>{const d=document.createElement("div");d.className="q";
+  d.innerHTML='<div class="t">'+(i+1)+'. '+q+'</div><select onchange="ans['+i+']=+this.value"><option value="0">0 没有</option><option value="1">1 偶尔</option><option value="2">2 经常</option><option value="3">3 总是</option></select>';
+  qsBox.appendChild(d);});
+function score(){
+  const total=ans.reduce((a,b)=>a+b,0);
+  let level=total>=13?"偏高，建议尽快联系医生":total>=10?"中等，建议多关注自己":"偏低，继续照顾好自己";
+  document.getElementById("res").innerHTML='<div class="result">本次筛查总分：<b>'+total+' / 30</b><br>参考：'+level+'</div>';
+}
+function addStudy(){
+  studies.unshift({dna:document.getElementById("dna").value,t:new Date().toLocaleDateString("zh-CN")});
+  localStorage.setItem(KEY,JSON.stringify(studies));render();
+}
+function render(){
+  const s=document.getElementById("study");s.innerHTML=studies.length?'<p style="font-size:13px;color:#555;margin-top:10px"><b>我的研究意向</b></p>':'';
+  studies.slice(0,5).forEach(x=>{const d=document.createElement("div");d.className="item";d.innerHTML=x.dna+'<div class="meta">'+x.t+'</div>';s.appendChild(d);});
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>面向MZ的另类资产组合追踪</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.res{font-size:14px;margin-top:8px;padding:10px;border-radius:10px;background:#FFF7F7}
+.res b{color:var(--coral)}
+.warn{background:#FFF3E0;color:#9a6b00}
+li{list-style:none;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+ul{padding:0;margin:6px 0 0}
+.del{color:var(--muted);font-size:12px;border:none;background:none;cursor:pointer;float:right}
+.pill{font-size:11px;padding:1px 7px;border-radius:999px;background:#FFF0F0;color:var(--coral);margin-right:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">finance</span><span class="tag">mz_alternative_asset_tracker</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">MZ 另类资产追踪</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Alternative-asset tracker: resell / gold / crypto</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国 MZ 把「理财」玩成文化：리셀테크(限量鞋服倒卖)市场 2021 年 7000 亿→2022 年 1 兆→预计 1.5 兆韩元，Cream 年交易额破 1 兆。痛点=倒卖收益散落多平台、成本基础/真伪/税务难追踪。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#777;margin:6px 0 0">记倒卖/黄金/加密的买入成本与卖出价 → 自动算利润与收益率，提示税务。</p>
+    <label>平台/品类</label>
+    <input type="text" id="plat" placeholder="例 Cream(鞋) / 金 / 比特币">
+    <label>商品</label>
+    <input type="text" id="item" placeholder="例 Nike Dunk 限定">
+    <div class="row">
+      <div><label>成本(万KRW)</label><input type="number" id="cost" placeholder="30" inputmode="numeric" step="any"></div>
+      <div><label>卖出(万KRW)</label><input type="number" id="sell" placeholder="45" inputmode="numeric" step="any"></div>
+    </div>
+    <button class="btn" onclick="add()">＋ 记录</button>
+    <div class="res" id="res"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>💎 另类资产组合</b>
+    <ul id="ul"></ul>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.asiae.co.kr/en/article/2023022409233124929" target="_blank" style="color:var(--coral)">Cream(Naver) / SoldOut(Musinsa) / Airstack(Hanwha) / 토스</a>
+  </div>
+
+<script>
+const KEY="P16-018";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function fmt(n){return (n||0).toLocaleString("ko-KR")+" 万 KRW";}
+function add(){
+  const plat=document.getElementById("plat").value.trim();
+  const item=document.getElementById("item").value.trim();
+  const cost=parseFloat(document.getElementById("cost").value);
+  const sell=parseFloat(document.getElementById("sell").value);
+  if(!plat||!item||!cost||sell==null||sell<0){alert("请填全");return;}
+  items.unshift({plat,item,cost,sell,t:Date.now()});
+  ["plat","item","cost","sell"].forEach(id=>document.getElementById(id).value="");
+  save();
+}
+function del(t){items=items.filter(x=>x.t!==t);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const ul=document.getElementById("ul");ul.innerHTML="";
+  let totCost=0,totSell=0;
+  items.forEach(x=>{
+    const profit=x.sell-x.cost, roi=x.cost>0?profit/x.cost*100:0;
+    totCost+=x.cost;totSell+=x.sell;
+    const li=document.createElement("li");
+    li.innerHTML=`<button class="del" onclick="del(${x.t})">删除</button>
+      <span class="pill">${x.plat}</span>${x.item}<br>
+      <span style="color:#999;font-size:12px">成本 ${fmt(x.cost)} → 卖 ${fmt(x.sell)} ｜ 利润 <b style="color:${profit>=0?'var(--ok)':'var(--coral)'}">${fmt(profit)} (${roi.toFixed(0)}%)</b></span>`;
+    ul.appendChild(li);
+  });
+  const totProfit=totSell-totCost, roi=totCost>0?totProfit/totCost*100:0;
+  let taxNote = totProfit>0 ? `<div class="warn">⚠ 年倒卖收益超阈值(约年250万KRW)可能需申报杂项/事业所得，注意税务。</div>`:"";
+  document.getElementById("res").innerHTML=
+    `组合成本 <b>${fmt(totCost)}</b> ｜ 现值 <b>${fmt(totSell)}</b><br>总利润 <b style="color:${totProfit>=0?'var(--ok)':'var(--coral)'}">${fmt(totProfit)}</b>（${roi.toFixed(0)}%）<br>${taxNote}`;
+}
+render();
+</script>
+</body>
+</html>

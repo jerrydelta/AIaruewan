@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>No-Code 内部工具模板市集</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.tpl{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:8px;font-size:13px}
+.tpl .star{float:right;color:var(--coral);font-size:12px}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:13px}
+.item .del{float:right;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">no_code</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">No-Code 内部工具市集</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Internal-Tool Template Market</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Gartner 预测 2026 低代码/无代码市场超 $30B，70% 新企业应用将用 LCNC 构建，开发时间最高降 90%。41% 员工成为"公民开发者"。痛点：非技术者想造内部工具但缺引导。机会在模板市集（请假/采购/客户）。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 模板浏览</b>
+    <select id="filter" onchange="render()">
+      <option value="">全部分类</option>
+      <option value="请假">请假/考勤</option>
+      <option value="采购">采购/报销</option>
+      <option value="客户">客户/CRM</option>
+      <option value="库存">库存/资产</option>
+    </select>
+    <div id="market"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的收藏</b>
+    <p style="font-size:12px;color:var(--muted);margin:6px 0 0">已收藏 <b class="h-coral" id="cnt">0</b> 个</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.integrate.io/blog/no-code-transformations-usage-trends/" target="_blank" style="color:var(--coral)">No-Code 趋势报告</a>
+  </div>
+
+<script>
+const KEY="P2-013";
+const TPLS=[
+  {n:"연차 신청서",cat:"请假",d:"员工提交休假申请→主管审批→自动累计余额"},
+  {n:"출장 정산",cat:"采购",d:"出差费用填报→票据上传→财务核对→报销"},
+  {n:"거래처 관리",cat:"客户",d:"客户档案+跟进记录+到期提醒"},
+  {n:"비품 재고",cat:"库存",d:"办公用品出入库→低库存预警"},
+  {n:"교육 이수",cat:"请假",d:"培训课程报名→完成记录→证书管理"},
+  {n:"견적서 발행",cat:"客户",d:"报价单模板→审批→发送给客户"},
+  {n:"도서 대여",cat:"库存",d:"公司图书/设备借阅登记与归还"},
+  {n:"월간 보고",cat:"采购",d:"部门月报结构化填报→自动汇总"}
+];
+let fav = JSON.parse(localStorage.getItem(KEY) || "[]");
+function render(){
+  const f=document.getElementById("filter").value;
+  const list=TPLS.filter(t=>!f||t.cat===f);
+  let h="";
+  list.forEach((t)=>{
+    const isFav=fav.includes(t.n);
+    h+='<div class="tpl"><span class="star" onclick="toggle(\''+t.n.replace(/'/g,"")+'\')">'+(isFav?"★ 已收藏":"☆ 收藏")+'</span><b>'+t.n+'</b> <span style="font-size:11px;color:var(--coral)">'+t.cat+'</span><br><span style="color:#777">'+t.d+'</span></div>';
+  });
+  document.getElementById("market").innerHTML=h;
+  let fh='<b>📋 我的收藏</b><p style="font-size:12px;color:var(--muted);margin:6px 0 0">已收藏 <b class="h-coral" id="cnt">'+fav.length+'</b> 个</p>';
+  if(fav.length===0){ fh+='<p style="font-size:13px;color:var(--muted)">还没有收藏。</p>'; }
+  fav.forEach((n,i)=>{
+    fh+='<div class="item"><span class="del" onclick="toggle(\''+n.replace(/'/g,"")+'\')">取消</span>'+n+'</div>';
+  });
+  document.getElementById("list").innerHTML=fh;
+}
+function toggle(name){
+  const i=fav.indexOf(name);
+  if(i>=0) fav.splice(i,1); else fav.push(name);
+  localStorage.setItem(KEY,JSON.stringify(fav)); render();
+}
+render();
+</script>
+</body>
+</html>

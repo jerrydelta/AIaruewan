@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩↔中走廊低费汇款·到手估算</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.res{font-size:14px;margin-top:8px;padding:10px;border-radius:10px;background:#FFF7F7}
+.res b{color:var(--coral)}
+li{list-style:none;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+ul{padding:0;margin:6px 0 0}
+.del{color:var(--muted);font-size:12px;border:none;background:none;cursor:pointer;float:right}
+.pill{font-size:11px;padding:1px 7px;border-radius:999px;background:#FFF0F0;color:var(--coral);margin-right:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">finance</span><span class="tag">kor_china_remittance</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩↔中低费汇款·到手估算</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KR↔CN low-fee remittance: receive estimate</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">在韩华人把韩元汇回中国是刚需。传统银行电汇慢(2-7天)且中间行费高；PandaRemit 用中间汇率、支付宝/微信直连，平均 2 分钟到账，到手高于 UTransfer。痛点=隐型汇率差+慢。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#777;margin:6px 0 0">填汇款额与汇率/手续费 → 估算到手人民币；对比两家渠道。</p>
+    <label>汇款金额（万 KRW）</label>
+    <input type="number" id="krw" placeholder="100" inputmode="numeric">
+    <label>汇率（1 CNY = ? KRW，中间价）</label>
+    <input type="number" id="rate" placeholder="190" step="any">
+    <div class="row">
+      <div><label>A渠道手续费%</label><input type="number" id="fa" placeholder="0.5" step="any"></div>
+      <div><label>B渠道手续费%</label><input type="number" id="fb" placeholder="1.0" step="any"></div>
+    </div>
+    <button class="btn" onclick="calc()">估算到手</button>
+    <div class="res" id="res"></div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <label>记一笔汇款（金额万KRW）</label>
+    <div class="row">
+      <input type="number" id="amt" placeholder="100" inputmode="numeric">
+      <button class="btn" style="margin-top:6px" onclick="add()">＋ 记</button>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📤 汇款记录</b>
+    <ul id="ul"></ul>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://item.pandaremit.com/article/138109.html" target="_blank" style="color:var(--coral)">PandaRemit(熊猫速汇) / UTransfer / Wise / Toss</a>
+  </div>
+
+<script>
+const KEY="P16-012";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function fmt(n,d){return (n||0).toLocaleString(undefined,{maximumFractionDigits:d||0})+"";
+}
+function calc(){
+  const krw=parseFloat(document.getElementById("krw").value)*10000;
+  const rate=parseFloat(document.getElementById("rate").value);
+  const fa=parseFloat(document.getElementById("fa").value)/100||0;
+  const fb=parseFloat(document.getElementById("fb").value)/100||0;
+  if(!krw||!rate){alert("请填汇款额与汇率");return;}
+  const a=krw/rate*(1-fa);
+  const b=krw/rate*(1-fb);
+  document.getElementById("res").innerHTML=
+    `A渠道到手 <b>${fmt(a,1)} 元</b><br>B渠道到手 <b>${fmt(b,1)} 元</b><br>`+
+    `<b>A比B多 ${fmt(a-b,1)} 元</b>（选中间汇率+低费更划算）`;
+}
+function add(){
+  const amt=parseFloat(document.getElementById("amt").value);
+  if(!amt||amt<=0){alert("请输入金额");return;}
+  items.unshift({amt,d:new Date().toISOString().slice(0,10),t:Date.now()});
+  document.getElementById("amt").value="";save();
+}
+function del(t){items=items.filter(x=>x.t!==t);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const ul=document.getElementById("ul");ul.innerHTML="";
+  let sum=0;
+  items.forEach(x=>{sum+=x.amt;const li=document.createElement("li");
+    li.innerHTML=`<button class="del" onclick="del(${x.t})">删除</button>
+      <span class="pill">汇款</span>${x.d} · ${fmt(x.amt,0)} 万 KRW`;
+    ul.appendChild(li);});
+  ul.insertAdjacentHTML("beforeend",`<li style="border:none">累计汇出 <b>${fmt(sum,0)} 万 KRW</b></li>`);
+}
+render();
+</script>
+</body>
+</html>

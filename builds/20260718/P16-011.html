@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>日本多卡最优化·按类别选卡</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.res{font-size:14px;margin-top:8px;padding:10px;border-radius:10px;background:#FFF7F7}
+.res b{color:var(--coral)}
+li{list-style:none;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+ul{padding:0;margin:6px 0 0}
+.del{color:var(--muted);font-size:12px;border:none;background:none;cursor:pointer;float:right}
+.pill{font-size:11px;padding:1px 7px;border-radius:999px;background:#FFF0F0;color:var(--coral);margin-right:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">finance</span><span class="tag">multi_card_point_optimizer</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">日本多卡最优化</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Multi-card optimizer: best-card-by-category</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本人平均持多张卡+多积分(Ponta/Rakuten/d/T/nanaco/WAON)，Moneytree 已聚合但偏「查看」。缺一个「按消费类别推荐最优卡+年费续费建议+积分到期」的独立工具。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#777;margin:6px 0 0">登记你的卡与各品类返点率(%) → 选消费类别即推荐最优卡。</p>
+    <label>卡名</label>
+    <input type="text" id="cname" placeholder="例 Rakutenカード">
+    <label>年费(円，0=无)</label>
+    <input type="number" id="fee" placeholder="0" inputmode="numeric">
+    <label>超市/食料 返点%</label>
+    <input type="number" id="grocery" placeholder="1" step="any">
+    <label>网络/EC 返点%</label>
+    <input type="number" id="ec" placeholder="1" step="any">
+    <label>交通/加油 返点%</label>
+    <input type="number" id="trans" placeholder="1" step="any">
+    <label>其他/通用 返点%</label>
+    <input type="number" id="other" placeholder="1" step="any">
+    <button class="btn" onclick="addCard()">＋ 加卡</button>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <label>本次消费类别</label>
+    <select id="cat"><option value="grocery">超市/食料</option><option value="ec">网络/EC</option><option value="trans">交通/加油</option><option value="other">其他/通用</option></select>
+    <label>消费金额(円)</label>
+    <input type="number" id="spend" placeholder="10000" inputmode="numeric">
+    <button class="btn" onclick="pick()">推荐最优卡</button>
+    <div class="res" id="res"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>💳 我的卡</b>
+    <ul id="ul"></ul>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/app/cardwise-find-your-best-card/id6755047913" target="_blank" style="color:var(--coral)">Moneytree / RewardsWise / CardWise / セゾンPortal</a>
+  </div>
+
+<script>
+const KEY="P16-011";
+let cards=JSON.parse(localStorage.getItem(KEY)||"[]");
+function fmt(n){return Math.round(n||0).toLocaleString("ja-JP")+" 円";}
+const LBL={grocery:"超市/食料",ec:"网络/EC",trans:"交通/加油",other:"其他/通用"};
+function addCard(){
+  const cname=document.getElementById("cname").value.trim();
+  if(!cname){alert("请输入卡名");return;}
+  const card={cname,fee:parseFloat(document.getElementById("fee").value)||0,
+    grocery:parseFloat(document.getElementById("grocery").value)||0,
+    ec:parseFloat(document.getElementById("ec").value)||0,
+    trans:parseFloat(document.getElementById("trans").value)||0,
+    other:parseFloat(document.getElementById("other").value)||0,t:Date.now()};
+  cards.push(card);
+  ["cname","fee","grocery","ec","trans","other"].forEach(id=>document.getElementById(id).value="");
+  save();
+}
+function pick(){
+  const cat=document.getElementById("cat").value;
+  const spend=parseFloat(document.getElementById("spend").value);
+  if(!cards.length){alert("请先加卡");return;}
+  if(!spend||spend<=0){alert("请输入消费金额");return;}
+  let best=null,bp=-1;
+  cards.forEach(c=>{const r=c[cat];if(r>bp){bp=r;best=c;}});
+  const earn=spend*bp/100;
+  document.getElementById("res").innerHTML=
+    `推荐：<b>${best.cname}</b>（${LBL[cat]}返点 ${bp}%）<br>本次回収 <b>${fmt(earn)}</b> 积分价值<br>`+
+    (best.fee>0?`年费 ${fmt(best.fee)}，建议评估是否值得续费。`:`无年费，放心用。`);
+}
+function del(t){cards=cards.filter(x=>x.t!==t);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(cards));render();}
+function render(){
+  const ul=document.getElementById("ul");ul.innerHTML="";
+  cards.forEach(x=>{const li=document.createElement("li");
+    li.innerHTML=`<button class="del" onclick="del(${x.t})">删除</button>
+      <span class="pill">${x.fee>0?fmt(x.fee)+'/年':'无年费'}</span>${x.cname}<br>
+      <span style="color:#999;font-size:12px">食${x.grocery}% ・ EC${x.ec}% ・ 交${x.trans}% ・ 他${x.other}%</span>`;
+    ul.appendChild(li);});
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>ADHD视觉日计划器</title>
+<style>
+:root{
+  --coral:#FF6B6B;        --coral-dark:#E85555;
+  --ink:#2D2D2D;          --muted:#8A8A8A;
+  --bg:#F7F7F7;           --card:#FFFFFF;
+  --line:#ECECEC;         --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-sm{padding:7px 10px;font-size:13px;border-radius:9px;margin-top:0}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.tl{position:relative;border-left:3px solid var(--coral);margin:10px 0 0 6px;padding-left:12px}
+.tl .ev{margin-bottom:10px}
+.tl .t{font-size:12px;color:var(--coral);font-weight:600}
+.tl .nm{font-size:14px}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px}
+.mini{font-size:12px;color:var(--muted)}
+.done{text-decoration:line-through;color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">neurodiversity</span><span class="tag">adhd_visual_planner</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">ADHD视觉日计划器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">ADHD visual daily planner (timeline + AI breakdown)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Tiimo 是神经多元优先的视觉日计划器，100 万+用户、2025 iPhone 年度 App。传统日历对"时间盲"ADHD 用户失效。中文 ADHD 视觉计划器仍是空白——本工具用彩色时间轴+任务拆解帮你"看见时间"。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 时间轴日程</b>
+    <div class="row">
+      <div><label>开始时间</label><input id="st" type="time" value="09:00"></div>
+      <div><label>时长(分)</label><input id="dur" type="number" value="30" min="5"></div>
+    </div>
+    <label>任务</label>
+    <input id="task" placeholder="如：写周报">
+    <button class="btn" onclick="add()">＋ 加入时间轴</button>
+    <div id="tl" class="tl"></div>
+  </div>
+
+  <div class="card">
+    <b>🤖 AI 任务拆解</b>
+    <label>一个让你瘫痪的大任务</label>
+    <input id="big" placeholder="如：准备搬家">
+    <button class="btn" onclick="breakdown()">拆解成小步</button>
+    <div id="sub"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.tiimoapp.com/ko/about" target="_blank" style="color:var(--coral)">Tiimo</a>
+  </div>
+
+<script>
+const KEY="P11-010";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){ localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+function toMin(t){ const[a,b]=t.split(':').map(Number); return a*60+b; }
+function fmt(m){ const h=Math.floor(m/60),x=m%60; return String(h).padStart(2,'0')+':'+String(x).padStart(2,'0'); }
+function add(){
+  const st=document.getElementById('st').value, task=document.getElementById('task').value.trim();
+  if(!task){ alert('请填任务'); return; }
+  const dur=+document.getElementById('dur').value||30;
+  items.push({id:Date.now(),st,et:fmt(toMin(st)+dur),task,done:false});
+  document.getElementById('task').value='';
+  save();
+}
+function toggle(id){ const t=items.find(x=>x.id===id); if(t){t.done=!t.done; save();} }
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function render(){
+  items.sort((a,b)=>toMin(a.st)-toMin(b.st));
+  const box=document.getElementById('tl'); box.innerHTML='';
+  items.forEach(t=>{
+    const el=document.createElement('div'); el.className='ev';
+    el.innerHTML='<div class="t">'+t.st+'–'+t.et+'</div>'+
+      '<div class="nm '+(t.done?'done':'')+'">'+t.task+'</div>'+
+      '<div class="row" style="margin-top:4px">'+
+      '<button class="btn btn-sm" style="background:var(--ok)" onclick="toggle('+t.id+')">'+(t.done?'↺ 重做':'✓ 完成')+'</button>'+
+      '<button class="btn btn-sm" style="background:#ccc" onclick="del('+t.id+')">删</button></div>';
+    box.appendChild(el);
+  });
+}
+const TEMPLATES={
+  "搬家":["列物品清单打包","预约搬家车","水电煤过户","通知地址变更","新家清洁布置"],
+  "报告":["列大纲与要点","找数据/资料","写初稿","检查格式","提交"],
+  "做饭":["想菜单买菜","洗切备料","烹饪","装盘","收拾厨房"],
+  "学习":["定目标与时限","拆分章节","做笔记","做题自测","复盘"]
+};
+function breakdown(){
+  const big=document.getElementById('big').value.trim();
+  if(!big){ alert('请填大任务'); return; }
+  let subs=TEMPLATES["搬家"];
+  for(const k in TEMPLATES){ if(big.includes(k)){ subs=TEMPLATES[k]; break; } }
+  if(subs===TEMPLATES["搬家"] && !big.includes("搬家")){
+    subs=["先花2分钟只想第1步","拆成3个最小动作","设个计时25分钟开始","做完奖励自己"];
+  }
+  const box=document.getElementById('sub'); box.innerHTML='<div class="mini" style="margin-top:8px">「'+big+'」可拆为：</div>';
+  subs.forEach((s,i)=>{
+    const d=document.createElement('div'); d.className='item';
+    d.innerHTML='<span class="mini">'+(i+1)+'.</span> '+s;
+    box.appendChild(d);
+  });
+}
+render();
+</script>
+</body>
+</html>

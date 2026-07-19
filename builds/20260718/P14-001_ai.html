@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>戒烟/电子烟极简计数器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ghost{background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{text-align:center;padding:10px 4px}
+.stat b{display:block;font-size:22px;color:var(--coral)}
+.stat span{font-size:12px;color:var(--muted)}
+.big-btn{font-size:18px;padding:18px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">addiction_recovery</span><span class="tag">quit_smoking_tracker</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">戒烟/电子烟极简计数器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Minimalist quit-smoking / vape puff counter</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">戒烟者最缺的不是方法，而是"愧疚感"与即时反馈。现有戒烟 App 数据冰冷、说教感强。Puff Count 用"实时看抽烟成本"验证月入数万美金——把每口烟换成钱和尼古丁，让代价看得见。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 实时抽烟成本计数</b>
+    <label>每包价格（元）</label>
+    <input id="packPrice" type="number" value="30" inputmode="decimal">
+    <div class="row">
+      <div><label>每包含支数</label><input id="perPack" type="number" value="20"></div>
+      <div><label>每支口数（估算）</label><input id="puffs" type="number" value="10"></div>
+    </div>
+    <label>每支尼古丁含量（mg，可不填）</label>
+    <input id="nic" type="number" value="12" inputmode="decimal">
+    <button class="btn big-btn" id="puffBtn" style="margin-top:14px">＋ 记一口烟</button>
+    <p style="font-size:12px;color:var(--muted);text-align:center;margin:8px 0 0">点一下 = 刚抽了一口，立刻算钱和尼古丁</p>
+    <div class="row" style="margin-top:10px">
+      <div class="stat"><b id="todayPuffs">0</b><span>今日口数</span></div>
+      <div class="stat"><b id="todayCost">¥0</b><span>今日花费</span></div>
+      <div class="stat"><b id="todayNic">0mg</b><span>今日尼古丁</span></div>
+    </div>
+    <div class="row" style="margin-top:4px">
+      <div class="stat"><b id="allPuffs">0</b><span>累计口数</span></div>
+      <div class="stat"><b id="allCost">¥0</b><span>累计花费</span></div>
+      <div class="stat"><b id="allDays">0</b><span>记录天数</span></div>
+    </div>
+    <button class="btn btn-ghost" id="undoBtn" style="margin-top:14px">撤销最后一次记录</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P14-001">
+    <div class="collapse-header" id="aiHeader_P14-001" onclick="toggleAI('P14-001')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P14-001" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P14-001">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P14-001" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P14-001')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P14-001" style="display:none;margin-top:10px">
+        <div id="aiMessages_P14-001" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P14-001" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P14-001')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 今日记录</b>
+    <p id="empty" style="font-size:13px;color:var(--muted);margin:6px 0 0">还没有记录，点上方按钮开始。</p>
+    <div id="log"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://f.mffb.com.cn/a/468112.html" target="_blank" style="color:var(--coral)">Puff Count / 今日抽烟 / Sum Puff</a>
+  </div>
+
+<script>
+const KEY="P14-001";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const $=id=>document.getElementById(id);
+function costPerPuff(){const p=+packPrice.value||0,c=+perPack.value||1,pp=+puffs.value||1;return c?p/c/pp:0;}
+function nicPerPuff(){const n=+nic.value||0,c=+perPack.value||1,pp=+puffs.value||1;return c?n/c/pp:0;}
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function add(){items.push({t:Date.now(),day:todayStr(),cost:costPerPuff(),nic:nicPerPuff()});save();}
+function undo(){if(items.length){items.pop();save();}}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const day=todayStr();
+  const td=items.filter(x=>x.day===day);
+  const tcp=td.reduce((s,x)=>s+x.cost,0), tcn=td.reduce((s,x)=>s+x.nic,0);
+  const acp=items.reduce((s,x)=>s+x.cost,0), acn=items.reduce((s,x)=>s+x.nic,0);
+  const days=new Set(items.map(x=>x.day)).size;
+  todayPuffs.textContent=td.length; todayCost.textContent="¥"+tcp.toFixed(1);
+  todayNic.textContent=tcn.toFixed(1)+"mg";
+  allPuffs.textContent=items.length; allCost.textContent="¥"+acp.toFixed(1); allDays.textContent=days;
+  if(items.length){empty.style.display="none";}else{empty.style.display="block";}
+  log.innerHTML=td.slice().reverse().map((x,i)=>{
+    const time=new Date(x.t).toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit"});
+    return `<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--line)">
+      <span>${time}</span><span class="h-coral">¥${x.cost.toFixed(2)} · ${x.nic.toFixed(1)}mg</span></div>`;
+  }).join("");
+}
+puffBtn.onclick=add; undoBtn.onclick=undo;
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

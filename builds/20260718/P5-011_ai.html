@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI 语音日记 + 周报</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;font-size:13px}
+.item b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.note{font-size:13px;color:#555;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:8px;white-space:pre-line}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">lifestyle</span><span class="tag">ai_voice_journaling</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI 语音日记 + 周报</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Vertical-scenario AI voice journaling + weekly recap</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">AI 语音日记是 2026 增长中的心理健康品类:Rosebud、Stoic Voice 2025 年冲入 App Store 心理健康 Top 200,订阅 $7-12/月。差异化在"跨周提取情绪主题/压力源"。痛点:想写日记但不愿打字的人(通勤/育儿/创始人)。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:4px 0 10px">记一段语音日记(此处用文字代录),选场景与情绪,生成跨周情绪周报。</p>
+    <label>场景</label>
+    <select id="scene"><option>康复日记</option><option>创始人焦虑</option><option>产后情绪</option><option>日常</option></select>
+    <label>今日情绪(1-5)</label>
+    <input id="mood" type="range" min="1" max="5" value="3" oninput="moodv.textContent=this.value">
+    <span id="moodv" class="h-coral" style="font-size:13px">3</span>
+    <label>日记内容</label>
+    <textarea id="text" rows="3" placeholder="今天发生了什么?压力源是什么?"></textarea>
+    <button class="btn" onclick="add()">保存日记</button>
+    <button class="btn" style="background:var(--ink)" onclick="weekly()">生成本周周报</button>
+    <div class="note" id="report" style="display:none"></div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P5-011">
+    <div class="collapse-header" id="aiHeader_P5-011" onclick="toggleAI('P5-011')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P5-011" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P5-011">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P5-011" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P5-011')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P5-011" style="display:none;margin-top:10px">
+        <div id="aiMessages_P5-011" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P5-011" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P5-011')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>📝 我的日记</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://catdoes.com/blog/mobile-app-ideas-2026" target="_blank" style="color:var(--coral)">Rosebud · Stoic Voice 语音日记案例</a>
+  </div>
+
+<script>
+const KEY="P5-011";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){const text=text_.value.trim(); if(!text){alert("写点什么吧");return;}
+  items.unshift({scene:scene.value,mood:+mood.value,text,date:new Date().toLocaleString()});
+  localStorage.setItem(KEY,JSON.stringify(items)); text_.value=""; render();}
+function weekly(){if(!items.length){report.style.display="block";report.textContent="还没有日记,先记几篇吧。";return;}
+  const week=items.filter(i=>{const d=new Date(i.date);const now=new Date();
+    return (now-d)<=7*86400000;});
+  const use=week.length?week:items.slice(0,7);
+  const avg=(use.reduce((a,b)=>a+b.mood,0)/use.length).toFixed(1);
+  const scenes={}; use.forEach(i=>scenes[i.scene]=(scenes[i.scene]||0)+1);
+  const top=Object.entries(scenes).sort((a,b)=>b[1]-a[1])[0];
+  report.style.display="block";
+  report.textContent=`📊 近 ${use.length} 篇周报\n平均情绪:${avg}/5 ${avg>=4?'😊 状态不错':avg>=3?'🙂 平稳':'🌧 偏低,多关照自己'}\n高频场景:${top?top[0]+' ('+top[1]+'篇)':'-'}\n压力源提示:交叉多篇内容,留意重复出现的词。`;}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){if(!items.length){items_.innerHTML='<p style="font-size:13px;color:#555;margin:6px 0 0">还没有日记。</p>';return;}
+  items_.innerHTML=items.map((it,i)=>`<div class="item"><span class="del" onclick="del(${i})">删除</span>
+    <b>${it.scene}</b> · 情绪 ${it.mood}/5 · <span style="font-size:12px;color:#999">${it.date}</span><br>${it.text}</div>`).join("");}
+const text_=document.getElementById("text"),scene=document.getElementById("scene"),mood=document.getElementById("mood"),report=document.getElementById("report");
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

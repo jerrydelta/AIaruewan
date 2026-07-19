@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>哀伤疗愈 · 给亲人的信</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ok{background:var(--ok)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.mini{font-size:12px;color:var(--muted)}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.note{background:#F3F8FF;border:1px solid #D9E8FF;border-radius:12px;padding:12px;margin-top:8px;font-size:13px}
+.moodrow{display:flex;gap:6px;margin-top:8px}
+.moodrow button{flex:1;padding:8px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:18px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">spirituality</span><span class="tag">ai_grief_healing</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">哀伤疗愈 · 给亲人的信</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Compliant AI grief-healing (safe companionship, clear boundary)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">约 10%-30% 丧亲者陷入"延长哀伤障碍"，传统心理服务稀缺。天之灵用"像但知道是 AI"的边界做疗愈陪伴，近 5 万用户、日均对话超 1 万次。本工具提供安全的文字倾诉与哀伤记录空间。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 安全倾诉 + 哀伤日记</b>
+    <div class="note">🕊 这是一处安全的空间。你写下的话不会被任何人看到，只存在你的设备里。TA 已不在，但爱仍在你心里。</div>
+    <label>写给 TA 的话 / 今天的心情</label>
+    <textarea id="text" rows="4" placeholder="例如：妈，今天下雨了，我又想起你做的汤……"></textarea>
+    <label>此刻的心情</label>
+    <div class="moodrow" id="mood">
+      <button onclick="pick('😢')">😢</button>
+      <button onclick="pick('😔')">😔</button>
+      <button onclick="pick('😐')">😐</button>
+      <button onclick="pick('🙂')">🙂</button>
+      <button onclick="pick('😊')">😊</button>
+    </div>
+    <button class="btn btn-ok" onclick="save()">📥 保存这封信</button>
+  </div>
+
+  <div class="card" id="list"><b>💌 我的疗愈信箱</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="http://www.xxze.com.cn/gongye/102975.html" target="_blank" style="color:var(--coral)">天之灵（AI 哀伤疗愈，刻意保持"像但知道是 AI"的边界）</a>
+  </div>
+
+<script>
+const KEY="P7-007";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let curMood="";
+function pick(m){curMood=m;document.querySelectorAll("#mood button").forEach(b=>b.style.background=b.textContent===m?"#FFF0F0":"#fff");}
+function save(){
+  const text=document.getElementById("text").value.trim();
+  if(!text){alert("请先写下想对 TA 说的话");return;}
+  items.unshift({text,mood:curMood||"😐",date:new Date().toLocaleString("zh-CN")});
+  document.getElementById("text").value="";curMood="";
+  document.querySelectorAll("#mood button").forEach(b=>b.style.background="#fff");
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+}
+function del(id){items=items.filter(x=>x.id!==id);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p class="mini" style="margin-top:8px">信箱还空着，写第一封信给 TA 吧。</p>';return;}
+  box.innerHTML=items.map((it,i)=>`
+    <div class="item"><div style="font-size:18px">${it.mood}</div>
+    <div style="font-size:14px;margin-top:4px;white-space:pre-wrap">${esc(it.text)}</div>
+    <div class="mini">${it.date}</div>
+    <button class="btn" style="margin-top:6px;background:#EEE;color:#888;padding:8px" onclick="del(${i})">删除</button></div>`).join("");
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+</script>
+</body>
+</html>

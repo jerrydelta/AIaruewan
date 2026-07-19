@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>ADHD游戏化专注计时器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.ring{width:200px;height:200px;margin:10px auto;display:block}
+.time{font-size:40px;font-weight:800;text-anchor:middle;fill:var(--ink)}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)}
+.coin{color:#F7B500;font-weight:700}
+small{color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">productivity</span><span class="tag">adhd_gamified_focus_timer</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">ADHD 游戏化专注计时器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Modern gamified focus timer for ADHD</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">ADHD 群体（成人 4-5%）是最强生产力信号用户。Forest 被 6000 万人用但用户抱怨"游戏机制陈旧、无即时奖励"。本工具用即时奖励金币+段位+可暂停防挫败的现代机制，专注即反馈。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>本回合专注时长</label>
+    <select id="dur"><option value="15">15 分钟（轻松起步）</option><option value="25">25 分钟（标准）</option><option value="45">45 分钟（深度）</option></select>
+    <svg class="ring" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="90" fill="none" stroke="#EEE" stroke-width="14"/>
+      <circle id="arc" cx="100" cy="100" r="90" fill="none" stroke="var(--coral)" stroke-width="14" stroke-linecap="round" stroke-dasharray="565" stroke-dashoffset="0" transform="rotate(-90 100 100)"/>
+      <text id="t" class="time" x="100" y="112">25:00</text>
+    </svg>
+    <div class="row">
+      <button class="btn" id="start">▶ 开始（赢金币）</button>
+      <button class="btn sub" id="pause">⏸ 暂停</button>
+    </div>
+    <p id="reward" class="h-coral" style="text-align:center;font-weight:700;min-height:20px"></p>
+  </div>
+
+  <div class="card">
+    <b>🏆 我的进度</b>
+    <div class="stat"><span>累计金币</span><span class="coin" id="coins">0 🪙</span></div>
+    <div class="stat"><span>完成回合</span><span id="done">0</span></div>
+    <div class="stat"><span>累计专注</span><span id="mins">0 分钟</span></div>
+    <div class="stat"><span>段位</span><span id="lv" class="h-coral">🌱 新芽</span></div>
+    <button class="btn sub" id="reset" style="margin-top:10px">重置进度</button>
+  </div>
+
+  <div class="card" id="list"><b>📜 专注记录</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://uporbit.app/compare/best-adhd-apps-2026" target="_blank" style="color:var(--coral)">Forest · Flora · Tiimo · Focusmate · TickTick</a>
+  </div>
+
+<script>
+const KEY="P1-010";
+let S=JSON.parse(localStorage.getItem(KEY)||'{"coins":0,"done":0,"mins":0,"log":[]}');
+let timer=null,left=25*60,total=25*60,running=false;
+const arc=document.getElementById("arc"),C=565;
+function fmt(s){const m=Math.floor(s/60),x=s%60;return `${m}:${String(x).padStart(2,"0")}`;}
+function show(){document.getElementById("t").textContent=fmt(left);arc.style.strokeDashoffset=C*(1-left/total);}
+function render(){
+  document.getElementById("coins").textContent=S.coins+" 🪙";
+  document.getElementById("done").textContent=S.done;
+  document.getElementById("mins").textContent=S.mins+" 分钟";
+  const lv=S.done>=20?"👑 大师":S.done>=10?"🔥 专注者":S.done>=3?"🌟 成长":"🌱 新芽";
+  document.getElementById("lv").textContent=lv;
+  const box=document.getElementById("items");
+  if(!S.log.length){box.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">还没有记录，开始第一回合吧！</p>';return;}
+  box.innerHTML=S.log.slice().reverse().map(r=>`<div class="stat"><span>${r.min}分钟</span><span class="coin">+${r.coin}🪙</span><small>${r.t}</small></div>`).join("");
+}
+function start(){
+  if(running)return;total=+document.getElementById("dur").value*60;left=total;running=true;show();
+  timer=setInterval(()=>{left--;show();if(left<=0){clearInterval(timer);running=false;
+    const coin=Math.round(total/60)*5;S.coins+=coin;S.done++;S.mins+=Math.round(total/60);
+    S.log.push({min:Math.round(total/60),coin,t:new Date().toLocaleString("zh")});
+    localStorage.setItem(KEY,JSON.stringify(S));
+    document.getElementById("reward").textContent=`🎉 +${coin} 金币！太棒了！`;render();}},1000);
+}
+function pause(){if(running){clearInterval(timer);running=false;document.getElementById("reward").textContent="⏸ 已暂停，随时继续，不丢进度";}}
+document.getElementById("start").onclick=start;
+document.getElementById("pause").onclick=pause;
+document.getElementById("reset").onclick=()=>{if(confirm("重置所有进度？")){S={coins:0,done:0,mins:0,log:[]};localStorage.setItem(KEY,JSON.stringify(S));render();}};
+show();render();
+</script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩国单人户·预算+净资产+目标</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.res{font-size:14px;margin-top:8px;padding:10px;border-radius:10px;background:#FFF7F7}
+.res b{color:var(--coral)}
+.warn{background:#FFF3E0;color:#9a6b00}
+li{list-style:none;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+ul{padding:0;margin:6px 0 0}
+.del{color:var(--muted);font-size:12px;border:none;background:none;cursor:pointer;float:right}
+.pill{font-size:11px;padding:1px 7px;border-radius:999px;background:#FFF0F0;color:var(--coral);margin-right:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">finance</span><span class="tag">korea_single_household_finance</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩国单人户·一体化财务</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">1인가구 all-in-one: budget + net worth + goals</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国 1 人가구 激增，需要「预算+净资产+目标储蓄」合一。Moneyboard 加信用卡账户、预算超支提醒，但用户仍想要投资资产并入净资产视图。痛点=预算 App 与资产/投资割裂。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#777;margin:6px 0 0">记收支 → 预算超支提醒；记资产/负债 → 净资产；设攒钱目标 → 进度。</p>
+    <label>类型</label>
+    <select id="type"><option value="支出">支出</option><option value="收入">收入</option><option value="资产">资产(加)</option><option value="负债">负债(减)</option></select>
+    <div class="row">
+      <div><label>金额(万KRW)</label><input type="number" id="amt" placeholder="50" inputmode="numeric" step="any"></div>
+      <div><label>分类</label><input type="text" id="cat" placeholder="食/住/积蓄/存款"></div>
+    </div>
+    <button class="btn" onclick="add()">＋ 记</button>
+    <div class="res" id="res"></div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <label>攒钱目标（万 KRW）</label>
+    <input type="number" id="goal" placeholder="1000" inputmode="numeric">
+    <button class="btn" onclick="setGoal()">设目标</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📒 财务台账</b>
+    <ul id="ul"></ul>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/kr/app/moneyboard-%EA%B0%80%EA%B3%84%EB%B6%80-%EC%98%88%EC%82%B0-%EC%9E%90%EC%82%B0%EA%B4%80%EB%A6%AC/id625887028" target="_blank" style="color:var(--coral)">Moneyboard / 위플 가계부 / BCFi</a>
+  </div>
+
+<script>
+const KEY="P16-013";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"items":[],"budget":0,"goal":0}');
+function fmt(n){return (n||0).toLocaleString("ko-KR")+" 万 KRW";}
+function add(){
+  const type=document.getElementById("type").value;
+  const amt=parseFloat(document.getElementById("amt").value);
+  const cat=document.getElementById("cat").value.trim()||type;
+  if(!amt||amt<=0){alert("请输入金额");return;}
+  data.items.unshift({type,amt,cat,d:new Date().toISOString().slice(0,10),t:Date.now()});
+  document.getElementById("amt").value="";document.getElementById("cat").value="";
+  save();
+}
+function setGoal(){const g=parseFloat(document.getElementById("goal").value);if(g>0){data.goal=g;save();}}
+function del(t){data.items=data.items.filter(x=>x.t!==t);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function render(){
+  const ul=document.getElementById("ul");ul.innerHTML="";
+  let exp=0,inc=0,asset=0,lia=0;
+  data.items.forEach(x=>{
+    if(x.type==="支出")exp+=x.amt;else if(x.type==="收入")inc+=x.amt;
+    else if(x.type==="资产")asset+=x.amt;else if(x.type==="负债")lia+=x.amt;
+    const li=document.createElement("li");
+    li.innerHTML=`<button class="del" onclick="del(${x.t})">删除</button>
+      <span class="pill">${x.type}</span>${x.d} · ${x.cat} · ${fmt(x.amt)}`;
+    ul.appendChild(li);
+  });
+  const net=asset-lia+(inc-exp);
+  const budgetAlert = data.budget>0 && exp>data.budget;
+  let html=`净资产 <b>${fmt(net)}</b>（资产 ${fmt(asset)} − 负债 ${fmt(lia)} + 净积蓄 ${fmt(inc-exp)}）<br>`;
+  html+=`本月支出 ${fmt(exp)} ${data.budget>0?`/ 预算 ${fmt(data.budget)}`:""}`;
+  if(budgetAlert)html+=`<div class="warn">⚠ 已超预算！超 ${fmt(exp-data.budget)}</div>`;
+  if(data.goal>0){const p=Math.min(100,net/data.goal*100);
+    html+=`<div>攒钱目标 ${fmt(data.goal)}：进度 <b>${p.toFixed(0)}%</b></div>`;}
+  document.getElementById("res").innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

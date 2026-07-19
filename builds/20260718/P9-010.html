@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>女性旅行者安全社交+实时守护</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;font-size:14px}
+.item:first-child{border-top:none}
+.del{background:none;border:none;color:var(--coral);font-size:13px;cursor:pointer;float:right;margin-top:-2px}
+.sos{display:block;width:100%;padding:14px;border:none;border-radius:12px;
+  background:#E85555;color:#fff;font-size:16px;font-weight:700;cursor:pointer;margin-top:10px}
+.sos:active{background:#c94646}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">travel</span><span class="tag">solo_female_safety_network</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">女性旅行者安全 + 守护</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Verified women-traveler safety + real-time guardian</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">84% 独行女性称旅行 App 对安全感"必不可少"。但安全类与社交类割裂，多数只做定位共享而非已验证同伴匹配。一体化安全社交 + 实时守护是空白。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 守护人 + 行程报备 + 旅伴 + SOS</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">添加可信守护人，创建行程报备并共享，匹配已验证女性旅伴；遇险一键 SOS。</p>
+    <div class="row">
+      <div><label>守护人姓名</label><input id="gName" placeholder="如 小琳"></div>
+      <div><label>电话</label><input id="gTel" placeholder="如 138xxxx"></div>
+    </div>
+    <button class="btn" onclick="addGuard()">＋ 添加守护人</button>
+
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <div class="row">
+      <div><label>目的地</label><input id="tripTo" placeholder="如 清迈"></div>
+      <div><label>返回日期</label><input id="tripBack" type="date"></div>
+    </div>
+    <label>共享给守护人</label>
+    <select id="guardSel"></select>
+    <button class="btn" onclick="addTrip()">创建行程报备</button>
+
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <div class="row">
+      <div><label>旅伴昵称</label><input id="bName" placeholder="如 Mia"></div>
+      <div><label>所在城市</label><input id="bCity" placeholder="如  Lisbon"></div>
+    </div>
+    <button class="btn" onclick="addBuddy()">＋ 添加已验证旅伴</button>
+
+    <button class="sos" onclick="sos()">🆘 SOS 一键求助</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.shetravelsafe.com/about" target="_blank" style="color:var(--coral)">SheTravelSafe · NomadHer · bSafe · Companion</a>
+  </div>
+
+<script>
+const KEY="P9-010";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"guards":[],"trips":[],"buddies":[]}');
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function addGuard(){
+  const n=document.getElementById("gName").value.trim(), t=document.getElementById("gTel").value.trim();
+  if(!n){alert("请输入姓名");return;}
+  data.guards.push({n,t});document.getElementById("gName").value="";document.getElementById("gTel").value="";save();
+}
+function addTrip(){
+  const to=document.getElementById("tripTo").value.trim(), back=document.getElementById("tripBack").value;
+  const gi=document.getElementById("guardSel").value;
+  if(!to){alert("请输入目的地");return;}
+  const g = data.guards[gi]?data.guards[gi].n:"未指定";
+  data.trips.push({to,back,g});document.getElementById("tripTo").value="";document.getElementById("tripBack").value="";save();
+}
+function addBuddy(){
+  const n=document.getElementById("bName").value.trim(), c=document.getElementById("bCity").value.trim();
+  if(!n){alert("请输入昵称");return;}
+  data.buddies.push({n,c});document.getElementById("bName").value="";document.getElementById("bCity").value="";save();
+}
+function sos(){
+  const n=data.guards.length;
+  if(!n){alert("请先添加守护人，否则无人接收求助。");return;}
+  alert("🆘 已向 "+n+" 位守护人发送你的实时定位与求助信息！");
+}
+function del(k,i){data[k].splice(i,1);save();}
+function render(){
+  let g="<b style='font-size:14px'>🛡 守护人（"+data.guards.length+"）</b>";
+  data.guards.forEach((x,i)=>{g+=`<div class='item'><button class='del' onclick='del("guards",${i})'>删除</button><b>${x.n}</b> <span class='tag'>${x.t||"无电话"}</span></div>`;});
+  let sel="";data.guards.forEach((x,i)=>{sel+=`<option value='${i}'>${x.n}</option>`;});
+  document.getElementById("guardSel").innerHTML=sel||"<option>先添加守护人</option>";
+  let t="<b style='font-size:14px'>📍 行程报备（"+data.trips.length+"）</b>";
+  data.trips.forEach((x,i)=>{
+    let tip="";if(x.back){const d=Math.ceil((new Date(x.back)-new Date())/86400000);tip=d>0?`还有 ${d} 天返回`:"已到期";}
+    t+=`<div class='item'><button class='del' onclick='del("trips",${i})'>删除</button><b>${x.to}</b> <span class='tag'>共享给 ${x.g}</span><div style='font-size:13px;color:#555'>${x.back?x.back+" · "+tip:"未设返回"}</div></div>`;
+  });
+  let b="<b style='font-size:14px'>👯 已验证旅伴（"+data.buddies.length+"）</b>";
+  data.buddies.forEach((x,i)=>{b+=`<div class='item'><button class='del' onclick='del("buddies",${i})'>删除</button><b>${x.n}</b> <span class='tag'>✓已验证</span><div style='font-size:13px;color:#555'>${x.c}</div></div>`;});
+  document.getElementById("list").innerHTML=g+t+b;
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>居家跌倒安全守护</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.7;padding:16px;max-width:480px;margin:0 auto;font-size:17px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:16px;border:none;border-radius:14px;
+  background:var(--coral);color:#fff;font-size:19px;font-weight:700;cursor:pointer;margin-top:10px}
+.btn:active{background:var(--coral-dark)}
+.btn-ok{background:var(--ok)}
+.btn-sos{background:#D63031;font-size:24px;padding:24px}
+.btn-sos:active{background:#a81f1f}
+.tag{display:inline-block;font-size:13px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:3px 11px;margin:2px 5px 2px 0}
+input{width:100%;padding:14px;border:1px solid var(--line);
+  border-radius:12px;font-size:17px;margin-top:8px;background:#fff;color:var(--ink)}
+label{font-size:15px;color:var(--muted);display:block;margin-top:12px;font-weight:600}
+.mini{font-size:13px;color:var(--muted)}
+.chk{display:flex;align-items:center;gap:10px;background:#FBFBFB;border:1px solid var(--line);
+  border-radius:12px;padding:12px;margin-top:10px;font-size:17px}
+.chk input{width:24px;height:24px;margin:0}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">elderly</span><span class="tag">fall_detection</span></div>
+    <h1 style="font-size:22px;margin:8px 0 4px">居家跌倒安全守护</h1>
+    <p class="h-coral" style="font-size:15px;margin:0">安全自检 · 紧急联系人 · 一键求助</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">💡 为什么需要</b>
+    <p style="font-size:15px;color:#555;margin:6px 0 0">跌倒是老人"头号杀手"，56% 发生在家中。本工具帮你做居家安全自检、存好紧急联系人，并在需要时一键求助。</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">🚨 紧急求助</b>
+    <button class="btn btn-sos" onclick="sos()">🆘 一键求助</button>
+    <p class="mini" id="sosHint" style="margin-top:8px">请先在下方添加紧急联系人。</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">📞 紧急联系人</b>
+    <div class="row">
+      <div><label>姓名</label><input id="cname" placeholder="如：儿子"></div>
+      <div><label>电话</label><input id="cphone" placeholder="手机号"></div>
+    </div>
+    <button class="btn btn-ok" onclick="addContact()">➕ 添加联系人</button>
+    <div id="contacts"></div>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">🏠 居家安全自检</b>
+    <div id="checks"></div>
+    <div id="safeScore" style="font-size:18px;font-weight:700;color:var(--coral);margin-top:12px"></div>
+    <button class="btn" onclick="checkIn()">☀ 今日安全打卡</button>
+    <div id="log" class="mini" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card" style="font-size:13px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://finance.sina.cn/tech/2025-09-04/detail-infpiwey6675355.d.html" target="_blank" style="color:var(--coral)">三思跌倒侦测吸顶灯 / 清澜技术（毫米波雷达跌倒监测）</a>
+  </div>
+
+<script>
+const KEY="P7-013";
+let contacts=JSON.parse(localStorage.getItem(KEY+"_c")||"[]");
+const CHECKS=["浴室铺了防滑垫","床边有夜灯","通道无杂物","卫生间装了扶手","随身带紧急呼叫器"];
+let chk=JSON.parse(localStorage.getItem(KEY+"_chk")||"[]");
+let logs=JSON.parse(localStorage.getItem(KEY+"_log")||"[]");
+function addContact(){
+  const n=document.getElementById("cname").value.trim(),p=document.getElementById("cphone").value.trim();
+  if(!n||!p){alert("请填姓名和电话");return;}
+  contacts.push({n,p});localStorage.setItem(KEY+"_c",JSON.stringify(contacts));
+  document.getElementById("cname").value="";document.getElementById("cphone").value="";renderContacts();
+}
+function sos(){
+  if(!contacts.length){alert("请先添加紧急联系人");return;}
+  const c=contacts[0];
+  if("speechSynthesis"in window){const u=new SpeechSynthesisUtterance("紧急求助，"+c.n+"电话"+c.p);u.lang="zh-CN";speechSynthesis.speak(u);}
+  if(confirm("立即呼叫 "+c.n+"（"+c.p+"）？")){window.location.href="tel:"+c.p;}
+}
+function toggleChk(i){if(!chk.includes(i))chk.push(i);else chk=chk.filter(x=>x!==i);localStorage.setItem(KEY+"_chk",JSON.stringify(chk));renderChecks();}
+function checkIn(){
+  const d=new Date().toLocaleDateString("zh-CN");
+  if(!logs.includes(d)){logs.push(d);localStorage.setItem(KEY+"_log",JSON.stringify(logs));}
+  document.getElementById("log").textContent="已打卡 "+logs.length+" 天，最近："+d;
+}
+function renderContacts(){
+  const box=document.getElementById("contacts");
+  if(!contacts.length){box.innerHTML='<p class="mini" style="margin-top:8px;font-size:14px">还没有联系人。</p>';document.getElementById("sosHint").textContent="请先在下方添加紧急联系人。";return;}
+  document.getElementById("sosHint").textContent="已设 "+contacts.length+" 位联系人，点击上方按钮可一键呼叫。";
+  box.innerHTML=contacts.map((c,i)=>`<div class="item"><div style="font-size:18px;font-weight:700">${esc(c.n)}</div><div class="mini" style="font-size:15px">${esc(c.p)}</div><button class="btn" style="margin-top:8px;background:#EEE;color:#888" onclick="delC(${i})">删除</button></div>`).join("");
+}
+function delC(i){contacts.splice(i,1);localStorage.setItem(KEY+"_c",JSON.stringify(contacts));renderContacts();}
+function renderChecks(){
+  document.getElementById("checks").innerHTML=CHECKS.map((t,i)=>`
+    <label class="chk"><input type="checkbox" ${chk.includes(i)?'checked':''} onchange="toggleChk(${i})"> ${t}</label>`).join("");
+  document.getElementById("safeScore").textContent="安全完成度："+chk.length+" / "+CHECKS.length;
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+renderContacts();renderChecks();
+document.getElementById("log").textContent=logs.length?("已打卡 "+logs.length+" 天，最近："+logs[logs.length-1]):"";
+</script>
+</body>
+</html>

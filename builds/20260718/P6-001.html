@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>纯净儿童内容 + 护眼计时锁</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.overlay{position:fixed;inset:0;background:rgba(45,45,45,.96);color:#fff;display:none;
+  flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;z-index:99}
+.overlay .big{font-size:20px;margin-bottom:14px}
+.lockbtn{width:160px;height:160px;border-radius:50%;border:3px solid var(--coral);
+  background:#fff;color:var(--coral);font-size:15px;font-weight:700;user-select:none}
+.timer{font-size:40px;font-weight:700;text-align:center;margin:10px 0;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">parenting</span><span class="tag">ad_free_kids_content</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">纯净儿童内容 + 护眼计时锁</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Ad-free clean kids content with parent-controlled eye-care timer</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">宝宝巴士等儿童 App 爆发"低俗广告/弹窗/误扣费"风波：实测 2 分钟弹出 10 条广告，孩子误触跳转自动下载并扣费。家长普遍呼吁"分级会员去广告、限定广告类型"。痛点：免费儿童内容被广告劫持、缺乏儿童安全保护。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">① 收藏无广告纯净内容（本地清单）　② 家长设观看时长，时间到自动锁定，需家长长按解锁（防误触），并弹出护眼提醒。</p>
+    <label>内容名称</label>
+    <input id="cName" placeholder="如：小猪佩奇儿歌">
+    <label>类型</label>
+    <select id="cType"><option>儿歌</option><option>动画</option><option>故事</option><option>早教</option></select>
+    <button class="btn" onclick="addContent()">＋ 加入收藏</button>
+
+    <label>护眼观看时长（分钟）</label>
+    <input id="min" type="number" value="20" min="1" max="120">
+    <button class="btn" onclick="startTimer()">▶ 开始护眼计时</button>
+    <div class="timer" id="timer">--:--</div>
+    <p style="font-size:12px;color:var(--muted);text-align:center;margin:0">时间到将自动锁定，需家长长按圆形按钮解锁。</p>
+  </div>
+
+  <div class="card" id="list">
+    <b>📚 我的纯净内容收藏</b>
+    <div id="contentList"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://finance.sina.com.cn/jjxw/2025-11-26/doc-infytizf1771860.shtml" target="_blank" style="color:var(--coral)">宝宝巴士广告风波报道 / 宝宝巴士·智慧树·儿歌点点</a>
+  </div>
+
+<div class="overlay" id="lock">
+  <div class="big">⏰ 时间到，已锁定<br><span style="font-size:14px">护眼提醒：看看远处，休息一下～</span></div>
+  <button class="lockbtn" id="unlock">长按解锁</button>
+</div>
+
+<script>
+const KEY="P6-001";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+let tick=null;
+
+function addContent(){
+  const name=document.getElementById('cName').value.trim();
+  const type=document.getElementById('cType').value;
+  if(!name){alert('请填写内容名称');return;}
+  items.unshift({name,type,t:new Date().toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})});
+  document.getElementById('cName').value='';
+  save();
+}
+function del(i){ items.splice(i,1); save(); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function render(){
+  const el=document.getElementById('contentList');
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有收藏，先添加一条吧。</p>';return;}
+  el.innerHTML=items.map((x,i)=>`<div class="item"><span>🎬 ${x.name} <span class="tag">${x.type}</span><br><span style="font-size:11px;color:var(--muted)">${x.t}</span></span><button onclick="del(${i})" style="border:none;background:#FFF0F0;color:var(--coral);border-radius:8px;padding:4px 10px">删除</button></div>`).join('');
+}
+
+function startTimer(){
+  const m=parseInt(document.getElementById('min').value)||20;
+  let total=m*60;
+  clearInterval(tick);
+  const tEl=document.getElementById('timer');
+  const show=()=>{const mm=String(Math.floor(total/60)).padStart(2,'0');const ss=String(total%60).padStart(2,'0');tEl.textContent=mm+':'+ss;};
+  show();
+  tick=setInterval(()=>{
+    total--;
+    if(total<=0){clearInterval(tick);tEl.textContent='00:00';document.getElementById('lock').style.display='flex';return;}
+    show();
+  },1000);
+}
+
+// 家长长按解锁
+const ub=document.getElementById('unlock');
+let press=null;
+function down(){press=setTimeout(()=>{document.getElementById('lock').style.display='none';},1500);}
+function up(){clearTimeout(press);}
+ub.addEventListener('mousedown',down);ub.addEventListener('touchstart',down);
+ub.addEventListener('mouseup',up);ub.addEventListener('mouseleave',up);ub.addEventListener('touchend',up);
+
+render();
+</script>
+</body>
+</html>

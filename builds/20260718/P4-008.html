@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>深度组队社交健身（情绪激励+同伴）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none;float:right}
+.mate{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.mate:last-child{border-bottom:none}
+.enc{font-size:12px;color:var(--ok)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">fitness</span><span class="tag">emotional_value_social</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">深度组队社交健身</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Emotionally-encouraging team-social fitness</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">大学生健身行为研究：运动类App情绪价值供给不足——个性化受限、感情化交互弱（仅数据罗列）、社交属性开发不足（群聊浅层、缺深度组队打卡与同伴归属感）。放弃主因：模块不丰富、情绪供给不给力、线上线下社交脱节。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">建一支小队，互相打卡、互相打气。同伴的坚持看得见，才有归属感。</p>
+    <label>队伍名称</label>
+    <input id="team" placeholder="如：早七打卡团">
+    <button class="btn" onclick="setTeam()">🚩 创建/加入队伍</button>
+    <div id="teamBox" style="margin-top:8px"></div>
+    <label>添加队友（昵称）</label>
+    <div class="row">
+      <input id="mate" placeholder="如：小鹿">
+      <button class="btn" style="margin-top:6px;flex:0 0 70px" onclick="addMate()">加队友</button>
+    </div>
+    <label>今天你打卡了吗？</label>
+    <button class="btn" onclick="mateCheck()">✅ 我今日已练（给队友打气）</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>👯 队伍打卡榜</b>
+    <div id="logs" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="http://xueshu.qikan.com.cn/preview/1/322/5264358" target="_blank" style="color:var(--coral)">Keep / 咕咚（大学生健身行为研究）</a>
+  </div>
+
+<script>
+const KEY="P4-008";
+let st=JSON.parse(localStorage.getItem(KEY)||"{}");
+if(!st.team)st={team:"",mates:[]};
+function save(){localStorage.setItem(KEY,JSON.stringify(st));render();}
+function setTeam(){const v=document.getElementById("team").value.trim();if(!v){alert("写个队名");return;}st.team=v;save();}
+function addMate(){const v=document.getElementById("mate").value.trim();if(!v)return;st.mates.push({n:v,days:0,last:""});document.getElementById("mate").value="";save();}
+function mateCheck(){if(!st.team){alert("先建个队伍");return;}
+  const me=prompt("你的昵称？（与队友列表一致才计入）");if(!me)return;
+  const m=st.mates.find(x=>x.n===me);if(!m){alert("队伍里没有这个昵称");return;}
+  const t=new Date().toISOString().slice(0,10);
+  if(m.last===t){alert("今天已经打卡过啦，去给队友打气~");return;}
+  m.days++;m.last=t;save();
+}
+function delM(i){st.mates.splice(i,1);save();}
+function render(){
+  document.getElementById("teamBox").innerHTML=st.team?`<div class="enc">🚩 当前队伍：<b>${st.team}</b>（${st.mates.length}人）</div>`:"";
+  document.getElementById("logs").innerHTML=st.team?(
+    st.mates.length?st.mates.map((m,i)=>
+      `<div class="mate"><span>${m.n}<br><small style="color:var(--muted)">累计打卡 ${m.days} 天${m.last?" · 最近 "+m.last:""}</small></span><button class="del" onclick="delM(${i})">移除</button></div>`
+    ).join("")+`<p class="enc" style="margin-top:8px">💪 队伍总打卡 ${st.mates.reduce((s,x)=>s+x.days,0)} 次，加油！</p>`
+    :`<p style="color:var(--muted);font-size:13px">还没有队友，邀请伙伴一起。</p>`
+  ):`<p style="color:var(--muted);font-size:13px">先创建一支队伍吧。</p>`;
+}
+render();
+</script>
+</body>
+</html>

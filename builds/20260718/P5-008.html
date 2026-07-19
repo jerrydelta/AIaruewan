@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Kmong 数字服务撮合收益计算器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;font-size:13px}
+.item b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.kpi{display:flex;gap:8px;margin-top:8px}
+.kpi div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:8px;text-align:center}
+.kpi b{display:block;font-size:18px;color:var(--coral)}
+.note{font-size:13px;color:#555;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">digital_product</span><span class="tag">kmong_digital_goods</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">Kmong 数字服务撮合收益计算器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Kmong-style vertical digital-goods + services marketplace</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国人才市场 크몽(Kmong)月访问 470 万,2025 年扭亏为盈(营业利润约 43 亿韩元、同比 +617%),企业版年交易额破 100 亿韩元。痛点:个人创作者/小企业需外包设计文档但不愿走高价 agency。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:4px 0 10px">上架一项数字服务,算平台佣金、专家到手与月收益预测。</p>
+    <label>服务名称</label>
+    <input id="name" placeholder="如 Logo 设计 / PPT 模板 / 文案代写">
+    <div class="row">
+      <div><label>服务类型</label>
+        <select id="cat"><option>设计</option><option>文档</option><option>翻译</option><option>视频</option></select>
+      </div>
+      <div><label>客单价($)</label><input id="price" type="number" value="30"></div>
+    </div>
+    <div class="row">
+      <div><label>月订单</label><input id="ord" type="number" value="40"></div>
+      <div><label>佣金率(%)</label><input id="fee" type="number" value="20"></div>
+    </div>
+    <button class="btn" onclick="add()">上架服务</button>
+    <div class="kpi">
+      <div><b id="kGMV">$0</b>月GMV</div>
+      <div><b id="kTake">$0</b>平台抽成</div>
+      <div><b id="kNet">$0</b>专家到手</div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>🤝 服务清单</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.cbinsights.com/company/kmong/customers" target="_blank" style="color:var(--coral)">Kmong (크몽) · Kmong Biz</a>
+  </div>
+
+<script>
+const KEY="P5-008";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function calc(){const gmv=items.reduce((a,b)=>a+b.price*b.ord,0);
+  const fee=items.reduce((a,b)=>a+b.price*b.ord*b.fee/100,0);
+  kGMV.textContent="$"+gmv.toFixed(0); kTake.textContent="$"+fee.toFixed(0); kNet.textContent="$"+(gmv-fee).toFixed(0);}
+function add(){const name=name_.value.trim()||"未命名服务";
+  const price=+(+price.value||0), ord=+(+ord.value||0), fee=+(+fee.value||0);
+  items.push({name,cat:cat.value,price,ord,fee});
+  localStorage.setItem(KEY,JSON.stringify(items)); name_.value=""; render(); calc();}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();calc();}
+function render(){if(!items.length){items_.innerHTML='<p style="font-size:13px;color:#555;margin:6px 0 0">还没有服务。</p>';return;}
+  items_.innerHTML=items.map((it,i)=>{const gmv=it.price*it.ord,take=gmv*it.fee/100;
+    return `<div class="item"><span class="del" onclick="del(${i})">删除</span>
+    <b>${it.name}</b> · ${it.cat}<br>$${it.price}×${it.ord}单 → GMV $${gmv.toFixed(0)} · 抽成 $${take.toFixed(0)} · 到手 $${(gmv-take).toFixed(0)}</div>`;}).join("");}
+const name_=document.getElementById("name");
+render(); calc();
+</script>
+</body>
+</html>

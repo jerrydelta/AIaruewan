@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>50+ 兴趣社区与活动</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.7;padding:16px;max-width:480px;margin:0 auto;font-size:17px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:16px;border:none;border-radius:14px;
+  background:var(--coral);color:#fff;font-size:19px;font-weight:700;cursor:pointer;margin-top:10px}
+.btn:active{background:var(--coral-dark)}
+.btn-ok{background:var(--ok)}
+.tag{display:inline-block;font-size:13px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:3px 11px;margin:2px 5px 2px 0}
+input,select,textarea{width:100%;padding:14px;border:1px solid var(--line);
+  border-radius:12px;font-size:17px;margin-top:8px;background:#fff;color:var(--ink)}
+label{font-size:15px;color:var(--muted);display:block;margin-top:12px;font-weight:600}
+.mini{font-size:13px;color:var(--muted)}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+.item .nm{font-size:19px;font-weight:700}
+.row{display:flex;gap:10px}.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">elderly</span><span class="tag">senior_social_community</span></div>
+    <h1 style="font-size:22px;margin:8px 0 4px">50+ 兴趣社区与活动</h1>
+    <p class="h-coral" style="font-size:15px;margin:0">兴趣团体 · 线下活动 · 实名交友</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">💡 为什么需要</b>
+    <p style="font-size:15px;color:#555;margin:6px 0 0">Stitch 全球 15 万+ 会员做"全维度陪伴社区"，Hank 做兴趣团体+线下活动。只做相亲天花板低，社区+本地活动才是可持续模型。</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">🛠 发起 / 记录一项活动</b>
+    <label>活动主题</label>
+    <input id="title" placeholder="如：社区书法小组">
+    <label>兴趣类别</label>
+    <select id="cat"><option>书画</option><option>歌舞</option><option>棋牌</option><option>旅游</option><option>读书</option><option>运动</option></select>
+    <label>时间地点</label>
+    <input id="where" placeholder="如：周六上午 社区活动室">
+    <label>报名人数</label>
+    <input id="num" type="number" min="0" placeholder="已报名几人">
+    <button class="btn" onclick="add()">➕ 发布活动</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P7-012">
+    <div class="collapse-header" id="aiHeader_P7-012" onclick="toggleAI('P7-012')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P7-012" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P7-012">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P7-012" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P7-012')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P7-012" style="display:none;margin-top:10px">
+        <div id="aiMessages_P7-012" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P7-012" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P7-012')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b style="font-size:18px">🎉 我的活动圈</b>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:13px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.thepaper.cn/newsDetail_forward_19912033" target="_blank" style="color:var(--coral)">Stitch / Hank（50+ 实名陪伴社区）</a>
+  </div>
+
+<script>
+const KEY="P7-012";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const title=document.getElementById("title").value.trim();
+  if(!title){alert("请填写活动主题");return;}
+  const num=parseInt(document.getElementById("num").value)||0;
+  items.unshift({id:Date.now(),title,cat:document.getElementById("cat").value,where:document.getElementById("where").value.trim(),num});
+  document.getElementById("title").value="";document.getElementById("where").value="";document.getElementById("num").value="";
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+}
+function join(id){const it=items.find(x=>x.id===id);if(it){it.num++;localStorage.setItem(KEY,JSON.stringify(items));render();}}
+function del(id){items=items.filter(x=>x.id!==id);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p class="mini" style="margin-top:8px;font-size:14px">还没有活动，发起第一个吧。</p>';return;}
+  box.innerHTML=items.map(it=>`
+    <div class="item">
+      <div class="nm">${esc(it.title)}</div>
+      <div class="mini" style="font-size:15px;margin-top:4px">类别：${it.cat} · ${esc(it.where||"地点待定")}</div>
+      <div class="mini" style="font-size:15px">已报名：${it.num} 人</div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-ok" style="margin-top:0" onclick="join(${it.id})">我报名 +1</button>
+        <button class="btn" style="margin-top:0;background:#EEE;color:#888;width:auto;padding:16px 18px" onclick="del(${it.id})">删</button>
+      </div>
+    </div>`).join("");
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

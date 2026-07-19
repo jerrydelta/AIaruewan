@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>小 SaaS 订阅/流失分析</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ghost{background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{text-align:center;padding:10px 4px}
+.stat b{display:block;font-size:18px;color:var(--coral)}
+.stat span{font-size:12px;color:var(--muted)}
+.m{font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin-top:7px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">micro_saas</span><span class="tag">saas_churn_analytics</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">小 SaaS 订阅 / 流失分析</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Lite subscription & churn analytics</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">小 SaaS（ARR<100万）负担不起企业级流失分析。订阅仪表盘连接 Stripe/Paddle，展示 MRR/Churn/LTV/同期群，定价 $49-99/月。Baremetrics/ChartMogul 越来越贵且臃肿，做"Lite 版"专注增长指标面向 indie 创始人。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 月度 MRR / Churn / LTV 看板</b>
+    <div class="row">
+      <div><label>月份</label><input id="month" placeholder="2026-07"></div>
+      <div><label>月初客户数</label><input id="start" type="number" value="100"></div>
+    </div>
+    <div class="row">
+      <div><label>月末客户数</label><input id="end" type="number" value="96"></div>
+      <div><label>客单价 ARPU($)</label><input id="arpu" type="number" value="29"></div>
+    </div>
+    <button class="btn" id="add">记录本月</button>
+    <div class="row" style="margin-top:10px">
+      <div class="stat"><b id="mrr">$0</b><span>最新 MRR</span></div>
+      <div class="stat"><b id="churn">0%</b><span>本月流失率</span></div>
+      <div class="stat"><b id="ltv">$0</b><span>预估 LTV</span></div>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin:4px 0 0">LTV = ARPU ÷ 月流失率（流失率为0时按12倍计）。</p>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P14-017">
+    <div class="collapse-header" id="aiHeader_P14-017" onclick="toggleAI('P14-017')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P14-017" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P14-017">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P14-017" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P14-017')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P14-017" style="display:none;margin-top:10px">
+        <div id="aiMessages_P14-017" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P14-017" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P14-017')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 增长看板</b>
+    <p id="empty" style="font-size:13px;color:var(--muted);margin:6px 0 0">还没有月份数据。</p>
+    <div id="log"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://infinenetech.com/blog/12-micro-saas-ideas-that-make-10k" target="_blank" style="color:var(--coral)">Subscription Analytics / 小型 SaaS 流失预测</a>
+  </div>
+
+<script>
+const KEY="P14-017";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const $=id=>document.getElementById(id);
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function add(){
+  if(!month.value.trim())return;
+  const s=+start.value||0,e=+end.value||0,a=+arpu.value||0;
+  const churn=s>0?Math.max(0,(s-e)/s):0;
+  const mrr=e*a;
+  const ltv=churn>0?a/churn:a*12;
+  const rec={month:month.value.trim(),start:s,end:e,arpu:a,churn,mrr,ltv};
+  const ex=items.find(x=>x.month===rec.month);
+  if(ex)Object.assign(ex,rec);else items.push(rec);
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function render(){
+  const last=items[items.length-1];
+  mrr.textContent=last?"$"+last.mrr.toLocaleString():"$0";
+  churn.textContent=last?Math.round(last.churn*100)+"%":"0%";
+  ltv.textContent=last?"$"+Math.round(last.ltv).toLocaleString():"$0";
+  if(items.length)empty.style.display="none";else empty.style.display="block";
+  log.innerHTML=items.slice().reverse().map(x=>{
+    const idx=items.indexOf(x);
+    const risk=x.churn>0.05?"高风险":"正常";
+    return `<div class="m"><span style="float:right;color:var(--coral);cursor:pointer" data-i="${idx}">✕</span>
+      <b>${x.month}</b> · MRR <b class="h-coral">$${x.mrr.toLocaleString()}</b><br>
+      <span style="font-size:12px;color:#666">客户 ${x.start}→${x.end} · 流失 ${Math.round(x.churn*100)}% · ARPU $${x.arpu} · LTV $${Math.round(x.ltv).toLocaleString()} · <span class="${x.churn>0.05?'h-coral':''}">流失${risk}</span></span></div>`;
+  }).join("");
+  document.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>del(+b.dataset.i));
+}
+const mrr=document.getElementById("mrr"),churn=document.getElementById("churn"),ltv=document.getElementById("ltv");
+add.onclick=add;
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

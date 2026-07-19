@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>专注认知训练</title>
+<style>
+:root{
+  --coral:#FF6B6B;        --coral-dark:#E85555;
+  --ink:#2D2D2D;          --muted:#8A8A8A;
+  --bg:#F7F7F7;           --card:#FFFFFF;
+  --line:#ECECEC;         --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-sm{padding:7px 10px;font-size:13px;border-radius:9px;margin-top:0;width:auto}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.mini{font-size:12px;color:var(--muted)}
+#arena{position:relative;height:300px;background:#FFF7F7;border:1px dashed var(--coral);border-radius:12px;margin-top:10px;overflow:hidden}
+.tgt{position:absolute;width:54px;height:54px;border-radius:50%;background:var(--coral);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;cursor:pointer}
+.score{font-size:20px;font-weight:700;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">neurodiversity</span><span class="tag">adhd_digital_therapeutics</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">专注认知训练</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Game-based ADHD digital therapeutic (dual-task)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Akili 的 EndeavorRx 是首个 FDA 授权游戏化 ADHD 数字疗法（8-17 岁），双任务引擎激活前额叶；日本 ENDEAVORRIDE 已获批。仅药物为主、数字辅助在亚洲稀缺。本工具用"双任务"点击小游戏模拟认知训练（娱乐向，非医疗）。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 双任务训练</b>
+    <p class="mini">规则：在干扰方块中出现时，尽快点中🎯目标（锻炼注意力分配）。每局 30 秒。</p>
+    <div class="row" style="align-items:center">
+      <div class="score">得分 <span id="sc">0</span></div>
+      <div class="score">⏱ <span id="tm">30</span></div>
+    </div>
+    <button class="btn" id="go" onclick="go()">▶ 开始一局</button>
+    <div id="arena"></div>
+    <p id="best" class="mini" style="margin-top:8px"></p>
+  </div>
+
+  <div class="card">
+    <b>📈 训练记录</b>
+    <div id="list"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.shionogi.com/content/dam/shionogi/jp/news/pdf/2025/2%E6%9C%88/J_20250218.pdf" target="_blank" style="color:var(--coral)">EndeavorRx / ENDEAVORRIDE</a>
+  </div>
+
+<script>
+const KEY="P11-013";
+let log=JSON.parse(localStorage.getItem(KEY)||"[]");
+let score=0, time=30, iv=null, tv=null;
+function save(){ localStorage.setItem(KEY,JSON.stringify(log)); render(); }
+function go(){
+  score=0; time=30; document.getElementById('sc').textContent=0;
+  const arena=document.getElementById('arena'); arena.innerHTML='';
+  document.getElementById('go').disabled=true;
+  spawn();
+  iv=setInterval(()=>{
+    time--; document.getElementById('tm').textContent=time;
+    if(time%2===0) spawn();
+    if(time<=0) end();
+  },1000);
+}
+function spawn(){
+  const arena=document.getElementById('arena');
+  const d=document.createElement('div'); d.className='tgt'; d.textContent='🎯';
+  d.style.left=(Math.random()*(arena.clientWidth-54))+'px';
+  d.style.top=(Math.random()*(arena.clientHeight-54))+'px';
+  d.onclick=()=>{ score++; document.getElementById('sc').textContent=score; d.remove(); };
+  arena.appendChild(d);
+  setTimeout(()=>{ if(d.parentNode) d.remove(); }, 1400);
+}
+function end(){
+  clearInterval(iv);
+  document.getElementById('arena').innerHTML='';
+  document.getElementById('go').disabled=false;
+  document.getElementById('tm').textContent=30;
+  log.unshift({score,date:new Date().toLocaleDateString()});
+  const best=Math.max(...log.map(x=>x.score));
+  document.getElementById('best').textContent='本局 '+score+' 分 · 历史最佳 '+best+' 分';
+  save();
+}
+function del(i){ log.splice(i,1); save(); }
+function render(){
+  const box=document.getElementById('list'); box.innerHTML='';
+  log.slice(0,10).forEach((l,i)=>{
+    const el=document.createElement('div'); el.className='mini';
+    el.style.marginTop='4px';
+    el.innerHTML='· '+l.date+' — '+l.score+' 分 <button class="btn btn-sm" style="background:#ccc;margin-left:8px" onclick="del('+i+')">删</button>';
+    box.appendChild(el);
+  });
+}
+render();
+</script>
+</body>
+</html>

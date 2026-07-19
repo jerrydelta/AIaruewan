@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>可食用菜园规划器</title>
+<style>
+:root{
+  --coral:#FF6B6B;        --coral-dark:#E85555;
+  --ink:#2D2D2D;          --muted:#8A8A8A;
+  --bg:#F7F7F7;           --card:#FFFFFF;
+  --line:#ECECEC;         --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-sm{padding:7px 10px;font-size:13px;border-radius:9px;margin-top:0}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item h3{margin:0 0 4px;font-size:15px}
+.mini{font-size:12px;color:var(--muted)}
+.ok{color:var(--ok);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">plant</span><span class="tag">edible_garden_planner</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">可食用菜园规划器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Hyper-local edible garden planner (USDA zone + companion)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">可食用/菜园类 App 明显少于观赏植物类。新手被"何时种/怎么排"劝退，通用 App 忽视可食用场景。欧美阳台/后院种菜潮下，超本地化（USDA 耐寒区+伴生种植）规划是空白机会。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 我的菜畦</b>
+    <div class="row">
+      <div><label>USDA 耐寒区</label>
+        <select id="zone">
+          <option>3</option><option>4</option><option>5</option><option selected>6</option>
+          <option>7</option><option>8</option><option>9</option><option>10</option>
+        </select></div>
+      <div><label>作物</label><input id="crop" placeholder="如：番茄"></div>
+    </div>
+    <label>播种日期</label>
+    <input id="sow" type="date">
+    <label>伴生/备注</label>
+    <input id="note" placeholder="如：与罗勒伴生驱虫；忌与玉米同畦">
+    <button class="btn" onclick="add()">＋ 加入菜园</button>
+    <div id="list"></div>
+  </div>
+
+  <div class="card">
+    <b>📚 伴生种植速查</b>
+    <div id="companion" class="mini"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://tendra-app.com/blog/the-12-best-free-gardening-apps-to-elevate-your-green-thumb-in-2025-1" target="_blank" style="color:var(--coral)">Seed to Spoon / Planter</a>
+  </div>
+
+<script>
+const KEY="P11-004";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const COMP={
+  "番茄":["罗勒(驱虫)","胡萝卜","洋葱"], "罗勒":["番茄"], "胡萝卜":["番茄","生菜"],
+  "玉米":["豆类","南瓜"], "豆类":["玉米","黄瓜"], "黄瓜":["豆类","萝卜"],
+  "生菜":["胡萝卜","草莓"], "草莓":["生菜","菠菜"], "南瓜":["玉米","豆类"],
+  "洋葱":["番茄","胡萝卜"], "菠菜":["草莓"], "萝卜":["黄瓜"]
+};
+function save(){ localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function suggest(c){
+  for(const k in COMP){ if(c.includes(k)) return COMP[k]; }
+  return null;
+}
+function add(){
+  const crop=document.getElementById('crop').value.trim();
+  if(!crop){ alert('请填作物'); return; }
+  const sow=document.getElementById('sow').value||today();
+  items.unshift({id:Date.now(),zone:document.getElementById('zone').value,crop,sow,
+    note:document.getElementById('note').value.trim()});
+  document.getElementById('crop').value='';document.getElementById('note').value='';
+  save();
+}
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function render(){
+  const box=document.getElementById('list'); box.innerHTML='';
+  items.forEach(p=>{
+    const s=suggest(p.crop);
+    const el=document.createElement('div'); el.className='item';
+    el.innerHTML='<h3>'+p.crop+' <span class="mini">· 区'+p.zone+'</span></h3>'+
+      '<div class="mini">📅 播种 '+p.sow+'</div>'+
+      (p.note?'<div style="font-size:14px;margin-top:4px">'+p.note+'</div>':'')+
+      (s?'<div class="ok" style="font-size:13px;margin-top:4px">🌿 建议伴生：'+s.join('、')+'</div>':
+         '<div class="mini" style="margin-top:4px">暂无该作物伴生数据</div>')+
+      '<button class="btn btn-sm" style="background:#ccc;width:auto;margin-top:8px" onclick="del('+p.id+')">删除</button>';
+    box.appendChild(el);
+  });
+  const cc=document.getElementById('companion'); cc.innerHTML='';
+  Object.keys(COMP).forEach(k=>{
+    const d=document.createElement('div'); d.textContent='· '+k+' ⇄ '+COMP[k].join('、'); cc.appendChild(d);
+  });
+}
+render();
+</script>
+</body>
+</html>

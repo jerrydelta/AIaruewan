@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>本地化 Vibe Coding Builder（日/韩）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.out{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:10px;font-size:13px;white-space:pre-wrap}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:13px}
+.item .del{float:right;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">vibe_coding</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">本地化 Vibe Coding Builder</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">JA/KO Natural-Language App Spec</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Replit/Bolt.new/Cursor 成熟，但英文界面为主，缺日韩本地化、本地支付与本地部署合规。日韩非技术者想造 App 但语言/支付门槛高。机会在双语界面 + 本地支付(Kakao/Naver Pay) + 本地云的 vibe coding builder。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 一句话生成 App 规格</b>
+    <select id="lang">
+      <option value="ja">日本語</option>
+      <option value="ko">한국어</option>
+      <option value="zh">中文</option>
+    </select>
+    <textarea id="idea" rows="2" placeholder="用母语描述你想做的 App，如：料理教室的预约+会员管理"></textarea>
+    <label>目标用户群</label>
+    <input id="user" placeholder="如：主妇 / 小店老板">
+    <button class="btn" onclick="gen()">生成规格书</button>
+    <div class="out" id="out" style="display:none"></div>
+    <button class="btn" id="saveBtn" style="display:none" onclick="save()">存档</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的规格书</b>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://pixso.net/articles/best-vibe-coding-tools" target="_blank" style="color:var(--coral)">Best Vibe Coding Tools</a>
+  </div>
+
+<script>
+const KEY="P2-014";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+let last=null;
+function gen(){
+  const lang=document.getElementById("lang").value;
+  const idea=document.getElementById("idea").value.trim()||"（请描述）";
+  const user=document.getElementById("user").value.trim()||"（目标用户）";
+  const L={
+    ja:{t:"アプリ仕様書",f:"機能",u:"対象ユーザー",p:"決済",n:"次のステップ"},
+    ko:{t:"앱 사양서",f:"기능",u:"대상 사용자",p:"결제",n:"다음 단계"},
+    zh:{t:"App 规格书",f:"功能",u:"目标用户",p:"支付",n:"下一步"}
+  }[lang];
+  const text="【"+L.t+"】\n"+L.u+"："+user+"\n概要："+idea+"\n\n"+L.f+"：\n・核心：录入/展示/本地保存闭环\n・账号：邮箱或社交登录\n・"+L.p+"：本地钱包(Kakao/Naver Pay / 支付代行)\n\n"+L.n+"：\n1. 用自然语言生成 MVP 页面\n2. 接本地支付与本地云\n3. 灰度发布给 "+user;
+  last={lang,idea,text,t:Date.now()};
+  const o=document.getElementById("out"); o.style.display="block"; o.textContent=text;
+  document.getElementById("saveBtn").style.display="block";
+}
+function save(){
+  if(!last) return;
+  items.unshift(last); localStorage.setItem(KEY,JSON.stringify(items)); last=null;
+  document.getElementById("out").style.display="none"; document.getElementById("saveBtn").style.display="none";
+  render();
+}
+function render(){
+  const box=document.getElementById("list");
+  let h='<b>📋 我的规格书</b>';
+  if(items.length===0){ h+='<p style="font-size:13px;color:var(--muted)">还没有存档。</p>'; }
+  items.forEach((it,i)=>{
+    const ln={ja:"日",ko:"韩",zh:"中"}[it.lang];
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除</span>['+ln+'] '+it.idea.slice(0,18)+'…<br><span style="color:var(--coral)" onclick="show('+i+')">查看</span></div>';
+  });
+  box.innerHTML=h;
+}
+function show(i){ alert(items[i].text); }
+function del(i){ items.splice(i,1); localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+render();
+</script>
+</body>
+</html>

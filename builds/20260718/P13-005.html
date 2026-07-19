@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>婚礼后关系延伸管家</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.item .del{float:right;color:var(--coral);font-size:12px;cursor:pointer}
+.tpl{background:#EAF7F0;border:1px solid #c8ecd9;border-radius:10px;padding:12px;font-size:14px;margin-top:10px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">wedding</span><span class="tag">post_wedding_relationship</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">婚礼后关系延伸管家</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Post-wedding relationship concierge</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">被验证的空白点：Zola 的「感谢信模板」关联宾客礼物清单，使其 NPS 飙到 72、周年复购 34%。国内无人跟进。婚礼 App 终局不是工具，而是「人生仪式管家」——把单次服务拉长为 10 年关系链。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 感谢信生成 + 周年提醒</b>
+    <label>宾客姓名</label><input id="gname" placeholder="王阿姨">
+    <label>所送礼物</label><input id="gift" placeholder="一套餐具">
+    <button class="btn" onclick="genTpl()">生成感谢信</button>
+    <div class="tpl" id="tpl" style="display:none"></div>
+
+    <div style="margin-top:14px;border-top:1px dashed var(--line);padding-top:12px">
+      <b>📅 周年 / 纪念日提醒</b>
+      <div class="row">
+        <div><label>名称</label><input id="evt" placeholder="结婚周年"></div>
+        <div><label>日期</label><input id="evtDate" type="date"></div>
+      </div>
+      <button class="btn" onclick="addEvt()">＋ 添加提醒</button>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>📅 纪念日</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.163.com/dy/article/KS74GPHM05561FZ3_pdya11y.html" target="_blank" style="color:var(--coral)">Zola 模式复盘</a>
+  </div>
+
+<script>
+const KEY="P13-005";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function genTpl(){
+  const g=document.getElementById("gname").value.trim();
+  const f=document.getElementById("gift").value.trim();
+  if(!g){alert("请填写宾客姓名");return;}
+  const tpl=`亲爱的 ${g}：\n感谢您来参加我们的婚礼，并送给我们${f||"心意"}。\n您的祝福让我们倍感温暖，这份礼物我们会好好珍藏。\n期待未来还能常常相聚！\n—— 新郎 & 新娘`;
+  const el=document.getElementById("tpl");
+  el.style.display="block";el.innerText=tpl;
+}
+function addEvt(){
+  const evt=document.getElementById("evt").value.trim();
+  const d=document.getElementById("evtDate").value;
+  if(!evt||!d){alert("请填写名称和日期");return;}
+  items.push({evt,d});
+  document.getElementById("evt").value="";document.getElementById("evtDate").value="";
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  const today=new Date();
+  let html='<b>📅 纪念日</b>';
+  if(items.length===0){html+='<p style="font-size:13px;color:#999;margin:8px 0">还没有纪念日。</p>';}
+  items.forEach((e,i)=>{
+    const dy=new Date(e.d);const next=new Date(dy);next.setFullYear(today.getFullYear());
+    if(next<today)next.setFullYear(today.getFullYear()+1);
+    const days=Math.ceil((next-today)/86400000);
+    html+=`<div class="item"><span class="del" onclick="del(${i})">删除</span>
+      <b>${e.evt}</b> · ${e.d}<br>距下次还有 <b class="h-coral">${days}</b> 天</div>`;
+  });
+  box.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

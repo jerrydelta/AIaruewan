@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>趣味ソモ임・발견コミュニティ</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#FFF0F0;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">hobby</span><span class="tag">hobby_meetup_korea</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">趣味ソモ임・발見コミュニティ</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Location-based hobby meetup & one-day class discovery (Korea)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">一人では始めにくい趣味を「地域＋趣味」でマッチングし、新しい人との出会いを得たい（特に退勤後・週末の余暇活用）。ソモ임・동호회・원데이클래スを容易に探して参加したい。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:4px 0 0">気になるモ임を「地域＋趣味」で保存し、参加予定を管理。フィルタで探せます。</p>
+    <label>趣味カテゴリ</label>
+    <select id="m-cat"><option>映画</option><option>読書</option><option>運動</option><option>工芸</option><option>スタディ</option><option>料理</option><option>写真</option></select>
+    <label>地域</label><input id="m-region" placeholder="例：弘大（ホンデ）">
+    <label>モ임名</label><input id="m-name" placeholder="例：週末読書ソモ임">
+    <label>日付</label><input id="m-date" type="date">
+    <label>参加ステータス</label>
+    <select id="m-join"><option>参加予定</option><option>興味あり</option><option>参加済</option></select>
+    <button class="btn" onclick="addM()">モ임を保存</button>
+    <div class="row" style="margin-top:10px">
+      <label style="margin:0">地域で絞る</label>
+    </div>
+    <input id="f-region" placeholder="フィルタ：地域（空=全件）" oninput="render()">
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://program.download/munto/" target="_blank" style="color:var(--coral)">문토（Munto）</a>
+  </div>
+
+<script>
+const KEY="P8-013";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addM(){
+  const cat=document.getElementById("m-cat").value;
+  const region=document.getElementById("m-region").value.trim();
+  const name=document.getElementById("m-name").value.trim();
+  const date=document.getElementById("m-date").value||new Date().toISOString().slice(0,10);
+  const join=document.getElementById("m-join").value;
+  if(!name){alert("モ임名を入力してください");return;}
+  items.push({cat,region,name,date,join,id:Date.now()});
+  document.getElementById("m-name").value="";document.getElementById("m-region").value="";
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const f=document.getElementById("f-region").value.trim();
+  let show=items.slice().reverse();
+  if(f)show=show.filter(i=>(i.region||"").includes(f));
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>🤝 保存したモ임</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>まだ保存がありません。</p>";return;}
+  box.innerHTML="<b>🤝 保存したモ임（"+items.length+"／表示"+show.length+"）</b>"+show.map((i,ri)=>{
+    const idx=items.indexOf(i);
+    return `<div class='item'><b>${esc(i.name)}</b> <span class='pill'>${i.cat}</span>
+      <div style='font-size:13px;color:var(--muted)'>${esc(i.region||'地域未設定')} ・ ${i.date} ・ ${i.join}</div>
+      <button class='mini' style='margin-top:6px' onclick='del(${idx})'>削除</button></div>`;
+  }).join("");
+}
+function del(idx){items.splice(idx,1);save();}
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+</script>
+</body>
+</html>

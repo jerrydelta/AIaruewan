@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>0-18 岁育儿记录与分析</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.stat{background:#FFF0F0;border-radius:10px;padding:10px;font-size:14px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">parenting</span><span class="tag">ai_parenting_assistant</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">0-18 岁育儿记录与分析</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">0-18 full-lifecycle parenting log + analysis</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">童迹 Ai 瞄准"当代家长育儿三大断层"：成长记录碎片化（照片/医疗报告/奖状分散）、出现问题缺即时科学分析、重大决策（择校/兴趣取舍）靠主观经验。痛点：现有产品要么只做 0-6 岁健康、要么只做 K12 刷题，缺贯穿 18 年的记录与分析。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">记录孩子各阶段事件（年龄/类别/内容）→ 自动生成时间线 + 简易分析（记录总数、各阶段覆盖、最近事件提醒）。数据本地保存。</p>
+    <label>孩子当前年龄</label>
+    <div class="row"><div><input id="ageY" type="number" placeholder="岁" min="0" max="18"></div>
+    <div><input id="ageM" type="number" placeholder="月" min="0" max="11"></div></div>
+    <label>事件类别</label>
+    <select id="cat"><option>健康医疗</option><option>成长里程碑</option><option>学习表现</option><option>兴趣特长</option><option>情绪行为</option><option>重要决策</option></select>
+    <label>内容</label><input id="content" placeholder="如：学会骑自行车 / 流感疫苗 / 选择钢琴班">
+    <button class="btn" onclick="add()">＋ 记录</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📊 我的育儿档案</b>
+    <div id="dataList"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://forum.trae.cn/t/topic/50009" target="_blank" style="color:var(--coral)">童迹Ai / 育学园 / 丁香妈妈</a>
+  </div>
+
+<script>
+const KEY="P6-009";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function add(){
+  const y=document.getElementById('ageY').value, m=document.getElementById('ageM').value;
+  const cat=document.getElementById('cat').value, c=document.getElementById('content').value.trim();
+  if(c===''){alert('请填写内容');return;}
+  const age=(parseInt(y||0))+(parseInt(m||0))/12;
+  items.unshift({age:Math.round(age*10)/10,cat,content:c,t:Date.now()});
+  document.getElementById('content').value='';
+  save();
+}
+function del(i){ items.splice(i,1); save(); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function fmt(t){return new Date(t).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function render(){
+  const el=document.getElementById('dataList');
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有记录。</p>';return;}
+  const cats={};items.forEach(x=>cats[x.cat]=(cats[x.cat]||0)+1);
+  const ages=items.map(x=>x.age);
+  const cover=Object.keys(cats).length;
+  let html=`<div class="stat">共 ${items.length} 条记录 · 覆盖 ${cover} 类<br>年龄跨度 ${Math.min(...ages)}~${Math.max(...ages)} 岁<br>最近：${items[0].cat} · ${items[0].content}</div>`;
+  html+=items.map((x,i)=>`<div class="item"><span>📌 <b>${x.age}岁</b> · ${x.cat}<br><span style="font-size:13px">${x.content}</span><br><span style="font-size:11px;color:var(--muted)">${fmt(x.t)}</span></span><button onclick="del(${i})" style="border:none;background:#FFF0F0;color:var(--coral);border-radius:8px;padding:4px 10px">删除</button></div>`).join('');
+  el.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

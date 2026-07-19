@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>自动客户证言收集展示</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ghost{background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{text-align:center;padding:10px 4px}
+.stat b{display:block;font-size:22px;color:var(--coral)}
+.stat span{font-size:12px;color:var(--muted)}
+.tm{font-size:13px;background:#FBFBFB;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px}
+.stars{color:#FFB020}
+.tpl{font-size:12px;background:#FFF0F0;border:1px solid #FFD9D9;border-radius:10px;padding:10px;margin-top:8px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">micro_saas</span><span class="tag">testimonial_collection</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">自动客户证言收集展示</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Automated testimonial collection</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">企业常忘记在合适时机请求客户证言。Testimonial.to 极简收集+展示，月收入超$6万、估值超$1500万仍单人运营。免费版好用→嵌入网站→去水印升级。自动请求+展示小工具，需求普适。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 收集 + 展示墙 + 请求模板</b>
+    <label>客户名</label><input id="who" placeholder="如：王女士 / ACME 公司">
+    <label>证言内容</label><textarea id="text" rows="2" placeholder="客户说了什么好话…"></textarea>
+    <div class="row">
+      <div><label>评分</label><select id="star"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
+      <div><label>类型</label><select id="kind"><option value="文字">文字</option><option value="视频">视频</option></select></div>
+    </div>
+    <button class="btn" id="add">收藏这条证言</button>
+    <div class="row" style="margin-top:10px">
+      <div class="stat"><b id="cnt">0</b><span>证言数</span></div>
+      <div class="stat"><b id="avg">0</b><span>平均评分</span></div>
+      <div class="stat"><b id="vid">0</b><span>视频数</span></div>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:12px 0">
+    <b style="font-size:14px">一键生成"请求证言"消息</b>
+    <input id="reqName" placeholder="客户称呼，如：李总">
+    <button class="btn btn-ghost" id="genReq">生成请求模板</button>
+    <div id="reqOut"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 证言展示墙（网站 Widget 预览）</b>
+    <p id="empty" style="font-size:13px;color:var(--muted);margin:6px 0 0">还没有证言，先收集一条。</p>
+    <div id="log"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.liezhe.com/saas-zhuanqian/" target="_blank" style="color:var(--coral)">Testimonial.to</a>
+  </div>
+
+<script>
+const KEY="P14-012";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const $=id=>document.getElementById(id);
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function add(){
+  if(!who.value.trim()||!text.value.trim())return;
+  items.push({who:who.value.trim(),text:text.value.trim(),star:+star.value,kind:kind.value});
+  who.value=text.value="";save();
+}
+function del(i){items.splice(i,1);save();}
+function genReq(){
+  const n=reqName.value.trim()||"客户";
+  reqOut.innerHTML=`<div class="tpl">主题：想请你为我们的服务写句真心话 🙏\n\n${n} 您好！感谢选择我们。如果体验还算满意，能否花1分钟为我们在官网留一句评价？\n文字或一段短视频都可以， link 直接提交即可，非常感谢！\n\n（提示：交付后 2-3 天发送，转化率最高）</div>`;
+}
+function render(){
+  cnt.textContent=items.length;
+  avg.textContent=items.length?(items.reduce((s,x)=>s+x.star,0)/items.length).toFixed(1):"0";
+  vid.textContent=items.filter(x=>x.kind==="视频").length;
+  if(items.length)empty.style.display="none";else empty.style.display="block";
+  log.innerHTML=items.slice().reverse().map(x=>{
+    const idx=items.indexOf(x);
+    return `<div class="tm"><span style="float:right;color:var(--coral);cursor:pointer" data-i="${idx}">✕</span>
+      <div class="stars">${"★".repeat(x.star)}${"☆".repeat(5-x.star)} <span style="font-size:11px;color:var(--muted)">${x.kind}</span></div>
+      <div style="margin:4px 0">"${esc(x.text)}"</div>
+      <div style="font-size:12px;color:var(--coral)">— ${esc(x.who)}</div></div>`;
+  }).join("");
+  document.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>del(+b.dataset.i));
+}
+function esc(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+add.onclick=add; genReq.onclick=genReq;
+render();
+</script>
+</body>
+</html>

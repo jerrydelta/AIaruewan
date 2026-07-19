@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>外卖/餐厅精准热量识别</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.total{background:#FFF0F0;border-radius:10px;padding:12px;font-size:16px;font-weight:700;text-align:center;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">food</span><span class="tag">takeout_calorie_gap</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">外卖/餐厅精准热量识别</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">High-accuracy calorie ID for takeout / restaurant</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">实测"手机算热量记乱账"：同一餐不同软件热量能差"两碗大米饭"。一瓶椰子水品牌标 54 千卡、外包装实算约 90；西红柿炒鸡蛋被统一算 220 千卡，不分家常（少油）与外卖（多油）。痛点：外卖/家常菜场景热量识别极不准。机会：对接外卖营养标签+家常菜个性化系数。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">选菜品（内置品牌/家常菜每 100g 热量）→ 选场景：品牌标称 / 家常（少油系数×0.85）/ 外卖（多油系数×1.3）→ 输入份量得估算热量，并提示误差来源。</p>
+    <label>菜品</label><select id="dish"></select>
+    <label>场景</label>
+    <select id="scene">
+      <option value="1">品牌标称（按营养标签）</option>
+      <option value="0.85">家常（少油少糖 ×0.85）</option>
+      <option value="1.3">外卖（多油 ×1.3）</option>
+    </select>
+    <label>份量（克）</label><input id="gram" type="number" value="200" min="1">
+    <button class="btn" onclick="add()">＋ 记一笔</button>
+    <div class="total" id="total">今日合计：0 kcal</div>
+  </div>
+
+  <div class="card" id="list">
+    <b>🍱 今日饮食</b>
+    <div id="foodList"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://so.html5.qq.com/page/real/search_news?docid=70000021_35469bf40e389152" target="_blank" style="color:var(--coral)">薄荷健康·食卡卡·MyFitnessPal·Cal AI 实测误差报道</a>
+  </div>
+
+<script>
+const KEY="P6-017";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+const LIB=[
+  {n:'西红柿炒鸡蛋',k:220,brand:90},{n:'宫保鸡丁',k:180,brand:160},{n:'红烧肉',k:350,brand:300},
+  {n:'麻婆豆腐',k:150,brand:130},{n:'白米饭',k:116,brand:116},{n:'椰子水',k:54,brand:90/*每100ml标称低但实测高*/},
+  {n:'麻辣烫(清汤)',k:90,brand:80},{n:'牛肉面',k:140,brand:120},{n:'沙拉(油醋)',k:120,brand:90},
+  {n:'炸鸡',k:300,brand:280}
+];
+const sel=document.getElementById('dish');
+sel.innerHTML=LIB.map((f,i)=>`<option value="${i}">${f.n}（标称 ${f.brand}kcal/100g）</option>`).join('');
+function add(){
+  const i=parseInt(sel.value), f=LIB[i], scene=parseFloat(document.getElementById('scene').value), g=parseFloat(document.getElementById('gram').value)||0;
+  let kcal;
+  if(scene===1) kcal=Math.round(f.brand*g/100);
+  else kcal=Math.round(f.k*g/100*scene);
+  const sceneTxt=scene===1?'品牌标称':(scene<1?'家常少油':'外卖多油');
+  items.unshift({name:f.n,kcal,scene:sceneTxt,t:Date.now()});
+  save();
+}
+function del(i){ items.splice(i,1); save(); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function fmt(t){return new Date(t).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function render(){
+  const el=document.getElementById('foodList');
+  const sum=items.reduce((a,b)=>a+b.kcal,0);
+  document.getElementById('total').textContent='今日合计：'+sum+' kcal';
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有记录。</p>';return;}
+  el.innerHTML=items.map((x,i)=>`<div class="item"><span>🍱 ${x.name} <span class="tag">${x.scene}</span><br><span style="font-size:11px;color:var(--muted)">${fmt(x.t)}</span></span><b>${x.kcal} kcal</b><button onclick="del(${i})" style="border:none;background:#FFF0F0;color:var(--coral);border-radius:8px;padding:4px 10px;margin-left:6px">删</button></div>`).join('');
+}
+render();
+</script>
+</body>
+</html>

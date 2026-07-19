@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>CGM 碳水计数与血糖日志</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.sub{font-weight:700;color:var(--coral);margin:14px 0 4px;font-size:15px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.stat{background:#FFF0F0;border-radius:10px;padding:10px;font-size:14px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">food</span><span class="tag">cgm_diabetes_nutrition</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">CGM 碳水计数与血糖日志</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Pro nutrition for diabetics & GI-sensitive, carb-counting</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">CGM（连续血糖监测）驱动的营养管理是高客单垂直。Nutrisense 订阅 $250-350/月；约 1/3 的 2 型、1/2 的 1 型糖友用 App 管理，可降 A1C 约 0.57%。痛点：普通热量 App 不懂血糖波动；糖尿病/IBS 人群缺专业食养联动。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">① 记录餐食碳水（食物/碳水克数）　② 记录血糖读数（数值/餐前餐后）　→ 显示当日碳水合计与血糖趋势列表（仅供记录参考，非医疗建议）。</p>
+    <div class="sub">① 碳水计数</div>
+    <label>餐次</label>
+    <select id="meal"><option>早餐</option><option>午餐</option><option>晚餐</option><option>加餐</option></select>
+    <label>食物</label><input id="food" placeholder="如：糙米饭">
+    <label>碳水（克）</label><input id="carb" type="number" placeholder="45">
+    <button class="btn" onclick="addCarb()">＋ 记碳水</button>
+
+    <div class="sub">② 血糖读数</div>
+    <label>读数（mmol/L）</label><input id="bg" type="number" step="0.1" placeholder="6.5">
+    <label>时机</label>
+    <select id="when"><option>餐前</option><option>餐后2h</option><option>睡前</option></select>
+    <button class="btn" onclick="addBg()">＋ 记血糖</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P6-016">
+    <div class="collapse-header" id="aiHeader_P6-016" onclick="toggleAI('P6-016')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P6-016" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P6-016">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P6-016" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P6-016')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P6-016" style="display:none;margin-top:10px">
+        <div id="aiMessages_P6-016" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P6-016" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P6-016')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📈 今日数据</b>
+    <div id="dataList"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.everydayhealth.com/hs/type-2-diabetes-care/diabetes-apps/" target="_blank" style="color:var(--coral)">Nutrisense·Cara Care·MacroFactor·Levels</a>
+  </div>
+
+<script>
+const KEY="P6-016";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function addCarb(){
+  const meal=document.getElementById('meal').value, food=document.getElementById('food').value.trim(), c=parseFloat(document.getElementById('carb').value);
+  if(!food||isNaN(c)){alert('请填写食物和碳水克数');return;}
+  items.unshift({type:'carb',meal,food,carb:c,t:Date.now()});
+  document.getElementById('food').value='';document.getElementById('carb').value='';save();
+}
+function addBg(){
+  const bg=parseFloat(document.getElementById('bg').value), w=document.getElementById('when').value;
+  if(isNaN(bg)){alert('请填写血糖');return;}
+  items.unshift({type:'bg',bg,when:w,t:Date.now()});save();
+}
+function del(i){ items.splice(i,1); save(); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function fmt(t){return new Date(t).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});}
+function render(){
+  const el=document.getElementById('dataList');
+  const carbs=items.filter(x=>x.type==='carb');
+  const bgs=items.filter(x=>x.type==='bg');
+  const sumC=carbs.reduce((a,b)=>a+b.carb,0);
+  const avgBg=bgs.length?(bgs.reduce((a,b)=>a+b.bg,0)/bgs.length).toFixed(1):'-';
+  let html=`<div class="stat">今日碳水合计 <b>${sumC}g</b> · 血糖 ${bgs.length} 次（均值 ${avgBg} mmol/L）</div>`;
+  if(!items.length){html+='<p style="font-size:13px;color:var(--muted)">还没有数据。</p>';}
+  html+=items.map((x,i)=>{
+    const body=x.type==='carb'?`${x.meal} · ${x.food} · <b>${x.carb}g 碳水</b>`:`血糖 ${x.bg} mmol/L · ${x.when}`;
+    const ico=x.type==='carb'?'🍚':'🩸';
+    return `<div class="item"><span>${ico} ${body}<br><span style="font-size:11px;color:var(--muted)">${fmt(x.t)}</span></span><button onclick="del(${i})" style="border:none;background:#FFF0F0;color:var(--coral);border-radius:8px;padding:4px 10px">删</button></div>`;
+  }).join('');
+  el.innerHTML=html;
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

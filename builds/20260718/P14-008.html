@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>控糖/抗糖女性向打卡</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ghost{background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{text-align:center;padding:10px 4px}
+.stat b{display:block;font-size:22px;color:var(--coral)}
+.stat span{font-size:12px;color:var(--muted)}
+.recipe{font-size:13px;background:#FBFBFB;border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-top:7px}
+.warn{background:#FFF3F3;border:1px solid #FFC9C9;border-radius:10px;padding:10px;font-size:13px;margin-top:8px;color:#b33434}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">addiction_recovery</span><span class="tag">sugar_craving_control</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">控糖 / 抗糖女性向打卡</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Sugar-craving control for women</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">控糖/抗糖是年轻女性高频焦虑却缺专门工具。法国案例用 Cursor 复刻戒断类 App、改粉紫配色+饮食记录+生理周期提醒，5个月下载6万、月收入$12K。换颜色+换赛道+换市场即可复制。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 每日控糖打卡 + 饮食 + 周期提醒</b>
+    <div class="row">
+      <div class="stat"><b id="streak">0</b><span>连续控糖天</span></div>
+      <div class="stat"><b id="sugarDays">0</b><span>高糖日</span></div>
+      <div class="stat"><b id="total">0</b><span>记录天</span></div>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:12px 0">
+    <div class="row">
+      <div><label>日期</label><input id="day" type="date"></div>
+      <div><label>是否高糖日</label>
+        <select id="high"><option value="0">控糖成功 ✓</option><option value="1">破功了</option></select>
+      </div>
+    </div>
+    <label>吃了什么（饮食记录）</label>
+    <input id="food" placeholder="如：奶茶一杯 / 无糖酸奶+莓果">
+    <button class="btn" id="add">打卡今日</button>
+    <hr style="border:none;border-top:1px solid var(--line);margin:12px 0">
+    <b style="font-size:14px">生理周期关联（提示高渴望期）</b>
+    <div class="row">
+      <div><label>上次经期首日</label><input id="period" type="date"></div>
+      <div><label>周期天数</label><input id="cycle" type="number" value="28"></div>
+    </div>
+    <div id="phase"></div>
+  </div>
+
+  <div class="card">
+    <b>🍓 低糖替代食谱</b>
+    <div id="recipes"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 控糖日记</b>
+    <p id="empty" style="font-size:13px;color:var(--muted);margin:6px 0 0">还没有记录。</p>
+    <div id="log"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://applet.10100.com/article/41910652" target="_blank" style="color:var(--coral)">Quitter 复刻 · 法国控糖案例</a>
+  </div>
+
+<script>
+const KEY="P14-008";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const $=id=>document.getElementById(id);
+const todayStr=()=>new Date().toISOString().slice(0,10);
+if(!day.value) day.value=todayStr();
+const recipes=[
+  "🍓 莓果无糖酸奶碗：冷冻蓝莓+无糖希腊酸奶+奇亚籽，满足甜瘾零添加糖。",
+  "🍫 黑巧(85%+)2小块：苦味满足口欲，糖分极低。",
+  "🥥 椰子水冻冰块：嘴馋时含一块，清凉无糖。",
+  "🍌 半根香蕉+花生酱：天然甜+蛋白脂肪，扛饿更久。",
+  "🌿 气泡水+柠檬+薄荷：替代含糖汽水的仪式感。"
+];
+recipes.innerHTML=recipes.map(r=>`<div class="recipe">${r}</div>`).join("");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function add(){
+  items.push({day:day.value||todayStr(),high:+high.value,food:food.value.trim()});
+  food.value="";save();
+}
+function renderPhase(){
+  const p=period.value,c=+cycle.value||28;
+  if(!p){phase.innerHTML="";return;}
+  const d=Math.floor((Date.now()-new Date(p))/864e5)%c;
+  let ph,tip;
+  if(d<5){ph="经期";tip="激素低谷，对糖分渴望往往更强——备好低糖替代。";}
+  else if(d>=c-14&&d<c-10){ph="排卵期前后";tip="雌激素高峰后回落，易情绪性想吃甜，注意。";}
+  else if(d>=c-7){ph="经前(PMS)";tip="黄体期孕酮上升，甜食渴望最强！提前准备替代品。";}
+  else{ph="卵泡期";tip="状态较稳，适合巩固控糖习惯。";}
+  phase.innerHTML=`<div class="warn">🩸 当前阶段：<b>${ph}</b>（周期第 ${d+1} 天）　${tip}</div>`;
+}
+function render(){
+  const sorted=items.slice().sort((a,b)=>a.day<b.day?1:-1);
+  let st=0;
+  for(let i=0;i<sorted.length;i++){if(sorted[i].high===0)st++;else break;}
+  streak.textContent=st;
+  sugarDays.textContent=items.filter(x=>x.high===1).length;
+  total.textContent=items.length;
+  if(items.length)empty.style.display="none";else empty.style.display="block";
+  log.innerHTML=items.slice().reverse().map(x=>{
+    const tag=x.high===1?'<span style="color:#E85555">高糖</span>':'<span class="h-coral">控糖✓</span>';
+    return `<div style="font-size:13px;padding:5px 0;border-bottom:1px solid var(--line)">${x.day} ${tag} ${x.food?("· "+esc(x.food)):""}</div>`;
+  }).join("");
+}
+function esc(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+add.onclick=add; period.onchange=renderPhase; cycle.onchange=renderPhase;
+renderPhase(); render();
+</script>
+</body>
+</html>

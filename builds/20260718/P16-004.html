@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>故乡税控除上限优化+返礼品对比</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.res{font-size:14px;margin-top:8px;padding:10px;border-radius:10px;background:#FFF7F7}
+.res b{color:var(--coral)}
+li{list-style:none;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+ul{padding:0;margin:6px 0 0}
+.del{color:var(--muted);font-size:12px;border:none;background:none;cursor:pointer;float:right}
+.pill{font-size:11px;padding:1px 7px;border-radius:999px;background:#FFF0F0;color:var(--coral);margin-right:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">finance</span><span class="tag">furusato_nozei_optimizer</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">故乡税·控除上限优化+返礼对比</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Furusato-nozei limit optimizer + gift compare</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">故乡税 2023 年寄付额破 1 兆日元、控除适用者超 1000 万，但手续繁杂（寄付申込、ワンストップ特例、控除上限模拟）。用户想把 2000 日元实负担用到极致。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#777;margin:6px 0 0">① 输入年收估算控除上限（目安） ② 登记返礼品比较還元率。</p>
+    <label>年収（万円）</label>
+    <input type="number" id="income" placeholder="例 500" inputmode="numeric">
+    <label>扶养人数</label>
+    <select id="dep"><option value="0">0 人（单身）</option><option value="1">1 人</option><option value="2">2 人</option><option value="3">3 人+</option></select>
+    <button class="btn" onclick="sim()">模拟控除上限</button>
+    <div class="res" id="res"></div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <label>返礼品·自治体</label>
+    <input type="text" id="city" placeholder="例 北海道・XX町">
+    <label>返礼品名</label>
+    <input type="text" id="gift" placeholder="例 特選和牛">
+    <div class="row">
+      <div><label>寄付額(円)</label><input type="number" id="don" placeholder="10000" inputmode="numeric"></div>
+      <div><label>市場価値(円)</label><input type="number" id="val" placeholder="13000" inputmode="numeric"></div>
+    </div>
+    <button class="btn" onclick="addGift()">＋ 加返礼</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>🎁 返礼品還元率排行</b>
+    <ul id="ul"></ul>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://prtimes.jp/main/html/rd/p/000001124.000007821.html" target="_blank" style="color:var(--coral)">ふるなびアプリ / ふるさとチョイス / 楽天ふるさと納税</a>
+  </div>
+
+<script>
+const KEY="P16-004";
+let gifts=JSON.parse(localStorage.getItem(KEY)||"[]");
+function fmt(n){return Math.round(n||0).toLocaleString("ja-JP")+" 円";}
+function sim(){
+  const inc=parseFloat(document.getElementById("income").value);
+  const dep=parseInt(document.getElementById("dep").value);
+  if(!inc||inc<=0){alert("请输入年収");return;}
+  // 简化目安：年収×係数（单身），扶养每人+0.4万
+  const rate=0.0072; // 约目安系数
+  let cap=inc*rate + dep*0.4;
+  cap=Math.max(cap,1.5);
+  document.getElementById("res").innerHTML=
+    `控除上限（目安）：<b>${fmt(cap*10000)}</b><br>実質負担は一律 <b>2,000 円</b>。この上限内で還元率の高い返礼を選ぶと得。`;
+}
+function addGift(){
+  const city=document.getElementById("city").value.trim();
+  const gift=document.getElementById("gift").value.trim();
+  const don=parseFloat(document.getElementById("don").value);
+  const val=parseFloat(document.getElementById("val").value);
+  if(!city||!gift||!don||!val){alert("请填全");return;}
+  gifts.unshift({city,gift,don,val,rate:val/don,t:Date.now()});
+  document.getElementById("city").value="";document.getElementById("gift").value="";
+  document.getElementById("don").value="";document.getElementById("val").value="";
+  save();
+}
+function del(t){gifts=gifts.filter(x=>x.t!==t);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(gifts));render();}
+function render(){
+  const ul=document.getElementById("ul");ul.innerHTML="";
+  const sorted=[...gifts].sort((a,b)=>b.rate-a.rate);
+  sorted.forEach(x=>{
+    const li=document.createElement("li");
+    li.innerHTML=`<button class="del" onclick="del(${x.t})">删除</button>
+      <span class="pill">還元率 ${(x.rate*100).toFixed(0)}%</span>${x.city} · ${x.gift}<br>
+      <span style="color:#999;font-size:12px">寄付 ${fmt(x.don)} → 価値 ${fmt(x.val)}</span>`;
+    ul.appendChild(li);
+  });
+  if(gifts.length){const best=sorted[0];
+    ul.insertAdjacentHTML("beforeend",`<li style="border:none;color:var(--ok)">✅ 最優秀：${best.city} ${best.gift}（${(best.rate*100).toFixed(0)}%）</li>`);}
+}
+render();
+</script>
+</body>
+</html>

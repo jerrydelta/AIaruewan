@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>手机聚合收款+对账</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.mini{font-size:14px;margin:14px 0 4px;font-weight:600;color:var(--ink);
+  border-left:4px solid var(--coral);padding-left:8px}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.del{color:var(--coral);float:right;font-size:13px;cursor:pointer}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.voice{background:var(--ok);color:#fff;border:none;border-radius:12px;padding:13px;width:100%;font-size:15px;font-weight:600;margin-top:8px;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">business</span><span class="tag">mobile_aggregated_pos</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">手机聚合收款+对账</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Mobile aggregated payment + auto-reconciliation + offline cashier</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">线下小微商户"手机即收银台"成标配：小麦收银宝聚合微信/支付宝收款、实时语音播报、3秒记账、日周月报表。痛点：传统POS贵、大系统冗余、对账烦。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <div class="mini">💳 一码收款</div>
+    <label>金额(元)</label><input id="amt" type="number" placeholder="如 88">
+    <label>渠道</label><select id="ch"><option>微信</option><option>支付宝</option><option>现金</option><option>银行卡</option></select>
+    <button class="voice" onclick="charge()">🔊 收款并语音播报</button>
+    <button class="btn" onclick="offline()">📴 离线记录(联网后同步)</button>
+
+    <div class="mini">📊 对账</div>
+    <button class="btn" onclick="recon()">自动对账（渠道汇总）</button>
+    <p id="stat" style="font-size:14px;margin:8px 0 0"></p>
+  </div>
+
+  <div class="card" id="list"><b>📋 收款流水</b><div id="box"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/app/%E5%B0%8F%E9%BA%A6%E6%94%B6%E9%93%B6%E5%AE%9D/id6744993683" target="_blank" style="color:var(--coral)">小麦收银宝 · 叮叮收银 · 悦收银 · 钱到啦</a>
+  </div>
+
+<script>
+const K="P12-011_pay";
+let items=JSON.parse(localStorage.getItem(K)||"[]");
+function charge(){const a=parseFloat(document.getElementById("amt").value),c=document.getElementById("ch").value;
+  if(isNaN(a)){alert("填金额");return;}items.push({a,c,off:false,t:new Date().toLocaleString()});localStorage.setItem(K,JSON.stringify(items));
+  try{const msg=new SpeechSynthesisUtterance("收款"+a+"元");speechSynthesis.speak(msg);}catch(e){}
+  render();}
+function offline(){const a=parseFloat(document.getElementById("amt").value),c=document.getElementById("ch").value;
+  if(isNaN(a)){alert("填金额");return;}items.push({a,c,off:true,t:new Date().toLocaleString()});localStorage.setItem(K,JSON.stringify(items));render();}
+function recon(){const by={};items.forEach(x=>by[x.c]=(by[x.c]||0)+x.a);
+  let h="渠道汇总：";for(const k in by)h+=`${k}¥${by[k].toFixed(0)} `;
+  const off=items.filter(x=>x.off).length;
+  document.getElementById("stat").innerHTML=h+(off?`<br><span style="color:#E85555">⚠ ${off} 笔待同步</span>`:`<br><span style="color:var(--ok)">✓ 已全部同步</span>`);}
+function del(i){items.splice(i,1);localStorage.setItem(K,JSON.stringify(items));render();}
+function render(){
+  const sum=items.reduce((s,x)=>s+x.a,0);
+  document.getElementById("stat").innerHTML=document.getElementById("stat").innerHTML||`共收 ¥${sum.toFixed(0)} · ${items.length} 笔`;
+  document.getElementById("box").innerHTML=items.slice().reverse().map((x,i)=>`<div class="item"><span class="del" onclick="del(${items.length-1-i})">删</span>${x.t} · ${x.c} · <b>¥${x.a}</b> ${x.off?'<span style="color:#E85555">[离线]</span>':''}</div>`).join("")||"暂无";
+}
+render();
+</script>
+</body>
+</html>

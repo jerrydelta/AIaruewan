@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>细分理财追踪器(零基/储蓄/债务)</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;font-size:13px}
+.item b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.kpi{display:flex;gap:8px;margin-top:8px}
+.kpi div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:8px;text-align:center}
+.kpi b{display:block;font-size:18px;color:var(--coral)}
+.note{font-size:13px;color:#555;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">digital_product</span><span class="tag">budget_finance_trackers</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">细分理财追踪器(零基/储蓄/债务)</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Niche finance trackers in Excel+PDF</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">预算/理财追踪表是 Etsy 全年高需、低竞争的细分数字品:定价 $5-25、套组 $15-49,1 月与 9 月双高峰;利润率 90-95%。痛点:人们想要财务清晰度但不会做表。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:4px 0 10px">模式切换:记录收入/支出/储蓄,实时看结余与零基预算达成度。</p>
+    <label>模式</label>
+    <select id="mode">
+      <option value="zerobase">零基预算</option>
+      <option value="saving">储蓄挑战</option>
+      <option value="debt">债务雪球</option>
+      <option value="adhd">ADHD 友好</option>
+    </select>
+    <label>条目名称</label>
+    <input id="name" placeholder="如 工资 / 房租 / 应急储蓄">
+    <div class="row">
+      <div><label>类型</label>
+        <select id="type"><option value="in">收入</option><option value="out">支出</option><option value="save">储蓄</option></select>
+      </div>
+      <div><label>金额($)</label><input id="amt" type="number" value="0"></div>
+    </div>
+    <button class="btn" onclick="add()">记一笔</button>
+    <div class="kpi">
+      <div><b id="kIn">$0</b>收入</div>
+      <div><b id="kOut">$0</b>支出</div>
+      <div><b id="kSave">$0</b>储蓄</div>
+    </div>
+    <div class="note" id="tip">零基预算:收入 - 支出 - 储蓄 = 0 才算分配完。</div>
+  </div>
+
+  <div class="card" id="list"><b>📒 财务流水</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.insightagent.app/guides/best-digital-downloads-etsy" target="_blank" style="color:var(--coral)">Etsy · Excel · Google Sheets 理财追踪案例</a>
+  </div>
+
+<script>
+const KEY="P5-005";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function calc(){const inc=items.filter(i=>i.type==="in").reduce((a,b)=>a+b.amt,0);
+  const out=items.filter(i=>i.type==="out").reduce((a,b)=>a+b.amt,0);
+  const sav=items.filter(i=>i.type==="save").reduce((a,b)=>a+b.amt,0);
+  kIn.textContent="$"+inc.toFixed(0); kOut.textContent="$"+out.toFixed(0); kSave.textContent="$"+sav.toFixed(0);
+  const mode=mode_.value; let t;
+  if(mode==="zerobase"){const left=inc-out-sav;
+    t=left===0?"✅ 预算已分配完(零基达成)":left>0?`还有 $${left} 未分配,建议转入储蓄`:`⚠️ 超支 $${-left}`;}
+  else if(mode==="saving"){t=`储蓄累计 $${sav},坚持就是胜利 💪`;}
+  else if(mode==="debt"){const paid=sav; t=`已还款/储蓄 $${sav},雪球越滚越大。`;}
+  else{t=`ADHD 友好模式:大按钮、少步骤,已记录 ${items.length} 笔。`;}
+  tip.textContent=t;}
+mode_.addEventListener("change",calc);
+function add(){const name=name_.value.trim()||"未命名"; const amt=+(+amt.value||0);
+  if(amt<=0){alert("金额需大于0");return;}
+  items.unshift({name,type:type_.value,amt,mode:mode_.value,date:new Date().toLocaleDateString()});
+  localStorage.setItem(KEY,JSON.stringify(items)); name_.value=""; amt_.value="0"; render(); calc();}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();calc();}
+function render(){if(!items.length){items_.innerHTML='<p style="font-size:13px;color:#555;margin:6px 0 0">还没有记录。</p>';return;}
+  const map={in:"收入",out:"支出",save:"储蓄"};
+  items_.innerHTML=items.map((it,i)=>`<div class="item"><span class="del" onclick="del(${i})">删除</span>
+    <b>${it.name}</b> · ${map[it.type]} · $${it.amt}<span style="font-size:12px;color:#999"> ${it.date}</span></div>`).join("");}
+const name_=document.getElementById("name"),amt_=document.getElementById("amt"),mode_=document.getElementById("mode"),type_=document.getElementById("type");
+render(); calc();
+</script>
+</body>
+</html>

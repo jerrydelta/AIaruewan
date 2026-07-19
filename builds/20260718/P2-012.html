@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Micro-SaaS 选题库 · 落地验证</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:13px}
+.item .del{float:right;color:var(--muted);font-size:12px}
+.checks label{font-size:13px;color:var(--ink);margin-top:2px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">micro_saas</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">Micro-SaaS 选题库</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Idea Library + Validation</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">2026 年 44% 盈利型 SaaS 由个体独立完成；平均 micro SaaS 产生 $5,000–50,000 MRR。垂直 CRM（教练/摄影/房产/自由职业）与 AI 内容工具（$19–99/月）最赚钱。痛点：选品难、获客难。机会在本地化选题库+落地模板。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 收录选题</b>
+    <input id="idea" placeholder="选题（如：瑜伽教练排课SaaS）">
+    <div class="row">
+      <select id="niche">
+        <option>垂直CRM</option><option>AI内容</option><option>自动化</option><option>教育</option><option>本地生活</option>
+      </select>
+      <input id="price" type="number" placeholder="定价 $/月">
+    </div>
+    <label>验证清单（勾选已完成）</label>
+    <div class="checks">
+      <label><input type="checkbox" id="c1" style="width:auto;margin:0 6px 0 0">有人愿意付费（访谈/预购）</label>
+      <label><input type="checkbox" id="c2" style="width:auto;margin:0 6px 0 0">竞品少/可差异化</label>
+      <label><input type="checkbox" id="c3" style="width:auto;margin:0 6px 0 0">能做到 MVP（≤30天）</label>
+      <label><input type="checkbox" id="c4" style="width:auto;margin:0 6px 0 0">可持续获客渠道</label>
+    </div>
+    <button class="btn" onclick="add()">收录选题</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 选题库</b>
+    <p style="font-size:12px;color:var(--muted);margin:6px 0 0">已收录 <b class="h-coral" id="cnt">0</b> 个</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.nxcode.io/resources/news/micro-saas-ideas-2026" target="_blank" style="color:var(--coral)">NxCode Micro-SaaS Ideas 2026</a>
+  </div>
+
+<script>
+const KEY="P2-012";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function add(){
+  const idea=document.getElementById("idea").value.trim();
+  if(!idea){ alert("填写选题"); return; }
+  const niche=document.getElementById("niche").value;
+  const price=+document.getElementById("price").value||0;
+  const done=["c1","c2","c3","c4"].filter(id=>document.getElementById(id).checked).length;
+  items.unshift({idea,niche,price,done,t:Date.now()});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("idea").value=""; document.getElementById("price").value="";
+  ["c1","c2","c3","c4"].forEach(id=>document.getElementById(id).checked=false);
+  render();
+}
+function render(){
+  const box=document.getElementById("list");
+  document.getElementById("cnt").textContent=items.length;
+  let h='<b>📋 选题库</b><p style="font-size:12px;color:var(--muted);margin:6px 0 0">已收录 <b class="h-coral" id="cnt">'+items.length+'</b> 个</p>';
+  if(items.length===0){ h+='<p style="font-size:13px;color:var(--muted)">还没有选题。</p>'; }
+  items.forEach((it,i)=>{
+    const ready=it.done===4?"✅ 可启动":"🔧 验证 "+it.done+"/4";
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除</span><b>'+it.idea+'</b><br>'+
+       '<span style="color:var(--coral)">'+it.niche+'</span> · $'+it.price+'/月 · '+ready+'</div>';
+  });
+  box.innerHTML=h;
+}
+function del(i){ items.splice(i,1); localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+render();
+</script>
+</body>
+</html>

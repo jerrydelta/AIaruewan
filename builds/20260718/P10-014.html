@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>自托管密码库</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.s{width:auto;padding:8px 12px;font-size:13px;margin:6px 4px 0 0;background:#FFE3E3;color:var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+input{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+.item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:none}
+.item .name{flex:1;font-size:15px}
+.item .meta{font-size:12px;color:var(--muted)}
+.del{color:var(--muted);font-size:18px;background:none;border:none;cursor:pointer}
+.offline{font-size:12px;color:var(--ok);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">privacy</span><span class="tag">self_hosted_password_manager</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">自托管密码库</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Self-hosted password manager run on your own server</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Vaultwarden 是 Bitwarden 兼容轻量自托管密码库（Rust 写，空闲内存 <50MB，树莓派可跑）。1Password 仅云、LastPass 2022-23 泄漏。隐私用户想要「自己的密码库跑在自己服务器」，自托管密码管理器渐成必备基础设施。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 本地密码库（主密码解锁）</b>
+    <label>主密码（解锁查看，仅本机校验）</label><input id="master" type="password" placeholder="设置/输入主密码">
+    <button class="btn s" onclick="unlock()">🔓 解锁库</button>
+    <div id="vault" style="display:none">
+      <label>网站 / 账号</label><input id="v_site" placeholder="如：github.com">
+      <div class="row"><div><label>用户名</label><input id="v_user" placeholder="账号"></div><div><label>密码</label><input id="v_pass" placeholder="密码"></div></div>
+      <button class="btn s" onclick="gen()">生成强密码</button>
+      <button class="btn" onclick="addV()">＋ 存入</button>
+      <p class="offline" style="margin-top:8px">🔒 数据仅存本机 localStorage，不上传。</p>
+    </div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://localtonet.com/blog/how-to-self-host-vaultwarden" target="_blank" style="color:var(--coral)">Vaultwarden / Bitwarden（自托管密码管理器）</a>
+  </div>
+
+<script>
+const KEY="P10-014";
+const MKEY="P10-014-master";
+let entries = JSON.parse(localStorage.getItem(KEY) || "[]");
+let unlocked=false;
+function setMaster(){
+  const m=document.getElementById('master').value;
+  if(!m)return;
+  if(localStorage.getItem(MKEY)){unlocked=localStorage.getItem(MKEY)===m;}
+  else{localStorage.setItem(MKEY,m);unlocked=true;}
+  document.getElementById('vault').style.display=unlocked?'':'none';
+  if(!unlocked)alert('主密码错误');
+  render();
+}
+function unlock(){setMaster();}
+function gen(){const c='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';let s='';for(let i=0;i<16;i++)s+=c[Math.floor(Math.random()*c.length)];document.getElementById('v_pass').value=s;}
+function addV(){
+  const site=document.getElementById('v_site').value.trim(),user=document.getElementById('v_user').value.trim(),pass=document.getElementById('v_pass').value.trim();
+  if(!site||!pass)return;
+  entries.push({id:Date.now(),site,user,pass});
+  ['v_site','v_user','v_pass'].forEach(i=>document.getElementById(i).value='');
+  localStorage.setItem(KEY,JSON.stringify(entries));render();
+}
+function del(id){entries=entries.filter(x=>x.id!=id);localStorage.setItem(KEY,JSON.stringify(entries));render();}
+function render(){
+  const el=document.getElementById('list');
+  if(!unlocked){el.innerHTML='<p style="font-size:13px;color:var(--muted)">输入主密码解锁后可查看密码库。</p>';return;}
+  if(!entries.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">库还是空的，存一条吧。</p>';return;}
+  el.innerHTML='<b>🔑 密码库（'+entries.length+' 条）</b>'+entries.map(e=>'<div class="item"><span class="name">'+esc(e.site)+'<span class="meta"><br>'+(e.user||'')+' · '+('•'.repeat(e.pass.length))+'</span></span><button class="del" onclick="del('+e.id+')">✕</button></div>').join('');
+}
+function esc(s){return s.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+render();
+</script>
+</body>
+</html>

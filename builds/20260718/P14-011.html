@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>自由职业者自动催款</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ghost{background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{text-align:center;padding:10px 4px}
+.stat b{display:block;font-size:20px;color:var(--coral)}
+.stat span{font-size:12px;color:var(--muted)}
+.inv{font-size:13px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.inv .x{float:right;color:var(--coral);cursor:pointer}
+.over{color:#E85555}.ok{color:var(--ok)}
+.tpl{font-size:12px;background:#FBFBFB;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">micro_saas</span><span class="tag">invoice_reminder_automation</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">自由职业者自动催款</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Freelancer automated collections</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">自由职业者/代理最痛的是"催欠款"。Invoice Reminder 连接开票系统，按可定制间隔自动发礼貌升级提醒、集成 Stripe/PayPal 付款链接、逾期看板，定价 $29-99/月。极窄单点比全功能财务 SaaS 更易上手、留存高。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 发票 + 自动升级提醒话术</b>
+    <label>客户名</label><input id="client" placeholder="如：XYZ 工作室">
+    <div class="row">
+      <div><label>金额(元)</label><input id="amt" type="number" value="5000"></div>
+      <div><label>开票日</label><input id="issued" type="date"></div>
+    </div>
+    <div class="row">
+      <div><label>账期(天)</label><input id="term" type="number" value="30"></div>
+      <div><label>付款链接</label><input id="pay" placeholder="https://pay/..."></div>
+    </div>
+    <button class="btn" id="add">登记发票</button>
+    <div class="row" style="margin-top:10px">
+      <div class="stat"><b id="open">0</b><span>未结发票</span></div>
+      <div class="stat"><b id="overdue">0</b><span>逾期数</span></div>
+      <div class="stat"><b id="owed">¥0</b><span>待收回款</span></div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 发票看板</b>
+    <p id="empty" style="font-size:13px;color:var(--muted);margin:6px 0 0">还没有发票。</p>
+    <div id="log"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://ideaproof.io/lists/micro-saas-ideas" target="_blank" style="color:var(--coral)">Invoice Reminder & Collections Automation</a>
+  </div>
+
+<script>
+const KEY="P14-011";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const $=id=>document.getElementById(id);
+const todayStr=()=>new Date().toISOString().slice(0,10);
+if(!issued.value) issued.value=todayStr();
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function add(){
+  if(!client.value.trim())return;
+  items.push({client:client.value.trim(),amt:+amt.value||0,issued:issued.value,term:+term.value||30,pay:pay.value.trim(),paid:false});
+  client.value="";pay.value="";save();
+}
+function markPaid(i){items[i].paid=true;save();}
+function del(i){items.splice(i,1);save();}
+function tpl(c,due,od){
+  if(od<=0)return `尊敬的${c}：发票已于 ${due} 到期，烦请通过下方链接付款，谢谢！\n${payPlaceholder}`;
+  if(od<=7)return `Hi ${c}，温馨提醒：发票已逾期 ${od} 天，方便时请安排付款 :) 链接：${payPlaceholder}`;
+  if(od<=30)return `${c} 您好，发票已逾期 ${od} 天。如已付款请忽略；否则烦请尽快处理，以免影响后续合作。链接：${payPlaceholder}`;
+  return `${c} 您好，发票已逾期 ${od} 天，多次提醒未获回复。请于3个工作日内付款或联系我们协商，谢谢。`;
+}
+const payPlaceholder="[付款链接]";
+function render(){
+  const open=items.filter(x=>!x.paid);
+  open0.textContent=open.length;
+  const od=open.filter(x=>overdueDays(x)>0);
+  overdue0.textContent=od.length;
+  owed0.textContent="¥"+open.reduce((s,x)=>s+x.amt,0).toLocaleString();
+  if(items.length)empty.style.display="none";else empty.style.display="block";
+  log.innerHTML=items.slice().reverse().map(x=>{
+    const idx=items.indexOf(x);
+    const dd=overdueDays(x);
+    const due=new Date(x.issued);due.setDate(due.getDate()+x.term);
+    const dueStr=due.toISOString().slice(0,10);
+    const col=x.paid?"var(--ok)":dd>0?"#E85555":"var(--muted)";
+    const st=x.paid?"已付✓":dd>0?`逾期${dd}天`:`待付(${dd*-1}天后到期)`;
+    const t=tpl(x.client,dueStr,dd);
+    return `<div class="inv"><span class="x" data-del="${idx}">✕</span>
+      <b>${esc(x.client)}</b> <span class="${x.paid?'ok':dd>0?'over':''}">· ${st}</span>
+      ${x.paid?'':'<span style="float:right;color:var(--coral);cursor:pointer" data-pay="'+idx+'">标记已付</span>'}<br>
+      <span style="font-size:12px;color:#666">¥${x.amt.toLocaleString()} · 开票${x.issued} · 到期${dueStr}</span>
+      ${x.paid?'':`<div class="tpl">📨 自动提醒话术：\n${t.replace(payPlaceholder,x.pay||payPlaceholder)}</div>`}</div>`;
+  }).join("");
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>del(+b.dataset.del));
+  document.querySelectorAll("[data-pay]").forEach(b=>b.onclick=()=>markPaid(+b.dataset.pay));
+}
+function overdueDays(x){const due=new Date(x.issued);due.setDate(due.getDate()+x.term);const d=Math.floor((Date.now()-due)/864e5);return d;}
+function esc(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+const open0=document.getElementById("open"),overdue0=document.getElementById("overdue"),owed0=document.getElementById("owed");
+add.onclick=add;
+render();
+</script>
+</body>
+</html>

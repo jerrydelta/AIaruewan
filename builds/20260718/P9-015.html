@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>无捆绑透明火车票购票助手</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;font-size:14px}
+.item:first-child{border-top:none}
+.del{background:none;border:none;color:var(--coral);font-size:13px;cursor:pointer;float:right;margin-top:-2px}
+.sumbox{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:10px;font-size:13px}
+.sumbox b{color:var(--coral)}
+.note{font-size:13px;color:var(--ok);background:#EAF7F0;border:1px solid #CDEBDD;border-radius:10px;padding:8px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">travel</span><span class="tag">china_train_ticket_hidden_fees</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">无捆绑透明火车票助手</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Transparent no-bundling train-ticket assistant</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">第三方抢票平台隐性消费突出：默认勾选加速包/保险/会员，高额加速包未对应更高成功率，12306 官方最早候补到票。知情权被系统设计剥夺。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 透明价格明细 + 一键退附加</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">只填基础票价，附加项一律手动选填，实时显示明细总价，一键退掉所有附加，并提示官方候补优先。</p>
+    <label>路线 / 车次</label><input id="route" placeholder="如 G103 北京南→上海虹桥">
+    <label>基础票价（元，以 12306 为准）</label><input id="base" type="number" inputmode="decimal" placeholder="如 553">
+    <div class="row">
+      <div><label>加速包(元)</label><input id="acc" type="number" inputmode="decimal" placeholder="0"></div>
+      <div><label>保险(元)</label><input id="ins" type="number" inputmode="decimal" placeholder="0"></div>
+    </div>
+    <label>会员/其他(元)</label><input id="vip" type="number" inputmode="decimal" placeholder="0">
+    <button class="btn" onclick="add()">＋ 记这笔购票</button>
+    <button class="btn" onclick="clearAdd()" style="background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9">↺ 一键退附加</button>
+    <div class="note">✅ 提示：优先在 12306 官方 App 候补，成功率最高且不收加速包。</div>
+    <div class="sumbox" id="sum"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://news.qq.com/rain/a/20250206A07MSE00" target="_blank" style="color:var(--coral)">智行火车票 · 携程旅行 · 去哪儿（对照避坑）</a>
+  </div>
+
+<script>
+const KEY="P9-015";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function nums(){return{
+  base:parseFloat(document.getElementById("base").value)||0,
+  acc:parseFloat(document.getElementById("acc").value)||0,
+  ins:parseFloat(document.getElementById("ins").value)||0,
+  vip:parseFloat(document.getElementById("vip").value)||0
+};}
+function showSum(){
+  const n=nums();const add=n.acc+n.ins+n.vip;
+  document.getElementById("sum").innerHTML=`基础 <b>¥${n.base}</b> ＋ 附加 <b>¥${add}</b> ＝ 应付 <b>¥${n.base+add}</b>`;
+}
+function add(){
+  const route=document.getElementById("route").value.trim();
+  const n=nums();
+  if(!route){alert("请填写路线/车次");return;}
+  if(n.base<=0){alert("请填写基础票价");return;}
+  const addon=n.acc+n.ins+n.vip;
+  items.push({route,base:n.base,acc:n.acc,ins:n.ins,vip:n.vip,total:n.base+addon});
+  ["route","base","acc","ins","vip"].forEach(id=>document.getElementById(id).value="");
+  save();
+}
+function clearAdd(){document.getElementById("acc").value="";document.getElementById("ins").value="";document.getElementById("vip").value="";showSum();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);save();}
+function render(){
+  let html="";
+  items.forEach((it,i)=>{
+    const addon=it.acc+it.ins+it.vip;
+    html+=`<div class='item'><button class='del' onclick='del(${i})'>删除</button><b>${it.route}</b>${addon>0?" <span class='tag'>含附加¥"+addon+"</span>":""}<div style='font-size:13px;color:#555'>基础 ¥${it.base}${it.acc?(" +加速¥"+it.acc):""}${it.ins?(" +保险¥"+it.ins):""}${it.vip?(" +其他¥"+it.vip):""} ＝ <b>¥${it.total}</b></div></div>`;
+  });
+  document.getElementById("list").innerHTML = items.length
+    ? "<b style='font-size:14px'>📒 购票记录（"+items.length+" 笔）</b>"+html
+    : "<p style='color:#999;font-size:13px'>暂无记录，记一笔看清真实票价。</p>";
+  showSum();
+}
+render();
+</script>
+</body>
+</html>

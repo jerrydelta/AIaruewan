@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>垂直AI音乐/beats生成器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.out{background:#FFF8F8;border:1px dashed var(--coral);border-radius:10px;padding:10px;margin-top:10px;font-size:13px;white-space:pre-wrap}
+.track{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;font-size:13px}
+.track b{color:var(--ink)}.del{color:var(--coral);font-size:12px;float:right;cursor:pointer}
+small{color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag">ai_music_generator_indie</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">垂直 AI 音乐 / beats 生成器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Vertical AI music/beats generator (commercial license)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Suno v4/Udio 接近人类水平，内容创作者/独立音乐人需无技能出 BGM 与歌曲。痛点：缺商用授权与情绪/时长精准控制。本工具离线生成歌曲/beats 规格（情绪、BPM、结构、乐器、歌词提示词），可直接喂给 Suno/Udio 并管理曲库+授权状态。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>主题 / 歌词关键词</label>
+    <input id="theme" placeholder="例如：深夜城市漫步，孤独但自由">
+    <div class="row">
+      <div><label>情绪</label><select id="mood"><option>开心</option><option>治愈</option><option>燃</option><option>伤感</option><option>放松</option></select></div>
+      <div><label>类型</label><select id="type"><option>背景音乐</option><option> beats</option><option>完整歌曲</option></select></div>
+    </div>
+    <div class="row">
+      <div><label>时长(秒)</label><input id="dur" type="number" value="60"></div>
+      <div><label>授权</label><select id="lic"><option>个人</option><option>商用</option><option>独家买断</option></select></div>
+    </div>
+    <button class="btn" id="gen">生成音乐规格</button>
+    <div class="out" id="out" style="display:none"></div>
+    <button class="btn sub" id="save" style="display:none">保存到曲库</button>
+  </div>
+
+  <div class="card" id="list"><b>🎵 我的曲库</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://toolchase.com/blog/best-ai-music-generators" target="_blank" style="color:var(--coral)">Suno · Udio · Boomy · Soundraw · AIVA · Mubert</a>
+  </div>
+
+<script>
+const KEY="P1-009";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let last=null;
+const cfg={开心:{bpm:120,key:"C大调",inst:"木吉他+鼓+口风琴"},治愈:{bpm:90,key:"G大调",inst:"钢琴+弦乐+风铃"},
+  燃:{bpm:140,key:"E小调",inst:"电吉他+合成器+鼓"},伤感:{bpm:75,key:"A小调",inst:"钢琴+大提琴"},放松:{bpm:65,key:"D大调",inst:"环境 pad+轻打击"}};
+function gen(){
+  const theme=document.getElementById("theme").value||"城市夜色";
+  const mood=document.getElementById("mood").value,type=document.getElementById("type").value;
+  const dur=+document.getElementById("dur").value,lic=document.getElementById("lic").value;
+  const c=cfg[mood];
+  const struct=type==="beats"?"Intro 4s → Loop 32s → Break 8s → Loop 16s":type==="背景音乐"?"Pad 8s → Theme 44s → Outro 8s":"Verse → Chorus → Verse → Chorus → Bridge → Outro";
+  const txt=`【${type}】${theme}\n情绪：${mood}｜${dur}秒｜授权：${lic}\nBPM：${c.bpm}｜调性：${c.key}｜乐器：${c.inst}\n结构：${struct}\n\n歌词/提示词：\n"${theme}"，${mood}氛围，${c.inst}，适合短视频 BGM，商用友好的旋律，无版权人声。`;
+  last={theme,mood,type,dur,lic,txt};
+  const o=document.getElementById("out");o.style.display="block";o.textContent=txt;
+  document.getElementById("save").style.display="block";
+}
+function save(){if(!last)return;items.push({...last,t:new Date().toLocaleString("zh")});localStorage.setItem(KEY,JSON.stringify(items));render();
+  document.getElementById("out").style.display="none";document.getElementById("save").style.display="none";last=null;}
+function render(){
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">暂无曲目。</p>';return;}
+  box.innerHTML=items.map((r,i)=>`<div class="track"><span class="del" data-i="${i}">删除</span>
+    <b>${r.theme}</b> · ${r.type}/${r.mood}/${r.lic}<br><small>${r.dur}秒 · ${r.t}</small></div>`).join("");
+  box.querySelectorAll(".del").forEach(e=>e.onclick=()=>{items.splice(+e.dataset.i,1);localStorage.setItem(KEY,JSON.stringify(items));render();});
+}
+document.getElementById("gen").onclick=gen;document.getElementById("save").onclick=save;render();
+</script>
+</body>
+</html>

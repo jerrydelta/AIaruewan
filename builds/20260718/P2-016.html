@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>开发者数字资产陪跑（Micro SaaS）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:13px}
+.item .del{float:right;color:var(--muted);font-size:12px}
+.step{font-size:12px;color:#777;margin-top:4px}
+.done{color:var(--ok)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">digital_asset</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">开发者数字资产陪跑</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Micro-SaaS Builder + Templates</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国 IT 招聘 2026 暴跌至 2022 年的 60.8%，终身雇佣消失，开发者转向用本职技能构建数字资产（每月现金流）。痛点：担心仅靠外包"用时间换钱"，缺可睡眠时赚钱的资产型收益。机会在陪跑社区+模板。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 资产看板</b>
+    <input id="name" placeholder="资产名（如：韩语纠错API）">
+    <div class="row">
+      <select id="stage">
+        <option>0 想法</option><option>1 验证</option><option>2 MVP</option>
+        <option>3 上线</option><option>4 盈利</option>
+      </select>
+      <input id="stack" placeholder="技术栈(Supabase+Stripe)">
+    </div>
+    <label>MVP 验证步骤（勾选完成）</label>
+    <label style="color:var(--ink)"><input type="checkbox" id="s1" style="width:auto;margin:0 6px 0 0">着陆页 + 等待名单</label>
+    <label style="color:var(--ink)"><input type="checkbox" id="s2" style="width:auto;margin:0 6px 0 0">预付/意向金验证</label>
+    <label style="color:var(--ink)"><input type="checkbox" id="s3" style="width:auto;margin:0 6px 0 0">公开开发(build in public)</label>
+    <button class="btn" onclick="add()">添加资产</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的数字资产</b>
+    <p style="font-size:12px;color:var(--muted);margin:6px 0 0">共 <b class="h-coral" id="cnt">0</b> 个</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://tubrief.io/id/community/3a4e9f66-ff6a-4e2c-8fdb-9b4d26aa406b?lang=zh" target="_blank" style="color:var(--coral)">tubrief 数字资产指南</a>
+  </div>
+
+<script>
+const KEY="P2-016";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function add(){
+  const name=document.getElementById("name").value.trim();
+  if(!name){ alert("填写资产名"); return; }
+  const stage=document.getElementById("stage").value;
+  const stack=document.getElementById("stack").value.trim();
+  const steps=["s1","s2","s3"].filter(id=>document.getElementById(id).checked).length;
+  items.unshift({name,stage,stack,steps,t:Date.now()});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("name").value=""; document.getElementById("stack").value="";
+  ["s1","s2","s3"].forEach(id=>document.getElementById(id).checked=false);
+  render();
+}
+function render(){
+  const box=document.getElementById("list");
+  document.getElementById("cnt").textContent=items.length;
+  let h='<b>📋 我的数字资产</b><p style="font-size:12px;color:var(--muted);margin:6px 0 0">共 <b class="h-coral" id="cnt">'+items.length+'</b> 个</p>';
+  if(items.length===0){ h+='<p style="font-size:13px;color:var(--muted)">还没有资产。</p>'; }
+  items.forEach((it,i)=>{
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除</span><b>'+it.name+'</b><br>'+
+       '<span style="color:var(--coral)">'+it.stage+'</span>'+(it.stack?' · '+it.stack:'')+
+       '<div class="step '+(it.steps===3?"done":"")+'">MVP 验证 '+it.steps+'/3</div></div>';
+  });
+  box.innerHTML=h;
+}
+function del(i){ items.splice(i,1); localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+render();
+</script>
+</body>
+</html>

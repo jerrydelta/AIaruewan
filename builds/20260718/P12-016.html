@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>独立开发者MRR仪表盘</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.mini{font-size:14px;margin:14px 0 4px;font-weight:600;color:var(--ink);
+  border-left:4px solid var(--coral);padding-left:8px}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.del{color:var(--coral);float:right;font-size:13px;cursor:pointer}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.big{font-size:26px;font-weight:700;color:var(--coral);text-align:center;margin:6px 0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">business</span><span class="tag">indie_maker_mrr_dashboard</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">独立开发者MRR仪表盘</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Unified MRR/traffic/churn dashboard for indie makers</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">独立开发者收入可视化被验证：MakerPulse把Stripe+App Store Connect+GA4拉成单一仪表盘，显示MRR/流失/iOS收入。痛点：独立开发者每天开5个后台做心算。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <div class="mini">📊 录入月度数据</div>
+    <label>月份</label><input id="mo" placeholder="如 2026-07">
+    <div class="row">
+      <div><label>MRR($)</label><input id="mrr" type="number" placeholder="500"></div>
+      <div><label>活跃用户</label><input id="au" type="number" placeholder="200"></div>
+    </div>
+    <label>流失用户</label><input id="churn" type="number" placeholder="8">
+    <button class="btn" onclick="add()">记录</button>
+    <div class="big" id="cur">MRR $0</div>
+    <p id="stat" style="font-size:13px;text-align:center;color:var(--muted);margin:0"></p>
+  </div>
+
+  <div class="card" id="list"><b>📋 月度趋势</b><div id="box"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://hunted.space/product/makerpulse" target="_blank" style="color:var(--coral)">MakerPulse · Makers Page</a>
+  </div>
+
+<script>
+const K="P12-016_mrr";
+let items=JSON.parse(localStorage.getItem(K)||"[]");
+function add(){const mo=document.getElementById("mo").value.trim(),mrr=parseFloat(document.getElementById("mrr").value)||0,au=parseInt(document.getElementById("au").value)||0,ch=parseInt(document.getElementById("churn").value)||0;
+  if(!mo){alert("填月份");return;}
+  const ex=items.find(x=>x.mo===mo);if(ex){ex.mrr=mrr;ex.au=au;ex.churn=ch;}else items.push({mo,mrr,au,churn:ch});
+  localStorage.setItem(K,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);localStorage.setItem(K,JSON.stringify(items));render();}
+function render(){
+  items.sort((a,b)=>a.mo<b.mo?-1:1);
+  const last=items[items.length-1];
+  document.getElementById("cur").textContent=last?("MRR $"+last.mrr.toLocaleString()):"MRR $0";
+  const sumMRR=items.reduce((s,x)=>s+x.mrr,0);
+  const sumAU=items.reduce((s,x)=>s+x.au,0);
+  const sumCh=items.reduce((s,x)=>s+x.churn,0);
+  document.getElementById("stat").textContent=`累计MRR $${sumMRR.toLocaleString()} · 总活跃 ${sumAU} · 总流失 ${sumCh}`;
+  document.getElementById("box").innerHTML=items.length?items.map((x,i)=>`<div class="item"><span class="del" onclick="del(${i})">删</span><b>${x.mo}</b> · MRR $${x.mrr} · 活跃${x.au} · 流失${x.churn}</div>`).join(""):"<p style='font-size:13px;color:var(--muted)'>还没有数据。</p>";
+}
+render();
+</script>
+</body>
+</html>

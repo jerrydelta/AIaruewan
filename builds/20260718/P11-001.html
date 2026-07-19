@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI植物识别+养护助手</title>
+<style>
+:root{
+  --coral:#FF6B6B;        --coral-dark:#E85555;
+  --ink:#2D2D2D;          --muted:#8A8A8A;
+  --bg:#F7F7F7;           --card:#FFFFFF;
+  --line:#ECECEC;         --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-sm{padding:7px 10px;font-size:13px;border-radius:9px;margin-top:0}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item h3{margin:0 0 4px;font-size:15px}
+.due{font-size:13px;font-weight:600}
+.due-soon{color:var(--coral)}
+.due-ok{color:var(--ok)}
+.log{font-size:12px;color:var(--muted);margin-top:4px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">plant</span><span class="tag">plant_identification</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI植物识别+养护助手</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI plant ID + care app (photo ID + disease + pet-toxicity)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">植物识别 App 市场 2025 年达 1.685 亿美元，欧美家庭园艺文化盛行（年均园艺支出 616 美元），认花/养护是刚需。PictureThis 已验证"识别+养护"是十亿级赛道，中国供应链+AI 可全球卖。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 我的植物养护台</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">添加植物（可粘贴识别备注/品种），设置浇水周期，自动算下次浇水日；随时记养护日记。</p>
+    <label>植物昵称</label>
+    <input id="name" placeholder="如：客厅绿萝">
+    <label>识别备注 / 品种</label>
+    <input id="species" placeholder="如：Epipremnum aureum，喜阴">
+    <label>浇水周期（天）</label>
+    <input id="interval" type="number" value="7" min="1">
+    <button class="btn" onclick="addPlant()">＋ 添加植物</button>
+    <div id="plants"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 养护日记 & 统计</b>
+    <p id="stat" style="font-size:13px;color:var(--muted)"></p>
+    <div id="logs"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.10100.com/article/3919494" target="_blank" style="color:var(--coral)">PictureThis / Pl@ntNet / PlantSnap</a>
+  </div>
+
+<script>
+const KEY="P11-001";
+let data = JSON.parse(localStorage.getItem(KEY) || '{"plants":[],"logs":[]}');
+function save(){ localStorage.setItem(KEY, JSON.stringify(data)); render(); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function addDays(d,n){ let t=new Date(d); t.setDate(t.getDate()+n); return t.toISOString().slice(0,10); }
+function addPlant(){
+  const name=document.getElementById('name').value.trim();
+  if(!name){ alert('请填植物昵称'); return; }
+  const interval=Math.max(1,parseInt(document.getElementById('interval').value)||7);
+  data.plants.push({id:Date.now(),name,species:document.getElementById('species').value.trim(),interval,last:today()});
+  document.getElementById('name').value='';document.getElementById('species').value='';
+  save();
+}
+function water(id){
+  const p=data.plants.find(x=>x.id===id); if(!p) return;
+  p.last=today();
+  data.logs.unshift({plant:p.name,text:'浇水',date:today()});
+  save();
+}
+function careLog(id){
+  const p=data.plants.find(x=>x.id===id); if(!p) return;
+  const t=prompt('给【'+p.name+'】记一条养护：','施肥/换盆/观察叶片…');
+  if(t && t.trim()){ data.logs.unshift({plant:p.name,text:t.trim(),date:today()}); save(); }
+}
+function del(id){ data.plants=data.plants.filter(x=>x.id!==id); save(); }
+function render(){
+  const box=document.getElementById('plants'); box.innerHTML='';
+  data.plants.forEach(p=>{
+    const due=addDays(p.last,p.interval);
+    const left=Math.round((new Date(due)-new Date(today()))/86400000);
+    const cls=left<=1?'due-soon':'due-ok';
+    const txt=left>0?('还有 '+left+' 天浇水'):(left===0?'今天该浇水 💧':'已超期 '+Math.abs(left)+' 天');
+    const el=document.createElement('div'); el.className='item';
+    el.innerHTML='<h3>'+p.name+'</h3>'+
+      (p.species?'<div class="log">'+p.species+'</div>':'')+
+      '<div class="due '+cls+'">'+txt+'（'+due+'）</div>'+
+      '<div class="row" style="margin-top:8px">'+
+      '<button class="btn btn-sm" style="background:var(--ok)" onclick="water('+p.id+')">已浇水</button>'+
+      '<button class="btn btn-sm" onclick="careLog('+p.id+')">记养护</button>'+
+      '<button class="btn btn-sm" style="background:#ccc" onclick="del('+p.id+')">删</button></div>';
+    box.appendChild(el);
+  });
+  document.getElementById('stat').textContent='共 '+data.plants.length+' 盆植物 · 日记 '+data.logs.length+' 条';
+  const lg=document.getElementById('logs'); lg.innerHTML='';
+  data.logs.slice(0,12).forEach(l=>{
+    const d=document.createElement('div'); d.className='log';
+    d.textContent='· '+l.date+' 【'+l.plant+'】'+l.text; lg.appendChild(d);
+  });
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>离乳食周计划 + 购物清单</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.recipe{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px}
+.recipe b{color:var(--ink)}
+.item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">parenting</span><span class="tag">weaning_meal_planner</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">离乳食周计划 + 购物清单</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Age-staged baby-weaning planner with auto shopping list</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">离乳食规划是高频刚需。日本"きめて離乳食"(MAMADAYS)月下载约 2.2k、月收入约 $900，400+ 营养士监修视频食谱、按月份龄"今日吃什么"一键决定；英国 Annabel Karmel 号称 10 万+ 家庭。痛点：新手父母每天"今晚喂啥"心智负担重。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">选宝宝月龄 → 推荐对应阶段食谱（含食材）→ 勾选加入本周计划 → 自动汇总食材生成购物清单（本地保存）。</p>
+    <label>宝宝月龄阶段</label>
+    <select id="stage" onchange="showRecipes()">
+      <option value="5">5-6月 初期（泥糊）</option>
+      <option value="7">7-8月 中期（碎末）</option>
+      <option value="9">9-11月 后期（小块）</option>
+      <option value="12">12月+ 结束期（软饭）</option>
+    </select>
+    <div id="recipes"></div>
+    <button class="btn" onclick="genList()">🛒 生成本周购物清单</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P6-007">
+    <div class="collapse-header" id="aiHeader_P6-007" onclick="toggleAI('P6-007')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P6-007" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P6-007">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P6-007" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P6-007')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P6-007" style="display:none;margin-top:10px">
+        <div id="aiMessages_P6-007" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P6-007" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P6-007')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 本周计划 & 购物清单</b>
+    <div id="planList"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://softwar.io/app/app-1644030258" target="_blank" style="color:var(--coral)">きめて離乳食 / MAMADAYS·トモニテ / Annabel Karmel / Little Bites</a>
+  </div>
+
+<script>
+const KEY="P6-007";
+let plan = JSON.parse(localStorage.getItem(KEY) || "[]");
+const DB={
+ 5:[{n:'南瓜米糊',f:['南瓜','米粉']},{n:'胡萝卜泥',f:['胡萝卜','母乳/配方奶']},{n:'苹果泥',f:['苹果']}],
+ 7:[{n:'西兰花土豆泥',f:['西兰花','土豆']},{n:'鸡肉蔬菜粥',f:['鸡胸肉','大米','菠菜']},{n:'蛋黄羹',f:['鸡蛋黄','温水']}],
+ 9:[{n:'番茄豆腐碎',f:['番茄','嫩豆腐']},{n:'鳕鱼蔬菜面',f:['鳕鱼','碎面','青菜']},{n:'南瓜鸡肉饭',f:['南瓜','鸡腿肉','软米饭']}],
+ 12:[{n:'软饭肉末菜',f:['软米饭','猪肉末','胡萝卜']},{n:'鸡蛋软饼',f:['鸡蛋','面粉','牛奶']},{n:'三色烩饭',f:['米饭','玉米','青豆','鸡肉']}]
+};
+let picked=[];
+function showRecipes(){
+  const s=document.getElementById('stage').value;
+  const list=DB[s];
+  picked=[];
+  document.getElementById('recipes').innerHTML=list.map((r,i)=>
+    `<div class="recipe"><label style="margin:0"><input type="checkbox" onchange="toggle(${i},'${r.n}',\`${r.f.join(',')}\`)" style="width:auto;margin:0 6px 0 0"> <b>${r.n}</b></label><div style="font-size:12px;color:var(--muted);margin-top:4px">食材：${r.f.join('、')}</div></div>`
+  ).join('');
+}
+function toggle(i,n,f){
+  if(picked.find(x=>x.n===n)) picked=picked.filter(x=>x.n!==n);
+  else picked.push({n,f:f.split(',')});
+}
+function genList(){
+  const s=document.getElementById('stage').value;
+  if(!picked.length){alert('请先勾选食谱');return;}
+  const all={};
+  picked.forEach(r=>r.f.forEach(ing=>all[ing]=(all[ing]||0)+1));
+  plan.unshift({stage:s,recipes:picked.map(p=>p.n),shop:all,t:Date.now()});
+  picked=[];
+  save();
+}
+function del(i){ plan.splice(i,1); save(); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(plan)); render(); }
+function fmt(t){return new Date(t).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function render(){
+  const el=document.getElementById('planList');
+  if(!plan.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有本周计划，勾选食谱后生成。</p>';showRecipes();return;}
+  el.innerHTML=plan.map((p,i)=>{
+    const shop=Object.keys(p.shop).map(k=>k+(p.shop[k]>1?'×'+p.shop[k]:'')).join('、');
+    return `<div class="item" style="flex-direction:column;align-items:flex-start"><div><b>阶段 ${p.stage}</b> · ${fmt(p.t)}</div><div style="font-size:13px">食谱：${p.recipes.join('、')}</div><div style="font-size:13px;color:var(--coral)">🛒 购物：${shop}</div><button onclick="del(${i})" style="border:none;background:#FFF0F0;color:var(--coral);border-radius:8px;padding:4px 10px;margin-top:4px">删除</button></div>`;
+  }).join('');
+  showRecipes();
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

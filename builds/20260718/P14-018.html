@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>一人公司利基微 SaaS 测算</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ghost{background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{text-align:center;padding:10px 4px}
+.stat b{display:block;font-size:20px;color:var(--coral)}
+.stat span{font-size:12px;color:var(--muted)}
+.plan{font-size:13px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.chk{font-size:13px;background:#FBFBFB;border:1px solid var(--line);border-radius:10px;padding:8px 11px;margin-top:7px}
+.chk b{color:var(--ok)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">micro_saas</span><span class="tag">solo_saas_cross_border</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">一人公司利基微 SaaS 测算</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Solo-founder niche micro-SaaS</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">大公司看不上、单人能做的利基才有空隙。老周定位"跨境电商小卖家评论采集分析"、中文界面+更低价差异化，2025 年 MRR 达 5 万（免费+Pro 99+Team 299 元/月），毛利约 88%。Zigpoll 独立创始人 2026 年 6 月 MRR 12.5 万。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · MRR 测算 + 定价方案</b>
+    <div class="row">
+      <div><label>付费用户数</label><input id="users" type="number" value="500"></div>
+      <div><label>客单价(元/月)</label><input id="price" type="number" value="99"></div>
+    </div>
+    <button class="btn" id="calc">测算我的 MRR</button>
+    <div class="row" style="margin-top:10px">
+      <div class="stat"><b id="mrr">¥0</b><span>月度 MRR</span></div>
+      <div class="stat"><b id="arr">¥0</b><span>年度 ARR</span></div>
+      <div class="stat"><b id="profit">¥0</b><span>毛利(88%)</span></div>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:12px 0">
+    <b style="font-size:14px">三层定价方案（可改）</b>
+    <div class="row">
+      <div><label>免费版</label><input id="f1" value="¥0 引流"></div>
+      <div><label>Pro</label><input id="f2" value="¥99/月"></div>
+      <div><label>Team</label><input id="f3" value="¥299/月"></div>
+    </div>
+    <button class="btn btn-ghost" id="savePlan">保存定价方案</button>
+  </div>
+
+  <div class="card">
+    <b>✅ 利基切入检查清单</b>
+    <div id="checks"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的测算记录</b>
+    <p id="empty" style="font-size:13px;color:var(--muted);margin:6px 0 0">还没有测算。</p>
+    <div id="log"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.opcguide.com/saas-solo-developer-case" target="_blank" style="color:var(--coral)">一人公司跨境评论 SaaS（老周）/ Zigpoll</a>
+  </div>
+
+<script>
+const KEY="P14-018";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const $=id=>document.getElementById(id);
+const checks=["是否大公司看不上、单人能做？","是否有明确付费意愿的细分人群？","中文界面/更低价能否差异化？","能否免费版引流+订阅转化？","SEO/口碑增长路径是否清晰？"];
+document.getElementById("checks").innerHTML=checks.map((c,i)=>{
+  const on=localStorage.getItem(KEY+"_chk_"+i)==="1";
+  return `<div class="chk" data-c="${i}" style="cursor:pointer"><b>${on?"☑":"☐"}</b> ${c}</div>`;
+}).join("");
+document.querySelectorAll("[data-c]").forEach(el=>el.onclick=()=>{
+  const i=el.dataset.c;const k=KEY+"_chk_"+i;
+  localStorage.setItem(k,localStorage.getItem(k)==="1"?"0":"1");
+  const on=localStorage.getItem(k)==="1";
+  el.querySelector("b").textContent=on?"☑":"☐";
+});
+function calc(){
+  const u=+users.value||0,p=+price.value||0;
+  const m=u*p,ar=m*12,pr=m*0.88;
+  mrr.textContent="¥"+m.toLocaleString();
+  arr.textContent="¥"+ar.toLocaleString();
+  profit.textContent="¥"+Math.round(pr).toLocaleString();
+  items.push({t:Date.now(),u,p,m,arr:ar,pr:Math.round(pr)});
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+}
+function savePlan(){
+  localStorage.setItem(KEY+"_plan",JSON.stringify({f1:f1.value,f2:f2.value,f3:f3.value}));
+  savePlanBtn.textContent="✅ 已保存";
+}
+function render(){
+  if(items.length)empty.style.display="none";else empty.style.display="block";
+  log.innerHTML=items.slice().reverse().map(x=>{
+    return `<div class="plan">${new Date(x.t).toLocaleDateString("zh-CN")} · ${x.u}用户 × ¥${x.p} = <b class="h-coral">¥${x.m.toLocaleString()}/月</b> · 年 ¥${x.arr.toLocaleString()} · 毛利 ¥${x.pr.toLocaleString()}</div>`;
+  }).join("");
+}
+const mrr=document.getElementById("mrr"),arr=document.getElementById("arr"),profit=document.getElementById("profit"),savePlanBtn=document.getElementById("savePlan");
+const savedPlan=JSON.parse(localStorage.getItem(KEY+"_plan")||"null");
+if(savedPlan){f1.value=savedPlan.f1;f2.value=savedPlan.f2;f3.value=savedPlan.f3;}
+calc.onclick=calc; savePlan.onclick=savePlan;
+render();
+</script>
+</body>
+</html>

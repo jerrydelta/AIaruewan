@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>WHO 背书戒烟健康可视化</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{text-align:center;padding:10px 4px}
+.stat b{display:block;font-size:22px;color:var(--coral)}
+.stat span{font-size:12px;color:var(--muted)}
+.ms{font-size:13px;padding:9px 12px;border-radius:10px;margin-top:8px;border:1px solid var(--line)}
+.ms.on{background:#EAFaf3;border-color:#Bfe9d2;color:#1f7a52}
+.ms.off{background:#FBFBFB;color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">addiction_recovery</span><span class="tag">smoking_cessation_health</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">WHO 背书戒烟健康可视化</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">WHO-backed quit-smoking health viz</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">用户要"看得见的健康回报"而非说教。Stop smoke now 基于 WHO 研究可视化无烟时长/省钱/寿命延长/肺恢复里程碑，月下载84K、月收入约$2K。CureApp SC 是日本处方戒烟 DTx（医疗机器承認）。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 无烟里程碑 + 省钱</b>
+    <div class="row">
+      <div><label>戒烟开始日</label><input id="start" type="date"></div>
+      <div><label>每日抽烟数</label><input id="dpy" type="number" value="20"></div>
+    </div>
+    <div class="row">
+      <div><label>每包价格(元)</label><input id="pp" type="number" value="30"></div>
+      <div><label>每包含支数</label><input id="ppc" type="number" value="20"></div>
+    </div>
+    <button class="btn" id="calc" style="margin-top:10px">计算我的戒烟成果</button>
+    <div class="row" style="margin-top:10px">
+      <div class="stat"><b id="days">—</b><span>无烟天数</span></div>
+      <div class="stat"><b id="saved">¥0</b><span>已省下</span></div>
+      <div class="stat"><b id="life">0</b><span>延寿(天*)</span></div>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin:4px 0 0">*延寿为示意估算，仅供激励，非医学建议。</p>
+    <div id="ms"></div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P14-006">
+    <div class="collapse-header" id="aiHeader_P14-006" onclick="toggleAI('P14-006')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P14-006" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P14-006">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P14-006" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P14-006')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P14-006" style="display:none;margin-top:10px">
+        <div id="aiMessages_P14-006" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P14-006" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P14-006')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的戒烟档案</b>
+    <div id="log" style="font-size:13px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.appkittie.com/app/app-cureapp-sc-id1529386528" target="_blank" style="color:var(--coral)">Stop smoke now / CureApp SC / Smoke Free</a>
+  </div>
+
+<script>
+const KEY="P14-006";
+const $=id=>document.getElementById(id);
+const todayStr=()=>new Date().toISOString().slice(0,10);
+if(!start.value) start.value=todayStr();
+const milestones=[
+  {h:0.33,t:"20分钟：心率和血压恢复正常"},
+  {h:8,t:"8小时：血液一氧化碳降至正常"},
+  {h:24,t:"24小时：心脏病发作风险开始下降"},
+  {d:3,t:"3天：味觉嗅觉改善"},
+  {d:21,t:"3周：肺功能提升约30%"},
+  {d:90,t:"3个月：咳嗽气喘明显减轻"},
+  {d:270,t:"9个月：肺纤毛恢复，抗感染力增强"},
+  {d:365,t:"1年：冠心病风险减半"}
+];
+function calc(){
+  const s=start.value;if(!s)return;
+  const days=Math.max(0,Math.floor((Date.now()-new Date(s))/864e5));
+  const dpy=+dpy.value||0,pp=+pp.value||0,ppc=+ppc.value||1;
+  const saved=days*dpy*(pp/ppc);
+  const life=(days*dpy*11/20/1440); // 每支约减11分钟寿命的粗略示意
+  days0.textContent=days;
+  saved0.textContent="¥"+saved.toFixed(0);
+  life0.textContent=life.toFixed(1);
+  let html="";
+  milestones.forEach(m=>{
+    const need=m.h!==undefined?m.h/24:m.d;
+    const on=days>=need;
+    html+=`<div class="ms ${on?'on':'off'}">${on?'✅':'🔒'} ${m.t} <span style="float:right">${on?'已达成':'第'+(m.h!==undefined?(m.h/24).toFixed(1):m.d)+'天'}</span></div>`;
+  });
+  ms.innerHTML=html;
+  localStorage.setItem(KEY,JSON.stringify({s,days,saved:saved.toFixed(0)}));
+  log.innerHTML=`<div style="padding:6px 0">📅 开始于 ${s}　|　已坚持 <b class="h-coral">${days}</b> 天　|　省下 <b class="h-coral">¥${saved.toFixed(0)}</b></div>`;
+}
+calc.onclick=calc;
+const saved0=document.getElementById("saved");const days0=document.getElementById("days");const life0=document.getElementById("life");
+calc();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

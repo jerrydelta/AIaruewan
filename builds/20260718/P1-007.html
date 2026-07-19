@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI纹身设计生成器+AR试戴</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.out{background:#FFF8F8;border:1px dashed var(--coral);border-radius:10px;padding:10px;margin-top:10px;font-size:13px;white-space:pre-wrap}
+.design{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;font-size:13px}
+.design b{color:var(--ink)}.del{color:var(--coral);font-size:12px;float:right;cursor:pointer}
+#tryon{width:100%;background:#000;border-radius:10px;margin-top:8px;display:block}
+small{color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag">ai_tattoo_design_generator</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI 纹身设计生成器 + AR 试戴</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI tattoo generator + AR body try-on</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">2026 年超 30% 纹身客户带 AI 设计到店，全球纹身市场 CAGR ~10.3%。从模糊想法到具体图稿是最大瓶颈。本工具离线生成纹身设计提示词 + 风格化线稿预览 + 上传身体照片 AR 试戴（点照片放置图样）。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>设计描述</label>
+    <input id="desc" placeholder="例如：一只展翅的鲸鱼，绕着月亮">
+    <div class="row">
+      <div><label>风格</label><select id="style"><option>日式</option><option>水彩</option><option>几何</option><option>写实线条</option><option>极简</option></select></div>
+      <div><label>部位</label><select id="part"><option>手臂</option><option>后背</option><option>小腿</option><option>锁骨</option></select></div>
+    </div>
+    <button class="btn" id="gen">生成设计提示词 + 线稿预览</button>
+    <div id="preview" style="text-align:center;margin-top:10px"></div>
+    <div class="out" id="out" style="display:none"></div>
+    <button class="btn sub" id="save" style="display:none">保存设计</button>
+
+    <label>AR 试戴：上传身体照片，点击放置图样</label>
+    <input id="photo" type="file" accept="image/*">
+    <canvas id="tryon" width="360" height="360"></canvas>
+  </div>
+
+  <div class="card" id="list"><b>🖋 我的纹身设计</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.aifortattoo.com/en/blog/tattoo-trends-2026" target="_blank" style="color:var(--coral)">Inkhunter · Tattoodo · TattoosAI · Inker AI</a>
+  </div>
+
+<script>
+const KEY="P1-007";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let last=null;
+const motif={日式:`<svg viewBox='0 0 100 100'><path d='M20 60 Q50 10 80 60 Q50 90 20 60 Z' fill='none' stroke='%23000' stroke-width='2'/><circle cx='50' cy='45' r='8' fill='none' stroke='%23000'/></svg>`,
+  水彩:`<svg viewBox='0 0 100 100'><circle cx='50' cy='50' r='35' fill='none' stroke='%23FF6B6B' stroke-width='3'/><path d='M30 50 Q50 30 70 50' stroke='%233A7BD5' fill='none' stroke-width='2'/></svg>`,
+  几何:`<svg viewBox='0 0 100 100'><polygon points='50,15 85,85 15,85' fill='none' stroke='%23000' stroke-width='2'/><circle cx='50' cy='62' r='18' fill='none' stroke='%23000'/></svg>`,
+  写实线条:`<svg viewBox='0 0 100 100'><path d='M25 75 C25 40 75 40 75 75' fill='none' stroke='%23000' stroke-width='1.5'/><path d='M40 55 Q50 45 60 55' fill='none' stroke='%23000'/></svg>`,
+  极简:`<svg viewBox='0 0 100 100'><circle cx='50' cy='50' r='30' fill='none' stroke='%23000' stroke-width='2'/></svg>`};
+function gen(){
+  const desc=document.getElementById("desc").value||"一只鲸鱼绕月亮";
+  const style=document.getElementById("style").value,part=document.getElementById("part").value;
+  document.getElementById("preview").innerHTML=`<img src="data:image/svg+xml,${encodeURIComponent(motif[style].replace(/%23/g,'#'))}" width="120" style="border:1px solid #eee;border-radius:10px">`;
+  const txt=`【纹身设计】${desc}\n风格：${style}｜部位：${part}\n\n提示词：tattoo design, ${desc}, ${style} style, fine line, black ink, ${part} placement, high detail, vector line art\n\nAR 试戴：上传${part}照片，点击下方画布放置该图样验证。`;
+  last={desc,style,part,txt};
+  const o=document.getElementById("out");o.style.display="block";o.textContent=txt;
+  document.getElementById("save").style.display="block";
+}
+const cv=document.getElementById("tryon"),cx=cv.getContext("2d");
+let img=null;
+document.getElementById("photo").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=ev=>{img=new Image();img.onload=()=>{cx.drawImage(img,0,0,360,360);};img.src=ev.target.result;};r.readAsDataURL(f);
+};
+cv.onclick=e=>{
+  if(!img)return;const rect=cv.getBoundingClientRect();
+  const x=(e.clientX-rect.left)/rect.width*360,y=(e.clientY-rect.top)/rect.height*360;
+  const style=document.getElementById("style").value;
+  const im=new Image();im.onload=()=>cx.drawImage(im,x-30,y-30,60,60);im.src="data:image/svg+xml,"+encodeURIComponent(motif[style].replace(/%23/g,'#'));
+};
+function save(){if(!last)return;items.push({...last,t:new Date().toLocaleString("zh")});localStorage.setItem(KEY,JSON.stringify(items));render();
+  document.getElementById("out").style.display="none";document.getElementById("save").style.display="none";last=null;}
+function render(){
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">暂无设计。</p>';return;}
+  box.innerHTML=items.map((r,i)=>`<div class="design"><span class="del" data-i="${i}">删除</span>
+    <b>${r.desc}</b> · ${r.style}/${r.part}<br><small>${r.t}</small></div>`).join("");
+  box.querySelectorAll(".del").forEach(e=>e.onclick=()=>{items.splice(+e.dataset.i,1);localStorage.setItem(KEY,JSON.stringify(items));render();});
+}
+document.getElementById("gen").onclick=gen;document.getElementById("save").onclick=save;render();
+</script>
+</body>
+</html>

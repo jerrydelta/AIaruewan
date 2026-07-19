@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>自托管工具图鉴</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+input,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+.item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:none}
+.item .name{flex:1;font-size:15px}
+.item .meta{font-size:12px;color:var(--muted)}
+.star{color:#E8A33D}
+.fav{font-size:12px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:3px 10px;cursor:pointer}
+.offline{font-size:12px;color:var(--ok);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">privacy</span><span class="tag">self_hosting_ecosystem</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">自托管工具图鉴</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Self-hosting ecosystem / curation of SaaS-replacement tools</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Self-hosting 生态爆发。awesome-selfhosted 在 GitHub 27.6 万 Star、100+ 分类；Nextcloud（私有云）、Jellyfin（媒体）、Immich（照片）成云端替代。对 Google/Meta 等 SaaS 的数据依赖、月费、隐藏收集令人疲惫，日韩 DIY 文化渐成，自托管工具/指南需求大。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 自托管工具收藏与筛选</b>
+    <label>搜索（名称 / 分类）</label><input id="q" placeholder="如：password / 媒体 / 云盘" oninput="render()">
+    <label>只看收藏</label><select id="only" onchange="render()"><option value="no">否</option><option value="yes">是</option></select>
+    <p class="offline" style="margin-top:8px">🔒 收藏仅存本机。</p>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://juejin.cn/post/7611715859572932654" target="_blank" style="color:var(--coral)">awesome-selfhosted / Nextcloud / Vaultwarden / Jellyfin / Immich</a>
+  </div>
+
+<script>
+const KEY="P10-013";
+const LIB=[
+  {n:"Nextcloud",c:"私有云盘",s:"自建网盘替代 Google Drive"},
+  {n:"Vaultwarden",c:"密码管理",s:"Bitwarden 兼容轻量自托管密码库"},
+  {n:"Jellyfin",c:"媒体中心",s:"自有影音库替代 Netflix/网盘"},
+  {n:"Immich",c:"照片备份",s:"私有照片同步替代 Google 相册"},
+  {n:"Home Assistant",c:"智能家居",s:"本地控制替代云端智能家居"},
+  {n:"FreshRSS",c:"RSS 阅读",s:"自建订阅源聚合"},
+  {n:"Paperless-ngx",c:"文档管理",s:"纸质文件数字化归档"},
+  {n:"Pi-hole",c:"网络广告",s:"全家 DNS 级广告拦截"},
+  {n:"Syncthing",c:"文件同步",s:"端到端设备间同步，无中心服务器"},
+  {n:"Miniflux",c:"RSS 阅读",s:"极简自托管 RSS"}
+];
+let fav = JSON.parse(localStorage.getItem(KEY) || "[]");
+function render(){
+  const q=document.getElementById('q').value.trim().toLowerCase();
+  const only=document.getElementById('only').value;
+  let list=LIB.filter(t=>(t.n+t.c+t.s).toLowerCase().includes(q));
+  if(only=='yes')list=list.filter(t=>fav.includes(t.n));
+  const el=document.getElementById('list');
+  if(!list.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">没有匹配的工具。</p>';return;}
+  el.innerHTML='<b>🧰 工具图鉴（'+list.length+'）</b>'+list.map(t=>{
+    const f=fav.includes(t.n);
+    return '<div class="item"><span class="name">'+t.n+'<div class="meta">['+t.c+'] '+t.s+'</div></span>'+
+    '<span class="fav" onclick="toggle(\''+t.n+'\')">'+(f?'★ 已收藏':'☆ 收藏')+'</span></div>';
+  }).join('');
+}
+function toggle(n){fav.includes(n)?fav=fav.filter(x=>x!=n):fav.push(n);localStorage.setItem(KEY,JSON.stringify(fav));render();}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>反羞耻温和健身追踪App</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none;float:right}
+.stat{display:flex;gap:8px;margin:10px 0}
+.stat>div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;text-align:center;padding:10px}
+.stat b{display:block;font-size:20px;color:var(--coral)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:13px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;cursor:pointer}
+.chip.on{background:var(--coral);color:#fff;border-color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">fitness</span><span class="tag">fitness_tracker_shame</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">反羞耻温和健身追踪</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Anti-shame, whole-wellbeing gentle tracker</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">UCL+Loughborough研究用AI分析5大盈利健身App的58,881条社媒帖，13,799条负面：用户因未达目标感"羞耻"、被通知"烦躁"、算法目标荒诞（如提示每天摄入-700卡路里）。刚性卡路里计数与机械目标伤害动机与心理健康。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">今天善待自己了吗？只记"整体健康"，不称体重、不逼卡路里。</p>
+    <label>今天的心情（点选）</label>
+    <div class="chips" id="mood">
+      <span class="chip" data-v="很棒">😊 很棒</span>
+      <span class="chip" data-v="不错">🙂 不错</span>
+      <span class="chip" data-v="一般">😐 一般</span>
+      <span class="chip" data-v="低落">😔 低落</span>
+    </div>
+    <label>精力（1-5，越大越有活力）</label>
+    <input id="energy" type="number" min="1" max="5" value="3">
+    <label>动了一会儿吗？（分钟，0 也可以）</label>
+    <input id="move" type="number" min="0" value="0">
+    <label>今天的一个小确幸（选填）</label>
+    <input id="joy" placeholder="如：晒了十分钟太阳">
+    <button class="btn" onclick="add()">💚 记录今天</button>
+    <div class="stat">
+      <div><b id="sN">0</b>记录天数</div>
+      <div><b id="sGood">0%</b>状态不错</div>
+    </div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P4-002">
+    <div class="collapse-header" id="aiHeader_P4-002" onclick="toggleAI('P4-002')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P4-002" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P4-002">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P4-002" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P4-002')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P4-002" style="display:none;margin-top:10px">
+        <div id="aiMessages_P4-002" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P4-002" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P4-002')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>🌿 我的健康日记</b>
+    <div id="logs" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://finance.yahoo.com/news/fitness-trackers-lead-feelings-shame-070100904.html" target="_blank" style="color:var(--coral)">MyFitnessPal / Fitbit / Noom（Yahoo Finance）</a>
+  </div>
+
+<script>
+const KEY="P4-002";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let mood="";
+document.querySelectorAll("#mood .chip").forEach(c=>c.onclick=()=>{
+  document.querySelectorAll("#mood .chip").forEach(x=>x.classList.remove("on"));
+  c.classList.add("on");mood=c.dataset.v;
+});
+function add(){
+  if(!mood){alert("先选一下今天的心情~");return;}
+  const energy=parseInt(document.getElementById("energy").value)||3;
+  const move=parseInt(document.getElementById("move").value)||0;
+  const joy=document.getElementById("joy").value.trim();
+  items.unshift({mood,energy,move,joy,d:new Date().toISOString().slice(0,10)});
+  mood="";document.querySelectorAll("#mood .chip").forEach(x=>x.classList.remove("on"));
+  document.getElementById("joy").value="";
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  document.getElementById("sN").textContent=items.length;
+  const good=items.length?Math.round(items.filter(x=>x.mood==="很棒"||x.mood==="不错").length/items.length*100):0;
+  document.getElementById("sGood").textContent=good+"%";
+  document.getElementById("logs").innerHTML=items.length?items.map((x,i)=>
+    `<div class="item"><button class="del" onclick="del(${i})">删除</button>${x.d} · 心情${x.mood} · 精力${x.energy}/5 · 活动${x.move}分${x.joy?"<br><small style='color:var(--muted)'>小确幸：${x.joy}</small>":""}</div>`
+  ).join(""):`<p style="color:var(--muted);font-size:13px">还没有记录，今天从善待自己开始。</p>`;
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

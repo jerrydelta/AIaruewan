@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韓国キッズ・ホームスクール教材</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#FFF0F0;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">education</span><span class="tag">korean_kids_homeschool</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韓国キッズ・ホームスクール教材</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Korean kids homeschool bundle: play-based language + math + coding</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韓国でも早期教育（早起き教育）需要が高く、親がAI・コーディングを含む総合的な創造力学習を求めている。韓国語（한글방글）＋算数（다비수）＋コーディング（다비코드）の3本柱を遊び感覚で一括提供する教材が不足している。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:4px 0 0">3分野（国語・算数・コーディング）の学習を記録し、分野ごとの学習時間をバランスよく可視化しよう。</p>
+    <label>学習分野</label>
+    <select id="a-sub">
+      <option value="国語（한글）">国語（한글 文字組合）</option>
+      <option value="算数（다비수）">算数（다비수 論理）</option>
+      <option value="コーディング（다비코드）">コーディング（다비코드 計算思考）</option>
+    </select>
+    <label>活動内容</label>
+    <input id="a-name" placeholder="例：ひらがなカードあわせ">
+    <label>学習時間（分）</label>
+    <input id="a-min" type="number" min="1" placeholder="例：20">
+    <button class="btn" onclick="addAct()">記録する</button>
+    <div id="bal" style="margin-top:14px"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cy/app/%EB%8B%A4%EB%B9%84%ED%82%A4%EC%A6%88-%ED%99%88%EC%8A%A4%EC%BF%A8/id1570086153" target="_blank" style="color:var(--coral)">다비키즈 홈스쿨（Dabikids Homeschool）</a>
+  </div>
+
+<script>
+const KEY="P8-003";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function addAct(){
+  const sub=document.getElementById("a-sub").value;
+  const name=document.getElementById("a-name").value.trim();
+  const min=parseInt(document.getElementById("a-min").value)||0;
+  if(!name||!min){alert("活動内容と時間を入力してください");return;}
+  items.push({sub,name,min,date:new Date().toLocaleDateString("ja-JP"),id:Date.now()});
+  document.getElementById("a-name").value="";
+  document.getElementById("a-min").value="";
+  save();
+}
+const SUBS=["国語（한글）","算数（다비수）","コーディング（다비코드）"];
+function render(){
+  const tot=SUBS.map(s=>items.filter(i=>i.sub===s).reduce((a,b)=>a+b.min,0));
+  const all=tot.reduce((a,b)=>a+b,0)||1;
+  let html="<b>📊 分野別学習時間（合計 "+(items.reduce((a,b)=>a+b.min,0))+"分）</b>";
+  SUBS.forEach((s,k)=>{
+    const pct=Math.round(tot[k]/all*100);
+    html+=`<div style='margin-top:8px'><span class='pill'>${s}</span> <span style='font-size:12px;color:var(--muted)'>${tot[k]}分</span>
+      <div style='height:8px;background:#FFE9E9;border-radius:999px;overflow:hidden;margin-top:4px'><i style='display:block;height:100%;background:var(--coral);width:${pct}%'></i></div></div>`;
+  });
+  document.getElementById("bal").innerHTML=html;
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>🎒 学習ログ</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>まだ記録がありません。</p>";return;}
+  box.innerHTML="<b>🎒 学習ログ（"+items.length+"件）</b>"+items.slice().reverse().map((i,ri)=>{
+    const idx=items.length-1-ri;
+    return `<div class='item'><div><b>${esc(i.name)}</b> <span class='pill'>${i.sub}</span></div>
+      <div style='font-size:13px;color:var(--muted)'>${i.min}分 ・ ${i.date}</div>
+      <button class='mini' style='margin-top:6px' onclick='del(${idx})'>削除</button></div>`;
+  }).join("");
+}
+function del(idx){items.splice(idx,1);save();}
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+</script>
+</body>
+</html>

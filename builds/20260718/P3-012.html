@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>宠物哀伤纪念堂</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item b{color:var(--ink)}.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.shrine{border:1px dashed var(--coral);background:#FFF8F8}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">pet</span><span class="tag">pet_grief_memorial</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">宠物哀伤纪念堂</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Pet grief & memorial · 数字纪念堂</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">宠物丧亲正成为被认可的心理刚需。全球宠物丧亲数字哀悼支持App市场2024年约$1.225亿，预计至2033年达$3.628亿。PetLoss提供私密数字纪念堂+引导日记。失去宠物常被轻视（"只是只动物"），求助无门。</p>
+  </div>
+
+  <div class="card shrine">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">建立毛孩子的纪念堂，写下引导日记，所有内容仅存本地、离线私密。</p>
+    <label>TA的名字</label>
+    <input id="name" placeholder="例如：煤球">
+    <label>今天的想念 / 想说的话（引导日记）</label>
+    <textarea id="note" rows="3" placeholder="今天又梦到TA在门口等我……"></textarea>
+    <label>此刻心情</label>
+    <select id="mood"><option>想念</option><option>平静</option><option>难过</option><option>感恩</option><option>释然</option></select>
+    <button class="btn" onclick="add()">存入纪念堂</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 纪念时间线</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">本地保存，仅你可见、永远在。</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.psychologytoday.com/us/blog/rethinking-the-human-animal-bond/202509/when-pet-loss-becomes-big-business" target="_blank" style="color:var(--coral)">PetLoss · Memorial & Healing</a>
+  </div>
+
+<script>
+const KEY="P3-012";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const name=document.getElementById("name").value.trim();
+  if(!name){alert("先写下TA的名字");return;}
+  const note=document.getElementById("note").value.trim()||"（默默想念）";
+  const mood=document.getElementById("mood").value;
+  items.unshift({name,note,mood,t:new Date().toLocaleString("zh-CN")});
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+  document.getElementById("note").value="";
+}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const el=document.getElementById("list");
+  let h='<b>📋 纪念时间线</b><p style="font-size:12px;color:var(--muted);margin:4px 0 0">本地保存，仅你可见、永远在。</p>';
+  if(!items.length){h+='<p style="font-size:13px;color:var(--muted);margin-top:8px">纪念堂还空着，写下第一句吧。</p>';}
+  items.forEach((it,i)=>{
+    h+='<div class="item shrine"><span class="del" onclick="del('+i+')">删除 ✕</span>'+
+       '<b>🕯 '+it.name+'</b> · <span style="font-size:12px;color:var(--coral)">'+it.mood+'</span><br>'+
+       '<span style="font-size:14px;color:#555">'+it.note+'</span><br>'+
+       '<span style="font-size:11px;color:var(--muted)">'+it.t+'</span></div>';
+  });
+  el.innerHTML=h;
+}
+render();
+</script>
+</body>
+</html>

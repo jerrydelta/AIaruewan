@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>日本加密税计算器·NTA格式+CARF</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.res{font-size:14px;margin-top:8px;padding:10px;border-radius:10px;background:#FFF7F7}
+.res b{color:var(--coral)}
+li{list-style:none;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+ul{padding:0;margin:6px 0 0}
+.del{color:var(--muted);font-size:12px;border:none;background:none;cursor:pointer;float:right}
+.pill{font-size:11px;padding:1px 7px;border-radius:999px;background:#FFF0F0;color:var(--coral);margin-right:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">finance</span><span class="tag">crypto_tax_calculator</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">日本加密税计算器·NTA+CARF</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Multi-exchange crypto tax (NTA format + CARF 2026)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本加密税制全球最重：买卖/币币/质押/空投/NFT 收益按「杂项所得」综合课税，最高 55%，亏损不可结转；2026-01-01 起 CARF 跨境自动申报启动。手动算税极易出错、跨所聚合难。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#777;margin:6px 0 0">用「総平均法」记录每笔交易 → 自动算 PNL → 输出 NTA 杂项所得估算（含 CARF 跨境标记）。</p>
+    <label>交易所</label>
+    <input type="text" id="ex" placeholder="例 binance / coincheck / 自建钱包">
+    <label>类型</label>
+    <select id="type"><option value="买入">买入（法币换币）</option><option value="卖出">卖出（变现）</option><option value="币币">币币交易</option><option value="质押/空投">质押/空投收入</option></select>
+    <div class="row">
+      <div><label>数量</label><input type="number" id="qty" placeholder="0.5" step="any"></div>
+      <div><label>单价(JPY)</label><input type="number" id="price" placeholder="8000000" inputmode="numeric"></div>
+    </div>
+    <label>备注</label>
+    <input type="text" id="memo" placeholder="例 BTC 卖出 / ETH 质押奖励">
+    <button class="btn" onclick="add()">＋ 记交易</button>
+    <div class="res" id="res"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📊 交易记录（総平均法）</b>
+    <ul id="ul"></ul>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://cryptact.com" target="_blank" style="color:var(--coral)">Cryptact / Koinly / Gtax / dTax</a>
+  </div>
+
+<script>
+const KEY="P16-003";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function fmt(n){return Math.round(n||0).toLocaleString("ja-JP")+" 円";}
+// 総平均法：维护累计成本均价
+function add(){
+  const ex=document.getElementById("ex").value.trim();
+  const type=document.getElementById("type").value;
+  const qty=parseFloat(document.getElementById("qty").value);
+  const price=parseFloat(document.getElementById("price").value);
+  const memo=document.getElementById("memo").value.trim();
+  if(!qty||qty<=0||!price||price<0){alert("请填写有效数量与单价");return;}
+  items.unshift({ex,type,qty,price,memo,t:Date.now()});
+  document.getElementById("qty").value="";document.getElementById("price").value="";document.getElementById("memo").value="";
+  save();
+}
+function del(t){items=items.filter(x=>x.t!==t);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function taxMisc(income){
+  const tbl=[[1950000,0.05],[3300000,0.10],[6950000,0.20],[9000000,0.23],[18000000,0.33],[40000000,0.40],[Infinity,0.45]];
+  let prev=0,tax=income*1.1; // 杂项所得加算復興特別所得税近似
+  // 用应纳税所得额（含10%復興加算）查表
+  let t=0,p=0;
+  for(const [cap,rate] of tbl){ if(income<=p)break; const seg=Math.min(income,cap)-p; if(seg>0)t+=seg*rate; p=cap; }
+  return t*1.021; // 復興特別所得税2.1%
+}
+function render(){
+  const ul=document.getElementById("ul");ul.innerHTML="";
+  let totalCost=0,totalQty=0,pnl=0;
+  items.forEach(x=>{
+    const value=x.qty*x.price;
+    if(x.type==="买入"){ totalCost+=value; totalQty+=x.qty; }
+    else if(x.type==="卖出"){ const avg=totalQty>0?totalCost/totalQty:0; const costBasis=avg*x.qty; totalCost-=costBasis; totalQty-=x.qty; pnl+=(value-costBasis); }
+    else if(x.type==="币币"){ const avg=totalQty>0?totalCost/totalQty:0; const costBasis=avg*x.qty; totalCost-=costBasis+value; totalQty+=0; pnl+=(value-costBasis); }
+    else if(x.type==="质押/空投"){ pnl+=value; }
+    const li=document.createElement("li");
+    li.innerHTML=`<button class="del" onclick="del(${x.t})">删除</button>
+      <span class="pill">${x.type}</span>${x.ex} · ${x.qty} × ${fmt(x.price)}<br>
+      <span style="color:#999;font-size:12px">${x.memo||""} ＝ ${fmt(value)}</span>`;
+    ul.appendChild(li);
+  });
+  let html=`<div>已实现损益（総平均法）：<b>${fmt(pnl)}</b></div>`;
+  if(pnl>0){
+    const tax=taxMisc(pnl);
+    html+=`<div>CARF 跨境申报：<b>适用</b>（2026 起自动交换）</div>`;
+    html+=`<div>NTA 杂项所得税估算：<b>${fmt(tax)}</b>（含復興加算，综合税率约 ${(tax/(pnl)*100).toFixed(1)}%）</div>`;
+  }else{
+    html+=`<div class="warn">亏损不可结转（日本税制），但记录可用于核对。</div>`;
+  }
+  document.getElementById("res").innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

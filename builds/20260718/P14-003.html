@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI 戒酒赞助者</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ghost{background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{text-align:center;padding:10px 4px}
+.stat b{display:block;font-size:24px;color:var(--coral)}
+.stat span{font-size:12px;color:var(--muted)}
+.bubble{background:#FFF0F0;border-radius:12px;padding:10px 12px;font-size:14px;margin-top:8px}
+.bubble.me{background:#FFE9E9;text-align:right}
+.crisis{background:#FFF3F3;border:1px solid #FFC9C9;border-radius:12px;padding:12px;font-size:13px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">addiction_recovery</span><span class="tag">ai_sobriety_sponsor</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI 戒酒赞助者</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI sobriety sponsor (24/7 companion)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">戒瘾者极度孤独、羞耻感强，真人赞助者难随时在线。Sunflower 用 AI 卡通蜜蜂做 24/7 赞助者，10个月 MAU 从200涨到10万+，年化收入做到 $1M。AI 陪伴式戒瘾成为新范式。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 本地赞助者对话 + 戒断计时</b>
+    <label>戒断开始日</label>
+    <input id="start" type="date">
+    <div class="stat" style="margin-top:6px"><b id="days">—</b><span>坚持天数</span></div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <b style="font-size:14px">和赞助者 Sam 说说此刻的感受</b>
+    <textarea id="msg" rows="2" placeholder="如：今晚聚会好想喝一杯…"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" id="send">让 Sam 回应</button>
+      <button class="btn btn-ghost" id="cbt">来一个 CBT 小练习</button>
+    </div>
+    <div id="chat" style="margin-top:6px"></div>
+    <div class="crisis">
+      ⚠️ 危机时刻：你并不孤单。中国心理援助热线 <b>400-161-9995</b>；如遇紧急危险请拨打 <b>120 / 110</b>。
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的日记</b>
+    <p id="empty" style="font-size:13px;color:var(--muted);margin:6px 0 0">还没有记录，和 Sam 聊一句吧。</p>
+    <div id="log"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://pitchbook.com/news/articles/sobriety-ai-sponsor-sunflowers-duolingo" target="_blank" style="color:var(--coral)">Sunflower (YC) — sobriety's Duolingo</a>
+  </div>
+
+<script>
+const KEY="P14-003";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const $=id=>document.getElementById(id);
+const todayStr=()=>new Date().toISOString().slice(0,10);
+if(!start.value) start.value=todayStr();
+const replies=[
+  "我在这里陪着你。想喝的那一股冲动通常只会持续几分钟——我们深呼吸，数到十，它就会过去。",
+  "你今晚能来聚会已经很勇敢了。想想你坚持到现在的原因，那个理由比一杯酒更值得。",
+  "孤独感是正常的，但别一个人扛。把这份冲动记下来，你已经迈出最重要的一步：承认它。",
+  "做得好，你没有屈服。每一次忍住，都是在重写你的大脑。明天醒来你会感谢现在的自己。",
+  "如果现在很难受，试试用冷水洗脸、出门走五分钟，或者给信任的人发条消息。换一个环境。"
+];
+const cbtTips=[
+  "CBT练习：写下触发你欲望的情境，再写一种你可以用过且有效的替代行为。",
+  "CBT练习：把'我必须喝一杯'改成'我现在想喝，但我可以选择不喝'——语言改变想法。",
+  "CBT练习：想象冲动像海浪，它升起也会落下。观察它，不要跳进去。",
+  "CBT练习：记录此刻的情绪强度1-10，10分钟后重评——多数冲动会自然下降。"
+];
+let ri=0,ci=0;
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function send(){
+  const m=msg.value.trim();if(!m)return;
+  const r=replies[ri%replies.length];ri++;
+  items.push({t:Date.now(),me:m,sam:r});
+  msg.value="";save();
+}
+function cbt(){
+  const tip=cbtTips[ci%cbtTips.length];ci++;
+  items.push({t:Date.now(),me:"（CBT 练习）",sam:tip});
+  save();
+}
+function render(){
+  const s=start.value;
+  days.textContent=s?Math.max(0,Math.floor((Date.now()-new Date(s))/864e5)):"—";
+  if(items.length)empty.style.display="none";else empty.style.display="block";
+  chat.innerHTML="";log.innerHTML="";
+  items.slice().reverse().forEach(x=>{
+    chat.innerHTML+=`<div class="bubble me">${esc(x.me)}</div><div class="bubble">🐝 Sam：${esc(x.sam)}</div>`;
+    log.innerHTML+=`<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--line)">
+      <span class="h-coral">${new Date(x.t).toLocaleString("zh-CN")}</span><br>${esc(x.me)} → ${esc(x.sam).slice(0,30)}…</div>`;
+  });
+}
+function esc(s){return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+send.onclick=send; cbt.onclick=cbt;
+render();
+</script>
+</body>
+</html>

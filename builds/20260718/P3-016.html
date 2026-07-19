@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>宠物晒宠社区本</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item b{color:var(--ink)}.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.pill{display:inline-block;font-size:11px;background:#FFF0F0;color:var(--coral);border-radius:999px;padding:1px 8px;margin:2px 3px 0 0}
+.like{color:var(--coral);font-size:13px;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">pet</span><span class="tag">pet_photo_sns_jp</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">宠物晒宠·社区本</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Pet photo UGC community</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本"ペットじまん"月下载约2.2k，全功能免费，用户发宠物照片/视频、按品类浏览、互相点赞评论、分享养宠商品测评。痛点：纯晒宠社区难变现、难留存。机会：UGC社区+本地社交/线下聚会。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">发布你的宠物帖子（文字描述代替照片），按犬/猫浏览、可点赞，本地保存。</p>
+    <div class="row">
+      <div><label>宠物名</label><input id="pet" placeholder="煤球"></div>
+      <div><label>类别</label><select id="cat"><option>狗狗</option><option>猫咪</option><option>其他</option></select></div>
+    </div>
+    <label>这一刻</label>
+    <textarea id="desc" rows="2" placeholder="今天在阳台晒太阳，懒成一团"></textarea>
+    <label>分享好物（可选）</label>
+    <input id="goods" placeholder="例如：某牌冻干，TA超爱">
+    <button class="btn" onclick="add()">发布帖子</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的社区动态</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">本地保存，点❤️攒赞。</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://softwar.io/app/app-1494069672" target="_blank" style="color:var(--coral)">ペットじまん (Petjiman)</a>
+  </div>
+
+<script>
+const KEY="P3-016";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const pet=document.getElementById("pet").value.trim();
+  if(!pet){alert("先填宠物名");return;}
+  const cat=document.getElementById("cat").value;
+  const desc=document.getElementById("desc").value.trim()||"（无描述）";
+  const goods=document.getElementById("goods").value.trim();
+  items.unshift({pet,cat,desc,goods,like:0,t:new Date().toLocaleString("zh-CN")});
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+  document.getElementById("pet").value="";document.getElementById("desc").value="";document.getElementById("goods").value="";
+}
+function lik(i){items[i].like++;localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const el=document.getElementById("list");
+  let h='<b>📋 我的社区动态</b><p style="font-size:12px;color:var(--muted);margin:4px 0 0">本地保存，点❤️攒赞。</p>';
+  if(!items.length){h+='<p style="font-size:13px;color:var(--muted);margin-top:8px">还没有帖子。</p>';}
+  items.forEach((it,i)=>{
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除 ✕</span>'+
+       '<span class="pill">'+it.cat+'</span> <b>'+it.pet+'</b><br>'+
+       '<span style="font-size:14px;color:#555">'+it.desc+'</span><br>'+
+       (it.goods?'<span style="font-size:13px;color:var(--coral)">🛍 '+it.goods+'</span><br>':'')+
+       '<span class="like" onclick="lik('+i+')">❤️ '+it.like+'</span> '+
+       '<span style="font-size:11px;color:var(--muted)">'+it.t+'</span></div>';
+  });
+  el.innerHTML=h;
+}
+render();
+</script>
+</body>
+</html>

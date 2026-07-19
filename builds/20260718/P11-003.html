@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>植物病害诊断记录台</title>
+<style>
+:root{
+  --coral:#FF6B6B;        --coral-dark:#E85555;
+  --ink:#2D2D2D;          --muted:#8A8A8A;
+  --bg:#F7F7F7;           --card:#FFFFFF;
+  --line:#ECECEC;         --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-sm{padding:7px 10px;font-size:13px;border-radius:9px;margin-top:0}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item h3{margin:0 0 4px;font-size:15px}
+.sev{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;display:inline-block}
+.s1{background:#E8F8EF;color:var(--ok)}
+.s2{background:#FFF6E0;color:#C98A00}
+.s3{background:#FFE9E9;color:var(--coral)}
+.mini{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">plant</span><span class="tag">disease_diagnosis</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">植物病害诊断记录台</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Accurate transparent plant-disease diagnosis</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">自动病害诊断普遍不准：PlantIn 付费却判"笑话"、隐藏按次收费；PlantAI 每天判"老化黄叶"而植物已枯死。用户付费得虚假诊断。本工具帮你诚实记录症状+严重度+处理方案，并提示"疑难请找人类专家"。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 病害记录</b>
+    <label>植物名称</label>
+    <input id="name" placeholder="如：番茄苗">
+    <label>症状描述</label>
+    <textarea id="sym" rows="2" placeholder="如：下部叶片出现黄色斑点并卷曲"></textarea>
+    <label>严重度评估</label>
+    <select id="sev">
+      <option value="1">1 轻度（局部）</option>
+      <option value="2">2 中度（扩散中）</option>
+      <option value="3">3 重度（危及生命）</option>
+    </select>
+    <label>我的处理 / 治疗建议</label>
+    <textarea id="fix" rows="2" placeholder="如：剪除病叶+喷施多菌灵，观察3天"></textarea>
+    <button class="btn" onclick="add()">＋ 保存诊断</button>
+    <div id="list"></div>
+  </div>
+
+  <div class="card">
+    <b>📒 诊断历史</b>
+    <p id="stat" style="font-size:13px;color:var(--muted)"></p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.complaintsboard.com/plantin-b149562" target="_blank" style="color:var(--coral)">PlantIn / Plantion / PlantAI / Plant Doctor</a>
+  </div>
+
+<script>
+const KEY="P11-003";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){ localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+function today(){ return new Date().toISOString().slice(0,10); }
+const sevMap={1:['s1','轻度'],2:['s2','中度'],3:['s3','重度']};
+function add(){
+  const name=document.getElementById('name').value.trim();
+  const sym=document.getElementById('sym').value.trim();
+  if(!name||!sym){ alert('请填植物名称和症状'); return; }
+  items.unshift({id:Date.now(),name,sym,sev:+document.getElementById('sev').value,
+    fix:document.getElementById('fix').value.trim(),date:today()});
+  document.getElementById('name').value='';document.getElementById('sym').value='';document.getElementById('fix').value='';
+  save();
+}
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function render(){
+  const box=document.getElementById('list'); box.innerHTML='';
+  items.forEach(d=>{
+    const s=sevMap[d.sev];
+    const el=document.createElement('div'); el.className='item';
+    el.innerHTML='<h3>'+d.name+' <span class="sev '+s[0]+'">'+s[1]+'</span></h3>'+
+      '<div class="mini">📅 '+d.date+'</div>'+
+      '<div style="font-size:14px;margin-top:4px">症状：'+d.sym+'</div>'+
+      (d.fix?'<div style="font-size:14px;margin-top:4px">处理：'+d.fix+'</div>':'')+
+      (d.sev===3?'<div class="mini" style="color:var(--coral);margin-top:4px">⚠ 重度：建议找人类园艺专家兜底</div>':'')+
+      '<button class="btn btn-sm" style="background:#ccc;width:auto;margin-top:8px" onclick="del('+d.id+')">删除</button>';
+    box.appendChild(el);
+  });
+  const heavy=items.filter(x=>x.sev===3).length;
+  document.getElementById('stat').textContent='共 '+items.length+' 条 · 其中 '+heavy+' 条重度建议专家兜底';
+}
+render();
+</script>
+</body>
+</html>

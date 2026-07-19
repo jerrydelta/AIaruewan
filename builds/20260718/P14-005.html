@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>手机戒断·屏幕时间计价</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ghost{background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{text-align:center;padding:10px 4px}
+.stat b{display:block;font-size:22px;color:var(--coral)}
+.stat span{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">addiction_recovery</span><span class="tag">screen_time_addiction</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">手机戒断 · 屏幕时间计价</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Phone-detox: screen-time tax/debt</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">原生屏幕时间"忽略按钮免费"导致无效。ScrollTax 把刷屏"计价"——每5分钟扣1税点，靠阅读/专注/家务/步数赚回，超支滚入次日债务。用定价心理学而非纯阻断做差异化。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 屏幕时间税 + 赚回机制</b>
+    <div class="row">
+      <div class="stat"><b id="balance">0</b><span>时间币余额</span></div>
+      <div class="stat"><b id="debt">0</b><span>今日债务</span></div>
+      <div class="stat"><b id="logged">0</b><span>记录天数</span></div>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:12px 0">
+    <b style="font-size:14px">① 记录今日屏幕时间（每5分钟 = 扣1币）</b>
+    <div class="row">
+      <div><label>日期</label><input id="day" type="date"></div>
+      <div><label>分钟</label><input id="mins" type="number" value="120"></div>
+    </div>
+    <button class="btn" id="logScreen">计入屏幕时间</button>
+    <hr style="border:none;border-top:1px solid var(--line);margin:12px 0">
+    <b style="font-size:14px">② 用健康行为赚回时间币</b>
+    <div class="row">
+      <div><label>行为</label>
+        <select id="act"><option value="read">阅读15分钟(+3)</option><option value="walk">步行2000步(+3)</option><option value="focus">专注工作25分钟(+4)</option><option value="chore">家务10分钟(+2)</option><option value="sun">晒太阳10分钟(+2)</option></select>
+      </div>
+      <div><label>次数</label><input id="cnt" type="number" value="1" min="1"></div>
+    </div>
+    <button class="btn btn-ghost" id="earn">赚回时间币</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 每日账本</b>
+    <p id="empty" style="font-size:13px;color:var(--muted);margin:6px 0 0">还没有记录。</p>
+    <div id="log"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/mo/app/naze-screen-time-control/id6474093604" target="_blank" style="color:var(--coral)">Naze / ScrollTax / Opal / OffScreen</a>
+  </div>
+
+<script>
+const KEY="P14-005";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const $=id=>document.getElementById(id);
+const todayStr=()=>new Date().toISOString().slice(0,10);
+if(!day.value) day.value=todayStr();
+const earnMap={read:3,walk:3,focus:4,chore:2,sun:2};
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function logScreen(){
+  const d=day.value||todayStr();const tax=Math.floor((+mins.value||0)/5);
+  let rec=items.find(x=>x.day===d);
+  if(!rec){rec={day:d,screen:0,earned:0};items.push(rec);}
+  rec.screen+=tax;save();
+}
+function earn(){
+  const d=todayStr();const v=earnMap[act.value]*(+cnt.value||1);
+  let rec=items.find(x=>x.day===d);
+  if(!rec){rec={day:d,screen:0,earned:0};items.push(rec);}
+  rec.earned+=v;save();
+}
+function render(){
+  const today=items.find(x=>x.day===todayStr());
+  const bal=today?today.earned-today.screen:0;
+  const debt=bal<0?-bal:0;
+  balance.textContent=bal;
+  debt.textContent=debt;
+  logged.textContent=items.length;
+  if(items.length)empty.style.display="none";else empty.style.display="block";
+  log.innerHTML=items.slice().reverse().map(x=>{
+    const b=x.earned-x.screen;
+    const col=b<0?"#E85555":"var(--ok)";
+    return `<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--line)">
+      <span>${x.day}</span><span style="color:${col}">屏幕-${x.screen} 赚+${x.earned} = ${b>=0?"+":""}${b}</span></div>`;
+  }).join("");
+}
+logScreen.onclick=logScreen; earn.onclick=earn;
+render();
+</script>
+</body>
+</html>

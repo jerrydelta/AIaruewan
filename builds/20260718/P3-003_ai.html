@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>语音优先深度交友声音档案</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item b{color:var(--ink)}.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.pill{display:inline-block;font-size:11px;background:#FFF0F0;color:var(--coral);border-radius:999px;padding:1px 8px;margin:2px 3px 0 0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">social</span><span class="tag">voice_first_friendship</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">语音优先深度交友·声音档案</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Voice-first deep-friendship app</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">文字社交浮浅、照片焦虑、MBTI套话。语音优先社交是2026新兴品类：在滤镜照片之外，声音承载情绪与真实人格，特别受内向者与深度思考者欢迎——"实质胜过表面"。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">用一段"想说的话"（代替语音）描述你真实的声音气质与想找的连接，建立声音档案，本地保存。</p>
+    <label>我想说的话（真实语气，越自然越容易匹配）</label>
+    <textarea id="msg" rows="3" placeholder="例如：我喜欢深夜安静地讲今天遇到的小事，声音偏低，喜欢听别人慢慢说……"></textarea>
+    <label>想找的连接类型</label>
+    <select id="conn"><option>深度对话搭子</option><option>异地语音笔友</option><option>同好兴趣友</option><option>慢热见面友</option></select>
+    <label>深度话题偏好（逗号分隔）</label>
+    <input id="topic" placeholder="例如：电影、孤独感、职业迷茫">
+    <label>范围</label>
+    <select id="scope"><option>全球</option><option>本地</option></select>
+    <button class="btn" onclick="add()">建立声音档案</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P3-003">
+    <div class="collapse-header" id="aiHeader_P3-003" onclick="toggleAI('P3-003')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P3-003" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P3-003">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P3-003" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P3-003')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P3-003" style="display:none;margin-top:10px">
+        <div id="aiMessages_P3-003" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P3-003" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P3-003')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的声音档案</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">本地保存，无照片、无焦虑。</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.bubblic.app/blog/best-apps-to-make-friends-2026.html" target="_blank" style="color:var(--coral)">Bubblic · 语音社交</a>
+  </div>
+
+<script>
+const KEY="P3-003";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const msg=document.getElementById("msg").value.trim();
+  if(!msg){alert("先写一段想说的话");return;}
+  const conn=document.getElementById("conn").value;
+  const topic=document.getElementById("topic").value.trim();
+  const scope=document.getElementById("scope").value;
+  items.unshift({msg,conn,topic,scope,t:new Date().toLocaleString("zh-CN")});
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+  document.getElementById("msg").value="";document.getElementById("topic").value="";
+}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const el=document.getElementById("list");
+  let h='<b>📋 我的声音档案</b><p style="font-size:12px;color:var(--muted);margin:4px 0 0">本地保存，无照片、无焦虑。</p>';
+  if(!items.length){h+='<p style="font-size:13px;color:var(--muted);margin-top:8px">还没有档案。</p>';}
+  items.forEach((it,i)=>{
+    let pills=(it.topic?it.topic.split(/[,，]/).map(x=>'<span class="pill">'+x.trim()+'</span>').join(""):"");
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除 ✕</span>'+
+       '<b>'+it.conn+'</b> · '+it.scope+'<br>'+
+       '<span style="font-size:13px;color:#555">"'+it.msg+'"</span><br>'+pills+
+       '<br><span style="font-size:11px;color:var(--muted)">'+it.t+'</span></div>';
+  });
+  el.innerHTML=h;
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

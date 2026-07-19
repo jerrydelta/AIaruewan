@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI+真人混合健身教练（问责优先）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none;float:right}
+.stat{display:flex;gap:8px;margin:10px 0}
+.stat>div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;text-align:center;padding:10px}
+.stat b{display:block;font-size:20px;color:var(--coral)}
+.buddy{background:#FFF7F7;border:1px dashed var(--coral);border-radius:12px;padding:10px;margin-top:8px;font-size:13px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">fitness</span><span class="tag">ai_trainer_gap</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI+真人混合健身教练</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI + human hybrid personal training</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">多项研究：真人教练带来85%坚持率，App仅25%（90天后）；AI动作纠错仅对低复杂度动作有效，复杂杠铃动作差距大；无法读取生活情境（睡眠/压力/伤病）实时调节。用户要的不只是计划，而是"有人会注意到我没来"的问责与安全感。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">低复杂度动作交给App计划，关键节点拉上"问责搭子"。有人会注意到你没来。</p>
+    <label>我的训练目标</label>
+    <select id="goal"><option>增肌</option><option>减脂</option><option>塑形</option><option>保持健康</option></select>
+    <label>每周可练天数</label>
+    <input id="days" type="number" min="1" max="7" value="3">
+    <button class="btn" onclick="genPlan()">🤖 生成混合计划</button>
+    <div id="planBox" style="margin-top:8px"></div>
+    <label>问责搭子（伙伴名/昵称）</label>
+    <input id="buddy" placeholder="如：阿强 / 跑步群">
+    <label>今天完成了吗？</label>
+    <div class="row">
+      <select id="check"><option value="me">我完成了</option><option value="miss">我今天没来</option></select>
+      <button class="btn" style="margin-top:6px" onclick="checkIn()">打卡</button>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📅 问责打卡记录</b>
+    <div id="logs" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://beachsidereader.com/article/ai-coaching-vs-trainer" target="_blank" style="color:var(--coral)">Future / SensAI / FitnessAI</a>
+  </div>
+
+<script>
+const KEY="P4-004";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let plan=[];
+const PLANS={
+  "增肌":["周一 推（胸肩三头）","周三 拉（背二头）","周五 腿+核心"],
+  "减脂":["周一 有氧HIIT 20分","周二 力量全身","周四 快走40分","周六 骑行"],
+  "塑形":["周一 臀腿","周三 上肢","周五 核心+拉伸"],
+  "保持健康":["隔天 30分快走","周末 户外活动"]
+};
+function genPlan(){
+  const g=document.getElementById("goal").value;
+  const d=parseInt(document.getElementById("days").value)||3;
+  plan=PLANS[g].slice(0,d);
+  document.getElementById("planBox").innerHTML=
+    `<b style="font-size:13px">本周计划（App端低复杂度动作）：</b>`+
+    plan.map(p=>`<div style="font-size:14px;padding:4px 0">• ${p}</div>`).join("")+
+    `<p style="font-size:12px;color:var(--muted);margin:6px 0 0">⚠ 大重量/复杂动作请约真人教练把关安全。</p>`;
+}
+function checkIn(){
+  const buddy=document.getElementById("buddy").value.trim()||"（未填搭子）";
+  const v=document.getElementById("check").value;
+  const ok=v==="me";
+  items.unshift({buddy,ok,d:new Date().toISOString().slice(0,10)});
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const total=items.length, done=items.filter(x=>x.ok).length;
+  document.getElementById("logs").innerHTML=items.length?
+    `<div class="stat"><div><b>${total}</b>总打卡</div><div><b>${total?Math.round(done/total*100):0}%</b>完成率</div><div><b>${items.filter(x=>!x.ok).length}</b>缺席</div></div>`+
+    items.map((x,i)=>
+      `<div class="item"><button class="del" onclick="del(${i})">删除</button>${x.d} · ${x.ok?"✅":"⚠️ 没来"} · 搭子：${x.buddy}</div>`
+    ).join(""):`<p style="color:var(--muted);font-size:13px">还没有打卡，今天动一下并告诉搭子？</p>`;
+}
+render();
+</script>
+</body>
+</html>

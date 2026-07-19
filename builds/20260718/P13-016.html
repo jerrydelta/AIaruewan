@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>慢性病(内膜异位)全身追踪+社区</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:13px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#fff;cursor:pointer}
+.chip.on{background:var(--coral);color:#fff;border-color:var(--coral)}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.item .del{float:right;color:var(--coral);font-size:12px;cursor:pointer}
+.note{background:#EAF7F0;color:#1f7a52;border:1px solid #c8ecd9;border-radius:10px;padding:10px;font-size:13px;margin-top:10px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">health</span><span class="tag">chronic_illness_endometriosis</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">慢性病(内膜异位)全身追踪+社区</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Chronic-illness whole-body tracker</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">慢性病人群（内膜异位/纤维肌痛/IBS）需要「全身」追踪，但经期 App 只盯周期。Matilda 提供症状+生活方式+社区+专家 Q&A；Bearable 被赞「终于发现 flare-up 与周期同步」。痛点：把内膜异位当「严重痛经」忽视，缺全身+情绪+社区。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 全身症状 + 周期关联 + 情绪日记</b>
+    <label>日期</label><input id="date" type="date">
+    <label>疼痛部位（可多选）</label>
+    <div class="chips" id="areas"></div>
+    <div class="row">
+      <div><label>疼痛 0-10</label><input id="pain" type="number" min="0" max="10" placeholder="5"></div>
+      <div><label>周期第几天</label><input id="cyc" type="number" placeholder="14"></div>
+    </div>
+    <label>情绪 / 日记</label><textarea id="mood" rows="2" placeholder="今天很累，肚子胀"></textarea>
+    <button class="btn" onclick="addItem()">＋ 记录</button>
+    <div class="note">🤝 本工具为个人记录版；真实社区/专家 Q&A 需联网服务，这里先帮你沉淀可用于问诊的全身数据。</div>
+  </div>
+
+  <div class="card" id="list"><b>🩹 记录</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/app/matilda/id6449485262" target="_blank" style="color:var(--coral)">Matilda / Ekvi / Bearable</a>
+  </div>
+
+<script>
+const KEY="P13-016";
+const AREA=["下腹","腰骶","盆腔","肠胃","头痛","关节","全身乏力"];
+let sel=new Set();
+const box=document.getElementById("areas");
+AREA.forEach(a=>{
+  const c=document.createElement("div");c.className="chip";c.innerText=a;
+  c.onclick=()=>{if(sel.has(a)){sel.delete(a);c.className="chip";}else{sel.add(a);c.className="chip on";}};
+  box.appendChild(c);
+});
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+if(!document.getElementById("date").value)document.getElementById("date").valueAsDate=new Date();
+function addItem(){
+  const date=document.getElementById("date").value;
+  items.push({date,areas:[...sel],pain:document.getElementById("pain").value,mood:document.getElementById("mood").value.trim(),cyc:document.getElementById("cyc").value});
+  sel.clear();document.querySelectorAll(".chip").forEach(c=>c.className="chip");
+  ["pain","mood","cyc"].forEach(id=>document.getElementById(id).value="");
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  let html='<b>🩹 记录</b>';
+  if(items.length===0)html+='<p style="font-size:13px;color:#999;margin:8px 0">还没有记录。</p>';
+  [...items].reverse().forEach((x,i)=>{
+    const idx=items.length-1-i;
+    html+=`<div class="item"><span class="del" onclick="del(${idx})">删除</span>
+      <b>${x.date}</b> · 疼痛${x.pain||'?'} · 周期${x.cyc||'?'}天<br>
+      ${x.areas.length?x.areas.join("、"):"无部位"} ${x.mood?("· "+x.mood):""}</div>`;
+  });
+  box.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

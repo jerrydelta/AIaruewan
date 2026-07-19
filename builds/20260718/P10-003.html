@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>情侣共享账本+日历</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.tab{display:inline-block;width:auto;padding:8px 14px;margin:0 6px 0 0;font-size:13px;background:#fff;color:var(--coral);border:1px solid #FFD9D9}
+.btn.tab.on{background:var(--coral);color:#fff}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:none}
+.item .name{flex:1;font-size:15px}
+.item .who{font-size:12px;color:var(--muted)}
+.del{color:var(--muted);font-size:18px;background:none;border:none;cursor:pointer}
+.sum{font-size:14px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">home</span><span class="tag">couple_shared_finance</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">情侣共享账本 + 日历</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Couple shared account-book + shared calendar app</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国 BuBoo「부부」把共享账本+共享日历+会员优惠券一体化，自动抓取银行/信用卡通知。痛点：因钱吵架、垫钱清算的「モヤモヤ」频发。家计透明化+日程共享合一的夫妻专用 SaaS 需求旺盛。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 共享账本 / 共享日历</b>
+    <div style="margin-bottom:10px">
+      <span class="btn tab on" id="t1" onclick="switchT('exp')">💰 共享账本</span>
+      <span class="btn tab" id="t2" onclick="switchT('cal')">📅 共享日历</span>
+    </div>
+    <div id="expPane">
+      <label>项目</label><input id="e_name" placeholder="如：周末聚餐 / 房租 / 电影票">
+      <div class="row">
+        <div><label>金额</label><input id="e_amt" type="number" placeholder="0"></div>
+        <div><label>付款人</label><select id="e_who"><option value="me">我</option><option value="partner">伴侣</option></select></div>
+      </div>
+      <label>分类</label><select id="e_cat"><option>餐饮</option><option>居住</option><option>娱乐</option><option>交通</option><option>其他</option></select>
+      <button class="btn" onclick="addExp()">＋ 记一笔</button>
+      <div class="sum" id="expSum"></div>
+    </div>
+    <div id="calPane" style="display:none">
+      <label>日期</label><input id="c_date" type="date">
+      <label>事项</label><input id="c_name" placeholder="如：纪念日 / 看房 / 体检">
+      <button class="btn" onclick="addCal()">＋ 加日程</button>
+    </div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://appkk.com/%EA%B3%B5%EC%9C%A0-%EA%B0%80%EA%B3%84%EB%B6%80-%EC%9D%BC%EC%A0%95-buboo-%EB%B6%80%EB%B6%80/com.pulapp.buboo" target="_blank" style="color:var(--coral)">BuBoo 부부（韩国情侣共享账本+日历）</a>
+  </div>
+
+<script>
+const KEY="P10-003";
+let data = JSON.parse(localStorage.getItem(KEY) || '{"exp":[],"cal":[]}');
+let mode="exp";
+function save(){ localStorage.setItem(KEY, JSON.stringify(data)); render(); }
+function switchT(m){mode=m;document.getElementById('t1').className='btn tab'+(m=='exp'?' on':'');document.getElementById('t2').className='btn tab'+(m=='cal'?' on':'');document.getElementById('expPane').style.display=m=='exp'?'':'none';document.getElementById('calPane').style.display=m=='cal'?'':'none';render();}
+function addExp(){
+  const name=document.getElementById('e_name').value.trim();
+  const amt=parseFloat(document.getElementById('e_amt').value)||0;
+  if(!name||!amt)return;
+  data.exp.push({id:Date.now(),name,amt,who:document.getElementById('e_who').value,cat:document.getElementById('e_cat').value});
+  document.getElementById('e_name').value='';document.getElementById('e_amt').value='';save();
+}
+function addCal(){
+  const date=document.getElementById('c_date').value, name=document.getElementById('c_name').value.trim();
+  if(!date||!name)return;
+  data.cal.push({id:Date.now(),date,name});
+  document.getElementById('c_date').value='';document.getElementById('c_name').value='';save();
+}
+function del(k,id){data[k]=data[k].filter(x=>x.id!=id);save();}
+function settle(){
+  let me=0,pt=0;data.exp.forEach(e=>e.who=='me'?me+=e.amt:pt+=e.amt);
+  const diff=Math.abs(me-pt)/2;
+  if(me===pt)return '两人均摊 ✅ 无欠款';
+  return (me>pt?'伴侣':'我')+' 需付给 '+(me>pt?'我':'伴侣')+' '+diff.toFixed(0)+' 元结算';
+}
+function render(){
+  const el=document.getElementById('list');
+  if(mode=='exp'){
+    const total=data.exp.reduce((s,e)=>s+e.amt,0);
+    document.getElementById('expSum').innerHTML='合计 '+total.toFixed(0)+' 元 · '+settle();
+    if(!data.exp.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有记账。</p>';return;}
+    el.innerHTML='<b>💰 账目</b>'+data.exp.map(e=>'<div class="item"><span class="name">'+esc(e.name)+'<span class="who"> · '+e.cat+'</span></span><span class="who">'+e.amt+'元·'+(e.who=='me'?'我付':'伴侣付')+'</span><button class="del" onclick="del(\'exp\','+e.id+')">✕</button></div>').join('');
+  }else{
+    if(!data.cal.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有日程。</p>';return;}
+    el.innerHTML='<b>📅 日程</b>'+data.cal.sort((a,b)=>a.date>b.date?1:-1).map(c=>'<div class="item"><span class="who">'+c.date+'</span><span class="name">'+esc(c.name)+'</span><button class="del" onclick="del(\'cal\','+c.id+')">✕</button></div>').join('');
+  }
+}
+function esc(s){return s.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+render();
+</script>
+</body>
+</html>

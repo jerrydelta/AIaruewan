@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韓国高校全科・AI弱点分析</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#FFF0F0;color:var(--coral)}
+.weak{background:#FFF4F4;border-color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">education</span><span class="tag">korean_csat_prep</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韓国高校全科・AI弱点分析</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Korean high-school all-subject exam app (AI weak-point analysis)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">高校生は「内申（내신）＋修能（수능）」を一括・タブレットで効率学習したい。紙の問題集は重く携带不便。AIが苦手類型を自動分析し「 맞춤 문제（カスタム問題）」を無制限に出す仕組みが求められている。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:4px 0 0">単元ごとの正答数を入力すると、AIが苦手類型を分析し「追加すべきカスタム問題数」を提案します。</p>
+    <label>教科</label>
+    <select id="e-sub"><option>国語</option><option>数学</option><option>英語</option><option>社会</option><option>科学</option></select>
+    <label>単元</label><input id="e-unit" placeholder="例：微積分・確率">
+    <div class="row">
+      <div><label>正解数</label><input id="e-correct" type="number" min="0" placeholder="7"></div>
+      <div><label>総問題数</label><input id="e-total" type="number" min="1" placeholder="10"></div>
+    </div>
+    <button class="btn" onclick="addE()">記録する</button>
+    <div id="ai" style="margin-top:14px"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://tabtap.co.kr/" target="_blank" style="color:var(--coral)">기출탭탭（Gichul TabTab） / 풀다（Pulda）</a>
+  </div>
+
+<script>
+const KEY="P8-006";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addE(){
+  const sub=document.getElementById("e-sub").value;
+  const unit=document.getElementById("e-unit").value.trim();
+  const correct=parseInt(document.getElementById("e-correct").value)||0;
+  const total=parseInt(document.getElementById("e-total").value)||0;
+  if(!unit||!total){alert("単元と総問題数を入力してください");return;}
+  if(correct>total){alert("正解数は総問題数を超えません");return;}
+  items.push({sub,unit,correct,total,id:Date.now()});
+  document.getElementById("e-unit").value="";document.getElementById("e-correct").value="";document.getElementById("e-total").value="";
+  save();
+}
+function render(){
+  const units={};
+  items.forEach(i=>{const k=i.sub+"・"+i.unit;units[k]=units[k]||{sub:i.sub,unit:i.unit,t:0,c:0};units[k].t+=i.total;units[k].c+=i.correct;});
+  const rows=Object.keys(units).map(k=>({k,...units[k],rate:units[k].c/units[k].t}));
+  rows.sort((a,b)=>a.rate-b.rate);
+  let html="<b>🤖 AI弱点分析（苦手順）</b>";
+  if(!rows.length)html+="<p style='font-size:13px;color:var(--muted);margin:6px 0 0'>まだデータがありません。</p>";
+  rows.forEach(r=>{
+    const extra=r.rate<0.7?Math.ceil((0.85-r.rate)*r.t)+1:0;
+    html+=`<div class='item ${r.rate<0.7?'weak':''}' style='padding:8px 10px'>
+      <div class='row' style='margin:0'><span class='pill'>${esc(r.sub)}</span><b style='flex:2'>${esc(r.unit)}</b>
+      <span style='color:${r.rate<0.7?'var(--coral)':'var(--ok)'}'>${Math.round(r.rate*100)}% (${r.c}/${r.t})</span></div>
+      ${r.rate<0.7?`<div style='font-size:12px;color:var(--coral);margin-top:4px'>⚠ カスタム問題 +${extra}問を推奨</div>`:`<div style='font-size:12px;color:var(--ok);margin-top:4px'>✓ 安定</div>`}
+    </div>`;
+  });
+  document.getElementById("ai").innerHTML=html;
+
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>📒 学習記録</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>まだ記録がありません。</p>";return;}
+  box.innerHTML="<b>📒 学習記録（"+items.length+"件）</b>"+items.slice().reverse().map((i,ri)=>{
+    const idx=items.length-1-ri;
+    return `<div class='item' style='padding:8px 10px'><span class='pill'>${esc(i.sub)}</span> <b>${esc(i.unit)}</b>
+      <span style='font-size:13px;color:var(--muted)'> ${i.correct}/${i.total}</span>
+      <button class='mini' style='margin-top:4px' onclick='del(${idx})'>削除</button></div>`;
+  }).join("");
+}
+function del(idx){items.splice(idx,1);save();}
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+</script>
+</body>
+</html>

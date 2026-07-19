@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>多人云自习室</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.mini{font-size:14px;margin:14px 0 4px;font-weight:600;color:var(--ink);
+  border-left:4px solid var(--coral);padding-left:8px}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.del{color:var(--coral);float:right;font-size:13px;cursor:pointer}
+.bar{height:8px;background:#EEE;border-radius:99px;margin-top:6px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--coral)}
+.big{font-size:32px;text-align:center;font-weight:700;color:var(--coral);margin:6px 0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">student</span><span class="tag">online_study_room</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">多人云自习室</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Multi-user co-study room + socialized focus tracking</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">考研党/考证党"云自习"需求上升：伴学笔记已上线在线自习室——多人在线同屏、实时显示队友专注时长。Forest用"树苗枯萎"帮大学生减少手机依赖。痛点：缺乏同伴监督、学习孤独感。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <div class="mini">👥 我的自习室（搭子）</div>
+    <label>昵称</label><input id="m_name" placeholder="如 考研小张">
+    <label>今日目标专注(分钟)</label><input id="m_goal" type="number" placeholder="120">
+    <button class="btn" onclick="addM()">加入自习室</button>
+
+    <div class="mini">⏱ 我的专注计时</div>
+    <div class="big" id="clock">25:00</div>
+    <button class="btn" id="sb" onclick="toggle()">开始</button>
+    <label>记到哪个搭子</label><select id="m_sel"></select>
+
+    <div class="mini">💌 匿名鼓励纸条</div>
+    <input id="note" placeholder="给搭子打气…" onkeydown="if(event.key==='Enter')addNote()">
+    <button class="btn" onclick="addNote()">发纸条</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P12-007">
+    <div class="collapse-header" id="aiHeader_P12-007" onclick="toggleAI('P12-007')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P12-007" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P12-007">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P12-007" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P12-007')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P12-007" style="display:none;margin-top:10px">
+        <div id="aiMessages_P12-007" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P12-007" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P12-007')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>📋 自习室 & 纸条墙</b><div id="box"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://so.html5.qq.com/page/real/search_news?docid=70000021_78568c046c298452" target="_blank" style="color:var(--coral)">伴学笔记(自习室) · Forest专注森林 · Focusmate</a>
+  </div>
+
+<script>
+const KM="P12-007_members",KN="P12-007_notes",KF="P12-007_focus";
+let M=JSON.parse(localStorage.getItem(KM)||"[]");
+let N=JSON.parse(localStorage.getItem(KN)||"[]");
+let focusCur=parseInt(localStorage.getItem(KF)||"0");
+let timer=null,left=25*60,running=false;
+function toggle(){running=!running;document.getElementById("sb").textContent=running?"暂停":"继续";
+  if(running){timer=setInterval(()=>{left--;if(left<=0){clearInterval(timer);running=false;left=25*60;focusCur++;localStorage.setItem(KF,focusCur);document.getElementById("sb").textContent="开始";render();}upd();},1000);}else clearInterval(timer);}
+function upd(){const m=String(Math.floor(left/60)).padStart(2,"0"),s=String(left%60).padStart(2,"0");document.getElementById("clock").textContent=m+":"+s;}
+function addM(){const n=document.getElementById("m_name").value.trim(),g=parseInt(document.getElementById("m_goal").value)||0;
+  if(!n){alert("昵称");return;}M.push({n,g,min:0});localStorage.setItem(KM,JSON.stringify(M));render();}
+function addNote(){const t=document.getElementById("note").value.trim();if(!t){alert("写点啥");return;}N.push(t);localStorage.setItem(KN,JSON.stringify(N));document.getElementById("note").value="";render();}
+function tick(i){if(M[i]){M[i].min+=25;localStorage.setItem(KM,JSON.stringify(M));render();}}
+function del(i){M.splice(i,1);localStorage.setItem(KM,JSON.stringify(M));render();}
+function render(){
+  const sel=document.getElementById("m_sel");sel.innerHTML=M.map((x,i)=>`<option value="${i}">${x.n}</option>`).join("");
+  let h=`<p style="font-size:12px;color:var(--muted)">我累计专注 ${focusCur} 次</p>`;
+  if(M.length)h+=M.map((x,i)=>{const p=x.goal?Math.min(100,Math.round(x.min/x.goal*100)):0;
+    return `<div class="item"><span class="del" onclick="del(${i})">退出</span><b>${x.n}</b> · ${x.min}分钟/目标${x.g}分
+    <div class="bar"><i style="width:${p}%"></i></div>
+    <button class="btn" style="margin-top:6px;padding:9px" onclick="tick(${i})">+25分钟</button></div>`;}).join("");
+  else h+="<p style='font-size:13px;color:var(--muted)'>还没有搭子，加一个。</p>";
+  if(N.length)h+="<div style='font-size:13px;color:var(--muted);margin-top:10px'>💌 纸条墙</div>"+N.slice().reverse().map(x=>`<div class="item">${x.replace(/</g,"&lt;")}</div>`).join("");
+  document.getElementById("box").innerHTML=h;
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

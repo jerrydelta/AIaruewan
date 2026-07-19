@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>婚礼邀请邮件送达率优化器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.check{font-size:14px;padding:7px 0;border-bottom:1px dashed var(--line);display:flex;align-items:center;gap:8px}
+.score{text-align:center;font-size:40px;font-weight:700;margin:10px 0}
+.note{background:#EAF7F0;color:#1f7a52;border:1px solid #c8ecd9;border-radius:10px;padding:10px;font-size:13px;margin-top:10px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">wedding</span><span class="tag">invitation_email_deliverability</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">婚礼邀请邮件送达率优化器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Wedding invitation email deliverability optimizer</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Reddit 痛点（75/100）：WithJoy 的婚礼邀请邮件大量进宾客垃圾箱，「很多宾客说从没看到邀请邮件」。通用邮件服务不优化婚礼邀请送达率。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 送达率自检 + 收件箱测试</b>
+    <label>发件域名（如 invite.ourwedding.com）</label>
+    <input id="domain" placeholder="invite.ourwedding.com">
+    <label>邮件主题</label><input id="subj" placeholder="诚挚邀请您参加我们的婚礼">
+    <label>收件测试邮箱</label><input id="testmail" placeholder="aunt@example.com">
+    <button class="btn" onclick="check()">🔍 评估送达风险</button>
+    <div id="result"></div>
+
+    <div style="margin-top:14px;border-top:1px dashed var(--line);padding-top:12px">
+      <b>✅ 高送达率清单</b>
+      <div class="check">☑ 使用专属子域名发信（非免费邮箱）</div>
+      <div class="check">☑ 配置 SPF / DKIM / DMARC 认证</div>
+      <div class="check">☑ 主题避免「免费」「惊喜」等触发词</div>
+      <div class="check">☑ 发送前做收件箱投放测试</div>
+      <div class="check">☑ 提供一键「若未收到点此查看」网页版</div>
+    </div>
+  </div>
+
+  <div class="card" id="list" style="font-size:13px;color:var(--muted)">
+    测试记录会出现在这里。
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.saasniche.com/professions/Wedding%20Planners" target="_blank" style="color:var(--coral)">SaaSNiche 婚礼策划痛点库</a>
+  </div>
+
+<script>
+const KEY="P13-007";
+let tests=JSON.parse(localStorage.getItem(KEY)||"[]");
+function check(){
+  const domain=document.getElementById("domain").value.trim().toLowerCase();
+  const subj=document.getElementById("subj").value.trim();
+  const mail=document.getElementById("testmail").value.trim().toLowerCase();
+  if(!domain||!subj||!mail){alert("请填写完整三项");return;}
+  let score=100, issues=[];
+  if(domain.endsWith("@gmail.com")||domain.endsWith("@qq.com")||domain.endsWith("@163.com")){
+    score-=30;issues.push("使用免费邮箱发信，极易进垃圾箱（-30）");}
+  if(!domain.includes(".")){score-=20;issues.push("非专属域名（-20）");}
+  const trig=/免费|惊喜|限时|优惠|点击|赢取|cash|free|win|click/i;
+  if(trig.test(subj)){score-=15;issues.push("主题含触发词（-15）");}
+  if(subj.length>50){score-=5;issues.push("主题过长（-5）");}
+  const spammy=["noreply","no-reply","admin"].some(x=>mail.includes(x));
+  if(spammy){score-=10;issues.push("测试邮箱疑似系统地址（-10）");}
+  score=Math.max(0,score);
+  const ok=score>=85;
+  let html=`<div class="score" style="color:${ok?'#3FB984':'#E85555'}">${score}</div>`;
+  html+=`<p style="text-align:center;font-size:13px;color:#555;margin:0">送达风险评分（越高越好）</p>`;
+  if(issues.length===0)html+='<div class="note">✅ 配置良好，抵达率应较高。</div>';
+  else issues.forEach(i=>html+=`<div class="note" style="background:#FFF7E8;color:#9a6b00;border-color:#ffe2a8">⚠ ${i}</div>`);
+  document.getElementById("result").innerHTML=html;
+  tests.push({domain,subj,mail,score});
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(tests));render();}
+function render(){
+  const box=document.getElementById("list");
+  let html='<b style="color:var(--ink)">📨 测试记录</b>';
+  if(tests.length===0){html+='<p style="margin:8px 0">还没有测试。</p>';}
+  tests.slice().reverse().forEach(t=>{
+    html+=`<div style="padding:6px 0;border-bottom:1px dashed var(--line)">
+      ${t.mail} → 评分 <b style="color:${t.score>=85?'#3FB984':'#E85555'}">${t.score}</b></div>`;
+  });
+  box.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

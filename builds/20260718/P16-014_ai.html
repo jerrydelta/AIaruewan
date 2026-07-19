@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>退休资金缺口模拟+自动储蓄教练</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.res{font-size:14px;margin-top:8px;padding:10px;border-radius:10px;background:#FFF7F7}
+.res b{color:var(--coral)}
+.warn{background:#FFF3E0;color:#9a6b00}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">finance</span><span class="tag">retirement_planning_coach</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">退休缺口模拟+储蓄教练</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Retirement-gap simulator + auto-savings coach</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本「老后 2000 万円问题」深入人心：84.4% 对老后不安，78.7% 认为公年金不够，平均夫妻 35 年缺口约 1428 万円。现有 NISA/iDeCo 工具分散、不会算「还差多少」。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#777;margin:6px 0 0">填年龄/退休龄/现储蓄/月存/预期收益 → 算缺口与每月该存多少。</p>
+    <div class="row">
+      <div><label>现在年龄</label><input type="number" id="age" placeholder="35" inputmode="numeric"></div>
+      <div><label>退休年龄</label><input type="number" id="ret" placeholder="65" inputmode="numeric"></div>
+    </div>
+    <div class="row">
+      <div><label>现有储蓄(万円)</label><input type="number" id="now" placeholder="300" inputmode="numeric"></div>
+      <div><label>月存(万円)</label><input type="number" id="m" placeholder="5" inputmode="numeric" step="any"></div>
+    </div>
+    <label>预期年化 %</label>
+    <input type="number" id="r" placeholder="4" step="any">
+    <label>目标退休金（万円，如2000万円→2000）</label>
+    <input type="number" id="target" placeholder="2000" inputmode="numeric">
+    <button class="btn" onclick="sim()">模拟缺口</button>
+    <div class="res" id="res"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.smtb.jp/personal/column/happy-retirement/column_21" target="_blank" style="color:var(--coral)">NISA / iDeCo / りそな つみたてボックス</a>
+  </div>
+
+<script>
+const KEY="P16-014";
+function fmt(n){return Math.round(n||0).toLocaleString("ja-JP")+" 万円";}
+function sim(){
+  const age=parseFloat(document.getElementById("age").value);
+  const ret=parseFloat(document.getElementById("ret").value);
+  const now=parseFloat(document.getElementById("now").value);
+  const m=parseFloat(document.getElementById("m").value);
+  const r=parseFloat(document.getElementById("r").value)/100;
+  const target=parseFloat(document.getElementById("target").value);
+  if(!age||!ret||!now||!target){alert("请填全");return;}
+  const yrs=ret-age;
+  if(yrs<=0){alert("退休年龄需大于现在年龄");return;}
+  const rm=r/12, months=yrs*12;
+  const proj = now*Math.pow(1+r,yrs) + m*((Math.pow(1+rm,months)-1)/rm);
+  const gap = target - proj;
+  let html=`${yrs}年后预计积累 <b>${fmt(proj)}</b><br>目标 <b>${fmt(target)}</b><br>`;
+  if(gap<=0) html+=`<div>✅ 现有计划已达标，还多出 <b>${fmt(-gap)}</b></div>`;
+  else{
+    // 反推每月需存
+    const needM = (target - now*Math.pow(1+r,yrs)) / ((Math.pow(1+rm,months)-1)/rm);
+    html+=`<div class="warn">⚠ 缺口 <b>${fmt(gap)}</b> 万円</div>`;
+    html+=`<div>按当前收益，每月需存 <b>${fmt(needM)}</b> 万円（现 ${fmt(m)} → 需 +${fmt(Math.max(needM-m,0))}）</div>`;
+  }
+  document.getElementById("res").innerHTML=html;
+  localStorage.setItem(KEY,JSON.stringify({age,ret,now,m,r:document.getElementById("r").value,target}));
+}
+const s=JSON.parse(localStorage.getItem(KEY)||"null");
+if(s){["age","ret","now","m","r","target"].forEach(k=>{if(s[k]!=null)document.getElementById(k).value=s[k];});}
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

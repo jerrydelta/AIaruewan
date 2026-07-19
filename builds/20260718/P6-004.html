@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>政务育儿一体助手</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.sub{font-weight:700;color:var(--coral);margin:14px 0 4px;font-size:15px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;padding:6px 0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">parenting</span><span class="tag">local_gov_parenting_app</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">政务育儿一体助手</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Usable local-gov parenting: health-check booking + digital questionnaire + growth log</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本地方"子育てアプリ"普遍被吐槽"使いづらい"：有成长记录但难用，且缺浦添市已上线的"乳幼児健診オンライン予約"和福岡市"問診票デジタル化"。痛点：政务育儿 App 功能割裂、预约/问诊仍线下、UX 差。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">① 健診在线预约登记　② 问询表数字化（勾选即存）　③ 成长记录（月龄/身高/体重）。</p>
+    <div class="sub">① 乳幼児健診オンライン予約</div>
+    <label>宝宝姓名</label><input id="bName" placeholder="如：小花">
+    <label>健診项目</label>
+    <select id="bItem"><option>3月龄体检</option><option>6月龄体检</option><option>1岁体检</option><option>疫苗接種</option><option>齿科检查</option></select>
+    <label>期望日期</label><input id="bDate" type="date">
+    <button class="btn" onclick="book()">📅 提交预约</button>
+
+    <div class="sub">② 問診票デジタル化</div>
+    <div class="chk"><input type="checkbox" id="q1" style="width:auto;margin:0"> 近期有无发热</div>
+    <div class="chk"><input type="checkbox" id="q2" style="width:auto;margin:0"> 食欲是否正常</div>
+    <div class="chk"><input type="checkbox" id="q3" style="width:auto;margin:0"> 睡眠是否安稳</div>
+    <div class="chk"><input type="checkbox" id="q4" style="width:auto;margin:0"> 大便是否正常</div>
+    <button class="btn" onclick="saveQ()">💾 保存问询表</button>
+
+    <div class="sub">③ 成長記録</div>
+    <label>月龄</label><input id="gMonth" type="number" min="0" max="72" placeholder="如：6">
+    <div class="row"><div><label>身高(cm)</label><input id="gH" type="number" placeholder="67.6"></div>
+    <div><label>体重(kg)</label><input id="gW" type="number" placeholder="7.9"></div></div>
+    <button class="btn" onclick="addGrowth()">＋ 记录成长</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📑 我的数据</b>
+    <div id="dataList"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.townnews.co.jp/0203/2025/01/10/766226.html" target="_blank" style="color:var(--coral)">川崎市子育てアプリ / 浦添市·福岡市 子育てアプリ</a>
+  </div>
+
+<script>
+const KEY="P6-004";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function book(){
+  const name=document.getElementById('bName').value.trim();
+  const item=document.getElementById('bItem').value;
+  const date=document.getElementById('bDate').value;
+  if(!name||!date){alert('请填写宝宝姓名和期望日期');return;}
+  items.unshift({type:'预约',text:name+' · '+item+' · '+date,t:Date.now()});
+  document.getElementById('bName').value='';document.getElementById('bDate').value='';
+  save();
+}
+function saveQ(){
+  const a=document.getElementById('q1').checked, b=document.getElementById('q2').checked,
+        c=document.getElementById('q3').checked, d=document.getElementById('q4').checked;
+  items.unshift({type:'问询表',text:'发热:'+(a?'有':'无')+' / 食欲:'+(b?'正常':'异常')+' / 睡眠:'+(c?'安稳':'不安')+' / 大便:'+(d?'正常':'异常'),t:Date.now()});
+  ['q1','q2','q3','q4'].forEach(id=>document.getElementById(id).checked=false);
+  save();
+}
+function addGrowth(){
+  const m=document.getElementById('gMonth').value, h=document.getElementById('gH').value, w=document.getElementById('gW').value;
+  if(m===''){alert('请填写月龄');return;}
+  items.unshift({type:'成长',text:m+'月龄 · 身高'+(h||'-')+'cm · 体重'+(w||'-')+'kg',t:Date.now()});
+  document.getElementById('gMonth').value='';document.getElementById('gH').value='';document.getElementById('gW').value='';
+  save();
+}
+function del(i){ items.splice(i,1); save(); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function fmt(t){return new Date(t).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function render(){
+  const el=document.getElementById('dataList');
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有数据。</p>';return;}
+  const ico={预约:'📅',问询表:'📝',成长:'📈'};
+  el.innerHTML=items.map((x,i)=>`<div class="item"><span>${ico[x.type]||'•'} <b>${x.type}</b><br><span style="font-size:13px">${x.text}</span><br><span style="font-size:11px;color:var(--muted)">${fmt(x.t)}</span></span><button onclick="del(${i})" style="border:none;background:#FFF0F0;color:var(--coral);border-radius:8px;padding:4px 10px">删除</button></div>`).join('');
+}
+render();
+</script>
+</body>
+</html>

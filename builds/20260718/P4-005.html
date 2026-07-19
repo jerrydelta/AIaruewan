@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>纯净跑步记录（高精度·离线·无广告）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none;float:right}
+.stat{display:flex;gap:8px;margin:10px 0}
+.stat>div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;text-align:center;padding:10px}
+.stat b{display:block;font-size:18px;color:var(--coral)}
+.note{font-size:12px;color:var(--muted);margin:6px 0 0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">fitness</span><span class="tag">running_gps_accuracy</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">纯净跑步记录（离线·无广告）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">High-accuracy ad-free running tracker</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">跑者实测：Keep在高楼/树荫定位乱飘、卡路里虚高；Nike Run Club后台断档、锁屏自动停表；咕咚心率同步滞后。根因：GPS受环境干扰+手机锁屏省电降频丢点。痛点：数据不可信、广告多、自动暂停丢记录。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">不联网、不弹广告。手动校准录入，配速当场算准，数据全留本地。</p>
+    <div class="row">
+      <div><label>距离（km）</label><input id="km" type="number" min="0" step="0.01" placeholder="5"></div>
+      <div><label>时长（分）</label><input id="min" type="number" min="0" placeholder="30"></div>
+    </div>
+    <label>GPS校准系数（1.00=不调，0.95=纠偏高估）</label>
+    <input id="cal" type="number" min="0.5" max="1.5" step="0.01" value="1.00">
+    <label>路线/备注（选填）</label>
+    <input id="note" placeholder="如：江边 / 操场10圈">
+    <button class="btn" onclick="add()">＋ 记一次跑</button>
+    <p class="note">⚙ 校准系数用于修正"里程普遍偏高"问题，按你常用手表对比后填。</p>
+    <div class="stat">
+      <div><b id="sKm">0</b>总km</div>
+      <div><b id="sPace">--</b>均配速</div>
+      <div><b id="sN">0</b>次数</div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>🏃 跑步日志</b>
+    <div id="logs" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.toutiao.com/article/7655549428233536000/" target="_blank" style="color:var(--coral)">Keep / 悦跑圈 / 小米运动健康 / Nike Run Club / 咕咚</a>
+  </div>
+
+<script>
+const KEY="P4-005";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function fmtPace(km,min){if(!km||!min)return"--";const p=min/km;return Math.floor(p)+"'"+String(Math.round((p%1)*60)).padStart(2,"0")+'"';}
+function add(){
+  const rawKm=parseFloat(document.getElementById("km").value)||0;
+  const min=parseFloat(document.getElementById("min").value)||0;
+  const cal=parseFloat(document.getElementById("cal").value)||1;
+  const note=document.getElementById("note").value.trim();
+  if(!rawKm||!min){alert("填一下距离和时长");return;}
+  const km=+(rawKm*cal).toFixed(2);
+  items.unshift({km,min,note,pace:fmtPace(km,min),d:new Date().toISOString().slice(0,10)});
+  document.getElementById("km").value="";document.getElementById("min").value="";document.getElementById("note").value="";
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const totKm=items.reduce((s,x)=>s+x.km,0);
+  const totMin=items.reduce((s,x)=>s+x.min,0);
+  document.getElementById("sKm").textContent=+totKm.toFixed(1);
+  document.getElementById("sPace").textContent=fmtPace(totKm,totMin);
+  document.getElementById("sN").textContent=items.length;
+  document.getElementById("logs").innerHTML=items.length?items.map((x,i)=>
+    `<div class="item"><button class="del" onclick="del(${i})">删除</button>${x.d} · <b>${x.km}km</b> · ${x.min}分 · 配速${x.pace}${x.note?"<br><small style='color:var(--muted)'>${x.note}</small>":""}</div>`
+  ).join(""):`<p style="color:var(--muted);font-size:13px">还没有跑步记录。</p>`;
+}
+render();
+</script>
+</body>
+</html>

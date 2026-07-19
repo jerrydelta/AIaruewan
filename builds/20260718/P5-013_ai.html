@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>ADHD/戒断 高可靠习惯追踪器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;font-size:13px}
+.item b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.note{font-size:13px;color:#555;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:8px}
+.kpi{display:flex;gap:8px;margin-top:8px}
+.kpi div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:8px;text-align:center}
+.kpi b{display:block;font-size:18px;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">lifestyle</span><span class="tag">habit_tracker_gap</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">ADHD/戒断 高可靠习惯追踪器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Vertical reliable habit tracker: bad-habit + wearable</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">习惯追踪 App 存在明确功能缺口:用户最想要"坏习追踪""iCloud 同步",现有产品普遍缺失;竞品因同步 bug 丢失进度被差评。痛点:通用追踪器不做"戒断/负面习惯",且可靠性差。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:4px 0 10px">支持"建立习惯"与"戒断/坏习"两类;本地可靠存储,每日打卡不断档。</p>
+    <label>习惯名称</label>
+    <input id="name" placeholder="如 晨跑 / 戒烟 / 少刷手机">
+    <div class="row">
+      <div><label>类型</label>
+        <select id="kind"><option value="build">建立习惯</option><option value="quit">戒断/坏习</option></select>
+      </div>
+      <div><label>每周目标(天)</label><input id="goal" type="number" value="7"></div>
+    </div>
+    <button class="btn" onclick="add()">添加追踪</button>
+    <div class="kpi">
+      <div><b id="kBuild">0</b>建立中</div>
+      <div><b id="kQuit">0</b>戒断中</div>
+      <div><b id="kTotal">0</b>共</div>
+    </div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P5-013">
+    <div class="collapse-header" id="aiHeader_P5-013" onclick="toggleAI('P5-013')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P5-013" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P5-013">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P5-013" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P5-013')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P5-013" style="display:none;margin-top:10px">
+        <div id="aiMessages_P5-013" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P5-013" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P5-013')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>🔒 我的追踪</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://rantbase.app/review/habit-tracker-habitkit-6443918070" target="_blank" style="color:var(--coral)">HabitKit · Habit Tracker (Davetech)</a>
+  </div>
+
+<script>
+const KEY="P5-013";
+const today=new Date().toLocaleDateString();
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){const name=name_.value.trim()||"未命名";
+  items.push({name,kind:kind.value,goal:+(+goal.value||7),log:[],streak:0});
+  localStorage.setItem(KEY,JSON.stringify(items)); name_.value=""; render(); calc();}
+function check(i){const h=items[i];
+  const last=h.log[h.log.length-1];
+  if(last===today){h.log.pop();} else {h.log.push(today);}
+  h.streak=calcStreak(h.log);
+  localStorage.setItem(KEY,JSON.stringify(items)); render();}
+function calcStreak(log){if(!log.length)return 0;
+  let s=0; const d=new Date();
+  for(let k=0;;k++){const ds=new Date(d.getTime()-k*86400000).toLocaleDateString();
+    if(log.includes(ds))s++;else if(k>0)break;else break;}
+  return s;}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();calc();}
+function calc(){kBuild.textContent=items.filter(i=>i.kind==="build").length;
+  kQuit.textContent=items.filter(i=>i.kind==="quit").length; kTotal.textContent=items.length;}
+function render(){if(!items.length){items_.innerHTML='<p style="font-size:13px;color:#555;margin:6px 0 0">还没有追踪项。</p>';return;}
+  items_.innerHTML=items.map((it,i)=>{const done=it.log[it.log.length-1]===today;
+    const tag=it.kind==="quit"?'🚫 戒断':'✅ 建立';
+    const btn=it.kind==="quit"?(done?'今天破戒了(撤销)':'今天没破戒 ✓'):(done?'今天已完成 ✓':'今天打卡');
+    return `<div class="item"><span class="del" onclick="del(${i})">删除</span>
+    <b>${it.name}</b> · ${tag} · 连${it.streak}天<br>
+    <span onclick="check(${i})" style="cursor:pointer;display:inline-block;margin-top:6px;padding:8px 12px;border-radius:10px;font-size:14px;${done?'background:var(--ok);color:#fff':'background:#f0f0f0;color:#666'}">${btn}</span></div>`;}).join("");}
+const name_=document.getElementById("name");
+render(); calc();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

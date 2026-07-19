@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>数字游民多币种行程预算</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;font-size:14px}
+.item:first-child{border-top:none}
+.del{background:none;border:none;color:var(--coral);font-size:13px;cursor:pointer;float:right;margin-top:-2px}
+.sumbox{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:10px;font-size:13px}
+.sumbox b{color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">travel</span><span class="tag">nomad_budget_multicurrency</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">数字游民多币种行程预算</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Multi-currency trip-budget for digital nomads</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">数字游民/长期旅行者多币种预算是高频刚需。通用记账 App 不按"行程"组织、离线弱、跨币种原币留存 + 本币视图是核心缺口。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 原币记录 + 本币自动换算 + 按行程归集</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">用原币记账，填汇率自动换算本币，按行程分批汇总成本洞察。</p>
+    <label>行程名</label><input id="trip" placeholder="如 清迈慢生活 30天">
+    <div class="row">
+      <div><label>原币金额</label><input id="amt" type="number" inputmode="decimal" placeholder="如 15000"></div>
+      <div><label>币种</label>
+        <select id="cur"><option>THB</option><option>USD</option><option>EUR</option><option>JPY</option><option>GBP</option><option>CNY</option></select></div>
+    </div>
+    <label>汇率（1 原币 = ? 本币）</label>
+    <input id="rate" type="number" inputmode="decimal" placeholder="如 0.2">
+    <button class="btn" onclick="add()">＋ 记一笔</button>
+    <div class="sumbox" id="sum"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/eg/app/nomadwallet-travel-spend-app/id6639600190" target="_blank" style="color:var(--coral)">NomadWallet · NomadExpenses · Spendee · Finny</a>
+  </div>
+
+<script>
+const KEY="P9-013";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const trip=document.getElementById("trip").value.trim();
+  const amt=parseFloat(document.getElementById("amt").value);
+  const cur=document.getElementById("cur").value;
+  const rate=parseFloat(document.getElementById("rate").value)||0;
+  if(!trip){alert("请输入行程名");return;}
+  if(!amt||amt<=0){alert("请输入有效金额");return;}
+  items.push({trip,amt,cur,local:amt*rate});
+  document.getElementById("amt").value="";document.getElementById("rate").value="";
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);save();}
+function render(){
+  let html=""; const byTrip={};
+  items.forEach((it,i)=>{
+    byTrip[it.trip]=byTrip[it.trip]||0; byTrip[it.trip]+=it.local;
+    html+=`<div class='item'><button class='del' onclick='del(${i})'>删除</button><b>${it.trip}</b> <span class='tag'>${it.cur}</span><div style='font-size:13px;color:#555'>${it.amt} ${it.cur} → 本币 ${it.local.toFixed(0)}</div></div>`;
+  });
+  document.getElementById("list").innerHTML = items.length
+    ? "<b style='font-size:14px'>📒 记账（"+items.length+" 笔）</b>"+html
+    : "<p style='color:#999;font-size:13px'>暂无记录，开始你的多币种记账。</p>";
+  let sum="";
+  for(const t in byTrip){ sum+=`${t}: <b>本币 ${byTrip[t].toFixed(0)}</b><br>`; }
+  document.getElementById("sum").innerHTML = sum ? "各行程本币合计：<br>"+sum : "记录后显示各行程本币合计";
+}
+render();
+</script>
+</body>
+</html>

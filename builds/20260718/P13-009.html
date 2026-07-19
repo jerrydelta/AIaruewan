@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>城市级本地化婚礼策划</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.item .del{float:right;color:var(--coral);font-size:12px;cursor:pointer}
+.check{font-size:14px;padding:8px 0;border-bottom:1px dashed var(--line);display:flex;align-items:center;gap:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">wedding</span><span class="tag">korean_local_planner</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">城市级本地化婚礼策划</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">City-level localized wedding planner</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国 더 플래너 聚焦光州/全南本地策划师一站式；主流平台偏全国通用，地方新人需本地化供应商与评价。机会：区域化/城市级婚礼策划（类似中国婚礼纪城市站）。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 本地供应商目录 + 城市清单</b>
+    <div class="row">
+      <div><label>城市/区域</label><input id="region" placeholder="杭州"></div>
+      <div><label>类目</label>
+        <select id="lcat"><option>场地</option><option>摄影</option><option>司仪</option><option>花艺</option><option>婚纱</option></select></div>
+    </div>
+    <label>商家名称</label><input id="lname" placeholder="西湖XX宴会厅">
+    <label>本地备注（口碑/价格）</label><input id="lnote" placeholder="口碑好，人均800">
+    <button class="btn" onclick="addItem()">＋ 添加本地商家</button>
+
+    <div style="margin-top:14px;border-top:1px dashed var(--line);padding-top:12px">
+      <b>📋 按城市生成筹备清单</b>
+      <input id="city" placeholder="输入城市，如 成都" style="margin-top:8px">
+      <button class="btn" onclick="genCheck()">生成清单</button>
+      <div id="checklist"></div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>🏙 本地商家</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://theplanner.andro.io" target="_blank" style="color:var(--coral)">더 플래너 (The Planner)</a>
+  </div>
+
+<script>
+const KEY="P13-009";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addItem(){
+  const region=document.getElementById("region").value.trim();
+  const lname=document.getElementById("lname").value.trim();
+  if(!region||!lname){alert("请填写城市与商家");return;}
+  items.push({region,lcat:document.getElementById("lcat").value,lname,lnote:document.getElementById("lnote").value.trim()});
+  document.getElementById("lname").value="";document.getElementById("lnote").value="";
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function genCheck(){
+  const city=document.getElementById("city").value.trim();
+  if(!city){alert("请输入城市");return;}
+  const base=["确定婚期与预算","预约"+city+"本地婚宴厅","联系"+city+"摄影团队",
+    "筛选司仪/策划师","试纱与婚纱租购","花艺与布置","发邀请并收回 RSVP","婚品采购与伴手礼"];
+  let html='<b style="font-size:14px">📋 '+city+' 筹备清单</b>';
+  base.forEach(t=>html+=`<div class="check">☐ ${t}</div>`);
+  document.getElementById("checklist").innerHTML=html;
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  let html='<b>🏙 本地商家</b>';
+  if(items.length===0)html+='<p style="font-size:13px;color:#999;margin:8px 0">还没有本地商家。</p>';
+  const byRegion={};
+  items.forEach((v,i)=>{(byRegion[v.region]=byRegion[v.region]||[]).push(v);});
+  Object.keys(byRegion).forEach(r=>{
+    html+=`<div style="margin-top:8px"><b style="color:var(--coral)">${r}</b>`;
+    byRegion[r].forEach(v=>{
+      const idx=items.indexOf(v);
+      html+=`<div class="item"><span class="del" onclick="del(${idx})">删除</span>
+        <b>${v.lname}</b> · ${v.lcat}<br>${v.lnote||''}</div>`;
+    });
+    html+='</div>';
+  });
+  box.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

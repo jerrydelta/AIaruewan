@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>强验证少而精韩式严肃约会</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none;float:right}
+.pick{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;padding:10px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">relationship</span><span class="tag">korea_dating_trust</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">强验证少而精韩式约会</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Trust-verified, few-quality-matches dating</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国在线约会市场2024年估值2.64亿美元，CAGR 7.5%。核心壁垒是"信任与隐私"：韩国人避开约会App头号原因是不信任陌生人。Amanda需20人打分≥3.0才入、Noon Date每日仅4个精选匹配。痛点：MZ世代因低匹配率/假账号/肤浅筛选而弃App。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具（少而精·重验证）</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">每个候选人都先过验证关。系统每天只给你"已验证+评分高"的精选，不刷量。</p>
+    <label>昵称</label>
+    <input id="name" placeholder="如：Jisoo">
+    <div class="row">
+      <div><label>职业/学校</label><input id="job" placeholder="如：设计师"></div>
+      <div><label>身份验证</label>
+        <select id="ver"><option value="1">✅ 已验证</option><option value="0">❌ 未验证</option></select>
+      </div>
+    </div>
+    <label>综合印象评分（1-5）</label>
+    <input id="score" type="number" min="1" max="5" value="4">
+    <button class="btn" onclick="add()">＋ 加候选人</button>
+    <button class="btn" onclick="pick()" style="background:#fff;color:var(--coral);border:1px solid var(--coral)">🌟 看今日精选（仅已验证高评）</button>
+    <div id="pickBox"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 候选人池</b>
+    <div id="logs" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://daxueconsulting.com/online-dating-market-korea" target="_blank" style="color:var(--coral)">Amanda / Noon Date / Tinder / Duo</a>
+  </div>
+
+<script>
+const KEY="P4-013";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const name=document.getElementById("name").value.trim();
+  const job=document.getElementById("job").value.trim();
+  const ver=document.getElementById("ver").value==="1";
+  const score=parseFloat(document.getElementById("score").value)||3;
+  if(!name){alert("写个昵称");return;}
+  items.unshift({name,job,ver,score,d:new Date().toISOString().slice(0,10)});
+  document.getElementById("name").value="";document.getElementById("job").value="";
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function pick(){
+  const top=items.filter(p=>p.ver&&p.score>=4).sort((a,b)=>b.score-a.score).slice(0,4);
+  document.getElementById("pickBox").innerHTML=top.length?
+    top.map(p=>`<div class="pick">💎 <b>${p.name}</b> · ${p.job||"—"} · ${p.score}★ <span style="color:var(--ok)">已验证</span></div>`).join("")
+    :`<div class="pick">今天暂无"已验证且≥4星"的精选，少而精更安心。</div>`;
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  document.getElementById("logs").innerHTML=items.length?items.map((x,i)=>
+    `<div class="item"><button class="del" onclick="del(${i})">删除</button>${x.name} · ${x.job||"—"} · ${x.score}★ ${x.ver?'<span style="color:var(--ok)">✓验证</span>':'<span style="color:var(--coral-dark)">未验证</span>'}</div>`
+  ).join(""):`<p style="color:var(--muted);font-size:13px">还没有候选人。</p>`;
+}
+render();
+</script>
+</body>
+</html>

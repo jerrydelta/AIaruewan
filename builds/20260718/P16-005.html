@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>在韩外国人报税优化·中英文向导</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.res{font-size:14px;margin-top:8px;padding:10px;border-radius:10px;background:#FFF7F7}
+.res b{color:var(--coral)}
+.warn{background:#FFF3E0;color:#9a6b00}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">finance</span><span class="tag">foreign_resident_tax_korea</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">在韩外国人报税优化</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KR foreigner tax optimizer: 19% flat vs progressive</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">在韩外籍默认选 19% 平税常白白多缴 200 万韩元以上；活用渐进税率 + 住房/医疗/信用卡扣除更划算；租客即便月薪&lt;8000万韩元且名字在租约上也有资格申领月租抵免，但多数外籍租户不知。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#777;margin:6px 0 0">输入年所得与扣除（单位：万韩元），对比 19% 平税 vs 渐进税率，看能省多少。</p>
+    <label>年総所得（万 KRW）</label>
+    <input type="number" id="inc" placeholder="例 5000" inputmode="numeric">
+    <label>控除合計（万 KRW）— 住房/医疗/信用卡/海外保险等</label>
+    <input type="number" id="ded" placeholder="例 800" inputmode="numeric">
+    <label>是否已用 19% 平税预扣？</label>
+    <select id="flat"><option value="1">是（雇主已按19%扣）</option><option value="0">否</option></select>
+    <button class="btn" onclick="calc()">比较并计算可退</button>
+    <div class="res" id="res"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 计算历史</b>
+    <ul id="ul" style="padding:0;margin:6px 0 0;list-style:none"></ul>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.trulykr.com/2026/05/how-to-file-korean-taxes-as-foreign.html" target="_blank" style="color:var(--coral)">Hometax / Wetax / 손택스 / NTS English Portal</a>
+  </div>
+
+<script>
+const KEY="P16-005";
+let history=JSON.parse(localStorage.getItem(KEY)||"[]");
+// 韩国所得税累进（과세표준，万KRW）含地方税前
+function progressive(taxable){ // taxable 单位 万KRW
+  const b=[[1400,0.06],[4600,0.15],[8800,0.24],[15000,0.35],[30000,0.38],[50000,0.40],[100000,0.42],[Infinity,0.45]];
+  let prev=0,t=0;
+  for(const [cap,rate] of b){ if(taxable<=prev)break; const seg=Math.min(taxable,cap)-prev; if(seg>0)t+=seg*rate; prev=cap; }
+  return t*1.10; // +10% 地方所得税
+}
+function fmt(n){return Math.round(n*10000).toLocaleString("ko-KR")+" 韩元";}
+function render(){
+  const ul=document.getElementById("ul");ul.innerHTML="";
+  history.slice(0,15).forEach(h=>{const li=document.createElement("li");
+    li.style="padding:7px 0;border-bottom:1px solid var(--line);font-size:14px";
+    li.innerHTML=`<span class="pill">${h.d}</span>所得 ${h.inc}万 → 省 ${fmt(h.save)}`;
+    ul.appendChild(li);});
+}
+function calc(){
+  const inc=parseFloat(document.getElementById("inc").value);
+  const ded=parseFloat(document.getElementById("ded").value)||0;
+  const flatUsed=document.getElementById("flat").value==="1";
+  if(!inc||inc<=0){alert("请输入年所得");return;}
+  const taxable=Math.max(inc-ded,0);
+  const flatTax=taxable*0.19*1.10;
+  const progTax=progressive(taxable);
+  const save=flatTax-progTax;
+  let html=`課税所得：<b>${fmt(taxable)}</b><br>`;
+  html+=`19% 平税：<b>${fmt(flatTax)}</b><br>`;
+  html+=`渐进税率：<b>${fmt(progTax)}</b><br>`;
+  if(save>0){ html+=`<div class="${flatUsed?'warn':''}">${flatUsed?'⚠ 改用渐进税率可退税约':'改用渐进税率可少缴约'} <b>${fmt(save)}</b>（约 ${(save/(flatTax||1)*100).toFixed(0)}%）</div>`; }
+  else html+=`<div>当前 19% 平税已更优，无需调整。</div>`;
+  html+=`<div style="font-size:12px;color:#999;margin-top:6px">提示：租約署名+月薪&lt;8000万 KRW 可申月租抵免；海外保险/学费常被漏。</div>`;
+  document.getElementById("res").innerHTML=html;
+  history.unshift({d:new Date().toISOString().slice(0,10),inc,save:Math.max(save,0),t:Date.now()});
+  localStorage.setItem(KEY,JSON.stringify(history));render();
+}
+render();
+</script>
+</body>
+</html>

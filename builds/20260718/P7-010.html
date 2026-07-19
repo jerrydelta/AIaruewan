@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>极简适老用药提醒</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.7;padding:16px;max-width:480px;margin:0 auto;font-size:17px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:16px;border:none;border-radius:14px;
+  background:var(--coral);color:#fff;font-size:19px;font-weight:700;cursor:pointer;margin-top:10px}
+.btn:active{background:var(--coral-dark)}
+.btn-ok{background:var(--ok)}
+.btn-voice{background:#FFE9B0;color:#7a5a00}
+.tag{display:inline-block;font-size:13px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:3px 11px;margin:2px 5px 2px 0}
+input,select,textarea{width:100%;padding:14px;border:1px solid var(--line);
+  border-radius:12px;font-size:17px;margin-top:8px;background:#fff;color:var(--ink)}
+label{font-size:15px;color:var(--muted);display:block;margin-top:12px;font-weight:600}
+.mini{font-size:13px;color:var(--muted)}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+.item .nm{font-size:20px;font-weight:700}
+.dose{font-size:16px;color:#444;margin-top:4px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">elderly</span><span class="tag">senior_med_reminder</span></div>
+    <h1 style="font-size:22px;margin:8px 0 4px">极简适老用药提醒</h1>
+    <p class="h-coral" style="font-size:15px;margin:0">超大字 · 语音播报 · 可离线</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">💡 为什么需要</b>
+    <p style="font-size:15px;color:#555;margin:6px 0 0">多数用药 App 字小、步骤多、需联网。本工具超大字、高对比、可语音播报药名、完全离线，子女也能远程看到服药记录。</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">🛠 添加药品</b>
+    <label>药名（点喇叭可听）</label>
+    <div class="row">
+      <input id="name" placeholder="如：降压药">
+      <button class="btn btn-voice" style="margin-top:8px;width:auto;padding:14px 18px" onclick="speak()">🔊 听</button>
+    </div>
+    <label>剂量 / 用量</label>
+    <input id="dose" placeholder="如：1 片">
+    <div class="row">
+      <div><label>服药时间</label><select id="time"><option>早</option><option>中</option><option>晚</option><option>睡前</option></select></div>
+      <div><label>餐次</label><select id="meal"><option>饭后</option><option>饭前</option><option>随餐</option><option>不限</option></select></div>
+    </div>
+    <button class="btn" onclick="add()">➕ 添加药品</button>
+  </div>
+
+  <div class="card" id="list">
+    <b style="font-size:18px">💊 今日服药清单</b>
+    <div id="items"></div>
+    <div id="summary" style="font-size:16px;font-weight:700;margin-top:12px;color:var(--coral)"></div>
+  </div>
+
+  <div class="card" style="font-size:13px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/app/clearcare-%E5%90%83%E8%8D%AF%E6%8F%90%E9%86%92/id6781589821" target="_blank" style="color:var(--coral)">ClearCare 吃药提醒 / 药准时（适老用药提醒）</a>
+  </div>
+
+<script>
+const KEY="P7-010";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let taken=JSON.parse(localStorage.getItem(KEY+"_taken")||"{}");
+function todayKey(){return new Date().toISOString().slice(0,10);}
+function speak(){const n=document.getElementById("name").value.trim();if(!n)return;
+  if("speechSynthesis"in window){const u=new SpeechSynthesisUtterance(n);u.lang="zh-CN";speechSynthesis.speak(u);}}
+function add(){
+  const name=document.getElementById("name").value.trim();
+  if(!name){alert("请填写药名");return;}
+  items.push({id:Date.now(),name,dose:document.getElementById("dose").value.trim(),time:document.getElementById("time").value,meal:document.getElementById("meal").value});
+  document.getElementById("name").value="";document.getElementById("dose").value="";
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+}
+function toggle(id){const k=todayKey();if(!taken[k])taken[k]={};taken[k][id]=!taken[k][id];localStorage.setItem(KEY+"_taken",JSON.stringify(taken));render();}
+function del(id){items=items.filter(x=>x.id!==id);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const k=todayKey();const tk=taken[k]||{};
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p class="mini" style="margin-top:8px;font-size:14px">还没有添加药品。</p>';document.getElementById("summary").textContent="";return;}
+  const done=items.filter(x=>tk[x.id]).length;
+  box.innerHTML=items.map(it=>`
+    <div class="item">
+      <div class="nm">${esc(it.name)}</div>
+      <div class="dose">${it.dose||"用量未填"} · ${it.time} · ${it.meal}</div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn ${tk[it.id]?'btn-ok':''}" style="margin-top:0" onclick="toggle(${it.id})">${tk[it.id]?'✅ 已服下':'确认服药'}</button>
+        <button class="btn" style="margin-top:0;background:#EEE;color:#888;width:auto;padding:16px 18px" onclick="del(${it.id})">删除</button>
+      </div>
+    </div>`).join("");
+  document.getElementById("summary").textContent=`今天已服 ${done} / ${items.length} 种药`;
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+</script>
+</body>
+</html>

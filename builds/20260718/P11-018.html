@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>听书式学习助手</title>
+<style>
+:root{
+  --coral:#FF6B6B;        --coral-dark:#E85555;
+  --ink:#2D2D2D;          --muted:#8A8A8A;
+  --bg:#F7F7F7;           --card:#FFFFFF;
+  --line:#ECECEC;         --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-sm{padding:7px 10px;font-size:13px;border-radius:9px;margin-top:0;width:auto}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+textarea,input[type=range]{width:100%;margin-top:6px}
+textarea{padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.out{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px;white-space:pre-wrap}
+.mini{font-size:12px;color:var(--muted)}
+h4{margin:14px 0 0;font-size:14px;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">neurodiversity</span><span class="tag">dyslexia_tts</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">听书式学习助手</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Dyslexia TTS + learning (summarize / quiz)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Speechify 是头号文字转语音，5500 万+用户、月收约 340 万美元，读写障碍/ADHD 群体靠"听"学习。普通 TTS 机械。本工具：粘贴文字→自然语音朗读+调速+AI 式总结+自测题，帮读写障碍学生"听书式"学习。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 读给我听</b>
+    <textarea id="txt" rows="5" placeholder="粘贴课文 / 文章 / 笔记…"></textarea>
+    <label>语速</label>
+    <input id="rate" type="range" min="0.5" max="1.5" step="0.1" value="0.9">
+    <button class="btn" style="background:var(--ok)" onclick="read()">🔊 朗读全文</button>
+    <button class="btn" style="background:#ccc" onclick="stop()">停止</button>
+    <h4>🤖 AI 总结</h4>
+    <button class="btn" onclick="summarize()">生成要点</button>
+    <div id="sum" class="out"></div>
+    <h4>✏️ 自测题</h4>
+    <button class="btn" onclick="quiz()">生成 3 道题</button>
+    <div id="qz"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://speechify.com/?landing_url=https%3A%2F%2Fspeechify.com%2Ftext-to-speech-online%2F" target="_blank" style="color:var(--coral)">Speechify</a>
+  </div>
+
+<script>
+const KEY="P11-018";
+let hist=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){ localStorage.setItem(KEY,JSON.stringify(hist)); }
+function read(){
+  const t=document.getElementById('txt').value.trim(); if(!t){alert('请粘贴文字');return;}
+  if(!('speechSynthesis' in window)){ alert('当前浏览器不支持语音'); return; }
+  const u=new SpeechSynthesisUtterance(t); u.lang='zh-CN'; u.rate=+document.getElementById('rate').value;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+function stop(){ if('speechSynthesis' in window) speechSynthesis.cancel(); }
+function sentences(t){ return t.split(/[。！？\.\!\?]/).map(s=>s.trim()).filter(s=>s.length>4); }
+function summarize(){
+  const t=document.getElementById('txt').value.trim(); if(!t){alert('请粘贴文字');return;}
+  const ss=sentences(t);
+  let pick=ss.slice(0,3);
+  if(ss.length>6) pick=pick.concat([ss[Math.floor(ss.length/2)]]);
+  const out='要点（共'+ss.length+'句，提取关键句）：\n• '+pick.join('\n• ');
+  document.getElementById('sum').textContent=out;
+  hist.push({type:'sum',date:new Date().toLocaleDateString()}); save();
+}
+function quiz(){
+  const t=document.getElementById('txt').value.trim(); if(!t){alert('请粘贴文字');return;}
+  const ss=sentences(t);
+  const box=document.getElementById('qz'); box.innerHTML='';
+  const idx=[0, Math.floor(ss.length/2), ss.length-1].filter(i=>i<ss.length);
+  const seen=new Set();
+  idx.forEach((i,n)=>{
+    if(seen.has(i)) return; seen.add(i);
+    const s=ss[i];
+    const kw=(s.match(/[一-龥]{2,4}/g)||['__'])[0]||'__';
+    const d=document.createElement('div'); d.className='out'; d.style.marginTop='6px';
+    d.innerHTML='Q'+(n+1)+'：上文主要讲到了关于「'+kw+'」的什么？<div class="mini" style="margin-top:4px">参考：'+s+'</div>';
+    box.appendChild(d);
+  });
+  if(!box.innerHTML) box.innerHTML='<div class="mini">文字太短，无法出题</div>';
+  hist.push({type:'quiz',date:new Date().toLocaleDateString()}); save();
+}
+</script>
+</body>
+</html>

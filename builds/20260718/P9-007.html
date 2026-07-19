@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>免费多平台配送零工收入仪表盘</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;font-size:14px}
+.item:first-child{border-top:none}
+.del{background:none;border:none;color:var(--coral);font-size:13px;cursor:pointer;float:right;margin-top:-2px}
+.sumbox{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:10px;font-size:13px}
+.sumbox b{color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">gig_economy</span><span class="tag">delivery_income_dashboard</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">免费多平台配送收入仪表盘</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Free multi-platform delivery-gig income dashboard</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">外卖/配送零工核心痛点是"每周该预留多少税"与"多平台收入汇总"。主流工具要么收费、要么不覆盖所有平台。免费多平台收入仪表盘 + 税务预留是空白。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 收入汇总 + 真实时薪 + 每周税预留</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">按平台记录单量、收入、里程与时长，自动算真实时薪，并给出每周应存税款。</p>
+    <div class="row">
+      <div><label>平台</label>
+        <select id="platform"><option>DoorDash</option><option>Uber Eats</option><option>Instacart</option><option>Grubhub</option><option>其他</option></select></div>
+      <div><label>单量</label><input id="orders" type="number" inputmode="numeric" placeholder="如 12"></div>
+    </div>
+    <div class="row">
+      <div><label>收入($)</label><input id="amt" type="number" inputmode="decimal" placeholder="如 96"></div>
+      <div><label>里程(mi)</label><input id="mi" type="number" inputmode="decimal" placeholder="如 18"></div>
+    </div>
+    <label>耗时(分钟)</label>
+    <input id="min" type="number" inputmode="decimal" placeholder="如 180">
+    <button class="btn" onclick="add()">＋ 记录一次出工</button>
+    <div class="sumbox" id="sum"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://gigmetry.com/tools-and-resources" target="_blank" style="color:var(--coral)">Solo · TallyO · Hurdlr</a>
+  </div>
+
+<script>
+const KEY="P9-007";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const platform=document.getElementById("platform").value;
+  const orders=parseInt(document.getElementById("orders").value)||0;
+  const amt=parseFloat(document.getElementById("amt").value);
+  const mi=parseFloat(document.getElementById("mi").value)||0;
+  const min=parseFloat(document.getElementById("min").value)||0;
+  if(!amt||amt<=0){alert("请输入有效收入");return;}
+  const hr = min>0 ? amt/(min/60) : 0;
+  items.push({platform,orders,amt,mi,min,hr});
+  document.getElementById("orders").value="";document.getElementById("amt").value="";
+  document.getElementById("mi").value="";document.getElementById("min").value="";
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);save();}
+function render(){
+  let inc=0,mi=0,html="";
+  const byP={};
+  items.forEach((it,i)=>{
+    inc+=it.amt; mi+=it.mi;
+    byP[it.platform]=byP[it.platform]||{amt:0,hr:[]};
+    byP[it.platform].amt+=it.amt; byP[it.platform].hr.push(it.hr);
+    html+=`<div class='item'><button class='del' onclick='del(${i})'>删除</button><b>$${it.amt.toFixed(0)}</b> <span class='tag'>${it.platform}</span><div style='font-size:13px;color:#555'>${it.orders}单 · ${it.mi}mi · ${it.min}min · 真实时薪 $${it.hr.toFixed(1)}</div></div>`;
+  });
+  document.getElementById("list").innerHTML = items.length
+    ? "<b style='font-size:14px'>📒 出工记录（"+items.length+" 次）</b>"+html
+    : "<p style='color:#999;font-size:13px'>暂无记录，记下第一次出工。</p>";
+  const tax=Math.max(0,(inc-mi*0.725))*0.153;
+  let sum=`总收入 <b>$${inc.toFixed(0)}</b> ｜ 总里程 ${mi.toFixed(0)}mi<br>`;
+  sum+=`估算季度税 <b>$${tax.toFixed(0)}</b> ｜ 每周预留 <b>$${(tax/13).toFixed(0)}</b><br>`;
+  for(const p in byP){ const a=byP[p].hr.reduce((x,y)=>x+y,0)/byP[p].hr.length;
+    sum+=`${p}: 均时薪 $${a.toFixed(1)} ｜ `; }
+  document.getElementById("sum").innerHTML=sum;
+}
+render();
+</script>
+</body>
+</html>

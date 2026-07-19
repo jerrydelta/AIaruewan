@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>银发兴趣社区与课程</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.7;padding:16px;max-width:480px;margin:0 auto;font-size:17px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:16px;border:none;border-radius:14px;
+  background:var(--coral);color:#fff;font-size:19px;font-weight:700;cursor:pointer;margin-top:10px}
+.btn:active{background:var(--coral-dark)}
+.btn-ok{background:var(--ok)}
+.tag{display:inline-block;font-size:13px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:3px 11px;margin:2px 5px 2px 0}
+input,select,textarea{width:100%;padding:14px;border:1px solid var(--line);
+  border-radius:12px;font-size:17px;margin-top:8px;background:#fff;color:var(--ink)}
+label{font-size:15px;color:var(--muted);display:block;margin-top:12px;font-weight:600}
+.mini{font-size:13px;color:var(--muted)}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+.item .nm{font-size:19px;font-weight:700}
+.row{display:flex;gap:10px}.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">elderly</span><span class="tag">silver_video_social</span></div>
+    <h1 style="font-size:22px;margin:8px 0 4px">银发兴趣社区与课程</h1>
+    <p class="h-coral" style="font-size:15px;margin:0">作品分享 · 兴趣圈子 · 在线课程</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">💡 为什么需要</b>
+    <p style="font-size:15px;color:#555;margin:6px 0 0">小年糕中老年用户 1.1 亿、糖豆用户 2 亿+。银发用户高粘性但需要"社区+轻量付费课程"，而非纯流量收割。</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">🛠 分享我的作品</b>
+    <label>作品标题</label>
+    <input id="title" placeholder="如：我的广场舞视频">
+    <label>类型</label>
+    <select id="type"><option>短视频</option><option>照片相册</option><option>书法/绘画</option><option>文章</option></select>
+    <label>一句话介绍</label>
+    <textarea id="desc" rows="2" placeholder="想说的话"></textarea>
+    <button class="btn" onclick="addWork()">📤 发布作品</button>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">🎓 我的课程学习</b>
+    <label>想学的课程</label>
+    <input id="course" placeholder="如：手机摄影课">
+    <button class="btn btn-ok" onclick="addCourse()">➕ 加入学习</button>
+    <div id="courses"></div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P7-014">
+    <div class="collapse-header" id="aiHeader_P7-014" onclick="toggleAI('P7-014')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P7-014" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P7-014">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P7-014" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P7-014')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P7-014" style="display:none;margin-top:10px">
+        <div id="aiMessages_P7-014" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P7-014" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P7-014')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b style="font-size:18px">🖼 我的作品墙</b>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:13px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.sohu.com/a/781798832_114988" target="_blank" style="color:var(--coral)">小年糕 / 美篇 / 糖豆（银发兴趣社区）</a>
+  </div>
+
+<script>
+const KEY="P7-014";
+let works=JSON.parse(localStorage.getItem(KEY)||"[]");
+let courses=JSON.parse(localStorage.getItem(KEY+"_c")||"[]");
+function addWork(){
+  const title=document.getElementById("title").value.trim();
+  if(!title){alert("请填写作品标题");return;}
+  works.unshift({id:Date.now(),title,type:document.getElementById("type").value,desc:document.getElementById("desc").value.trim()});
+  document.getElementById("title").value="";document.getElementById("desc").value="";
+  localStorage.setItem(KEY,JSON.stringify(works));renderWorks();
+}
+function addCourse(){
+  const c=document.getElementById("course").value.trim();
+  if(!c){alert("请填写课程名");return;}
+  courses.push({name:c,done:0});
+  document.getElementById("course").value="";localStorage.setItem(KEY+"_c",JSON.stringify(courses));renderCourses();
+}
+function study(i){courses[i].done++;localStorage.setItem(KEY+"_c",JSON.stringify(courses));renderCourses();}
+function delCourse(i){courses.splice(i,1);localStorage.setItem(KEY+"_c",JSON.stringify(courses));renderCourses();}
+function delW(id){works=works.filter(x=>x.id!==id);localStorage.setItem(KEY,JSON.stringify(works));renderWorks();}
+function renderWorks(){
+  const box=document.getElementById("items");
+  if(!works.length){box.innerHTML='<p class="mini" style="margin-top:8px;font-size:14px">还没有作品，分享第一个吧。</p>';return;}
+  box.innerHTML=works.map(it=>`<div class="item"><div class="nm">${esc(it.title)}</div><div class="mini" style="font-size:15px;margin-top:4px">${it.type}${it.desc?' · '+esc(it.desc):''}</div><button class="btn" style="margin-top:8px;background:#EEE;color:#888" onclick="delW(${it.id})">删除</button></div>`).join("");
+}
+function renderCourses(){
+  const box=document.getElementById("courses");
+  if(!courses.length){box.innerHTML='<p class="mini" style="margin-top:8px;font-size:14px">还没有课程。</p>';return;}
+  box.innerHTML=courses.map((c,i)=>`<div class="item"><div class="nm" style="font-size:17px">${esc(c.name)}</div><div class="mini" style="font-size:15px">已学习 ${c.done} 次</div><div class="row" style="margin-top:8px"><button class="btn btn-ok" style="margin-top:0" onclick="study(${i})">学一次</button><button class="btn" style="margin-top:0;background:#EEE;color:#888;width:auto;padding:16px 18px" onclick="delCourse(${i})">删</button></div></div>`).join("");
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+renderWorks();renderCourses();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>极简本地优先私人菜谱保管</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.recipe{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;font-size:13px}
+.recipe b{color:var(--ink)}.del{color:var(--coral);font-size:12px;float:right;cursor:pointer}
+small{color:var(--muted)}
+.se{width:60px;padding:6px;margin-top:0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">productivity</span><span class="tag">minimalist_recipe_manager</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">极简私人菜谱保管</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Minimalist ad-free local-first recipe keeper</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">菜谱网站广告泛滥、SEO 故事长，用户愤怒。Sift 开源极简本地优先、AI 提取纯菜谱去广告；美食记无开屏广告、自动算倍量。本工具离线无广告保管私人菜谱，支持倍量自动换算、标签筛选。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <label>菜名</label>
+    <input id="name" placeholder="例如：番茄炒蛋">
+    <label>食材（每行一种，可带数字量，如"鸡蛋 3个"）</label>
+    <textarea id="ing" rows="3" placeholder="鸡蛋 3个&#10;番茄 2个&#10;盐 适量"></textarea>
+    <label>步骤</label>
+    <textarea id="step" rows="3" placeholder="1.打蛋 2.炒番茄 3.混合"></textarea>
+    <div class="row">
+      <div><label>原份数</label><input id="base" type="number" value="2"></div>
+      <div><label>标签</label><select id="tag"><option>家常</option><option>早餐</option><option>汤</option><option>甜点</option><option>减脂</option></select></div>
+    </div>
+    <button class="btn" id="add">保存菜谱（存本地）</button>
+    <label>搜索 / 按标签筛选</label>
+    <input id="q" placeholder="输入菜名或标签">
+  </div>
+
+  <div class="card" id="list"><b>🍳 我的菜谱（<span id="cnt">0</span>）</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://fdroid.gitlab.io/jekyll-fdroid/zh_Hans/packages/app.siftrecipes" target="_blank" style="color:var(--coral)">Sift · Snackify · 美食记 · 食遇日记</a>
+  </div>
+
+<script>
+const KEY="P1-014";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const name=document.getElementById("name").value.trim();if(!name)return;
+  const ing=document.getElementById("ing").value;
+  const step=document.getElementById("step").value;
+  const base=+document.getElementById("base").value||1;
+  const tag=document.getElementById("tag").value;
+  items.push({name,ing,step,base,tag,t:new Date().toLocaleString("zh")});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  ["name","ing","step"].forEach(id=>document.getElementById(id).value="");
+  render();
+}
+function scaleText(ing,mult){
+  return ing.split("\n").map(l=>{
+    const m=l.match(/^(\D*?)(\d+(?:\.\d+)?)(\s*\S*)$/);
+    if(m){const n=parseFloat(m[2])*mult;return `${m[1]}${Number.isInteger(n)?n:n.toFixed(1)}${m[3]}`;}
+    return l;
+  }).join("\n");
+}
+function render(){
+  const q=document.getElementById("q").value.trim().toLowerCase();
+  document.getElementById("cnt").textContent=items.length;
+  const box=document.getElementById("items");
+  const list=items.filter(r=>!q||r.name.toLowerCase().includes(q)||r.tag.includes(q));
+  if(!list.length){box.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">没有匹配的菜谱。</p>';return;}
+  box.innerHTML=list.slice().reverse().map((r,i)=>{
+    const mult=r.base?1:1;
+    return `<div class="recipe"><span class="del" data-n="${r.name}">删除</span>
+      <b>${r.name}</b> <span class="tag">${r.tag}</span><br>
+      <small>食材：</small><div style="white-space:pre-wrap;font-size:13px">${r.ing}</div>
+      <small>步骤：</small><div style="font-size:13px">${r.step}</div>
+      <div style="margin-top:6px">倍量：
+        <button class="btn sub se scale" data-n="${r.name}" data-m="0.5" style="display:inline-block;width:auto;padding:4px 10px;margin:0 4px">½</button>
+        <button class="btn sub se scale" data-n="${r.name}" data-m="2" style="display:inline-block;width:auto;padding:4px 10px;margin:0 4px">×2</button>
+        <button class="btn sub se scale" data-n="${r.name}" data-m="3" style="display:inline-block;width:auto;padding:4px 10px">×3</button>
+      </div>
+      <div class="scaled" data-n="${r.name}" style="font-size:12px;color:var(--coral);white-space:pre-wrap;margin-top:4px"></div>
+    </div>`;
+  }).join("");
+  box.querySelectorAll(".del").forEach(e=>e.onclick=()=>{items=items.filter(x=>x.name!==e.dataset.n);localStorage.setItem(KEY,JSON.stringify(items));render();});
+  box.querySelectorAll(".scale").forEach(b=>b.onclick=()=>{
+    const r=items.find(x=>x.name===b.dataset.n);const m=+b.dataset.m;
+    document.querySelector(`.scaled[data-n="${CSS.escape(r.name)}"]`).textContent="换算后("+m+"倍)："+scaleText(r.ing,m);
+  });
+}
+document.getElementById("add").onclick=add;
+document.getElementById("q").oninput=render;
+render();
+</script>
+</body>
+</html>

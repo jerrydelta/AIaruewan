@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>自由职业者一体化客户门户</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ghost{background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{text-align:center;padding:10px 4px}
+.stat b{display:block;font-size:20px;color:var(--coral)}
+.stat span{font-size:12px;color:var(--muted)}
+.proj{font-size:13px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.pill{font-size:11px;padding:1px 8px;border-radius:999px;color:#fff}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">micro_saas</span><span class="tag">freelancer_client_portal</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">自由职业者一体化客户门户</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">All-in-one freelancer client portal</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">自由职业者在 5+ 工具间跳来跳去管项目、发票、合同、交付与反馈。Client Portal 把这些都收进一个门户：客户看状态、审批、付发票。标杆 MonoDesk 做"一个工作台"，AI Brief 转任务；自由职业者 SaaS 市场 56.6 亿美元。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 项目看板 + 审批 + 发票</b>
+    <label>项目名称</label><input id="pname" placeholder="如：品牌官网改版">
+    <div class="row">
+      <div><label>客户</label><input id="client" placeholder="如：ABC 公司"></div>
+      <div><label>金额(元)</label><input id="amt" type="number" value="8000"></div>
+    </div>
+    <label>交付物</label><input id="deliver" placeholder="如：首页+5内页+后台">
+    <label>状态</label>
+    <select id="status"><option value="需求中">需求中</option><option value="进行中">进行中</option><option value="待审批">待审批</option><option value="已完成">已完成</option></select>
+    <button class="btn" id="add">添加项目</button>
+    <div class="row" style="margin-top:10px">
+      <div class="stat"><b id="cnt">0</b><span>项目数</span></div>
+      <div class="stat"><b id="active">0</b><span>进行中</span></div>
+      <div class="stat"><b id="rev">¥0</b><span>已完成金额</span></div>
+    </div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P14-014">
+    <div class="collapse-header" id="aiHeader_P14-014" onclick="toggleAI('P14-014')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P14-014" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P14-014">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P14-014" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P14-014')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P14-014" style="display:none;margin-top:10px">
+        <div id="aiMessages_P14-014" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P14-014" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P14-014')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 项目看板</b>
+    <p id="empty" style="font-size:13px;color:var(--muted);margin:6px 0 0">还没有项目。</p>
+    <div id="log"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.vibrantsnap.com/blog/micro-saas-ideas-profitable-niches-2026" target="_blank" style="color:var(--coral)">MonoDesk / Client Portal for Freelancers</a>
+  </div>
+
+<script>
+const KEY="P14-014";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const $=id=>document.getElementById(id);
+const color={需求中:"#8A8A8A",进行中:"#FF6B6B",待审批:"#E0A800",已完成:"#3FB984"};
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function add(){
+  if(!pname.value.trim())return;
+  items.push({pname:pname.value.trim(),client:client.value.trim(),amt:+amt.value||0,deliver:deliver.value.trim(),status:status.value});
+  pname.value=client.value=deliver.value="";save();
+}
+function next(i){
+  const order=["需求中","进行中","待审批","已完成"];
+  const k=order.indexOf(items[i].status);
+  items[i].status=order[(k+1)%order.length];save();
+}
+function del(i){items.splice(i,1);save();}
+function render(){
+  cnt.textContent=items.length;
+  active.textContent=items.filter(x=>x.status==="进行中"||x.status==="待审批").length;
+  rev.textContent="¥"+items.filter(x=>x.status==="已完成").reduce((s,x)=>s+x.amt,0).toLocaleString();
+  if(items.length)empty.style.display="none";else empty.style.display="block";
+  const order=["需求中","进行中","待审批","已完成"];
+  const orders=["需求中","进行中","待审批","已完成"];
+  log.innerHTML=items.slice().sort((a,b)=>orders.indexOf(a.status)-orders.indexOf(b.status)).map(x=>{
+    const idx=items.indexOf(x);
+    return `<div class="proj">
+      <span style="float:right;color:var(--coral);cursor:pointer" data-del="${idx}">✕</span>
+      <b>${esc(x.pname)}</b> <span class="pill" style="background:${color[x.status]}">${x.status}</span><br>
+      <span style="font-size:12px;color:#666">${x.client||"—"} · ¥${x.amt.toLocaleString()}${x.deliver?" · "+esc(x.deliver):""}</span><br>
+      <span style="font-size:12px;color:var(--coral);cursor:pointer" data-next="${idx}">▶ 推进状态</span></div>`;
+  }).join("");
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>del(+b.dataset.del));
+  document.querySelectorAll("[data-next]").forEach(b=>b.onclick=()=>next(+b.dataset.next));
+}
+function esc(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+const cnt=document.getElementById("cnt"),active=document.getElementById("active"),rev=document.getElementById("rev");
+add.onclick=add;
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

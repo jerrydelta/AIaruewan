@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>冰箱保质期管理 + 临期食谱</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.r{background:var(--coral)}.y{background:#E8993A}.g{background:var(--ok)}
+.rec{background:#FFF0F0;border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">food</span><span class="tag">food_waste_fridge</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">冰箱保质期管理 + 临期食谱</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Fridge / expiry manager + near-expiry recipe recs</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本家庭系食品浪费约 216 万吨/年。实证：119 家庭干预研究中，用冰箱管理 App 组周浪费降 29%-51%。Panasonic 与横浜市实测 AI 摄像头冰箱+App（按期限排序、联动网购）。痛点：买了忘了吃、临期看不见。机会：保质期管理+临期食谱推荐。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">入库食材（名称/数量/保质期）→ 按剩余天数倒计时排序，临期自动高亮（红/黄/绿）；点"推荐临期食谱"按最临期食材匹配内置食谱。</p>
+    <label>食材名称</label><input id="name" placeholder="如：菠菜">
+    <div class="row"><div><label>数量</label><input id="qty" placeholder="1把"></div>
+    <div><label>保质期</label><input id="exp" type="date"></div></div>
+    <button class="btn" onclick="add()">＋ 入库</button>
+    <button class="btn" onclick="recommend()" style="background:#FFF0F0;color:var(--coral)">🍳 推荐临期食谱</button>
+    <div id="recBox"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>🧊 我的冰箱</b>
+    <div id="fridgeList"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://jp.weforum.org/stories/2025/05/how-japan-is-tackling-household-food-waste/" target="_blank" style="color:var(--coral)">Live Pantry·BEEP·Limiter·我的冰箱 / 日本食品ロス治理</a>
+  </div>
+
+<script>
+const KEY="P6-014";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+const RECIPES=[
+  {n:'清炒菠菜',need:['菠菜']},{n:'番茄炒蛋',need:['番茄','鸡蛋']},{n:'土豆炖肉',need:['土豆','猪肉']},
+  {n:'西兰花炒虾仁',need:['西兰花','虾']},{n:'凉拌黄瓜',need:['黄瓜']},{n:'牛奶燕麦',need:['牛奶','燕麦']},
+  {n:'豆腐汤',need:['豆腐']},{n:'香蕉奶昔',need:['香蕉','牛奶']},{n:'胡萝卜粥',need:['胡萝卜','大米']}
+];
+function add(){
+  const name=document.getElementById('name').value.trim(), qty=document.getElementById('qty').value.trim(), exp=document.getElementById('exp').value;
+  if(!name||!exp){alert('请填写名称和保质期');return;}
+  items.unshift({name,qty:qty||'1',exp,t:Date.now()});
+  document.getElementById('name').value='';document.getElementById('qty').value='';document.getElementById('exp').value='';
+  save();
+}
+function del(i){ items.splice(i,1); save(); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function daysLeft(exp){return Math.ceil((new Date(exp)-new Date(new Date().toDateString()))/86400000);}
+function recommend(){
+  const sorted=[...items].sort((a,b)=>daysLeft(a.exp)-daysLeft(b.exp));
+  const names=sorted.map(x=>x.name);
+  const hit=RECIPES.filter(r=>r.need.some(n=>names.includes(n)));
+  const box=document.getElementById('recBox');
+  if(!items.length){box.innerHTML='<p style="font-size:13px;color:var(--muted)">冰箱为空。</p>';return;}
+  if(!hit.length){box.innerHTML='<div class="rec">暂无匹配食谱，先补充常备食材吧～</div>';return;}
+  box.innerHTML='<div class="rec"><b>🍳 用最临期食材可做：</b><br>'+hit.map(r=>'· '+r.n+'（需：'+r.need.join('、')+'）').join('<br>')+'</div>';
+}
+function render(){
+  const el=document.getElementById('fridgeList');
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">冰箱空空，先入库食材。</p>';return;}
+  const sorted=[...items].sort((a,b)=>daysLeft(a.exp)-daysLeft(b.exp));
+  el.innerHTML=sorted.map(x=>{
+    const d=daysLeft(x.exp);
+    const cls=d<0?'r':(d<=2?'r':(d<=5?'y':'g'));
+    const txt=d<0?'已过期'+(-d)+'天':('还剩 '+d+' 天');
+    const idx=items.indexOf(x);
+    return `<div class="item"><span><span class="dot ${cls}"></span>${x.name} · ${x.qty}<br><span style="font-size:11px;color:var(--muted)">保质期 ${x.exp} · ${txt}</span></span><button onclick="del(${idx})" style="border:none;background:#FFF0F0;color:var(--coral);border-radius:8px;padding:4px 10px">删</button></div>`;
+  }).join('');
+}
+render();
+</script>
+</body>
+</html>

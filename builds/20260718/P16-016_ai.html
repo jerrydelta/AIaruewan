@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩国申购资格自检+加分计算</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.res{font-size:14px;margin-top:8px;padding:10px;border-radius:10px;background:#FFF7F7}
+.res b{color:var(--coral)}
+.warn{background:#FFF3E0;color:#9a6b00}
+.ok{background:#EAFaf1;color:#1d7a4d}
+li{list-style:none;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+ul{padding:0;margin:6px 0 0}
+.del{color:var(--muted);font-size:12px;border:none;background:none;cursor:pointer;float:right}
+.pill{font-size:11px;padding:1px 7px;border-radius:999px;background:#FFF0F0;color:var(--coral);margin-right:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">finance</span><span class="tag">korea_housing_subscription_assistant</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩国申购助手·资格+加分</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KR housing-subscription: eligibility + score</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国申购(청약)竞争极激烈、资格复杂（无住宅/世帯/所得资产标准各异），官方청약홈申请期服务器过载、界面繁琐、资格易看错导致后段淘汰。机会：第三方「资格自检+加分计算+日程追踪」助手。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#777;margin:6px 0 0">填家庭情况 → 资格自检 + 가점(加分)估算；记录关注的申购日程。</p>
+    <label>无住宅状态</label>
+    <select id="home"><option value="1">无住宅（首次）</option><option value="0">已有住宅</option></select>
+    <label>家庭类型</label>
+    <select id="hh"><option value="1">单身/无配偶</option><option value="2">夫妇无子女</option><option value="3">有子女(多子女优先)</option></select>
+    <label>所属月数（청약통장 가입개월）</label>
+    <input type="number" id="months" placeholder="24" inputmode="numeric">
+    <label>有无无住宅期限满 2 年？</label>
+    <select id="twoyr"><option value="1">是（满足）</option><option value="0">否</option></select>
+    <button class="btn" onclick="check()">资格自检+加分</button>
+    <div class="res" id="res"></div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <label>关注申购·名称</label>
+    <input type="text" id="sub" placeholder="例 XXアパート 1순위">
+    <label>申请截止日</label>
+    <input type="date" id="due">
+    <button class="btn" onclick="addSub()">＋ 加日程</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P16-016">
+    <div class="collapse-header" id="aiHeader_P16-016" onclick="toggleAI('P16-016')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P16-016" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P16-016">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P16-016" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P16-016')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P16-016" style="display:none;margin-top:10px">
+        <div id="aiMessages_P16-016" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P16-016" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P16-016')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📅 申购日程</b>
+    <ul id="ul"></ul>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://shortnewsdaily.kr/applyhome" target="_blank" style="color:var(--coral)">청약홈(官方) / 청년주택드림</a>
+  </div>
+
+<script>
+const KEY="P16-016";
+let subs=JSON.parse(localStorage.getItem(KEY)||"[]");
+function check(){
+  const home=document.getElementById("home").value==="1";
+  const hh=parseInt(document.getElementById("hh").value);
+  const months=parseInt(document.getElementById("months").value)||0;
+  const twoyr=document.getElementById("twoyr").value==="1";
+  let ok = home && twoyr && months>=6;
+  let score=0;
+  if(home)score+=10; if(twoyr)score+=10; score+=Math.min(months,60)/12*2; // 每月约2分(上限)
+  if(hh===3)score+=15; else if(hh===2)score+=5;
+  let html=`<div class="${ok?'ok':'warn'}">${ok?'✅ 基本资格满足，可申一般申购':'⚠ 资格未满：需无住宅+满2年+通账≥6月'}</div>`;
+  html+=`预估 가점(加分) <b>${score.toFixed(1)} 点</b>（无住宅10+满期10+所属${score>20?(score-30).toFixed(1):(score-20).toFixed(1)}+家庭${hh===3?15:hh===2?5:0}）`;
+  document.getElementById("res").innerHTML=html;
+  localStorage.setItem(KEY+"_chk",JSON.stringify({home:document.getElementById("home").value,hh,months,twoyr}));
+}
+function addSub(){
+  const sub=document.getElementById("sub").value.trim();
+  const due=document.getElementById("due").value;
+  if(!sub||!due){alert("请填全");return;}
+  subs.push({sub,due,t:Date.now()});
+  document.getElementById("sub").value="";document.getElementById("due").value="";
+  save();
+}
+function del(t){subs=subs.filter(x=>x.t!==t);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(subs));render();}
+function render(){
+  const ul=document.getElementById("ul");ul.innerHTML="";
+  const today=new Date().toISOString().slice(0,10);
+  [...subs].sort((a,b)=>a.due<b.due?-1:1).forEach(x=>{
+    const days=Math.round((new Date(x.due)-new Date(today))/86400000);
+    const li=document.createElement("li");
+    li.innerHTML=`<button class="del" onclick="del(${x.t})">删除</button>
+      <span class="pill">${days>=0?days+'天後':'已过期'}</span>${x.sub}<br>
+      <span style="color:#999;font-size:12px">截止 ${x.due}</span>`;
+    ul.appendChild(li);});
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

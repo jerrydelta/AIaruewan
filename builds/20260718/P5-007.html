@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>GoodNotes ADHD 规划器设计器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;font-size:13px}
+.item b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.kpi{display:flex;gap:8px;margin-top:8px}
+.kpi div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:8px;text-align:center}
+.kpi b{display:block;font-size:18px;color:var(--coral)}
+.note{font-size:13px;color:#555;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">digital_product</span><span class="tag">goodnotes_marketplace_adhd</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">GoodNotes ADHD 规划器设计器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Vertical GoodNotes ADHD/student planners + sticker ecosystem</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">GoodNotes Marketplace 已成数字规划器交易场,ADHD 规划器是显眼垂直;泰国店单款数字笔记本售出 2,619 份。痛点:ADHD/学生/职场人对"结构化+低压力"规划器刚需。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:4px 0 10px">拆解规划器模块,估算总工时与建议定价(时薪 $15,目标利润率 85%)。</p>
+    <label>模块名称</label>
+    <input id="name" placeholder="如 专注模式周页 / 低压力日页 / 贴纸包">
+    <div class="row">
+      <div><label>模块类型</label>
+        <select id="type"><option>专注模式页</option><option>结构化周页</option><option>低压力日页</option><option>贴纸包</option></select>
+      </div>
+      <div><label>工时(h)</label><input id="hours" type="number" value="3"></div>
+    </div>
+    <button class="btn" onclick="add()">添加模块</button>
+    <div class="kpi">
+      <div><b id="kMod">0</b>模块</div>
+      <div><b id="kHr">0h</b>总工时</div>
+      <div><b id="kPrice">$0</b>建议价</div>
+    </div>
+    <div class="note" id="tip">时薪 $15,建议定价 = 工时成本 ÷ (1 - 0.85)。</div>
+  </div>
+
+  <div class="card" id="list"><b>🧩 规划器模块</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://marketplace.goodnotes.com/es" target="_blank" style="color:var(--coral)">GoodNotes Marketplace · Daramine · Notability</a>
+  </div>
+
+<script>
+const KEY="P5-007";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const RATE=15, MARGIN=0.85;
+function calc(){const h=items.reduce((a,b)=>a+b.hours,0);
+  kMod.textContent=items.length; kHr.textContent=h+"h";
+  kPrice.textContent="$"+(h*RATE/(1-MARGIN)).toFixed(2);}
+function add(){const name=name_.value.trim()||"未命名模块";
+  items.push({name,type:type.value,hours:+(+hours.value||0)});
+  localStorage.setItem(KEY,JSON.stringify(items)); name_.value=""; render(); calc();}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();calc();}
+function render(){if(!items.length){items_.innerHTML='<p style="font-size:13px;color:#555;margin:6px 0 0">还没有模块。</p>';return;}
+  items_.innerHTML=items.map((it,i)=>`<div class="item"><span class="del" onclick="del(${i})">删除</span>
+    <b>${it.name}</b> · ${it.type} · ${it.hours}h</div>`).join("");}
+const name_=document.getElementById("name");
+render(); calc();
+</script>
+</body>
+</html>

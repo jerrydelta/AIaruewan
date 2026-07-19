@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>一体化产后监测</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.chk{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;margin-top:8px;font-size:14px}
+.chk input{width:auto;margin:0}
+.alert{background:#FFEFEF;border:1px solid #FFC9C9;color:#C0392B;border-radius:12px;padding:12px;font-size:14px;margin-top:10px}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:14px}
+.item .meta{font-size:11px;color:var(--muted);margin-top:4px}
+.del{color:var(--coral);font-size:12px;float:right;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">postpartum</span><span class="tag">integrated_monitor</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">一体化产后监测</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Pelvic floor + C-section + 纵向 PPD 筛查 + 实时警报</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">产后身体恢复与心理筛查割裂，缺"纵向追踪+异常实时报警"闭环。Myri Health 把盆底肌、C-section 恢复与纵向 PPD 筛查、实时临床警报结合（App Store 4.5 星）。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 今日三项打卡</b>
+    <label class="chk"><input type="checkbox" id="cPelvic"> 盆底肌训练已完成</label>
+    <label class="chk"><input type="checkbox" id="cSection"> C-section 伤口恢复良好（无红肿渗液）</label>
+    <label>今日心情筛查（1 很低落 → 10 很好）</label>
+    <input id="ppd" type="number" min="1" max="10" value="7">
+    <label>备注（伤口情况 / 身体感受，选填）</label>
+    <textarea id="note" rows="2" placeholder="例如：今天盆底训练10分钟，伤口结痂…"></textarea>
+    <button class="btn" onclick="addDay()">📌 记录这一天</button>
+    <div id="alertBox"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📈 纵向恢复时间线</b>
+    <div id="days"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://joinphoenixhealth.com/resourcecenter/top-10-best-apps-for-maternal-mental-health-support" target="_blank" style="color:var(--coral)">Myri Health（一体化产后监测）</a>
+    <p style="margin:6px 0 0">警报仅为提醒，非诊断。心情连续偏低或伤口异常，请及时联系医生。</p>
+  </div>
+
+<script>
+const KEY="P15-003";
+let days=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){localStorage.setItem(KEY,JSON.stringify(days));render();}
+function nowStr(){const d=new Date();const p=n=>(""+n).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());}
+function addDay(){
+  const ppd=+document.getElementById("ppd").value;
+  const rec={date:nowStr(),pelvic:document.getElementById("cPelvic").checked,section:document.getElementById("cSection").checked,ppd,note:document.getElementById("note").value.trim()};
+  days.unshift(rec);
+  document.getElementById("note").value="";document.getElementById("cPelvic").checked=false;document.getElementById("cSection").checked=false;
+  save();
+}
+function delDay(i){days.splice(i,1);save();}
+function render(){
+  const ab=document.getElementById("alertBox");ab.innerHTML="";
+  const low=days.filter(d=>d.ppd<=3).length;
+  if(low>0){ab.innerHTML='<div class="alert">⚠️ 近期有 '+low+' 天心情 ≤3 分。这不是你的错，但建议尽快联系医生或心理支持。</div>';}
+  else if(days.length&&days[0].ppd<=3){ab.innerHTML='<div class="alert">⚠️ 今天心情偏低，请多照顾自己，必要时联系医生。</div>';}
+  const box=document.getElementById("days");
+  box.innerHTML=days.length?'':'<p style="font-size:13px;color:#aaa;margin:8px 0 0">每天记一笔，慢慢看见恢复曲线。</p>';
+  days.forEach((d,i)=>{const el=document.createElement("div");el.className="item";
+    el.innerHTML='<span class="del" onclick="delDay('+i+')">删除</span><b>'+d.date+'</b> · 心情 '+d.ppd+'/10'+
+      '<div style="font-size:13px;color:#555">盆底:'+(d.pelvic?'✅':'—')+' ｜ 伤口:'+(d.section?'✅':'⚠️')+(d.note?'<br>'+d.note:'')+'</div>';
+    box.appendChild(el);});
+}
+render();
+</script>
+</body>
+</html>

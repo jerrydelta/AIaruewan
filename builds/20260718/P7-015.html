@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>适老反诈守护</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;--warn:#E8920C;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.7;padding:16px;max-width:480px;margin:0 auto;font-size:17px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:16px;border:none;border-radius:14px;
+  background:var(--coral);color:#fff;font-size:19px;font-weight:700;cursor:pointer;margin-top:10px}
+.btn:active{background:var(--coral-dark)}
+.btn-ok{background:var(--ok)}
+.btn-warn{background:var(--warn)}
+.tag{display:inline-block;font-size:13px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:3px 11px;margin:2px 5px 2px 0}
+textarea,input{width:100%;padding:14px;border:1px solid var(--line);
+  border-radius:12px;font-size:17px;margin-top:8px;background:#fff;color:var(--ink)}
+label{font-size:15px;color:var(--muted);display:block;margin-top:12px;font-weight:600}
+.mini{font-size:13px;color:var(--muted)}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+.result{margin-top:10px;border-radius:12px;padding:14px;font-size:16px}
+.result.high{background:#FFEDED;border:1px solid #FFB3B3;color:#B22}
+.result.low{background:#F3FFF7;border:1px solid #D6F3E3;color:#1c7a45}
+.row{display:flex;gap:10px}.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">elderly</span><span class="tag">anti_fraud_elderly</span></div>
+    <h1 style="font-size:22px;margin:8px 0 4px">适老反诈守护</h1>
+    <p class="h-coral" style="font-size:15px;margin:0">识诈检测 · 亲情代管 · 转账冻结</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">💡 为什么需要</b>
+    <p style="font-size:15px;color:#555;margin:6px 0 0">2024 年中消协老年网络消费"陷阱"居投诉首位，有老人被骗 198 万。本工具帮你识别可疑短信、存好亲情号、随时冻结预警。</p>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">🔍 可疑短信检测</b>
+    <label>把收到的短信 / 链接贴这里</label>
+    <textarea id="msg" rows="3" placeholder="如：恭喜中奖，点链接领红包，需先转账手续费"></textarea>
+    <button class="btn btn-warn" onclick="check()">🔍 检测是否诈骗</button>
+    <div id="result"></div>
+    <button class="btn btn-ok" id="saveBtn" style="display:none" onclick="save()">📥 存为已核查</button>
+  </div>
+
+  <div class="card">
+    <b style="font-size:18px">👪 亲情守护号</b>
+    <div class="row">
+      <div><label>子女姓名</label><input id="fname" placeholder="如：女儿"></div>
+      <div><label>电话</label><input id="fphone" placeholder="手机号"></div>
+    </div>
+    <button class="btn" onclick="addFamily()">➕ 添加亲情号</button>
+    <div id="family"></div>
+    <button class="btn btn-warn" onclick="freezeAlert()" style="margin-top:12px">🛑 我要冻结转账！</button>
+  </div>
+
+  <div class="card" id="list">
+    <b style="font-size:18px">🛡 已核查记录</b>
+    <div id="items"></div>
+  </div>
+
+  <div class="card" style="font-size:13px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.news.cn/fortune/20250313/409f4c7675e746e982253df3c5413342/c.html" target="_blank" style="color:var(--coral)">国家反诈中心APP / 华为远程守护（适老化反诈）</a>
+  </div>
+
+<script>
+const KEY="P7-015";
+let logs=JSON.parse(localStorage.getItem(KEY)||"[]");
+let family=JSON.parse(localStorage.getItem(KEY+"_f")||"[]");
+const SCAM=["中奖","红包","转账","手续费","验证码","银行卡","密码","公安局","警官","客服","刷单","投资","稳赚","免费领","福利","熟人借钱","账户异常","点链接","返利","解冻"];
+let last=null;
+function check(){
+  const m=document.getElementById("msg").value.trim();
+  if(!m){alert("请先粘贴短信内容");return;}
+  const hit=SCAM.filter(w=>m.includes(w));
+  const level=hit.length>=2?"high":"low";
+  const adv=level==="high"
+    ?"⚠ 高风险！命中诈骗关键词："+hit.join("、")+"。切勿转账、勿点链接、勿告知验证码，立即联系亲情号核实。"
+    :"✅ 未命中明显诈骗词（"+hit.join("、")+"）。仍请保持警惕，涉及钱款务必先与子女确认。";
+  last={msg:m,level,hit,date:new Date().toLocaleDateString("zh-CN")};
+  document.getElementById("result").innerHTML=`<div class="result ${level}">${adv}</div>`;
+  document.getElementById("saveBtn").style.display="block";
+}
+function save(){if(!last)return;logs.unshift(last);last=null;localStorage.setItem(KEY,JSON.stringify(logs));document.getElementById("result").innerHTML="";document.getElementById("saveBtn").style.display="none";render();}
+function addFamily(){const n=document.getElementById("fname").value.trim(),p=document.getElementById("fphone").value.trim();if(!n||!p){alert("请填姓名和电话");return;}family.push({n,p});localStorage.setItem(KEY+"_f",JSON.stringify(family));document.getElementById("fname").value="";document.getElementById("fphone").value="";renderFamily();}
+function freezeAlert(){
+  if(!family.length){alert("请先添加亲情号，冻结前先联系子女！");return;}
+  const f=family[0];
+  if(confirm("已通知子女 "+f.n+"（"+f.p+"）。\n请立即：①挂断陌生来电 ②不操作任何转账 ③让子女帮您联系银行冻结。\n\n拨打 "+f.n+"？")){window.location.href="tel:"+f.p;}
+}
+function renderFamily(){const box=document.getElementById("family");if(!family.length){box.innerHTML='<p class="mini" style="margin-top:8px;font-size:14px">还没有亲情号。</p>';return;}box.innerHTML=family.map((f,i)=>`<div class="item"><div style="font-size:18px;font-weight:700">${esc(f.n)}</div><div class="mini" style="font-size:15px">${esc(f.p)}</div></div>`).join("");}
+function render(){
+  const box=document.getElementById("items");
+  if(!logs.length){box.innerHTML='<p class="mini" style="margin-top:8px;font-size:14px">还没有核查记录。</p>';return;}
+  box.innerHTML=logs.map(it=>`<div class="item"><div style="font-size:16px">${it.level==='high'?'⚠ 高风险':'✅ 低风险'}：${esc(it.msg.slice(0,30))}${it.msg.length>30?'…':''}</div><div class="mini" style="font-size:14px">${it.date}</div></div>`).join("");
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+renderFamily();render();
+</script>
+</body>
+</html>

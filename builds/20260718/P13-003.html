@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>透明佣金·供应商决策排序引擎</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.item .del{float:right;color:var(--coral);font-size:12px;cursor:pointer}
+.seq{display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;
+  border-radius:50%;background:var(--coral);color:#fff;font-size:12px;font-weight:700;margin-right:6px}
+.note{background:#FFF7E8;color:#9a6b00;border:1px solid #ffe2a8;border-radius:10px;padding:10px;font-size:13px;margin-top:10px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">wedding</span><span class="tag">vendor_sequencing_commission</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">透明佣金 · 供应商决策排序引擎</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Transparent-commission + vendor-sequencing engine</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">每款工具都从「找供应商」开始，但新人真正需要的是「该找哪个、按什么顺序、错了会怎样」——排序能力为零。印度婚嫁生态靠未披露佣金（10%-40%）运转，每个「精选」清单都被付钱的一方塑造。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 供应商排序 + 佣金披露</b>
+    <label>供应商名称</label><input id="vname" placeholder="星光摄影">
+    <div class="row">
+      <div><label>类目</label>
+        <select id="vcat"><option>场地</option><option>摄影</option><option>司仪</option><option>花艺</option><option>婚纱</option><option>其他</option></select></div>
+      <div><label>决策顺序</label><input id="vseq" type="number" placeholder="1"></div>
+    </div>
+    <label>披露佣金比例 %（0=无/已自查）</label>
+    <input id="vcom" type="number" placeholder="0">
+    <button class="btn" onclick="addItem()">＋ 添加供应商</button>
+  </div>
+
+  <div class="card" id="list"><b>📑 决策排序（按顺序）</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.linkedin.com/posts/karan-jaju_vivah-buildinpublic-weddingtech-activity-7447879524803047424-Zsha" target="_blank" style="color:var(--coral)">WedMeGood / ShaadiSaga 竞品复盘</a>
+  </div>
+
+<script>
+const KEY="P13-003";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addItem(){
+  const vname=document.getElementById("vname").value.trim();
+  const vseq=parseInt(document.getElementById("vseq").value)||items.length+1;
+  if(!vname){alert("请填写供应商名称");return;}
+  items.push({
+    vname,
+    vcat:document.getElementById("vcat").value,
+    vseq,
+    vcom:parseFloat(document.getElementById("vcom").value)||0
+  });
+  document.getElementById("vname").value="";
+  document.getElementById("vseq").value="";
+  document.getElementById("vcom").value="";
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  const sorted=[...items].sort((a,b)=>a.vseq-b.vseq);
+  let totalCom=0,maxCom=0;
+  let html='<b>📑 决策排序（按顺序）</b>';
+  if(items.length===0){html+='<p style="font-size:13px;color:#999;margin:8px 0">还没有供应商，先添加一家。</p>';}
+  sorted.forEach((v,i)=>{
+    totalCom+=v.vcom; if(v.vcom>maxCom)maxCom=v.vcom;
+    const warn=v.vcom>0?'<span class="h-coral"> 披露佣金 '+v.vcom+'%</span>':' <span style="color:#3FB984">零佣金</span>';
+    html+=`<div class="item"><span class="del" onclick="del(${items.indexOf(v)})">删除</span>
+      <span class="seq">${v.vseq}</span><b>${v.vname}</b> · ${v.vcat}${warn}</div>`;
+  });
+  html+=`<div class="note">🧭 按「场地→摄影→司仪→花艺」顺序决策最常见；最高披露佣金 ${maxCom}% ，合计披露佣金 ${totalCom}%。本引擎不收任何回扣。</div>`;
+  box.innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>

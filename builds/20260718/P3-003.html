@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>语音优先深度交友声音档案</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item b{color:var(--ink)}.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.pill{display:inline-block;font-size:11px;background:#FFF0F0;color:var(--coral);border-radius:999px;padding:1px 8px;margin:2px 3px 0 0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">social</span><span class="tag">voice_first_friendship</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">语音优先深度交友·声音档案</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Voice-first deep-friendship app</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">文字社交浮浅、照片焦虑、MBTI套话。语音优先社交是2026新兴品类：在滤镜照片之外，声音承载情绪与真实人格，特别受内向者与深度思考者欢迎——"实质胜过表面"。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">用一段"想说的话"（代替语音）描述你真实的声音气质与想找的连接，建立声音档案，本地保存。</p>
+    <label>我想说的话（真实语气，越自然越容易匹配）</label>
+    <textarea id="msg" rows="3" placeholder="例如：我喜欢深夜安静地讲今天遇到的小事，声音偏低，喜欢听别人慢慢说……"></textarea>
+    <label>想找的连接类型</label>
+    <select id="conn"><option>深度对话搭子</option><option>异地语音笔友</option><option>同好兴趣友</option><option>慢热见面友</option></select>
+    <label>深度话题偏好（逗号分隔）</label>
+    <input id="topic" placeholder="例如：电影、孤独感、职业迷茫">
+    <label>范围</label>
+    <select id="scope"><option>全球</option><option>本地</option></select>
+    <button class="btn" onclick="add()">建立声音档案</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的声音档案</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">本地保存，无照片、无焦虑。</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.bubblic.app/blog/best-apps-to-make-friends-2026.html" target="_blank" style="color:var(--coral)">Bubblic · 语音社交</a>
+  </div>
+
+<script>
+const KEY="P3-003";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const msg=document.getElementById("msg").value.trim();
+  if(!msg){alert("先写一段想说的话");return;}
+  const conn=document.getElementById("conn").value;
+  const topic=document.getElementById("topic").value.trim();
+  const scope=document.getElementById("scope").value;
+  items.unshift({msg,conn,topic,scope,t:new Date().toLocaleString("zh-CN")});
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+  document.getElementById("msg").value="";document.getElementById("topic").value="";
+}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const el=document.getElementById("list");
+  let h='<b>📋 我的声音档案</b><p style="font-size:12px;color:var(--muted);margin:4px 0 0">本地保存，无照片、无焦虑。</p>';
+  if(!items.length){h+='<p style="font-size:13px;color:var(--muted);margin-top:8px">还没有档案。</p>';}
+  items.forEach((it,i)=>{
+    let pills=(it.topic?it.topic.split(/[,，]/).map(x=>'<span class="pill">'+x.trim()+'</span>').join(""):"");
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除 ✕</span>'+
+       '<b>'+it.conn+'</b> · '+it.scope+'<br>'+
+       '<span style="font-size:13px;color:#555">"'+it.msg+'"</span><br>'+pills+
+       '<br><span style="font-size:11px;color:var(--muted)">'+it.t+'</span></div>';
+  });
+  el.innerHTML=h;
+}
+render();
+</script>
+</body>
+</html>

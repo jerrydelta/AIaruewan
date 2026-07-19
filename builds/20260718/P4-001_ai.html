@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>轻量无套路健身记录+计划工具</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none}
+.stat{display:flex;gap:8px;margin-bottom:6px}
+.stat>div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;
+  text-align:center;padding:10px}
+.stat b{display:block;font-size:20px;color:var(--coral)}
+.pln{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.pln input{width:auto;margin:0}
+.done{text-decoration:line-through;color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">fitness</span><span class="tag">keep_user_churn</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">轻量无套路健身记录+计划工具</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Lightweight no-gimmick fitness tracker & planner</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Keep 2025年MAU锐减815万、靠砍研发省出首度盈利；AI教练使用率不足4%、被批"换马甲预制课"、数据失真卡死；免费课变会员专属、跑步默跳会员页。痛点：大厂把商业化碾压体验、过度付费墙、AI空壳。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">真免费、不弹会员、纯本地记录的训练日记。今日练了啥，记下来就好。</p>
+    <label>训练名称</label>
+    <input id="name" placeholder="如：深蹲 / 慢跑 / 拉伸">
+    <div class="row">
+      <div><label>时长（分钟）</label><input id="min" type="number" min="0" placeholder="30"></div>
+      <div><label>类型</label>
+        <select id="type"><option>力量</option><option>有氧</option><option>拉伸</option><option>其他</option></select>
+      </div>
+    </div>
+    <button class="btn" onclick="add()">＋ 记一笔</button>
+    <div class="stat" style="margin-top:14px">
+      <div><b id="sN">0</b>总次数</div>
+      <div><b id="sM">0</b>总分钟</div>
+      <div><b id="sT">0</b>今日</div>
+    </div>
+    <b style="font-size:14px">📋 本周训练计划（勾选完成）</b>
+    <div id="plan"></div>
+    <div class="row" style="margin-top:6px">
+      <input id="pn" placeholder="加一个计划项，如：周二练背">
+      <button class="btn" style="margin-top:6px;flex:0 0 80px" onclick="addPlan()">添加</button>
+    </div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P4-001">
+    <div class="collapse-header" id="aiHeader_P4-001" onclick="toggleAI('P4-001')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P4-001" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P4-001">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P4-001" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P4-001')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P4-001" style="display:none;margin-top:10px">
+        <div id="aiMessages_P4-001" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P4-001" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P4-001')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📒 训练记录</b>
+    <div id="logs" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://new.qq.com/rain/a/20260415A03CVT00?refer=cp_1009" target="_blank" style="color:var(--coral)">Keep（腾讯新闻调查）</a>
+  </div>
+
+<script>
+const KEY="P4-001";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const DEFAULT_PLAN=["周一 有氧30分","周三 力量训练","周五 拉伸放松","周日 长距离散步"];
+let plan=JSON.parse(localStorage.getItem(KEY+"_plan")||"null")||DEFAULT_PLAN.map(t=>({t,done:false}));
+
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function savePlan(){localStorage.setItem(KEY+"_plan",JSON.stringify(plan));renderPlan();}
+
+function add(){
+  const name=document.getElementById("name").value.trim();
+  const min=parseInt(document.getElementById("min").value)||0;
+  const type=document.getElementById("type").value;
+  if(!name){alert("写个训练名称吧");return;}
+  const d=new Date().toISOString().slice(0,10);
+  items.unshift({name,min,type,d,t:Date.now()});
+  document.getElementById("name").value="";document.getElementById("min").value="";
+  save();
+}
+function del(i){items.splice(i,1);save();}
+
+function addPlan(){
+  const v=document.getElementById("pn").value.trim();
+  if(!v)return;
+  plan.push({t:v,done:false});
+  document.getElementById("pn").value="";
+  savePlan();
+}
+function toggleP(i){plan[i].done=!plan[i].done;savePlan();}
+
+function render(){
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById("sN").textContent=items.length;
+  document.getElementById("sM").textContent=items.reduce((s,x)=>s+x.min,0);
+  document.getElementById("sT").textContent=items.filter(x=>x.d===today).length;
+  document.getElementById("logs").innerHTML=items.length?items.map((x,i)=>
+    `<div class="item"><span>${x.name} · ${x.type} · ${x.min}分<br><small style="color:var(--muted)">${x.d}</small></span><button class="del" onclick="del(${i})">删除</button></div>`
+  ).join(""):`<p style="color:var(--muted);font-size:13px">还没有记录，今天动一下？</p>`;
+}
+function renderPlan(){
+  document.getElementById("plan").innerHTML=plan.map((p,i)=>
+    `<div class="pln"><input type="checkbox" ${p.done?"checked":""} onchange="toggleP(${i})"><span class="${p.done?"done":""}">${p.t}</span></div>`
+  ).join("");
+}
+render();renderPlan();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

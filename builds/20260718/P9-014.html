@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>中文旅客跨境火车巴士比价</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;font-size:14px}
+.item:first-child{border-top:none}
+.del{background:none;border:none;color:var(--coral);font-size:13px;cursor:pointer;float:right;margin-top:-2px}
+.badge{display:inline-block;font-size:11px;background:#EAF7F0;color:var(--ok);border-radius:6px;padding:1px 6px;margin-left:4px}
+.badge.fast{background:#E7F0FF;color:#3B6FD4}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">travel</span><span class="tag">cross_border_rail_bus</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">跨境火车巴士一站式比价</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">One-stop cross-border train/bus comparison</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">欧洲/跨境火车巴士预订已验证（Omio 覆盖 45 国）。但跨境多段联运比价仍碎、附加手续费、中文界面稀缺。面向中文旅客的一站式比价是缺口。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 跨境车次比价（标最便宜 / 最快）</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">录入同一条路线的不同运营商报价与时长，自动标出最便宜与最快方案。</p>
+    <label>路线（出发 → 到达）</label><input id="route" placeholder="如 巴黎 → 阿姆斯特丹">
+    <div class="row">
+      <div><label>运营商</label><input id="op" placeholder="如 Omio"></div>
+      <div><label>价格(¥)</label><input id="price" type="number" inputmode="decimal" placeholder="如 320"></div>
+    </div>
+    <label>时长（分钟）</label><input id="dur" type="number" inputmode="numeric" placeholder="如 220">
+    <button class="btn" onclick="add()">＋ 添加方案</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/my/app/omio-train-bus-and-flight/id885372509" target="_blank" style="color:var(--coral)">Omio · Trainline · G2Rail</a>
+  </div>
+
+<script>
+const KEY="P9-014";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const route=document.getElementById("route").value.trim();
+  const op=document.getElementById("op").value.trim();
+  const price=parseFloat(document.getElementById("price").value);
+  const dur=parseInt(document.getElementById("dur").value)||0;
+  if(!route||!op){alert("请填写路线与运营商");return;}
+  if(!price||price<=0){alert("请输入有效价格");return;}
+  items.push({route,op,price,dur});
+  document.getElementById("op").value="";document.getElementById("price").value="";document.getElementById("dur").value="";
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function del(i){items.splice(i,1);save();}
+function render(){
+  let html="";
+  const cheapest=items.length?Math.min(...items.map(x=>x.price)):null;
+  const fastest=items.length?Math.min(...items.map(x=>x.dur)):null;
+  const byRoute={};
+  items.forEach((it,i)=>{
+    byRoute[it.route]=true;
+    let b="";
+    if(it.price===cheapest) b+="<span class='badge'>最便宜</span>";
+    if(it.dur && it.dur===fastest) b+="<span class='badge fast'>最快</span>";
+    html+=`<div class='item'><button class='del' onclick='del(${i})'>删除</button><b>${it.op}</b> ${b}<div style='font-size:13px;color:#555'>${it.route} · ¥${it.price}${it.dur?(" · "+it.dur+"分钟"):""}</div></div>`;
+  });
+  document.getElementById("list").innerHTML = items.length
+    ? "<b style='font-size:14px'>📒 比价方案（"+items.length+" 个）</b>"+html
+    : "<p style='color:#999;font-size:13px'>暂无方案，添加同路线的不同报价开始比价。</p>";
+}
+render();
+</script>
+</body>
+</html>

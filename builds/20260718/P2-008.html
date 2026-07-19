@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩国年薪谈判教练（AI）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.out{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:10px;font-size:14px;white-space:pre-wrap}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:13px}
+.item .del{float:right;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">career</span><span class="tag">salary_negotiation</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩国年薪谈判教练</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KR Salary-Negotiation AI Coach</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国职场文化下薪资谈判信息不透明、个人缺乏脚本与数据支撑。owlapply 的 커리어博客聚焦"2026 就业趋势 / 이직战略 / 连喜(年薪)协商实战"，说明强需求。痛点真实。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 谈判脚本生成</b>
+    <div class="row">
+      <input id="cur" type="number" placeholder="当前年薪 万원">
+      <input id="target" type="number" placeholder="期望年薪 万원">
+    </div>
+    <label>你的核心筹码</label>
+    <textarea id="lev" rows="2" placeholder="如：2年经验、独立上线项目、行业稀缺技能"></textarea>
+    <label>行业</label>
+    <select id="ind">
+      <option>IT/开发</option><option>金融</option><option>营销</option><option>制造</option><option>其他</option>
+    </select>
+    <button class="btn" onclick="gen()">生成谈判脚本</button>
+    <div class="out" id="out" style="display:none"></div>
+    <button class="btn" id="saveBtn" style="display:none" onclick="save()">存档</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的谈判准备</b>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://owlapply.com/ko/blog/gyeongryeog" target="_blank" style="color:var(--coral)">owlapply 커리어 블로그</a>
+  </div>
+
+<script>
+const KEY="P2-008";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+let last=null;
+function gen(){
+  const cur=+document.getElementById("cur").value||0;
+  const target=+document.getElementById("target").value||0;
+  const lev=document.getElementById("lev").value.trim()||"（补充筹码）";
+  const ind=document.getElementById("ind").value;
+  const gap=target-cur;
+  const pct=cur? Math.round(gap/cur*100):0;
+  const text="【年薪谈判脚本 · "+ind+"】\n现状："+cur+"万원 → 目标 "+target+"万원（+"+pct+"%）\n\n开场：基于市场行情与我的贡献，希望调整到 "+target+"万원 区间。\n筹码："+lev+"。\n话术：『我在过往角色中独立交付了可量化结果，这个薪资对应行业同岗水平，也能让我更专注长期产出。』\n退路：若暂不能达标，争取签约金 / 半年复评 / 期权补充。";
+  last={cur,target,ind,text,t:Date.now()};
+  const o=document.getElementById("out"); o.style.display="block"; o.textContent=text;
+  document.getElementById("saveBtn").style.display="block";
+}
+function save(){
+  if(!last) return;
+  items.unshift(last); localStorage.setItem(KEY,JSON.stringify(items)); last=null;
+  document.getElementById("out").style.display="none"; document.getElementById("saveBtn").style.display="none";
+  render();
+}
+function render(){
+  const box=document.getElementById("list");
+  let h='<b>📋 我的谈判准备</b>';
+  if(items.length===0){ h+='<p style="font-size:13px;color:var(--muted)">还没有存档。</p>'; }
+  items.forEach((it,i)=>{
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除</span><b>'+it.cur+'→'+it.target+'万원</b> · '+it.ind+'<br>'+
+       '<span style="color:#777">'+new Date(it.t).toLocaleString()+'</span> <span style="color:var(--coral)" onclick="show('+i+')">查看</span></div>';
+  });
+  box.innerHTML=h;
+}
+function show(i){ alert(items[i].text); }
+function del(i){ items.splice(i,1); localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+render();
+</script>
+</body>
+</html>

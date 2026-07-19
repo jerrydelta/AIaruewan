@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI 信仰问答与灵修助手</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ok{background:var(--ok)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item .q{font-size:14px;font-weight:600;color:var(--coral)}
+.item .a{font-size:14px;margin-top:4px}
+.mini{font-size:12px;color:var(--muted)}
+.verse{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;padding:12px;margin-top:10px}
+.verse b{color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">spirituality</span><span class="tag">ai_bible_chatbot</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI 信仰问答与灵修助手</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AI faith Q&A assistant (with RAG-style truth base to prevent hallucination)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">传统找牧师需预约、有羞耻感；Bible Chat 两年下载超 3000 万、年化收入约 $1500 万，证明"凌晨三点也能倾听的牧师"是刚需。但纯 AI 易产生神学幻觉，需要带"真理库校验"的本地知识底座。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 信仰问答 + 灵修日记</b>
+    <p class="mini">说出你的困惑，助手从内置"真理库"给出对应开示（离线可用，不联网、不编造）。</p>
+    <label>我的困惑 / 问题</label>
+    <textarea id="q" rows="2" placeholder="例如：我很焦虑，不知道前面该怎么走"></textarea>
+    <label>信仰流派</label>
+    <select id="faith">
+      <option value="christ">基督教 / 圣经</option>
+      <option value="buddha">佛教 / 佛经</option>
+      <option value="general">通用心灵慰藉</option>
+    </select>
+    <button class="btn" onclick="ask()">💬 获取属灵引导</button>
+    <div id="answer"></div>
+    <button class="btn btn-ok" id="saveBtn" style="display:none" onclick="save()">📥 存入灵修日记</button>
+    <div class="verse" id="daily"></div>
+    <button class="btn" style="background:#EEE;color:#888" onclick="dailyVerse()">📖 换一句今日经文</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P7-002">
+    <div class="collapse-header" id="aiHeader_P7-002" onclick="toggleAI('P7-002')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P7-002" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P7-002">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P7-002" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P7-002')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P7-002" style="display:none;margin-top:10px">
+        <div id="aiMessages_P7-002" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P7-002" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P7-002')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>📔 我的灵修日记</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://finance.sina.cn/2025-01-14/detail-ineexyis1782910.d.html" target="_blank" style="color:var(--coral)">Bible Chat / Faith Assistant（AI 信仰对话，年化收入约 $1500 万）</a>
+  </div>
+
+<script>
+const KEY="P7-002";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const KB={
+  christ:[
+    {k:["焦虑","担心","害怕","怕"],v:"「应当一无挂虑，只要凡事藉着祷告、祈求和感谢，将你们所要的告诉神。」——腓立比书 4:6"},
+    {k:["迷茫","不知道","路","方向","前面"],v:"「你要专心仰赖耶和华，不可倚靠自己的聪明；在你一切所行的事上都要认定他，他必指引你的路。」——箴言 3:5-6"},
+    {k:["难过","伤心","痛苦","哭"],v:"「哀恸的人有福了，因为他们必得安慰。」——马太福音 5:4"},
+    {k:["孤单","孤独","没人"],v:"「我总不撇下你，也不丢弃你。」——希伯来书 13:5"}
+  ],
+  buddha:[
+    {k:["焦虑","担心","害怕","怕"],v:"「心若调适，道可得矣。」一切无常，放下执着，安住当下。"},
+    {k:["迷茫","不知道","路","方向"],v:"「诸法因缘生，诸法因缘灭。」看清缘起，自然知道下一步。"},
+    {k:["难过","伤心","痛苦"],v:"「人生八苦，皆由执生。」观照苦的来处，慈悲待己。"},
+    {k:["孤单","孤独"],v:"「一切众生，皆具如来智慧德相。」你本自具足，并不孤单。"}
+  ],
+  general:[
+    {k:["焦虑","担心","害怕","怕"],v:"深呼吸三次。你不需要一次性解决所有事，只需走好眼前这一步。"},
+    {k:["迷茫","不知道","路","方向"],v:"把大问题拆成今天能做的一件小事，行动会替你指明方向。"},
+    {k:["难过","伤心","痛苦"],v:"允许自己难过，情绪像天气，会来也会走。你值得被温柔以待。"},
+    {k:["孤单","孤独"],v:"写信给一位你信任的人，或写下此刻的感受——表达本身就是疗愈。"}
+  ]
+};
+let last=null;
+function ask(){
+  const q=document.getElementById("q").value.trim();
+  if(!q){alert("请先描述你的困惑");return;}
+  const faith=document.getElementById("faith").value;
+  const base=KB[faith];
+  let hit=base.find(x=>x.k.some(w=>q.includes(w)));
+  if(!hit)hit=base[0];
+  last={q,faith,a:hit.v,date:new Date().toLocaleString("zh-CN")};
+  document.getElementById("answer").innerHTML=`<div class="verse"><b>属灵引导</b><div style="margin-top:6px;font-size:14px">${hit.v}</div><div class="mini" style="margin-top:6px">※ 来自内置真理库（${faith==="christ"?"圣经":faith==="buddha"?"佛经":"通用"}），非 AI 杜撰</div></div>`;
+  document.getElementById("saveBtn").style.display="block";
+}
+function save(){
+  if(!last)return;items.unshift(last);last=null;
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("answer").innerHTML="";
+  document.getElementById("saveBtn").style.display="none";
+  document.getElementById("q").value="";render();
+}
+function dailyVerse(){
+  const all=[...KB.christ,...KB.buddha].map(x=>x.v);
+  document.getElementById("daily").innerHTML=`<b>📖 今日经文</b><div style="margin-top:6px;font-size:14px">${all[Math.floor(Math.random()*all.length)]}</div>`;
+}
+function render(){
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p class="mini" style="margin-top:8px">还没有记录，试着问一个问题吧。</p>';return;}
+  box.innerHTML=items.map(it=>`
+    <div class="item"><div class="q">问：${esc(it.q)}</div><div class="a">引导：${esc(it.a)}</div><div class="mini">${it.date}</div></div>`).join("");
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+dailyVerse();render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

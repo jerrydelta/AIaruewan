@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>沟通符号板</title>
+<style>
+:root{
+  --coral:#FF6B6B;        --coral-dark:#E85555;
+  --ink:#2D2D2D;          --muted:#8A8A8A;
+  --bg:#F7F7F7;           --card:#FFFFFF;
+  --line:#ECECEC;         --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-sm{padding:7px 10px;font-size:13px;border-radius:9px;margin-top:0;width:auto}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.sym{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  width:64px;height:64px;background:#FFF0F0;border:1px solid #FFD9D9;border-radius:14px;
+  margin:4px;cursor:pointer;font-size:26px}
+.sym span{font-size:11px;color:var(--ink);margin-top:2px}
+.sentence{min-height:44px;border:1px solid var(--line);border-radius:10px;padding:10px;
+  margin-top:6px;font-size:16px;background:#fff}
+.mini{font-size:12px;color:var(--muted)}
+.board{display:flex;flex-wrap:wrap;justify-content:center}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">neurodiversity</span><span class="tag">autism_aac_communication</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">沟通符号板</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">AAC communication board (symbols + TTS)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">AAC 让非口语自闭症者用符号/语音表达。Proloquo2Go 领先但贵且复杂；日本 DropTap 作为 GIGA School 终端免费捆绑、累计供货 110 万台。本工具：点符号拼句子→文字转语音，零成本、可本地化。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 拼一句</b>
+    <div id="board" class="board"></div>
+    <div class="sentence" id="sentence"></div>
+    <div class="row">
+      <button class="btn" style="background:var(--ok)" onclick="speak()">🔊 朗读</button>
+      <button class="btn" style="background:#ccc" onclick="clearS()">清空</button>
+    </div>
+    <p id="hint" class="mini" style="margin-top:6px"></p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://rzldn.com/tech/jules/education/162630" target="_blank" style="color:var(--coral)">Proloquo2Go / DropTap / PECStalk</a>
+  </div>
+
+<script>
+const KEY="P11-014";
+const SYM=[
+  ["我","🙋"],["要","✋"],["吃","🍎"],["喝","🥤"],["玩","🧸"],["不","🚫"],
+  ["痛","😣"],["帮","🆘"],["去","🚪"],["厕所","🚽"],["睡","😴"],["喜欢","❤️"],
+  ["妈妈","👩"],["爸爸","👨"],["老师","🧑‍🏫"],["谢谢","🙏"],["更多","➕"],["结束","🏁"]
+];
+let seq=[];
+function build(){
+  const b=document.getElementById('board'); b.innerHTML='';
+  SYM.forEach((s,i)=>{
+    const d=document.createElement('div'); d.className='sym';
+    d.innerHTML=s[1]+'<span>'+s[0]+'</span>';
+    d.onclick=()=>tap(i);
+    b.appendChild(d);
+  });
+}
+function tap(i){
+  seq.push(SYM[i][0]);
+  document.getElementById('sentence').textContent=seq.join(' ');
+  if('speechSynthesis' in window){
+    const u=new SpeechSynthesisUtterance(SYM[i][0]);
+    u.lang='zh-CN'; u.rate=0.9; speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }
+}
+function speak(){
+  const t=seq.join(' ');
+  if(!t){ alert('先点符号'); return; }
+  if('speechSynthesis' in window){
+    const u=new SpeechSynthesisUtterance(t); u.lang='zh-CN'; u.rate=0.9; speechSynthesis.speak(u);
+  } else {
+    document.getElementById('hint').textContent='当前浏览器不支持语音，句子已生成：'+t;
+  }
+  localStorage.setItem(KEY, JSON.stringify(seq));
+}
+function clearS(){ seq=[]; document.getElementById('sentence').textContent=''; }
+build();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>会社員向け継続趣味クラス</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#FFF0F0;color:var(--coral)}
+.bar{height:8px;background:#FFE9E9;border-radius:999px;overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;background:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">hobby</span><span class="tag">worker_online_class</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">会社員向け継続趣味クラス</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Subscription hobby classes for workers with delivered supply kits</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">会社員は「夜のある生活」を自らデザインしたいが、趣味の継続的学習と準備物調達の手間が障壁。원데이ではなく、2〜3ヶ月・数十講義の継続型クラス＋準備物キット（贈り物箱）が求められている。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:4px 0 0">受講中のクラスを登録し、チャプター進捗とキット受取を管理。継続を可視化。</p>
+    <label>クラス名</label><input id="w-name" placeholder="例：ドローイング基礎">
+    <label>ジャンル</label>
+    <select id="w-gen"><option>ドローイング</option><option>カリグラフィ</option><option>革工芸</option><option>ラタン</option><option>木版画</option><option>その他</option></select>
+    <div class="row">
+      <div><label>進捗チャプター</label><input id="w-cur" type="number" min="0" placeholder="5"></div>
+      <div><label>全チャプター</label><input id="w-tot" type="number" min="1" placeholder="30"></div>
+    </div>
+    <label>キット受取</label>
+    <select id="w-kit"><option>未着</option><option>受取済</option></select>
+    <label>次回予定日</label><input id="w-next" type="date">
+    <button class="btn" onclick="addW()">クラスを登録</button>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.venturesquare.net/783950" target="_blank" style="color:var(--coral)">비스킷（Biscuit）</a>
+  </div>
+
+<script>
+const KEY="P8-014";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addW(){
+  const name=document.getElementById("w-name").value.trim();
+  const gen=document.getElementById("w-gen").value;
+  const cur=parseInt(document.getElementById("w-cur").value)||0;
+  const tot=parseInt(document.getElementById("w-tot").value)||0;
+  const kit=document.getElementById("w-kit").value;
+  const next=document.getElementById("w-next").value||"ー";
+  if(!name||!tot){alert("クラス名と全チャプター数を入力してください");return;}
+  items.push({name,gen,cur,tot,kit,next,id:Date.now()});
+  document.getElementById("w-name").value="";document.getElementById("w-cur").value="";document.getElementById("w-tot").value="";
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>🎁 受講クラス</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>まだ登録がありません。</p>";return;}
+  box.innerHTML="<b>🎁 受講クラス（"+items.length+"）</b>"+items.map((i,idx)=>{
+    const pct=Math.min(100,Math.round(i.cur/i.tot*100));
+    return `<div class='item'><div><b>${esc(i.name)}</b> <span class='pill'>${i.gen}</span></div>
+      <div style='font-size:13px;color:var(--muted)'>${i.cur}/${i.tot}チャプター（${pct}%） ・ キット:${i.kit} ・ 次回:${i.next}</div>
+      <div class='bar'><i style='width:${pct}%'></i></div>
+      <button class='mini' style='margin-top:6px' onclick='del(${idx})'>削除</button></div>`;
+  }).join("");
+}
+function del(idx){items.splice(idx,1);save();}
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+</script>
+</body>
+</html>

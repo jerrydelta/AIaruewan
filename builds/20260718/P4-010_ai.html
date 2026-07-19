@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>实时AI情侣沟通调解（冲突当下）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none;float:right}
+.tip{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;padding:12px;margin-top:10px;font-size:14px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">relationship</span><span class="tag">couple_communication_apps</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">实时AI情侣沟通调解</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Real-time AI couple-communication mediator</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">2026年15+款情侣沟通App横评：Paired（$69.99/年，400万情侣）、Lasting、Relish、LoveFix。共性痛点：多数"学习沟通"而非"冲突时支持"；每日问答易重复；高冲突时无效；需双方都参与。机会：聚焦"冲突发生当下"的实时AI调解+隐私单聊。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具（冲突当下救火）</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">吵起来的那一刻，先别发那句话。写下你的情绪，AI给你一句不升级的话术。</p>
+    <label>我现在的状态</label>
+    <select id="feeling"><option>委屈</option><option>愤怒</option><option>焦虑</option><option>失望</option><option>平静</option></select>
+    <label>我想对TA说的话（草稿）</label>
+    <textarea id="msg" rows="3" placeholder="先写下来，不会真的发出去"></textarea>
+    <button class="btn" onclick="mediate()">🤝 生成不升级的话术</button>
+    <div id="tipBox"></div>
+    <button class="btn" onclick="saveLog()" style="margin-top:8px">💾 存进我的复盘本</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P4-010">
+    <div class="collapse-header" id="aiHeader_P4-010" onclick="toggleAI('P4-010')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P4-010" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P4-010">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P4-010" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P4-010')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P4-010" style="display:none;margin-top:10px">
+        <div id="aiMessages_P4-010" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P4-010" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P4-010')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📓 冲突复盘本</b>
+    <div id="logs" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://lovefix.app/resources/apps/best-apps-relationship-communication/" target="_blank" style="color:var(--coral)">LoveFix / Paired / Lasting / Relish</a>
+  </div>
+
+<script>
+const KEY="P4-010";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let lastTip="";
+const TIPS={
+  "委屈":"试着说：『我刚才有点委屈，因为我很在意这件事。我们可以慢慢说吗？』",
+  "愤怒":"先深呼吸。试着说：『我现在有点上头，先停一下，等我们都冷静点再聊。』",
+  "焦虑":"试着说：『我有点不安，是怕我们之间出问题。你愿意听我说说吗？』",
+  "失望":"试着说：『我有点失望，但不是针对你。我们看看怎么一起解决？』",
+  "平静":"很好，趁平静把想法说清：『有件事我想跟你对齐一下，方便吗？』"
+};
+function mediate(){
+  const f=document.getElementById("feeling").value;
+  lastTip=TIPS[f];
+  document.getElementById("tipBox").innerHTML=`<div class="tip">💡 中立重述建议：<br>${lastTip}</div>`;
+}
+function saveLog(){
+  const f=document.getElementById("feeling").value;
+  const m=document.getElementById("msg").value.trim();
+  if(!m&&!lastTip){alert("先生成话术或写点什么");return;}
+  items.unshift({f,m,tip:lastTip,d:new Date().toISOString().slice(0,10)+" "+new Date().toTimeString().slice(0,5)});
+  document.getElementById("msg").value="";lastTip="";document.getElementById("tipBox").innerHTML="";
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  document.getElementById("logs").innerHTML=items.length?items.map((x,i)=>
+    `<div class="item"><button class="del" onclick="del(${i})">删除</button>${x.d} · 状态：${x.f}<br><small style="color:var(--muted)">原话：${x.m||"（无）"}</small>${x.tip?`<br><small style="color:var(--coral)">话术：${x.tip}</small>`:""}</div>`
+  ).join(""):`<p style="color:var(--muted);font-size:13px">还没有复盘记录。</p>`;
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

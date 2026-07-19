@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Canva 婚礼套件组合与旺季上架规划</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;font-size:13px}
+.item b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.kpi{display:flex;gap:8px;margin-top:8px}
+.kpi div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:8px;text-align:center}
+.kpi b{display:block;font-size:18px;color:var(--coral)}
+.note{font-size:13px;color:#555;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">digital_product</span><span class="tag">wedding_event_printables</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">Canva 婚礼套件组合与旺季上架规划</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Editable Canva wedding suites listed before peak season</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">婚礼/活动电子素材是 Etsy 高客单情感消费:邀请函套件 $15-55,求婚季(10-2 月)占全年 60% 销量,完整套件($35-65)溢价明显。痛点:新人时间紧、愿为省心付费。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:4px 0 10px">组合你的婚礼套件组件,自动算套件总价;并提示旺季上架倒计时。</p>
+    <label>组件名称</label>
+    <input id="name" placeholder="如 主请柬 / 座位卡 / 欢迎牌">
+    <div class="row">
+      <div><label>类型</label>
+        <select id="type"><option>请柬</option><option>座位卡</option><option>欢迎牌</option><option>流程卡</option><option>其他</option></select>
+      </div>
+      <div><label>单价($)</label><input id="price" type="number" value="12"></div>
+    </div>
+    <button class="btn" onclick="add()">加入套件</button>
+    <label style="margin-top:14px">上架月份(1-12)</label>
+    <input id="month" type="number" value="9">
+    <div class="kpi">
+      <div><b id="kCount">0</b>组件</div>
+      <div><b id="kSuite">$0</b>套件价</div>
+      <div><b id="kDays">--</b>距旺季</div>
+    </div>
+    <div class="note" id="tip">求婚季(10月-次年2月)占全年 60% 销量,建议提前 1-2 个月上架。</div>
+  </div>
+
+  <div class="card" id="list"><b>💐 我的婚礼套件</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://web-moguls.com/20-best-selling-digital-products-to-sell-on-etsy-right-now-2026" target="_blank" style="color:var(--coral)">Etsy · Canva 婚礼模板案例</a>
+  </div>
+
+<script>
+const KEY="P5-004";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function seasonTip(){const m=(+month.value||1);
+  let txt;
+  if(m>=10||m<=2) txt="✅ 当前处于求婚旺季(10-2月),应已上架在售。";
+  else if(m>=8&&m<=9) txt="⏰ 旺季前窗口:建议立即上架,抢占 10 月流量。";
+  else txt="📅 非旺季,可作为选品储备,旺季前 1-2 个月集中上架。";
+  tip.textContent=txt;
+  const now=new Date(), y=now.getMonth()+1>=10?now.getFullYear():now.getFullYear();
+  let target=new Date(now.getFullYear(),9,1);
+  if(target<now) target=new Date(now.getFullYear()+1,9,1);
+  const days=Math.ceil((target-now)/86400000);
+  kDays.textContent=days+"天";}
+function calc(){kCount.textContent=items.length;
+  kSuite.textContent="$"+items.reduce((a,b)=>a+b.price,0).toFixed(2);
+  seasonTip();}
+month.addEventListener("input",calc);
+function add(){const name=name_.value.trim()||"未命名组件";
+  items.push({name,type:type.value,price:+(+price.value||0)});
+  localStorage.setItem(KEY,JSON.stringify(items)); name_.value=""; render(); calc();}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();calc();}
+function render(){if(!items.length){items_.innerHTML='<p style="font-size:13px;color:#555;margin:6px 0 0">还没有组件。</p>';return;}
+  items_.innerHTML=items.map((it,i)=>`<div class="item"><span class="del" onclick="del(${i})">删除</span>
+    <b>${it.name}</b> · ${it.type} · $${it.price}</div>`).join("");}
+const name_=document.getElementById("name");
+render(); calc();
+</script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>实时中立隐私AI吵架调解（去毒化）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none;float:right}
+.tip{background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;padding:12px;margin-top:10px;font-size:14px}
+.flag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:#FFE9E9;color:var(--coral-dark);margin-left:4px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">relationship</span><span class="tag">ai_conflict_mediator</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">实时中立AI吵架调解</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Real-time neutral + E2EE AI mediator</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">AI情侣调解成新赛道：Rayzz提供"冲突仪表+4频道聊天"；Donkey Chats用AI分析争吵音频/文本语气、拦截刻薄信息；LoveFix实时给"不升级的话术"。痛点：现有App只做日常问卷不做"当下救火"。机会：实时、隐私、中立的AI吵架调解器。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具（去毒化重述）</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">把想吼出去的话贴进来。AI检测攻击性措辞，给你一句去毒化、能好好说出口的版本。全程本地，不上传。</p>
+    <label>我打算说的话</label>
+    <textarea id="msg" rows="3" placeholder="如：你从来都不管家里的事！"></textarea>
+    <button class="btn" onclick="mediate()">🤖 去毒化重述</button>
+    <div id="tipBox"></div>
+    <button class="btn" onclick="saveLog()" style="margin-top:8px">🔒 存进本地复盘（加密感·仅本机）</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📕 吵架复盘本</b>
+    <div id="logs" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/app/rayzz-communicate-better/id6762543160" target="_blank" style="color:var(--coral)">Rayzz / Donkey Chats / LoveFix / Nobee</a>
+  </div>
+
+<script>
+const KEY="P4-016";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+let last={orig:"",tip:""};
+const TOXIC=["从来都","总是","永远","废物","滚","闭嘴","你就是","算了吧","懒得","活该","瞎"];
+const SOFT="试着把指责换成'我感受'：先说事实，再说你的感受，最后提一个小请求。例如：『最近家里的事我一个人扛得有点累，我们能一起分担吗？』";
+function mediate(){
+  const m=document.getElementById("msg").value.trim();
+  if(!m){alert("先写点什么");return;}
+  const hit=TOXIC.filter(w=>m.includes(w));
+  let tip;
+  if(hit.length){tip=`检测到攻击性措辞：${hit.map(w=>"「"+w+"」").join(" ")}。${SOFT}`;}
+  else{tip="措辞较中性，可直接表达；若情绪上头，先深呼吸再发。";}
+  last={orig:m,tip,flag:hit};
+  document.getElementById("tipBox").innerHTML=`<div class="tip">💡 去毒化建议：<br>${tip}</div>`;
+}
+function saveLog(){
+  if(!last.orig){alert("先生成去毒化建议");return;}
+  items.unshift({orig:last.orig,tip:last.tip,toxic:last.flag.length,d:new Date().toISOString().slice(0,10)+" "+new Date().toTimeString().slice(0,5)});
+  last={orig:"",tip:""};document.getElementById("msg").value="";document.getElementById("tipBox").innerHTML="";
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  document.getElementById("logs").innerHTML=items.length?items.map((x,i)=>
+    `<div class="item"><button class="del" onclick="del(${i})">删除</button>${x.d}${x.toxic?'<span class="flag">含攻击措辞</span>':""}<br><small style="color:var(--muted)">原话：${x.orig}</small><br><small style="color:var(--coral)">建议：${x.tip}</small></div>`
+  ).join(""):`<p style="color:var(--muted);font-size:13px">还没有复盘记录。</p>`;
+}
+render();
+</script>
+</body>
+</html>

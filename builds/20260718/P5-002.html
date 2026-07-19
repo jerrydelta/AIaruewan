@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Notion 模板店选品与套组变现计算器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;font-size:13px}
+.item b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.kpi{display:flex;gap:8px;margin-top:8px}
+.kpi div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:8px;text-align:center}
+.kpi b{display:block;font-size:18px;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">digital_product</span><span class="tag">notion_templates</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">Notion 模板店选品与套组变现计算器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Vertical Notion template store (content/freelance/finance) + bundle monetization</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Notion 模板已成独立创作者稳定被动收入:Thomas Frank 单款 Ultimate Brain 卖 $79、累计销数万份;Gumroad 单平台 Notion 相关产品近 1.97 万款。痛点:通用模板饱和,垂直系统(内容创作/自由职业 CRM/个人理财)需求强。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:4px 0 10px">添加你的模板单品,自动算套组价(默认 8 折)与月收入预测。</p>
+    <label>模板名称</label>
+    <input id="name" placeholder="如 内容创作系统 v1">
+    <div class="row">
+      <div><label>垂直类目</label>
+        <select id="cat"><option>内容创作</option><option>自由职业 CRM</option><option>个人理财</option><option>学生/学术</option></select>
+      </div>
+      <div><label>单价($)</label><input id="price" type="number" value="29"></div>
+    </div>
+    <button class="btn" onclick="add()">加入店铺</button>
+    <label style="margin-top:14px">套组折扣率(%)</label>
+    <input id="disc" type="number" value="20">
+    <label>预估月销量(套组)</label>
+    <input id="vol" type="number" value="50">
+    <div class="kpi">
+      <div><b id="kCount">0</b>单品数</div>
+      <div><b id="kBundle">$0</b>套组价</div>
+      <div><b id="kRev">$0</b>月预估</div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>🏪 店铺单品</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://fungies.io/how-to-sell-notion-templates/" target="_blank" style="color:var(--coral)">Notion · Gumroad · Etsy 模板变现案例</a>
+  </div>
+
+<script>
+const KEY="P5-002";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function calc(){const d=(+disc.value||0)/100, v=+vol.value||0;
+  const sum=items.reduce((a,b)=>a+b.price,0);
+  const bundle=sum*(1-d); kCount.textContent=items.length;
+  kBundle.textContent="$"+bundle.toFixed(2); kRev.textContent="$"+(bundle*v).toFixed(0);}
+[disc,vol].forEach(el=>el.addEventListener("input",calc));
+function add(){const name=name_.value.trim()||"未命名模板";
+  items.push({name,cat:cat.value,price:+(+price.value||0)});
+  localStorage.setItem(KEY,JSON.stringify(items)); name_.value=""; render(); calc();}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();calc();}
+function render(){if(!items.length){items_.innerHTML='<p style="font-size:13px;color:#555;margin:6px 0 0">还没有单品,上面添加一个吧。</p>';return;}
+  items_.innerHTML=items.map((it,i)=>`<div class="item"><span class="del" onclick="del(${i})">删除</span>
+    <b>${it.name}</b> · ${it.cat} · $${it.price}</div>`).join("");}
+const name_=document.getElementById("name");
+render(); calc();
+</script>
+</body>
+</html>

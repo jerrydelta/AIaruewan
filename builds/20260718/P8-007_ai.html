@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韓国人向け日本語学習・K-culture</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#FFF0F0;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">education</span><span class="tag">japanese_for_koreans</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韓国人向け日本語学習・K-culture</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Japanese for Koreans blending K-culture context + JLPT prep</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韓国人学習者は「日本語の敬語・漢字・試験（N4/N3）」の実用会話と資格の両立を求める。K-drama・アニメの文脈で覚えたいが、既存アプリは教科書的で「生きた表現」が不足している。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:4px 0 0">K-culture文脈付きで表現を集め、JLPTレベルで管理。「今日の一文」でランダム復習。</p>
+    <label>表現（日本語）</label><input id="j-jp" placeholder="例：本当にありがとう">
+    <label>意味（韓国語）</label><input id="j-ko" placeholder="예: 정말 고마워">
+    <label>文脈（K-culture）</label><input id="j-ctx" placeholder="例：ドラマ『鬼滅の刃』で">
+    <label>JLPTレベル</label>
+    <select id="j-lv"><option>N5</option><option>N4</option><option>N3</option><option>N2</option><option>N1</option></select>
+    <button class="btn" onclick="addJ()">表現を保存</button>
+    <button class="mini" style="margin-top:8px" onclick="pickOne()">🎲 今日の一文</button>
+    <div id="pick" style="margin-top:10px;font-size:15px"></div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P8-007">
+    <div class="collapse-header" id="aiHeader_P8-007" onclick="toggleAI('P8-007')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P8-007" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P8-007">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P8-007" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P8-007')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P8-007" style="display:none;margin-top:10px">
+        <div id="aiMessages_P8-007" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P8-007" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P8-007')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/cn/app/bunpo-learn-japanese-korean/id1279720052" target="_blank" style="color:var(--coral)">LingoDeer / Bunpo / YuSpeak</a>
+  </div>
+
+<script>
+const KEY="P8-007";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addJ(){
+  const jp=document.getElementById("j-jp").value.trim();
+  const ko=document.getElementById("j-ko").value.trim();
+  const ctx=document.getElementById("j-ctx").value.trim();
+  const lv=document.getElementById("j-lv").value;
+  if(!jp||!ko){alert("表現と意味は必須です");return;}
+  items.push({jp,ko,ctx,lv,id:Date.now()});
+  document.getElementById("j-jp").value="";document.getElementById("j-ko").value="";document.getElementById("j-ctx").value="";
+  save();
+}
+function pickOne(){
+  if(!items.length){document.getElementById("pick").textContent="まだ表現がありません。";return;}
+  const i=items[Math.floor(Math.random()*items.length)];
+  document.getElementById("pick").innerHTML=`<b>${esc(i.jp)}</b> <span class='pill'>${i.lv}</span><br><span style='color:var(--muted);font-size:13px'>${esc(i.ko)}${i.ctx?' ／ '+esc(i.ctx):''}</span>`;
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>📘 マイ表現帳（"+items.length+"）</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>まだ表現がありません。</p>";return;}
+  box.innerHTML="<b>📘 マイ表現帳（"+items.length+"）</b>"+items.slice().reverse().map((i,ri)=>{
+    const idx=items.length-1-ri;
+    return `<div class='item' style='padding:8px 10px'><b>${esc(i.jp)}</b> <span class='pill'>${i.lv}</span>
+      <div style='font-size:13px;color:var(--muted)'>${esc(i.ko)}${i.ctx?' ／ '+esc(i.ctx):''}</div>
+      <button class='mini' style='margin-top:4px' onclick='del(${idx})'>削除</button></div>`;
+  }).join("");
+}
+function del(idx){items.splice(idx,1);save();}
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

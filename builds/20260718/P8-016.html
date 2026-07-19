@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>コレクション資産管理</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#FFF0F0;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">hobby</span><span class="tag">collection_asset_mgmt</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">コレクション資産管理</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Cross-genre collection asset manager with auction-price tracking</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">趣味のコレクション（高額品含む）を「資産」として一元管理し、重複購入を防ぎつつ価値を把握したい。アート・時計・ワイン・トレカ・フィギュア等、ジャンル横断で世界のオークションデータと照らし資産価値を分析したい。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:4px 0 0">取得価格と現在評価を記録し、資産総額と増減を可視化。同名で重複警告します。</p>
+    <label>ジャンル</label>
+    <select id="c-gen"><option>トレーディングカード</option><option>時計</option><option>フィギュア</option><option>アート</option><option>ワイン</option><option>スニーカー</option><option>その他</option></select>
+    <label>名称</label><input id="c-name" placeholder="例：PSA10 ピカチュウ">
+    <div class="row">
+      <div><label>取得価格(円)</label><input id="c-buy" type="number" min="0" placeholder="8000"></div>
+      <div><label>現在評価(円)</label><input id="c-now" type="number" min="0" placeholder="15000"></div>
+    </div>
+    <label>取得日</label><input id="c-date" type="date">
+    <button class="btn" onclick="addC()">資産を登録</button>
+    <div id="sum" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/sg/app/collet-collection-asset-mgmt/id1614772135" target="_blank" style="color:var(--coral)">COLLET / RecoColle2</a>
+  </div>
+
+<script>
+const KEY="P8-016";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function addC(){
+  const gen=document.getElementById("c-gen").value;
+  const name=document.getElementById("c-name").value.trim();
+  const buy=parseInt(document.getElementById("c-buy").value)||0;
+  const now=parseInt(document.getElementById("c-now").value)||0;
+  const date=document.getElementById("c-date").value||new Date().toISOString().slice(0,10);
+  if(!name){alert("名称を入力してください");return;}
+  const dup=items.find(i=>i.name===name&&i.gen===gen);
+  if(dup&&!confirm("同名の「"+name+"」が既にあります。重複購入防止のため確認：そのまま追加しますか？"))return;
+  items.push({gen,name,buy,now,date,id:Date.now()});
+  document.getElementById("c-name").value="";document.getElementById("c-buy").value="";document.getElementById("c-now").value="";
+  save();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const asset=items.reduce((a,b)=>a+b.now,0);
+  const cost=items.reduce((a,b)=>a+b.buy,0);
+  const pl=asset-cost;
+  document.getElementById("sum").innerHTML=
+    `<span style='font-size:13px'>資産総額 <b style='color:var(--coral)'>${asset.toLocaleString()}</b>円</span><br>`+
+    `<span style='font-size:13px;color:${pl>=0?'var(--ok)':'var(--coral)}'>評価増減 ${pl>=0?'+':''}${pl.toLocaleString()}円</span>`;
+  const box=document.getElementById("list");
+  if(!items.length){box.innerHTML="<b>🗃 コレクション</b><p style='font-size:13px;color:var(--muted);margin:6px 0 0'>まだ登録がありません。</p>";return;}
+  box.innerHTML="<b>🗃 コレクション（"+items.length+"点）</b>"+items.slice().reverse().map((i,ri)=>{
+    const idx=items.length-1-ri;
+    const d=i.now-i.buy;
+    return `<div class='item'><b>${esc(i.name)}</b> <span class='pill'>${i.gen}</span>
+      <div style='font-size:13px;color:var(--muted)'>取得${i.buy.toLocaleString()}→評価${i.now.toLocaleString()}円</div>
+      <div style='font-size:13px;color:${d>=0?'var(--ok)':'var(--coral)'}'>${d>=0?'+':''}${d.toLocaleString()}円 (${i.date})</div>
+      <button class='mini' style='margin-top:4px' onclick='del(${idx})'>削除</button></div>`;
+  }).join("");
+}
+function del(idx){items.splice(idx,1);save();}
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+render();
+</script>
+</body>
+</html>

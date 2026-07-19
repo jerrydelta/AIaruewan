@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>轻量无套路健身记录+计划工具</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none}
+.stat{display:flex;gap:8px;margin-bottom:6px}
+.stat>div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:12px;
+  text-align:center;padding:10px}
+.stat b{display:block;font-size:20px;color:var(--coral)}
+.pln{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.pln input{width:auto;margin:0}
+.done{text-decoration:line-through;color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">fitness</span><span class="tag">keep_user_churn</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">轻量无套路健身记录+计划工具</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Lightweight no-gimmick fitness tracker & planner</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Keep 2025年MAU锐减815万、靠砍研发省出首度盈利；AI教练使用率不足4%、被批"换马甲预制课"、数据失真卡死；免费课变会员专属、跑步默跳会员页。痛点：大厂把商业化碾压体验、过度付费墙、AI空壳。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">真免费、不弹会员、纯本地记录的训练日记。今日练了啥，记下来就好。</p>
+    <label>训练名称</label>
+    <input id="name" placeholder="如：深蹲 / 慢跑 / 拉伸">
+    <div class="row">
+      <div><label>时长（分钟）</label><input id="min" type="number" min="0" placeholder="30"></div>
+      <div><label>类型</label>
+        <select id="type"><option>力量</option><option>有氧</option><option>拉伸</option><option>其他</option></select>
+      </div>
+    </div>
+    <button class="btn" onclick="add()">＋ 记一笔</button>
+    <div class="stat" style="margin-top:14px">
+      <div><b id="sN">0</b>总次数</div>
+      <div><b id="sM">0</b>总分钟</div>
+      <div><b id="sT">0</b>今日</div>
+    </div>
+    <b style="font-size:14px">📋 本周训练计划（勾选完成）</b>
+    <div id="plan"></div>
+    <div class="row" style="margin-top:6px">
+      <input id="pn" placeholder="加一个计划项，如：周二练背">
+      <button class="btn" style="margin-top:6px;flex:0 0 80px" onclick="addPlan()">添加</button>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📒 训练记录</b>
+    <div id="logs" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://new.qq.com/rain/a/20260415A03CVT00?refer=cp_1009" target="_blank" style="color:var(--coral)">Keep（腾讯新闻调查）</a>
+  </div>
+
+<script>
+const KEY="P4-001";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const DEFAULT_PLAN=["周一 有氧30分","周三 力量训练","周五 拉伸放松","周日 长距离散步"];
+let plan=JSON.parse(localStorage.getItem(KEY+"_plan")||"null")||DEFAULT_PLAN.map(t=>({t,done:false}));
+
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function savePlan(){localStorage.setItem(KEY+"_plan",JSON.stringify(plan));renderPlan();}
+
+function add(){
+  const name=document.getElementById("name").value.trim();
+  const min=parseInt(document.getElementById("min").value)||0;
+  const type=document.getElementById("type").value;
+  if(!name){alert("写个训练名称吧");return;}
+  const d=new Date().toISOString().slice(0,10);
+  items.unshift({name,min,type,d,t:Date.now()});
+  document.getElementById("name").value="";document.getElementById("min").value="";
+  save();
+}
+function del(i){items.splice(i,1);save();}
+
+function addPlan(){
+  const v=document.getElementById("pn").value.trim();
+  if(!v)return;
+  plan.push({t:v,done:false});
+  document.getElementById("pn").value="";
+  savePlan();
+}
+function toggleP(i){plan[i].done=!plan[i].done;savePlan();}
+
+function render(){
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById("sN").textContent=items.length;
+  document.getElementById("sM").textContent=items.reduce((s,x)=>s+x.min,0);
+  document.getElementById("sT").textContent=items.filter(x=>x.d===today).length;
+  document.getElementById("logs").innerHTML=items.length?items.map((x,i)=>
+    `<div class="item"><span>${x.name} · ${x.type} · ${x.min}分<br><small style="color:var(--muted)">${x.d}</small></span><button class="del" onclick="del(${i})">删除</button></div>`
+  ).join(""):`<p style="color:var(--muted);font-size:13px">还没有记录，今天动一下？</p>`;
+}
+function renderPlan(){
+  document.getElementById("plan").innerHTML=plan.map((p,i)=>
+    `<div class="pln"><input type="checkbox" ${p.done?"checked":""} onchange="toggleP(${i})"><span class="${p.done?"done":""}">${p.t}</span></div>`
+  ).join("");
+}
+render();renderPlan();
+</script>
+</body>
+</html>

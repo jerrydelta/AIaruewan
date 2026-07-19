@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>AI 膳食规划(家庭多档案)</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;font-size:13px}
+.item b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.kpi{display:flex;gap:8px;margin-top:8px}
+.kpi div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:8px;text-align:center}
+.kpi b{display:block;font-size:16px;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">lifestyle</span><span class="tag">ai_meal_planner</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">AI 膳食规划(家庭多档案)</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Vertical AI meal planner (household multi-profile)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">AI 膳食规划 App 在 2026 快速起量且存在"家庭多人不同饮食"空白:Bitee 上线 8 个月月收入 $330、4.8★;多数 App 只做单人,家庭多饮食场景普遍缺失。痛点:减肥/健身人群要"提前规划+精准宏量+购物清单"。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:4px 0 10px">先建家庭成员档案,再添加每日餐食(含宏量),自动汇总并生成购物清单。</p>
+    <label>家庭成员</label>
+    <div class="row">
+      <div><input id="mname" placeholder="如 爸爸"></div>
+      <div><select id="goal"><option>减脂</option><option>健身</option><option>GLP-1 友好</option><option>普通</option></select></div>
+    </div>
+    <button class="btn" onclick="addMember()">添加成员</button>
+    <div id="members" style="margin-top:8px"></div>
+
+    <label style="margin-top:12px">添加一餐</label>
+    <div class="row">
+      <div><select id="meal"><option>早餐</option><option>午餐</option><option>晚餐</option><option>加餐</option></select></div>
+      <div><input id="dish" placeholder="菜品"></div>
+    </div>
+    <div class="row">
+      <div><label>蛋白(g)</label><input id="p" type="number" value="20"></div>
+      <div><label>碳水(g)</label><input id="c" type="number" value="30"></div>
+      <div><label>脂肪(g)</label><input id="f" type="number" value="10"></div>
+    </div>
+    <button class="btn" onclick="addMeal()">加入今日规划</button>
+    <div class="kpi">
+      <div><b id="kP">0</b>蛋白g</div>
+      <div><b id="kC">0</b>碳水g</div>
+      <div><b id="kF">0</b>脂肪g</div>
+    </div>
+  </div>
+
+  <div class="card"><b>🛒 今日购物清单</b><div id="shop" style="font-size:14px;margin-top:6px"></div></div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P5-018">
+    <div class="collapse-header" id="aiHeader_P5-018" onclick="toggleAI('P5-018')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P5-018" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P5-018">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P5-018" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P5-018')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P5-018" style="display:none;margin-top:10px">
+        <div id="aiMessages_P5-018" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P5-018" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P5-018')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>🍽 今日餐食</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.appkittie.com/app/app-bitee-ai-nutritionist-id6752269396" target="_blank" style="color:var(--coral)">Bitee · PrepMeal AI · Melio</a>
+  </div>
+
+<script>
+const KEY="P5-018";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"members":[],"meals":[]}');
+function addMember(){const m=mname_.value.trim(); if(!m){alert("填成员名");return;}
+  data.members.push({name:m,goal:goal.value});
+  localStorage.setItem(KEY,JSON.stringify(data)); mname_.value=""; renderMembers();}
+function addMeal(){const dish=dish_.value.trim(); if(!dish){alert("填菜品");return;}
+  data.meals.push({meal:meal.value,dish,p:+(+p.value||0),c:+(+c.value||0),f:+(+f.value||0)});
+  localStorage.setItem(KEY,JSON.stringify(data)); dish_.value=""; renderMeals(); calc();}
+function delM(i){data.meals.splice(i,1);localStorage.setItem(KEY,JSON.stringify(data));renderMeals();calc();}
+function delMem(i){data.members.splice(i,1);localStorage.setItem(KEY,JSON.stringify(data));renderMembers();}
+function calc(){kP.textContent=data.meals.reduce((a,b)=>a+b.p,0);
+  kC.textContent=data.meals.reduce((a,b)=>a+b.c,0); kF.textContent=data.meals.reduce((a,b)=>a+b.f,0);
+  const list=[...new Set(data.meals.map(m=>m.dish))];
+  shop_.innerHTML=list.length?list.map(x=>"• "+x).join("<br>"):'<span style="color:#999">还没有餐食</span>';}
+function renderMembers(){members_.innerHTML=data.members.length?data.members.map((m,i)=>`<span class="tag" style="margin-top:4px">${m.name}·${m.goal} <span onclick="delMem(${i})" style="cursor:pointer">✕</span></span>`).join(""):'<span style="font-size:13px;color:#999">暂无成员</span>';}
+function renderMeals(){if(!data.meals.length){items_.innerHTML='<p style="font-size:13px;color:#555;margin:6px 0 0">还没有餐食。</p>';return;}
+  items_.innerHTML=data.meals.map((m,i)=>`<div class="item"><span class="del" onclick="delM(${i})">删除</span>
+    <b>${m.meal}</b> · ${m.dish}<br>P ${m.p}g · C ${m.c}g · F ${m.f}g</div>`).join("");}
+const mname_=document.getElementById("mname"),goal=document.getElementById("goal"),members_=document.getElementById("members"),
+  meal=document.getElementById("meal"),dish=document.getElementById("dish"),p=document.getElementById("p"),c=document.getElementById("c"),f=document.getElementById("f"),
+  items_=document.getElementById("items"),shop_=document.getElementById("shop"),
+  kP=document.getElementById("kP"),kC=document.getElementById("kC"),kF=document.getElementById("kF");
+renderMembers(); renderMeals(); calc();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

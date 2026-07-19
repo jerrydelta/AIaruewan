@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>离线优先本地生产力工具</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.sub{background:#fff;color:var(--coral);border:1px solid var(--coral)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.task{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;font-size:14px;display:flex;align-items:center;gap:10px}
+.task.done b{text-decoration:line-through;color:var(--muted)}
+.del{color:var(--coral);font-size:12px;cursor:pointer;margin-left:auto}
+small{color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">productivity</span><span class="tag">offline_first_local_productivity</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">离线优先本地生产力</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Buy-once offline-first local productivity tool</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">对 9363 条 Reddit "I wish this existed" 分析：7% 明确要离线优先/隐私工具，用户因"订阅疲劳+隐私担忧"想要本地版 App（买断制、经 iCloud/局域网同步）。本工具纯本地任务清单，支持 JSON 导出/导入做备份与迁移，无订阅、无云。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 本地任务（断网可用）</b>
+    <label>新任务</label>
+    <input id="task" placeholder="例如：写完 Q3 计划">
+    <button class="btn" id="add">添加</button>
+    <div class="row" style="margin-top:8px">
+      <button class="btn sub" id="exp">⬇ 导出 JSON 备份</button>
+      <button class="btn sub" id="imp">⬆ 导入 JSON</button>
+    </div>
+    <input id="file" type="file" accept="application/json" style="display:none">
+  </div>
+
+  <div class="card" id="list"><b>✅ 任务（<span id="cnt">0</span>/<span id="done">0</span> 完成）</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://markethunt.io/insights/reddit-market-validation-analysis" target="_blank" style="color:var(--coral)">Local-first productivity tools (iCloud/Local sync)</a>
+  </div>
+
+<script>
+const KEY="P1-016";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function add(){
+  const v=document.getElementById("task").value.trim();if(!v)return;
+  items.push({t:v,done:false,ts:Date.now()});localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("task").value="";render();
+}
+function exp(){
+  const blob=new Blob([JSON.stringify(items,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="tasks-backup.json";a.click();
+}
+function imp(){
+  const f=document.getElementById("file");f.click();
+  f.onchange=e=>{const fr=new FileReader();fr.onload=ev=>{try{items=JSON.parse(ev.target.result);localStorage.setItem(KEY,JSON.stringify(items));render();}catch(_){alert("JSON 解析失败");}};fr.readAsText(e.target.files[0]);};
+}
+function render(){
+  document.getElementById("cnt").textContent=items.length;
+  document.getElementById("done").textContent=items.filter(x=>x.done).length;
+  const box=document.getElementById("items");
+  if(!items.length){box.innerHTML='<p style="font-size:13px;color:#aaa;margin:6px 0">暂无任务。</p>';return;}
+  box.innerHTML=items.slice().reverse().map((r,i)=>`<div class="task ${r.done?"done":""}">
+    <input type="checkbox" ${r.done?"checked":""} data-ts="${r.ts}" style="width:auto;margin:0">
+    <b>${r.t}</b><span class="del" data-ts="${r.ts}">删除</span></div>`).join("");
+  box.querySelectorAll('input[type=checkbox]').forEach(c=>c.onchange=()=>{const it=items.find(x=>x.ts==c.dataset.ts);it.done=c.checked;localStorage.setItem(KEY,JSON.stringify(items));render();});
+  box.querySelectorAll(".del").forEach(e=>e.onclick=()=>{items=items.filter(x=>x.ts!=e.dataset.ts);localStorage.setItem(KEY,JSON.stringify(items));render();});
+}
+document.getElementById("add").onclick=add;
+document.getElementById("exp").onclick=exp;
+document.getElementById("imp").onclick=imp;
+render();
+</script>
+</body>
+</html>

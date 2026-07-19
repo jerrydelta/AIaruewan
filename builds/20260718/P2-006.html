@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>在韩外国人 求职·签证·文化适配</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:13px}
+.item .del{float:right;color:var(--muted);font-size:12px}
+.badge{font-size:11px;padding:1px 7px;border-radius:999px;background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">career</span><span class="tag">foreigner_jobs</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">在韩外国人 求职·签证·文化</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Job + Visa + Culture-Fit (EN)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国主流求职平台（사람인/잡코리아）均以韩语为中心。2026 新出的「커리어빌더」专为在韩外国人设计：英文界面、签证指南、实时 Recruiter Chat。外国人求职信息分散、语言/签证门槛高，现有平台几乎无英文支持。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 申请追踪</b>
+    <input id="company" placeholder="公司 / 岗位">
+    <div class="row">
+      <select id="visa">
+        <option>E-7 特定活动</option><option>D-10 求职</option><option>F-2 居住</option>
+        <option>F-4 在外同胞</option><option>F-6 结婚移民</option><option>需赞助</option>
+      </select>
+      <select id="stage">
+        <option>已投递</option><option>笔试/作业</option><option>面试</option>
+        <option>面试通过</option><option>已拒/放弃</option>
+      </select>
+    </div>
+    <label>文化适配 / 注意事项</label>
+    <textarea id="note" rows="2" placeholder="如： hierarchical 文化重，邮件需正式敬语"></textarea>
+    <button class="btn" onclick="add()">添加追踪</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的求职板</b>
+    <p style="font-size:12px;color:var(--muted);margin:6px 0 0">进行中 <b class="h-coral" id="cnt">0</b> 个</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://apps.apple.com/fr/app/%EC%BB%A4%EB%A6%AC%EC%96%B4%EB%B9%8C%EB%8D%94/id6739476027" target="_blank" style="color:var(--coral)">커리어빌더 CareerBuilder KR</a>
+  </div>
+
+<script>
+const KEY="P2-006";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function add(){
+  const company=document.getElementById("company").value.trim();
+  if(!company){ alert("请填写公司/岗位"); return; }
+  const visa=document.getElementById("visa").value;
+  const stage=document.getElementById("stage").value;
+  const note=document.getElementById("note").value.trim();
+  items.unshift({company,visa,stage,note,t:Date.now()});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("company").value=""; document.getElementById("note").value="";
+  render();
+}
+function render(){
+  const box=document.getElementById("list");
+  const active=items.filter(x=>!["已拒/放弃"].includes(x.stage)).length;
+  let h='<b>📋 我的求职板</b><p style="font-size:12px;color:var(--muted);margin:6px 0 0">进行中 <b class="h-coral" id="cnt">'+active+'</b> 个</p>';
+  if(items.length===0){ h+='<p style="font-size:13px;color:var(--muted)">还没有追踪。</p>'; }
+  items.forEach((it,i)=>{
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除</span><b>'+it.company+'</b> <span class="badge">'+it.visa+'</span><br>'+
+       '阶段：'+it.stage+(it.note?'<br><span style="color:#777">'+it.note+'</span>':'')+'</div>';
+  });
+  box.innerHTML=h;
+}
+function del(i){ items.splice(i,1); localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>夫妻冲突复盘+成长（情绪可视化）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,textarea,select{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none;float:right}
+.dim{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px}
+.dim>span{flex:0 0 64px;color:var(--muted)}
+.bar{height:12px;background:#FFE3E3;border-radius:999px;overflow:hidden;flex:1}
+.bar>span{display:block;height:100%;background:var(--coral)}
+.radar{margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">relationship</span><span class="tag">couple_conflict_replay</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">夫妻冲突复盘+成长</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Privacy-first conflict-replay & growth</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">夫妻冲突"复盘"成新需求：Connected提供"冲突重放"梳理发生什么、揭示触发因素；LoveSync（开源）支持录音/文字输入，生成情绪心电图、沟通雷达图（共情/攻击/防御等五维）、调解建议、破冰话术，全本地存储隐私优先。痛点：吵完就翻篇、无沉淀、反复踩同一个雷。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具（情绪雷达·隐私本地）</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">每次冲突后花1分钟复盘：触发因素 + 五维情绪评分。雷达图看清模式，下次少踩雷。全留本机。</p>
+    <label>触发因素</label>
+    <input id="trig" placeholder="如：家务分配 / 长辈干涉 / 花钱">
+    <label>五维情绪强度（0-5）</label>
+    <div class="dim"><span>攻击性</span><div class="bar"><span id="b0"></span></div><input id="d0" type="range" min="0" max="5" value="0" style="flex:0 0 60px" oninput="upd(0)"></div>
+    <div class="dim"><span>防御心</span><div class="bar"><span id="b1"></span></div><input id="d1" type="range" min="0" max="5" value="0" style="flex:0 0 60px" oninput="upd(1)"></div>
+    <div class="dim"><span>逃避</span><div class="bar"><span id="b2"></span></div><input id="d2" type="range" min="0" max="5" value="0" style="flex:0 0 60px" oninput="upd(2)"></div>
+    <div class="dim"><span>共情</span><div class="bar"><span id="b3"></span></div><input id="d3" type="range" min="0" max="5" value="0" style="flex:0 0 60px" oninput="upd(3)"></div>
+    <div class="dim"><span>冷静</span><div class="bar"><span id="b4"></span></div><input id="d4" type="range" min="0" max="5" value="0" style="flex:0 0 60px" oninput="upd(4)"></div>
+    <button class="btn" onclick="add()">🔒 存这次复盘</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📊 冲突复盘本</b>
+    <div id="logs" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://github.com/RaeleneW/LoveSync" target="_blank" style="color:var(--coral)">LoveSync（开源） / Connected / Nobee</a>
+  </div>
+
+<script>
+const KEY="P4-018";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const DIM=["攻击性","防御心","逃避","共情","冷静"];
+function upd(i){document.getElementById("b"+i).style.width=document.getElementById("d"+i).value*20+"%";}
+function add(){
+  const trig=document.getElementById("trig").value.trim();
+  if(!trig){alert("写个触发因素");return;}
+  const scores=[0,1,2,3,4].map(i=>parseInt(document.getElementById("d"+i).value)||0);
+  items.unshift({trig,scores,d:new Date().toISOString().slice(0,10)});
+  document.getElementById("trig").value="";
+  [0,1,2,3,4].forEach(i=>{document.getElementById("d"+i).value=0;upd(i);});
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function radar(s){
+  return DIM.map((n,i)=>`<div class="dim"><span>${n}</span><div class="bar"><span style="width:${s[i]*20}%"></span></div><small style="flex:0 0 18px;text-align:right">${s[i]}</small></div>`).join("");
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  document.getElementById("logs").innerHTML=items.length?items.map((x,i)=>
+    `<div class="item"><button class="del" onclick="del(${i})">删除</button><b>${x.d}</b> · 触发：${x.trig}<div class="radar">${radar(x.scores)}</div></div>`
+  ).join(""):`<p style="color:var(--muted);font-size:13px">还没有复盘记录。</p>`;
+}
+[0,1,2,3,4].forEach(upd);render();
+</script>
+</body>
+</html>

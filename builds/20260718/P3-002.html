@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>MBTI性格匹配交友器</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item b{color:var(--ink)}.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.score{font-size:22px;font-weight:700;color:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">social</span><span class="tag">mbti_personality_friendship</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">MBTI性格匹配交友器</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">MBTI personality-matching friendship/dating app</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">滑卡式App只按照片/距离匹配，缺乏"懂我思维方式"的连接。性格匹配（如Boo用16型MBTI）已成主流差异化路线，全球用户、内向者友好。中日韩年轻人对MBTI狂热，可本地化落地。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">选你的MBTI + 想匹配的对象类型，计算兼容性并给出相处建议，本地保存匹配档案。</p>
+    <div class="row">
+      <div><label>我的MBTI</label>
+      <select id="me"></select></div>
+      <div><label>对方/目标</label>
+      <select id="you"></select></div>
+    </div>
+    <label>模式</label>
+    <select id="mode"><option>朋友</option><option>约会</option><option>同好搭子</option></select>
+    <label>备注（昵称/在哪里认识的）</label>
+    <input id="note" placeholder="例如：小A · 读书群">
+    <button class="btn" onclick="match()">计算匹配度</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的匹配档案</b>
+    <p style="font-size:12px;color:var(--muted);margin:4px 0 0">本地保存，可随时回看。</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.introvrs.com/blog/best-friend-finder-apps-introverts" target="_blank" style="color:var(--coral)">Boo · MBTI性格社交</a>
+  </div>
+
+<script>
+const T=["INTJ","INTP","ENTJ","ENTP","INFJ","INFP","ENFJ","ENFP","ISTJ","ISFJ","ESTJ","ESFJ","ISTP","ISFP","ESTP","ESFP"];
+const sel1=document.getElementById("me"),sel2=document.getElementById("you");
+T.forEach(t=>{sel1.add(new Option(t,t));sel2.add(new Option(t,t));});
+sel2.add(new Option("随机/不限","ANY"));
+const desc={
+  N:"重想法与可能",S:"重实际与细节",F:"重感受与和谐",T:"重逻辑与公正",
+  I:"需要独处充电",E:"从社交获得能量",J:"喜欢计划与确定",P:"喜欢灵活与开放"
+};
+function score(a,b){
+  if(b==="ANY")return 70+Math.floor(Math.random()*20);
+  let s=50,m=0;
+  for(let i=0;i<4;i++){if(a[i]===b[i]){s+=12;m++;}else{s-=4;}}
+  return Math.max(35,Math.min(98,s));
+}
+function tip(a,b){
+  if(b==="ANY")return "不限类型，建议先聊共同兴趣再判断契合度。";
+  let ds=[];for(let i=0;i<4;i++){if(a[i]!==b[i])ds.push(desc[a[i]]+" vs "+desc[b[i]]);}
+  return ds.length?("差异点："+ds.join("；")+"。建议尊重彼此节奏。"):"四维度高度一致，是天然同频组合！";
+}
+const KEY="P3-002";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function match(){
+  const me=sel1.value,you=sel2.value,mode=document.getElementById("mode").value,note=document.getElementById("note").value.trim();
+  const sc=score(me,you);
+  items.unshift({me,you,mode,note,sc,tip:tip(me,you),t:new Date().toLocaleString("zh-CN")});
+  localStorage.setItem(KEY,JSON.stringify(items));render();
+  document.getElementById("note").value="";
+}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const el=document.getElementById("list");
+  let h='<b>📋 我的匹配档案</b><p style="font-size:12px;color:var(--muted);margin:4px 0 0">本地保存，可随时回看。</p>';
+  if(!items.length){h+='<p style="font-size:13px;color:var(--muted);margin-top:8px">还没有匹配记录。</p>';}
+  items.forEach((it,i)=>{
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除 ✕</span>'+
+       '<b>'+it.me+' × '+(it.you==="ANY"?"随机":it.you)+'</b> · '+it.mode+'<br>'+
+       '<span class="score">'+it.sc+'%</span> 匹配度<br>'+
+       (it.note?'<span style="font-size:13px;color:#555">'+it.note+'</span><br>':'')+
+       '<span style="font-size:13px;color:var(--coral)">💡 '+it.tip+'</span><br>'+
+       '<span style="font-size:11px;color:var(--muted)">'+it.t+'</span></div>';
+  });
+  el.innerHTML=h;
+}
+render();
+</script>
+</body>
+</html>

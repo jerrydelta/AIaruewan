@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>共享植物养护</title>
+<style>
+:root{
+  --coral:#FF6B6B;        --coral-dark:#E85555;
+  --ink:#2D2D2D;          --muted:#8A8A8A;
+  --bg:#F7F7F7;           --card:#FFFFFF;
+  --line:#ECECEC;         --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-sm{padding:7px 10px;font-size:13px;border-radius:9px;margin-top:0}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item h3{margin:0 0 4px;font-size:15px}
+.mini{font-size:12px;color:var(--muted)}
+.due-soon{color:var(--coral);font-weight:600}
+.due-ok{color:var(--ok);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">plant</span><span class="tag">co_parenting_share</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">共享植物养护</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Shared plant care (multi-carer + travel handoff)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Planta 高级版允许"与家人或植物保姆共享账户"——被看重却被订阅墙挡住。情侣/室友/出差时的植物保姆无法协同管理同一批植物，免费版把数据隔离。本工具把"多养护人 + 出差交接"做成免费核心。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 协同养护</b>
+    <label>植物名称</label>
+    <input id="name" placeholder="如：玄关散尾葵">
+    <div class="row">
+      <div><label>负责养护人</label><input id="carer" placeholder="如：我/室友小王"></div>
+      <div><label>浇水周期(天)</label><input id="w" type="number" value="7" min="1"></div>
+    </div>
+    <label>出差交接备注</label>
+    <textarea id="hand" rows="2" placeholder="如：我出差7/20-7/28，请小王按提示浇水"></textarea>
+    <button class="btn" onclick="add()">＋ 添加</button>
+    <div id="list"></div>
+  </div>
+
+  <div class="card">
+    <b>👥 养护人概览</b>
+    <p id="stat" class="mini"></p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://myplantin.com/blog/best-plant-care-apps" target="_blank" style="color:var(--coral)">Planta</a>
+  </div>
+
+<script>
+const KEY="P11-009";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){ localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function addDays(d,n){ let t=new Date(d); t.setDate(t.getDate()+n); return t.toISOString().slice(0,10); }
+function left(d){ return Math.round((new Date(d)-new Date(today()))/86400000); }
+function add(){
+  const name=document.getElementById('name').value.trim();
+  if(!name){ alert('请填植物名称'); return; }
+  items.push({id:Date.now(),name,carer:document.getElementById('carer').value.trim()||'我',
+    w:+document.getElementById('w').value||7,last:today(),hand:document.getElementById('hand').value.trim()});
+  document.getElementById('name').value='';document.getElementById('hand').value='';
+  save();
+}
+function water(id){ const p=items.find(x=>x.id===id); if(p){ p.last=today(); save(); } }
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function render(){
+  const box=document.getElementById('list'); box.innerHTML='';
+  const carers={};
+  items.forEach(p=>{
+    carers[p.carer]=(carers[p.carer]||0)+1;
+    const due=addDays(p.last,p.w), l=left(due);
+    const el=document.createElement('div'); el.className='item';
+    el.innerHTML='<h3>'+p.name+'</h3>'+
+      '<div class="mini">👤 负责：'+p.carer+' · 下次浇水：<span class="'+(l<=1?'due-soon':'due-ok')+'">'+(l>0?'还有'+l+'天':'今天/超期')+'</span></div>'+
+      (p.hand?'<div style="font-size:13px;margin-top:4px">📦 交接：'+p.hand+'</div>':'')+
+      '<div class="row" style="margin-top:8px">'+
+      '<button class="btn btn-sm" style="background:var(--ok)" onclick="water('+p.id+')">已浇水</button>'+
+      '<button class="btn btn-sm" style="background:#ccc" onclick="del('+p.id+')">删</button></div>';
+    box.appendChild(el);
+  });
+  const keys=Object.keys(carers);
+  document.getElementById('stat').textContent= keys.length? ('养护人 '+keys.length+' 位：'+keys.map(k=>k+' '+carers[k]+'盆').join('，')) : '暂无协同记录';
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

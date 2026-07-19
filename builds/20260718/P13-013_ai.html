@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>可穿戴+AI相关性更年期伴侣</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.item .del{float:right;color:var(--coral);font-size:12px;cursor:pointer}
+.insight{background:#FFF7E8;color:#9a6b00;border:1px solid #ffe2a8;border-radius:10px;padding:10px;font-size:13px;margin-top:10px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">health</span><span class="tag">wearable_menopause_correlation</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">可穿戴+AI 相关性更年期伴侣</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Wearable + AI-correlation menopause companion</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Oura Ring 可测 0.13°C 温度变化做激素映射；多数更年期 App 需手动记录，而可穿戴自动捕捉体温/睡眠/HRV。机会：可穿戴+AI 相关性引擎（如「运动少的周潮热更严重」）的更年期伴侣。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 录入可穿戴指标 + 症状，看相关性</b>
+    <label>日期</label><input id="date" type="date">
+    <div class="row">
+      <div><label>基础体温 ℃</label><input id="temp" type="number" step="0.01" placeholder="36.50"></div>
+      <div><label>HRV ms</label><input id="hrv" type="number" placeholder="55"></div>
+    </div>
+    <div class="row">
+      <div><label>睡眠小时</label><input id="sleep" type="number" step="0.1" placeholder="6.5"></div>
+      <div><label>潮热次数</label><input id="flash" type="number" placeholder="3"></div>
+    </div>
+    <button class="btn" onclick="addItem()">＋ 记录</button>
+    <button class="btn" onclick="correlate()" style="background:#fff;color:var(--coral);border:1px solid var(--coral)">🔗 分析相关性</button>
+    <div id="insight"></div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P13-013">
+    <div class="collapse-header" id="aiHeader_P13-013" onclick="toggleAI('P13-013')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P13-013" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P13-013">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P13-013" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P13-013')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P13-013" style="display:none;margin-top:10px">
+        <div id="aiMessages_P13-013" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P13-013" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P13-013')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>📈 记录</b></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.naturalcycles.com/perimenopause" target="_blank" style="color:var(--coral)">Oura / Natural Cycles / Go Go Gaia</a>
+  </div>
+
+<script>
+const KEY="P13-013";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+if(!document.getElementById("date").value)document.getElementById("date").valueAsDate=new Date();
+function addItem(){
+  const date=document.getElementById("date").value;
+  items.push({
+    date,
+    temp:parseFloat(document.getElementById("temp").value)||null,
+    hrv:parseFloat(document.getElementById("hrv").value)||null,
+    sleep:parseFloat(document.getElementById("sleep").value)||null,
+    flash:parseInt(document.getElementById("flash").value)||0
+  });
+  ["temp","hrv","sleep","flash"].forEach(id=>document.getElementById(id).value="");
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function correlate(){
+  const box=document.getElementById("insight");
+  const d=items.filter(x=>x.sleep!=null&&x.flash!=null);
+  if(d.length<3){box.innerHTML='<div class="insight">至少需要 3 天「睡眠+潮热」记录才能分析相关性。</div>';return;}
+  const n=d.length;
+  const ms=d.reduce((a,x)=>a+x.sleep,0)/n;
+  const mf=d.reduce((a,x)=>a+x.flash,0)/n;
+  const cov=d.reduce((a,x)=>a+(x.sleep-ms)*(x.flash-mf),0);
+  const vs=d.reduce((a,x)=>a+(x.sleep-ms)**2,0);
+  const vf=d.reduce((a,x)=>a+(x.flash-mf)**2,0);
+  const r=cov/Math.sqrt(vs*vf||1);
+  let txt=`基于 ${n} 天数据：「睡眠」与「潮热」相关系数 r=${r.toFixed(2)}。`;
+  txt+= r<-0.3?' 呈负相关——睡得越少，潮热越多。建议优先改善睡眠。'
+      : r>0.3?' 呈正相关——需结合其他指标进一步观察。'
+      : ' 暂无明确线性关联，样本仍偏少，建议继续记录。';
+  box.innerHTML=`<div class="insight">🤖 ${txt}</div>`;
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const box=document.getElementById("list");
+  let html='<b>📈 记录</b>';
+  if(items.length===0)html+='<p style="font-size:13px;color:#999;margin:8px 0">还没有记录。</p>';
+  [...items].reverse().forEach((x,i)=>{
+    const idx=items.length-1-i;
+    html+=`<div class="item"><span class="del" onclick="del(${idx})">删除</span>
+      <b>${x.date}</b> · 体温${x.temp||'?'}℃ · HRV${x.hrv||'?'} · 睡${x.sleep||'?}h · 潮热${x.flash}次</div>`;
+  });
+  box.innerHTML=html;
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

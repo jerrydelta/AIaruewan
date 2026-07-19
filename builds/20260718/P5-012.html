@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>K-日常 Routine 习惯管理</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;font-size:13px}
+.item b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.note{font-size:13px;color:#555;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">lifestyle</span><span class="tag">korean_routine_app</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">K-日常 Routine 习惯管理</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">K-routine habit/self-management app</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国式习惯管理 App 'MyRoutine' 凭"以情境而非时钟安排习惯""60% 完成即视为达成"的低压力心理设计,在日本快速增长。痛点:东亚用户想要"整好日常"但被完美主义劝退。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:4px 0 10px">为情境添加习惯,今天勾选完成;达成阈值默认 60%(低压力)。</p>
+    <label>习惯名称</label>
+    <input id="name" placeholder="如 晨间喝水 / 睡前阅读">
+    <div class="row">
+      <div><label>情境</label>
+        <select id="ctx"><option>晨间</option><option>工作</option><option>夜间</option><option>碎片</option></select>
+      </div>
+      <div><label>每日目标(次)</label><input id="goal" type="number" value="1"></div>
+    </div>
+    <button class="btn" onclick="add()">添加习惯</button>
+    <div class="note">🧘 低压力机制:完成度达 60% 即算"今日达成",不追求完美。</div>
+  </div>
+
+  <div class="card" id="list"><b>✅ 今日打卡</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://prtimes.jp/main/html/rd/p/000000023.000159484.html" target="_blank" style="color:var(--coral)">MyRoutine (マイルーティン)</a>
+  </div>
+
+<script>
+const KEY="P5-012";
+const today=new Date().toLocaleDateString();
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function seedDone(){items.forEach(h=>{if(!h.doneDate||h.doneDate!==today)h.done=0;});}
+seedDone();
+function add(){const name=name_.value.trim()||"未命名习惯";
+  items.push({name,ctx:ctx.value,goal:+(+goal.value||1),done:0,doneDate:today});
+  localStorage.setItem(KEY,JSON.stringify(items)); name_.value=""; render();}
+function toggle(i){if(items[i].doneDate!==today)items[i].done=0,items[i].doneDate=today;
+  items[i].done++; if(items[i].done>items[i].goal)items[i].done=0;
+  localStorage.setItem(KEY,JSON.stringify(items)); render();}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){if(!items.length){items_.innerHTML='<p style="font-size:13px;color:#555;margin:6px 0 0">还没有习惯。</p>';return;}
+  items_.innerHTML=items.map((it,i)=>{const pct=Math.min(100,Math.round(it.done/it.goal*100));
+    const reached=it.done/it.goal>=0.6;
+    return `<div class="item"><span class="del" onclick="del(${i})">删除</span>
+    <b>${it.name}</b> · ${it.ctx}<br>
+    <span onclick="toggle(${i})" style="cursor:pointer;display:inline-block;margin-top:6px;padding:8px 12px;border-radius:10px;font-size:14px;${reached?'background:var(--ok);color:#fff':'background:#f0f0f0;color:#666'}">${it.done}/${it.goal} ${reached?'✓达成':''}</span>
+    <span style="font-size:12px;color:#999"> ${pct}%</span></div>`;}).join("");}
+const name_=document.getElementById("name");
+render();
+</script>
+</body>
+</html>

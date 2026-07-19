@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>零股/定额微型投资模拟</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.res{font-size:14px;margin-top:8px;padding:10px;border-radius:10px;background:#FFF7F7}
+.res b{color:var(--coral)}
+li{list-style:none;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+ul{padding:0;margin:6px 0 0}
+.del{color:var(--muted);font-size:12px;border:none;background:none;cursor:pointer;float:right}
+.pill{font-size:11px;padding:1px 7px;border-radius:999px;background:#FFF0F0;color:var(--coral);margin-right:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">finance</span><span class="tag">fractional_shares_micro_investing</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">零股/定额微型投资</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Fractional-share micro-investing from 1,000 KRW</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国投资证券「미니스탁」以 1000 韩元起投海外股破圈，用户 75% 为 2030 世代。高价蓝筹股门槛高、年轻人想小额分散。机会：零股/定额投资，1000 韩元起买 S&amp;P500 龙头。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#777;margin:6px 0 0">① 定投复利模拟 ② 记一笔零股买入（自动算股数）。</p>
+    <div class="row">
+      <div><label>每月投入(円/元)</label><input type="number" id="m" placeholder="1000" inputmode="numeric"></div>
+      <div><label>年数</label><input type="number" id="y" placeholder="10" inputmode="numeric"></div>
+    </div>
+    <label>预期年化收益 %</label>
+    <input type="number" id="r" placeholder="7" step="any">
+    <button class="btn" onclick="sim()">模拟定投成长</button>
+    <div class="res" id="res"></div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <label>零股买入·标的</label>
+    <input type="text" id="tk" placeholder="例 AAPL / S&P500 ETF">
+    <div class="row">
+      <div><label>投入金额</label><input type="number" id="inv" placeholder="1000" inputmode="numeric"></div>
+      <div><label>单价</label><input type="number" id="px" placeholder="250" step="any"></div>
+    </div>
+    <button class="btn" onclick="buy()">＋ 记买入</button>
+  </div>
+
+  <div class="card" id="list">
+    <b>📈 零股持仓</b>
+    <ul id="ul"></ul>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.chosun.com/economy/stock-finance/2021/09/13/6B7DHEW225AWHAHSKSQ44GN5VQ/" target="_blank" style="color:var(--coral)">미니스탁(한국투자증권) / Toss Securities / Kakao Pay Securities</a>
+  </div>
+
+<script>
+const KEY="P16-008";
+let holds=JSON.parse(localStorage.getItem(KEY)||"[]");
+function fmt(n){return (n||0).toLocaleString(undefined,{maximumFractionDigits:2})+"";
+}
+function sim(){
+  const m=parseFloat(document.getElementById("m").value);
+  const y=parseFloat(document.getElementById("y").value);
+  const r=parseFloat(document.getElementById("r").value)/100;
+  if(!m||!y){alert("请填每月投入与年数");return;}
+  const months=y*12, rm=r/12;
+  let fv=m*((Math.pow(1+rm,months)-1)/rm);
+  const paid=m*months;
+  document.getElementById("res").innerHTML=
+    `投入本金 <b>${fmt(paid)}</b><br>预计市值 <b>${fmt(fv)}</b><br>收益 <b>${fmt(fv-paid)}</b>（年化 ${(r*100).toFixed(1)}%）`;
+}
+function buy(){
+  const tk=document.getElementById("tk").value.trim();
+  const inv=parseFloat(document.getElementById("inv").value);
+  const px=parseFloat(document.getElementById("px").value);
+  if(!tk||!inv||!px){alert("请填全");return;}
+  const shares=inv/px;
+  holds.unshift({tk,inv,px,shares,t:Date.now()});
+  document.getElementById("tk").value="";document.getElementById("inv").value="";document.getElementById("px").value="";
+  save();
+}
+function del(t){holds=holds.filter(x=>x.t!==t);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(holds));render();}
+function render(){
+  const ul=document.getElementById("ul");ul.innerHTML="";
+  holds.forEach(x=>{const li=document.createElement("li");
+    li.innerHTML=`<button class="del" onclick="del(${x.t})">删除</button>
+      <span class="pill">零股</span>${x.tk}<br>
+      <span style="color:#999;font-size:12px">投入 ${fmt(x.inv)} ÷ ${fmt(x.px)} = <b>${x.shares.toFixed(4)} 股</b></span>`;
+    ul.appendChild(li);});
+}
+render();
+</script>
+</body>
+</html>

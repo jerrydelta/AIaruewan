@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>添加糖追踪（方糖可视化）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.cubes{font-size:18px;letter-spacing:2px;margin-top:6px}
+.bar{height:12px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;background:var(--coral)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">food</span><span class="tag">added_sugar_tracker</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">添加糖追踪（方糖可视化）</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Added-sugar tracker with cube visualization</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">多数热量 App 只显示"total sugar"（含天然糖），但管理血糖/减加工糖需单独追踪"添加糖"。美国心脏协会建议添加糖限 25-36g/日。日本"检糖 APP"扫饮料条码把糖分换算成方糖颗数（WHO 成人每日建议 25g≈6 粒方糖）。痛点：减糖人群缺直观、即时的添加糖可视化工具。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">从常见饮品/加工食品库选（含添加糖克数）→ 自动累计当日添加糖，按 4g=1 粒方糖可视化，超限提醒（默认 25g）。</p>
+    <label>饮品 / 加工食品</label>
+    <select id="item"></select>
+    <button class="btn" onclick="add()">＋ 记一笔</button>
+    <label>或手动添加糖（克）</label>
+    <div class="row"><div><input id="mName" placeholder="如：奶茶"></div><div><input id="mG" type="number" placeholder="糖g"></div></div>
+    <button class="btn" onclick="addManual()">＋ 手动添加</button>
+    <div id="sugarView"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>🍬 今日添加糖</b>
+    <div id="sList"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://savortheapp.com/blog/food-memories-journaling/best-food-diary-app" target="_blank" style="color:var(--coral)">MyNetDiary·Cronometer·YAZIO·检糖APP·あすけん</a>
+  </div>
+
+<script>
+const KEY="P6-013";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+const LIMIT=25, PER=4;
+const LIB=[
+  {n:'可乐 330ml',g:35},{n:'奶茶(全糖)',g:38},{n:'橙汁 250ml',g:21},{n:'酸奶饮品',g:18},
+  {n:'能量饮料',g:27},{n:'饼干 1包',g:12},{n:'巧克力 1条',g:24},{n:'风味酸奶',g:15},
+  {n:'即饮咖啡(甜)',g:16},{n:'果汁软糖',g:22}
+];
+const sel=document.getElementById('item');
+sel.innerHTML=LIB.map(f=>`<option value="${f.g}">${f.n}（添加糖${f.g}g）</option>`).join('');
+function add(){
+  const g=parseFloat(sel.value), name=sel.options[sel.selectedIndex].text.split('（')[0];
+  items.unshift({name,g,t:Date.now()});save();
+}
+function addManual(){
+  const n=document.getElementById('mName').value.trim(), g=parseFloat(document.getElementById('mG').value);
+  if(!n||isNaN(g)){alert('请填写名称和糖克数');return;}
+  items.unshift({name:n,g,t:Date.now()});
+  document.getElementById('mName').value='';document.getElementById('mG').value='';save();
+}
+function del(i){ items.splice(i,1); save(); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function fmt(t){return new Date(t).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function render(){
+  const el=document.getElementById('sList');
+  const sum=items.reduce((a,b)=>a+b.g,0);
+  const cubes=Math.ceil(sum/PER);
+  const pct=Math.min(100,Math.round(sum/LIMIT*100));
+  const over=sum>LIMIT;
+  document.getElementById('sugarView').innerHTML=
+    `<div style="margin-top:10px;font-size:14px">今日添加糖 <b>${sum}g</b> ≈ ${cubes} 粒方糖（4g/粒）</div>`+
+    `<div class="cubes">${'🟥'.repeat(Math.min(cubes,15))}${cubes>15?'…':''}</div>`+
+    `<div class="bar"><i style="width:${pct}%"></i></div>`+
+    `<div style="font-size:13px;margin-top:6px;color:${over?'var(--coral)':'var(--ok)'}">${over?'⚠️ 已超 WHO 建议上限 '+LIMIT+'g！':'✅ 占上限 '+pct+'%，还可吃 '+(LIMIT-sum).toFixed(0)+'g'}</div>`;
+  if(!items.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">还没有记录。</p>';return;}
+  el.innerHTML=items.map((x,i)=>`<div class="item"><span>🍬 ${x.name} · ${x.g}g<br><span style="font-size:11px;color:var(--muted)">${fmt(x.t)}</span></span><button onclick="del(${i})" style="border:none;background:#FFF0F0;color:var(--coral);border-radius:8px;padding:4px 10px">删</button></div>`).join('');
+}
+render();
+</script>
+</body>
+</html>

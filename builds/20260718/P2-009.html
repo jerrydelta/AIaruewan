@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>地域×Freelance 求人策展</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:13px}
+.item .del{float:right;color:var(--muted);font-size:12px}
+.chip{font-size:11px;padding:1px 7px;border-radius:999px;background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9;margin-left:4px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">career</span><span class="tag">regional_jobs</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">地域×Freelance 求人策展</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Regional + Freelance Curation</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本地方求人数明显少于大城市；ハローワーク被批"求人玉石混交、信息鲜度低"。地方与 freelance 群体信息分散、质量参差。按地域/远程/技能去噪、评分、推送是机会。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 求人收录 + 质量评分</b>
+    <input id="title" placeholder="案件 / 职位">
+    <div class="row">
+      <select id="region">
+        <option>东京</option><option>大阪</option><option>名古屋</option><option>地方都市</option><option>远程</option>
+      </select>
+      <select id="type"><option>正社員</option><option>業務委託</option><option>副業</option><option>スポット</option></select>
+    </div>
+    <label>质量评分（1-5：信息完整度/薪资透明/匹配度）</label>
+    <input id="score" type="number" min="1" max="5" value="3">
+    <label>备注 / 去噪理由</label>
+    <input id="note" placeholder="如：薪资透明、JD 清晰 → 高分">
+    <button class="btn" onclick="add()">收录</button>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 筛选</b>
+    <div class="row">
+      <select id="fRegion" onchange="render()">
+        <option value="">全部地域</option><option>东京</option><option>大阪</option><option>名古屋</option><option>地方都市</option><option>远程</option>
+      </select>
+      <select id="fMin" onchange="render()">
+        <option value="0">最低分 不限</option><option value="3">≥3</option><option value="4">≥4</option><option value="5">=5</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 策展库</b>
+    <p style="font-size:12px;color:var(--muted);margin:6px 0 0">平均质量分 <b class="h-coral" id="avg">0</b></p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.theport.jp/portcareer/qa/4821/" target="_blank" style="color:var(--coral)">ハローワーク 評判・活用</a>
+  </div>
+
+<script>
+const KEY="P2-009";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function add(){
+  const title=document.getElementById("title").value.trim();
+  if(!title){ alert("请填写案件"); return; }
+  const region=document.getElementById("region").value;
+  const type=document.getElementById("type").value;
+  const score=+document.getElementById("score").value||3;
+  const note=document.getElementById("note").value.trim();
+  items.unshift({title,region,type,score,note,t:Date.now()});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("title").value=""; document.getElementById("note").value="";
+  render();
+}
+function render(){
+  const fr=document.getElementById("fRegion").value;
+  const fmin=+document.getElementById("fMin").value;
+  let list=items.filter(x=>(!fr||x.region===fr)&&x.score>=fmin);
+  const avg=items.length? (items.reduce((s,x)=>s+x.score,0)/items.length).toFixed(1):0;
+  const box=document.getElementById("list");
+  let h='<b>📋 策展库</b><p style="font-size:12px;color:var(--muted);margin:6px 0 0">平均质量分 <b class="h-coral" id="avg">'+avg+'</b> · 显示 '+list.length+'/'+items.length+'</p>';
+  if(list.length===0){ h+='<p style="font-size:13px;color:var(--muted)">没有匹配项。</p>'; }
+  list.forEach((it)=>{
+    h+='<div class="item"><span class="del" onclick="del('+items.indexOf(it)+')">删除</span><b>'+it.title+'</b>'+
+       '<span class="chip">'+it.region+'</span><span class="chip">'+it.type+'</span><br>'+
+       '质量分 <b class="h-coral">'+it.score+'</b>'+(it.note?'<br><span style="color:#777">'+it.note+'</span>':'')+'</div>';
+  });
+  box.innerHTML=h;
+}
+function del(i){ items.splice(i,1); localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+render();
+</script>
+</body>
+</html>

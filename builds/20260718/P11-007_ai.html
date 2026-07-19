@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>稀有植物收藏册</title>
+<style>
+:root{
+  --coral:#FF6B6B;        --coral-dark:#E85555;
+  --ink:#2D2D2D;          --muted:#8A8A8A;
+  --bg:#F7F7F7;           --card:#FFFFFF;
+  --line:#ECECEC;         --ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-sm{padding:7px 10px;font-size:13px;border-radius:9px;margin-top:0}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.item h3{margin:0 0 4px;font-size:15px}
+.mini{font-size:12px;color:var(--muted)}
+.rar{color:var(--coral);font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">plant</span><span class="tag">rare_plant_db</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">稀有植物收藏册</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Rare/exotic plant specialist (curated DB + collector)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Planta 等大众 App 对稀有/exotic 物种支持弱（"Limited Database for Rare Plants"）。近年植物收藏热（锦化龟背竹、花烛属），即便付费用户也识别不了自己的稀有植物。机会：稀有专精的策展库+收藏者社区+交易市集。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 我的收藏</b>
+    <label>品种名</label>
+    <input id="name" placeholder="如：锦化龟背竹 Monstera albo">
+    <div class="row">
+      <div><label>稀缺度</label>
+        <select id="rar">
+          <option>普通</option><option>少见</option><option selected>稀有</option><option>极稀有</option>
+        </select></div>
+      <div><label>估值(元)</label><input id="val" type="number" value="0" min="0"></div>
+    </div>
+    <label>养护笔记 / 市集意向</label>
+    <textarea id="note" rows="2" placeholder="如：喜高湿散射光；想置换一株花烛"></textarea>
+    <button class="btn" onclick="add()">＋ 收藏入库</button>
+    <div id="list"></div>
+  </div>
+
+  <div class="card">
+    <b>📊 收藏统计</b>
+    <p id="stat" class="mini"></p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://ecocation.org/best-free-plant-care-apps/amp" target="_blank" style="color:var(--coral)">Planta / PictureThis</a>
+  </div>
+
+<script>
+const KEY="P11-007";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function save(){ localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+function add(){
+  const name=document.getElementById('name').value.trim();
+  if(!name){ alert('请填品种名'); return; }
+  items.unshift({id:Date.now(),name,rar:document.getElementById('rar').value,
+    val:+document.getElementById('val').value||0,note:document.getElementById('note').value.trim()});
+  document.getElementById('name').value='';document.getElementById('note').value='';
+  save();
+}
+function del(id){ items=items.filter(x=>x.id!==id); save(); }
+function render(){
+  const box=document.getElementById('list'); box.innerHTML='';
+  let total=0;
+  items.forEach(p=>{
+    total+=p.val;
+    const el=document.createElement('div'); el.className='item';
+    el.innerHTML='<h3>'+p.name+' <span class="rar">· '+p.rar+'</span></h3>'+
+      '<div class="mini">估值 '+p.val+' 元</div>'+
+      (p.note?'<div style="font-size:13px;margin-top:4px">'+p.note+'</div>':'')+
+      '<button class="btn btn-sm" style="background:#ccc;width:auto;margin-top:8px" onclick="del('+p.id+')">删除</button>';
+    box.appendChild(el);
+  });
+  document.getElementById('stat').textContent='共 '+items.length+' 株 · 收藏估值合计 '+total+' 元';
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

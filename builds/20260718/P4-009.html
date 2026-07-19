@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>稳定可靠AI健身房教练（对标Planfit）</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.item:last-child{border-bottom:none}
+.del{color:var(--coral);font-size:13px;cursor:pointer;border:none;background:none;float:right}
+.pln{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.pln input{width:auto;margin:0}
+.done{text-decoration:line-through;color:var(--muted)}
+.priv{font-size:12px;color:var(--ok);margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">fitness</span><span class="tag">planfit_crash_gap</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">稳定可靠AI健身房教练</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Stable, privacy-respecting AI gym coach</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Planfit（韩国AI健身教练）2025营收50亿韩元、累计超350万用户、全球收入占40%——验证AI健身房教练方向可行。但用户差评集中：离开App强制重启且极慢、崩溃丢失记录、付费后账户被重置、无密码重置入口。痛点：增长快但体验/账户/客服拉垮。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 2px">借鉴Planfit的AI个性化，但做稳定、隐私尊重、绝不崩溃丢记录的本地教练。</p>
+    <div class="row">
+      <div><label>目标</label><select id="goal"><option>增肌</option><option>减脂</option><option>塑形</option></select></div>
+      <div><label>经验</label><select id="exp"><option>新手</option><option>进阶</option><option>老手</option></select></div>
+    </div>
+    <button class="btn" onclick="gen()">🤖 生成我的训练计划</button>
+    <div id="planBox" style="margin-top:8px"></div>
+    <label>完成后记录本次训练</label>
+    <button class="btn" onclick="logDone()">✅ 本次训练完成</button>
+    <p class="priv">🔒 计划与记录仅存你本机，不会丢失、不上传。</p>
+  </div>
+
+  <div class="card" id="list">
+    <b>📈 训练完成记录</b>
+    <div id="logs" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://magazine.hankyung.com/job-joy/article/202603271535d" target="_blank" style="color:var(--coral)">Planfit（韩国经济杂志）</a>
+  </div>
+
+<script>
+const KEY="P4-009";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const LIB={
+  "增肌":{新手:["器械推胸 3×10","坐姿划船 3×10","腿举 3×12"],
+          进阶:["杠铃卧推 4×8","硬拉 4×5","引体 3×8"],
+          老手:["杠铃卧推 5×5","深蹲 5×5","杠铃划船 4×6"]},
+  "减脂":{新手:["快走 20分","哑铃循环 2轮","平板支撑 30秒"],
+          进阶:["HIIT 20分","壶铃摆荡 4×15","波比跳 3×10"],
+          老手:["HIIT 30分","负重深蹲 4×12","登山跑 4×20"]},
+  "塑形":{新手:["臀桥 3×15","侧平举 3×12","卷腹 3×15"],
+          进阶:["保加利亚分腿蹲 3×12","高位下拉 3×12","俄罗斯转体 3×20"],
+          老手:["臀推 4×10","绳索夹胸 4×12","悬垂举腿 3×15"]}
+};
+let cur=[];
+function gen(){
+  const g=document.getElementById("goal").value,e=document.getElementById("exp").value;
+  cur=LIB[g][e];
+  document.getElementById("planBox").innerHTML=
+    `<b style="font-size:13px">${g}·${e} 今日计划：</b>`+
+    cur.map(x=>`<div style="font-size:14px;padding:4px 0">• ${x}</div>`).join("")+
+    `<p style="font-size:12px;color:var(--muted);margin:6px 0 0">⚠ 大重量动作注意姿势安全，必要时请真人教练带。</p>`;
+}
+function logDone(){
+  if(!cur.length){alert("先生成一份计划");return;}
+  items.unshift({plan:cur.join(" / "),d:new Date().toISOString().slice(0,10)});
+  save();
+}
+function del(i){items.splice(i,1);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  document.getElementById("logs").innerHTML=items.length?items.map((x,i)=>
+    `<div class="item"><button class="del" onclick="del(${i})">删除</button>✅ ${x.d}<br><small style="color:var(--muted)">${x.plan}</small></div>`
+  ).join(""):`<p style="color:var(--muted);font-size:13px">还没有完成记录。</p>`;
+}
+render();
+</script>
+</body>
+</html>

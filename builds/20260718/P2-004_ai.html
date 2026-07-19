@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>在韩外国人 自由职业税务·记账</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.out{background:#FFF7F7;border:1px solid #FFE2E2;border-radius:10px;padding:12px;margin-top:10px;font-size:14px}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:13px}
+.item .del{float:right;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">career</span><span class="tag">freelance_tax</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">在韩外国人 自由职业税务·记账</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Bilingual Freelance Tax (EN/CN/JP)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">韩国人气税务 App「삼쩜삼」累计超 2000 万人使用，但界面全韩文无英文，外国人/境外收入/超简单费率门槛（₩2400万）的复杂 case 只能找 세무사（基础申报 ₩10–30万）。母语界面是空白。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 退税 / 税金估算</b>
+    <label>年度毛收入（원）</label>
+    <input id="income" type="number" placeholder="如 30000000">
+    <label>可抵扣费用（원，发票/经费用）</label>
+    <input id="exp" type="number" placeholder="如 5000000">
+    <button class="btn" onclick="calc()">估算税金</button>
+    <div class="out" id="out" style="display:none"></div>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px">* 简化估算：프리랜서 常用 3.3% 事业所得税率，仅作参考，正式申报请咨询 세무사。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 费用 / 发票台账</b>
+    <div class="row">
+      <input id="led_date" type="date">
+      <input id="led_cat" placeholder="类别(差旅/工具/餐)">
+    </div>
+    <input id="led_amt" type="number" placeholder="金额 원" style="margin-top:8px">
+    <button class="btn" onclick="addLed()">记一笔</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P2-004">
+    <div class="collapse-header" id="aiHeader_P2-004" onclick="toggleAI('P2-004')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P2-004" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P2-004">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P2-004" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P2-004')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P2-004" style="display:none;margin-top:10px">
+        <div id="aiMessages_P2-004" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P2-004" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P2-004')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 我的台账</b>
+    <p style="font-size:12px;color:var(--muted);margin:6px 0 0">合计 <b class="h-coral" id="sum">0</b> 원</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://localnomad.club/zh-cn/blog/tax/korea-freelancer-tax-filing-guide-2026" target="_blank" style="color:var(--coral)">在韩自由职业报税指南 2026</a>
+  </div>
+
+<script>
+const KEY="P2-004";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function fmt(n){ return (n||0).toLocaleString(); }
+function calc(){
+  const inc=+document.getElementById("income").value||0;
+  const ex=+document.getElementById("exp").value||0;
+  const taxable=Math.max(0,inc-ex);
+  const tax=Math.round(taxable*0.033);
+  const net=inc-tax;
+  const o=document.getElementById("out");
+  o.style.display="block";
+  o.innerHTML="课税所得：<b>"+fmt(taxable)+"</b> 원<br>估算税金(3.3%)：<b class='h-coral'>"+fmt(tax)+"</b> 원<br>税后净收：<b>"+fmt(net)+"</b> 원";
+}
+function addLed(){
+  const d=document.getElementById("led_date").value||new Date().toISOString().slice(0,10);
+  const c=document.getElementById("led_cat").value.trim()||"其他";
+  const a=+document.getElementById("led_amt").value||0;
+  if(!a){ alert("请输入金额"); return; }
+  items.unshift({d,c,a,t:Date.now()});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  document.getElementById("led_amt").value=""; document.getElementById("led_cat").value="";
+  render();
+}
+function render(){
+  const box=document.getElementById("list");
+  let sum=0;
+  let h='<b>📋 我的台账</b><p style="font-size:12px;color:var(--muted);margin:6px 0 0">合计 <b class="h-coral" id="sum">'+fmt(items.reduce((s,x)=>s+x.a,0))+'</b> 원</p>';
+  if(items.length===0){ h+='<p style="font-size:13px;color:var(--muted)">还没有记录。</p>'; }
+  items.forEach((it,i)=>{
+    sum+=it.a;
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除</span>'+it.d+' · '+it.c+'<br><b class="h-coral">'+fmt(it.a)+'</b> 원</div>';
+  });
+  box.innerHTML=h;
+}
+function del(i){ items.splice(i,1); localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

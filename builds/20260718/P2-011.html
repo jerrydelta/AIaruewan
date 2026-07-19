@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>韩文 AI Coding 辅助 · 模板+降本</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.tpl{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:8px;font-size:13px}
+.tpl b{color:var(--coral)}
+.item{background:#FAFAFA;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:13px}
+.item .del{float:right;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">tech</span><span class="tag">ai_coding</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">韩文 AI Coding 辅助</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">KR Docs + Compliance + Token</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">Anthropic 2026.6 开首尔办公室；NAVER 全工程部署 Claude Code，Samsung/LG/Nexon 跟进。46% 代码由 AI 生成。痛点：韩国中小企业/个人开发者缺本地化 AI coding 最佳实践与模板（韩文文档、本地合规、token 优化）。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 韩文 Prompt 模板库</b>
+    <select id="cat" onchange="showTpl()">
+      <option value="crud">CRUD API 생성</option>
+      <option value="bug">버그 수정 요청</option>
+      <option value="test">테스트 코드 작성</option>
+      <option value="refactor">리팩터링</option>
+      <option value="doc">한글 문서화</option>
+    </select>
+    <div class="tpl" id="tplBox"></div>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · Token 优化记录</b>
+    <div class="row">
+      <input id="before" type="number" placeholder="优化前 token">
+      <input id="after" type="number" placeholder="优化后 token">
+    </div>
+    <input id="memo" placeholder="优化手法（압축/배치/캐싱）" style="margin-top:8px">
+    <button class="btn" onclick="saveTok()">记录节省</button>
+    <p style="font-size:13px;color:var(--ok);margin-top:8px" id="saveMsg"></p>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 优化记录</b>
+    <p style="font-size:12px;color:var(--muted);margin:6px 0 0">累计节省 <b class="h-coral" id="totalSave">0</b> token</p>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://vmts.com.hk/insights/anthropic-seoul-korean-ai-ecosystem-2026" target="_blank" style="color:var(--coral)">Anthropic 서울 · 한국 AI 생태계</a>
+  </div>
+
+<script>
+const KEY="P2-011";
+const TPL={
+  crud:"한국어 주석 포함해서 {{언어}}로 사용자 CRUD REST API를 만들어줘. 검증과 에러 응답을 한국어로.",
+  bug:"다음 코드에서 {{증상}} 버그를 찾아 원인과 한국어 설명으로 고쳐줘.",
+  test:"{{프레임워크}} 기반 단위 테스트를 한국어 설명과 함께 작성해줘.",
+  refactor:"가독성과 성능을 위해 이 코드를 리팩터링하고 한국어로 변경 이유를 적어줘.",
+  doc:"이 함수를 한국어 README/주석 스타일로 문서화해줘."
+};
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+function showTpl(){ document.getElementById("tplBox").innerHTML="<b>템플릿:</b><br>"+TPL[document.getElementById("cat").value].replace(/\{\{|\}\}/g,""); }
+showTpl();
+function saveTok(){
+  const before=+document.getElementById("before").value||0;
+  const after=+document.getElementById("after").value||0;
+  const memo=document.getElementById("memo").value.trim()||"（未填）";
+  if(!before){ alert("填优化前 token"); return; }
+  const save=Math.max(0,before-after);
+  items.unshift({before,after,save,memo,t:Date.now()});
+  localStorage.setItem(KEY,JSON.stringify(items));
+  const pct=before? Math.round(save/before*100):0;
+  document.getElementById("saveMsg").textContent="本次节省 "+save+" token（-"+pct+"%）";
+  document.getElementById("before").value=""; document.getElementById("after").value=""; document.getElementById("memo").value="";
+  render();
+}
+function render(){
+  const box=document.getElementById("list");
+  const total=items.reduce((s,x)=>s+x.save,0);
+  document.getElementById("totalSave").textContent=total.toLocaleString();
+  let h='<b>📋 优化记录</b><p style="font-size:12px;color:var(--muted);margin:6px 0 0">累计节省 <b class="h-coral" id="totalSave">'+total.toLocaleString()+'</b> token</p>';
+  if(items.length===0){ h+='<p style="font-size:13px;color:var(--muted)">还没有记录。</p>'; }
+  items.forEach((it,i)=>{
+    h+='<div class="item"><span class="del" onclick="del('+i+')">删除</span>'+it.before+'→'+it.after+' (-'+it.save+')<br><span style="color:#777">'+it.memo+'</span></div>';
+  });
+  box.innerHTML=h;
+}
+function del(i){ items.splice(i,1); localStorage.setItem(KEY,JSON.stringify(items)); render(); }
+render();
+</script>
+</body>
+</html>

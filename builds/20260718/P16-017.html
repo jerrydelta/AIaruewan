@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>日本多券商多币种组合追踪</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.res{font-size:14px;margin-top:8px;padding:10px;border-radius:10px;background:#FFF7F7}
+.res b{color:var(--coral)}
+li{list-style:none;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+ul{padding:0;margin:6px 0 0}
+.del{color:var(--muted);font-size:12px;border:none;background:none;cursor:pointer;float:right}
+.pill{font-size:11px;padding:1px 7px;border-radius:999px;background:#FFF0F0;color:var(--coral);margin-right:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">finance</span><span class="tag">investment_portfolio_tracker_jp</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">多券商多币种组合追踪</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">JP multi-broker multi-currency portfolio tracker</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">日本散户跨多家券商/多币种持仓普遍，但 Money Forward ME 被吐槽「投资组合根本不能用」（个股/投信/债券/黄金被错归为股票）。缺一个「多券商聚合+日本特定口座/税 lot 感知」的组合追踪器。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#777;margin:6px 0 0">登记各券商持仓（含买入价/现价/币种/口座类型）→ 自动算组合市值、盈亏、特定口座税感知。</p>
+    <label>券商</label>
+    <input type="text" id="broker" placeholder="例 SBI / 楽天 / マネックス">
+    <label>资产类型</label>
+    <select id="asset"><option>株式</option><option>投資信託</option><option>債券</option><option>ETF</option><option>金(ゴールド)</option></select>
+    <label>口座类型</label>
+    <select id="acct"><option>特定口座</option><option>一般口座</option><option>NISA</option><option>iDeCo</option></select>
+    <div class="row">
+      <div><label>数量</label><input type="number" id="qty" placeholder="100" inputmode="numeric" step="any"></div>
+      <div><label>币种</label><select id="cur"><option>JPY</option><option>USD</option><option>EUR</option></select></div>
+    </div>
+    <div class="row">
+      <div><label>买入价</label><input type="number" id="buy" placeholder="2500" step="any"></div>
+      <div><label>现价</label><input type="number" id="now" placeholder="3000" step="any"></div>
+    </div>
+    <button class="btn" onclick="add()">＋ 加持仓</button>
+    <div class="res" id="res"></div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📊 组合</b>
+    <ul id="ul"></ul>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://sourceforge.net/software/portfolio-analysis/japan/" target="_blank" style="color:var(--coral)">Sharesight / Portseido / Money Forward ME</a>
+  </div>
+
+<script>
+const KEY="P16-017";
+let holds=JSON.parse(localStorage.getItem(KEY)||"[]");
+const FX={JPY:1,USD:155,EUR:168}; // 近似兑JPY
+function fmt(n){return Math.round(n||0).toLocaleString("ja-JP")+" 円";}
+function add(){
+  const broker=document.getElementById("broker").value.trim();
+  const asset=document.getElementById("asset").value;
+  const acct=document.getElementById("acct").value;
+  const qty=parseFloat(document.getElementById("qty").value);
+  const cur=document.getElementById("cur").value;
+  const buy=parseFloat(document.getElementById("buy").value);
+  const now=parseFloat(document.getElementById("now").value);
+  if(!broker||!qty||!now){alert("请填券商/数量/现价");return;}
+  holds.push({broker,asset,acct,qty,cur,buy,now,t:Date.now()});
+  ["broker","qty","buy","now"].forEach(id=>document.getElementById(id).value="");
+  save();
+}
+function del(t){holds=holds.filter(x=>x.t!==t);save();}
+function save(){localStorage.setItem(KEY,JSON.stringify(holds));render();}
+function render(){
+  const ul=document.getElementById("ul");ul.innerHTML="";
+  let totMv=0,totCost=0;
+  holds.forEach(x=>{
+    const fx=FX[x.cur]||1;
+    const mv=x.qty*x.now*fx, cost=x.qty*x.buy*fx, pl=mv-cost;
+    totMv+=mv;totCost+=cost;
+    const li=document.createElement("li");
+    const taxNote = x.acct==="特定口座"? "（源泉徴収済）" : x.acct==="一般口座"? "（確定申告要）" : "（非税）";
+    li.innerHTML=`<button class="del" onclick="del(${x.t})">删除</button>
+      <span class="pill">${x.broker}</span>${x.asset} · ${x.acct}${taxNote}<br>
+      <span style="color:#999;font-size:12px">${x.qty} ${x.cur} × ${x.now} → ${fmt(mv)} ｜ 盈亏 <b style="color:${pl>=0?'var(--ok)':'var(--coral)'}">${fmt(pl)}</b></span>`;
+    ul.appendChild(li);
+  });
+  const pl=totMv-totCost;
+  document.getElementById("res").innerHTML=
+    `组合市值 <b>${fmt(totMv)}</b> ｜ 成本 ${fmt(totCost)}<br>总盈亏 <b style="color:${pl>=0?'var(--ok)':'var(--coral)'}">${fmt(pl)}</b>（${(pl/(totCost||1)*100).toFixed(1)}%）`;
+}
+render();
+</script>
+</body>
+</html>

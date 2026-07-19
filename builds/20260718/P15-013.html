@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>临床EPDS数字筛查</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn.ghost{background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.q{border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-top:8px}
+.q .t{font-size:14px;font-weight:600}
+.q select{margin-top:6px}
+.result{background:#FFF8F0;border:1px solid #FFE6CC;border-radius:12px;padding:12px;font-size:14px;margin-top:10px}
+textarea#share{font-size:12px;background:#fafafa}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:14px}
+.item .meta{font-size:11px;color:var(--muted);margin-top:4px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">postpartum</span><span class="tag">clinical_epds</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">临床 EPDS 数字筛查</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">MGH 背书免费围产期抑郁筛查（EPDS）</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">PPD 筛查工具假阳性高（约 25%），需更精准数字量表。MGH Perinatal Depression Scale 免费提供 EPDS 等数字版，含睡眠/焦虑/压力量表，用户可授权数据分享给研究者。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 免费 EPDS 自测</b>
+    <p style="font-size:13px;color:#666;margin:6px 0 0">过去 7 天，选最符合的程度。做完可"分享给研究者"（模拟授权）。</p>
+    <div id="qs"></div>
+    <button class="btn" onclick="score()">📊 看我的分数</button>
+    <div id="res"></div>
+    <button class="btn ghost" id="shareBtn" style="display:none" onclick="share()">🔓 分享数据给研究者（模拟）</button>
+    <textarea id="share" rows="4" readonly style="margin-top:8px;display:none"></textarea>
+    <div id="shared"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://womensmentalhealth.org/posts/announcing-the-mgh-perinatal-depression-scale-mghpds-mobile-app-now-available-for-android/" target="_blank" style="color:var(--coral)">MGHPDS（麻省总医院 EPDS）</a>
+    <p style="margin:6px 0 0">教育用途，非诊断。得分 ≥13 建议就医。</p>
+  </div>
+
+<script>
+const KEY="P15-013";
+const QS=["我能笑对好事","我对未来乐观","当事情出错我自责","我无故焦虑害怕","事情让我受不了","我睡不安稳","我难过","我莫名哭泣","我有伤害自己的想法","我觉得自己不够好"];
+let ans=Array(QS.length).fill(0);
+let shared=JSON.parse(localStorage.getItem(KEY)||"[]");
+const qsBox=document.getElementById("qs");
+QS.forEach((q,i)=>{const d=document.createElement("div");d.className="q";
+  d.innerHTML='<div class="t">'+(i+1)+'. '+q+'</div><select onchange="ans['+i+']=+this.value"><option value="0">0 没有</option><option value="1">1 偶尔</option><option value="2">2 经常</option><option value="3">3 总是</option></select>';
+  qsBox.appendChild(d);});
+function score(){
+  const total=ans.reduce((a,b)=>a+b,0);
+  let level=total>=13?"偏高（≥13），建议尽快联系医生":total>=10?"中等，建议关注":"偏低，照顾好自己";
+  document.getElementById("res").innerHTML='<div class="result">EPDS 总分：<b>'+total+' / 30</b><br>'+level+'</div>';
+  document.getElementById("shareBtn").style.display="block";
+  document.getElementById("shareBtn").dataset.total=total;
+}
+function share(){
+  const total=+document.getElementById("shareBtn").dataset.total||0;
+  const payload={screen:"EPDS",total,authorized:true,t:new Date().toLocaleString("zh-CN")};
+  shared.unshift(payload);localStorage.setItem(KEY,JSON.stringify(shared));
+  const ta=document.getElementById("share");ta.style.display="block";
+  ta.value=JSON.stringify(payload,null,1)+"\n（已模拟授权，可用于优化量表研究）";
+  render();
+}
+function render(){
+  const s=document.getElementById("shared");s.innerHTML=shared.length?'<p style="font-size:13px;color:#555;margin-top:10px"><b>已分享记录</b></p>':'';
+  shared.slice(0,5).forEach(x=>{const d=document.createElement("div");d.className="item";d.innerHTML='EPDS '+x.total+' 分 · 已授权<div class="meta">'+x.t+'</div>';s.appendChild(d);});
+}
+render();
+</script>
+</body>
+</html>

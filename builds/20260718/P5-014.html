@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>HRV / 压力 / 睡眠 健康记录</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;font-size:13px}
+.item b{color:var(--coral)}
+.del{color:var(--muted);font-size:12px;float:right;cursor:pointer}
+.kpi{display:flex;gap:8px;margin-top:8px}
+.kpi div{flex:1;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:8px;text-align:center}
+.kpi b{display:block;font-size:18px;color:var(--coral)}
+.note{font-size:13px;color:#555;background:#FFF7F7;border:1px solid #FFE3E3;border-radius:10px;padding:10px;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">lifestyle</span><span class="tag">hrv_stress_monitor</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">HRV / 压力 / 睡眠 健康记录</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Vertical HRV/stress/sleep health app</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">HRV 压力监测 App StressWatch 验证东亚健康刚需:二人工作室月均收入达 $350,000,主要市场中日韩。痛点:用户想随时看压力/HRV 但海外社媒运营弱、bug 多致付费意愿低。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#555;margin:4px 0 10px">每天记录 HRV、压力评分与睡眠时长,自动看 30 天平均趋势。</p>
+    <div class="row">
+      <div><label>HRV(ms)</label><input id="hrv" type="number" value="60"></div>
+      <div><label>压力(1-10)</label><input id="stress" type="number" value="4"></div>
+      <div><label>睡眠(h)</label><input id="sleep" type="number" value="7"></div>
+    </div>
+    <button class="btn" onclick="add()">记录今天</button>
+    <div class="kpi">
+      <div><b id="kHrv">--</b>HRV均</div>
+      <div><b id="kStress">--</b>压力均</div>
+      <div><b id="kSleep">--</b>睡眠均</div>
+    </div>
+    <div class="note" id="tip">录入数据越多,趋势越准。</div>
+  </div>
+
+  <div class="card" id="list"><b>📈 记录历史</b><div id="items"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://finance.sina.com.cn/tech/roll/2025-03-14/doc-inepqsvu3099374.shtml" target="_blank" style="color:var(--coral)">StressWatch HRV 压力监测</a>
+  </div>
+
+<script>
+const KEY="P5-014";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function calc(){if(!items.length){kHrv.textContent=kStress.textContent=kSleep.textContent="--";tip.textContent="录入数据越多,趋势越准。";return;}
+  const h=items.reduce((a,b)=>a+b.hrv,0)/items.length;
+  const s=items.reduce((a,b)=>a+b.stress,0)/items.length;
+  const sl=items.reduce((a,b)=>a+b.sleep,0)/items.length;
+  kHrv.textContent=h.toFixed(0); kStress.textContent=s.toFixed(1); kSleep.textContent=sl.toFixed(1);
+  let msg=`已记录 ${items.length} 天。`;
+  if(s>=6)msg+=" 压力偏高,建议放松。"; else if(s<=3)msg+=" 压力可控 👍";
+  if(sl<6)msg+=" 睡眠不足 ⚠️";
+  tip.textContent=msg;}
+function add(){const hrv=+(+hrv.value||0),stress=+(+stress.value||0),sleep=+(+sleep.value||0);
+  if(!hrv||!stress||!sleep){alert("请填完三项");return;}
+  const today=new Date().toLocaleDateString();
+  const ex=items.findIndex(i=>i.date===today);
+  const rec={date:today,hrv,stress,sleep};
+  if(ex>=0)items[ex]=rec; else items.unshift(rec);
+  localStorage.setItem(KEY,JSON.stringify(items)); render(); calc();}
+function del(i){items.splice(i,1);localStorage.setItem(KEY,JSON.stringify(items));render();calc();}
+function render(){if(!items.length){items_.innerHTML='<p style="font-size:13px;color:#555;margin:6px 0 0">还没有记录。</p>';return;}
+  items_.innerHTML=items.map((it,i)=>`<div class="item"><span class="del" onclick="del(${i})">删除</span>
+    <b>${it.date}</b> · HRV ${it.hrv}ms · 压力 ${it.stress} · 睡眠 ${it.sleep}h</div>`).join("");}
+const hrv=document.getElementById("hrv"),stress=document.getElementById("stress"),sleep=document.getElementById("sleep");
+render(); calc();
+</script>
+</body>
+</html>

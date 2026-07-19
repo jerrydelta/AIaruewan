@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>留学生一站式安家平台</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.mini{font-size:14px;margin:14px 0 4px;font-weight:600;color:var(--ink);
+  border-left:4px solid var(--coral);padding-left:8px}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.del{color:var(--coral);float:right;font-size:13px;cursor:pointer}
+.seg{display:flex;gap:6px;margin-top:6px}
+.seg button{flex:1;padding:9px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--coral);color:#fff;border-color:var(--coral)}
+.row{display:flex;gap:8px}.row>*{flex:1}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">student</span><span class="tag">study_abroad_settle</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">留学生一站式安家</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">One-stop settlement for Chinese study-abroad students</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">留学生安家痛点密集：信息不对称、隐性成本、租房安全、语言障碍。垂直平台已被验证——异乡好居覆盖27国、港专租15万学子使用、yeeyi"租房→二手→兼职"闭环最高效。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <div class="seg" id="seg">
+      <button class="on" onclick="switchTab('rent',this)">🏠 按校租房</button>
+      <button onclick="switchTab('second',this)">📦 二手</button>
+      <button onclick="switchTab('job',this)">💼 兼职/接机</button>
+    </div>
+    <div id="tab_rent">
+      <label>学校</label><input id="r_school" placeholder="如 港大">
+      <label>房源/小区</label><input id="r_addr" placeholder="如 西环">
+      <div class="row"><div><label>月租(元)</label><input id="r_price" type="number" placeholder="6000"></div>
+      <div><label>通勤(分)</label><input id="r_comm" type="number" placeholder="20"></div></div>
+      <label>备注(零中介/VR等)</label><input id="r_note" placeholder="零中介费">
+      <button class="btn" onclick="addR()">添加房源</button>
+    </div>
+    <div id="tab_second" style="display:none">
+      <label>物品</label><input id="s_name" placeholder="如 二手书桌">
+      <div class="row"><div><label>分类</label><select id="s_cat"><option>家具</option><option>家电</option><option>教材</option><option>其他</option></select></div>
+      <div><label>价格(元)</label><input id="s_price" type="number" placeholder="200"></div></div>
+      <button class="btn" onclick="addS()">添加二手</button>
+    </div>
+    <div id="tab_job" style="display:none">
+      <label>类型</label><select id="j_type"><option>兼职</option><option>接机</option><option>导师</option></select>
+      <label>内容</label><input id="j_desc" placeholder="如 周末中餐店兼职">
+      <label>时薪/费用(元)</label><input id="j_pay" type="number" placeholder="80">
+      <button class="btn" onclick="addJ()">添加机会</button>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>📋 我的安家清单</b><div id="box"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.cnpinpai.cn/news_hot/75925.html" target="_blank" style="color:var(--coral)">异乡好居 · yeeyi · 港专租</a>
+  </div>
+
+<script>
+const KR="P12-004_rent",KS="P12-004_second",KJ="P12-004_job";
+let R=JSON.parse(localStorage.getItem(KR)||"[]");
+let S=JSON.parse(localStorage.getItem(KS)||"[]");
+let J=JSON.parse(localStorage.getItem(KJ)||"[]");
+function switchTab(t,el){["rent","second","job"].forEach(x=>document.getElementById("tab_"+x).style.display=x===t?"block":"none");
+  document.querySelectorAll("#seg button").forEach(b=>b.classList.remove("on"));el.classList.add("on");render();}
+function addR(){const a=document.getElementById("r_addr").value.trim(),p=document.getElementById("r_price").value,s=document.getElementById("r_school").value.trim(),c=document.getElementById("r_comm").value,n=document.getElementById("r_note").value.trim();
+  if(!a||!p){alert("填房源和月租");return;}R.push({s,a,p:+p,c:+c||0,n,t:new Date().toLocaleDateString()});localStorage.setItem(KR,JSON.stringify(R));render();}
+function addS(){const a=document.getElementById("s_name").value.trim(),c=document.getElementById("s_cat").value,p=document.getElementById("s_price").value;
+  if(!a||!p){alert("填物品和价格");return;}S.push({a,c,p:+p,t:new Date().toLocaleDateString()});localStorage.setItem(KS,JSON.stringify(S));render();}
+function addJ(){const a=document.getElementById("j_desc").value.trim(),c=document.getElementById("j_type").value,p=document.getElementById("j_pay").value;
+  if(!a||!p){alert("填内容和费用");return;}J.push({a,c,p:+p,t:new Date().toLocaleDateString()});localStorage.setItem(KJ,JSON.stringify(J));render();}
+function del(arr,k,i){arr.splice(i,1);localStorage.setItem(k,JSON.stringify(arr));render();}
+function render(){
+  let h="";
+  if(R.length)h+=`<div style="font-size:13px;color:var(--muted);margin-top:8px">🏠 房源(${R.length})</div>`+R.map((x,i)=>`<div class="item"><span class="del" onclick="del(R,'${KR}',${i})">删</span><b>${x.s} · ${x.a}</b><br>¥${x.p}/月 · 通勤${x.c}分 ${x.n?("· "+x.n):""}</div>`).join("");
+  if(S.length)h+=`<div style="font-size:13px;color:var(--muted);margin-top:8px">📦 二手(${S.length})</div>`+S.map((x,i)=>`<div class="item"><span class="del" onclick="del(S,'${KS}',${i})">删</span>${x.a} [${x.c}] · <b>¥${x.p}</b></div>`).join("");
+  if(J.length)h+=`<div style="font-size:13px;color:var(--muted);margin-top:8px">💼 机会(${J.length})</div>`+J.map((x,i)=>`<div class="item"><span class="del" onclick="del(J,'${KJ}',${i})">删</span>${x.c} · ${x.a} · <b>¥${x.p}</b></div>`).join("");
+  document.getElementById("box").innerHTML=h||"<p style='font-size:13px;color:var(--muted)'>还没有记录。</p>";
+}
+render();
+</script>
+</body>
+</html>

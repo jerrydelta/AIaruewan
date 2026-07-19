@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>电商库存/竞品价格监控</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.btn-ghost{background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{text-align:center;padding:10px 4px}
+.stat b{display:block;font-size:20px;color:var(--coral)}
+.stat span{font-size:12px;color:var(--muted)}
+.prod{font-size:13px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;margin-top:8px}
+.warn{color:#E85555}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">micro_saas</span><span class="tag">ecommerce_monitoring</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">电商库存 / 竞品价格监控</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">E-commerce inventory & price monitoring</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">电商卖家两大隐性痛点：库存告急导致销售损失、不知竞品何时降价。库存警报连接 Shopify/Amazon 在缺货前发警报（$19-49/月）；竞品价格监测器追踪对手价变（$29-79/月）。单点监控，运维轻、留存稳。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 库存预警 + 竞品比价</b>
+    <label>商品名</label><input id="pname" placeholder="如：便携榨汁杯">
+    <div class="row">
+      <div><label>我的库存</label><input id="stock" type="number" value="30"></div>
+      <div><label>预警阈值</label><input id="thr" type="number" value="10"></div>
+    </div>
+    <div class="row">
+      <div><label>我的售价</label><input id="myp" type="number" value="99"></div>
+      <div><label>竞品最低价</label><input id="cp" type="number" value="89"></div>
+    </div>
+    <button class="btn" id="add">添加监控</button>
+    <div class="row" style="margin-top:10px">
+      <div class="stat"><b id="cnt">0</b><span>监控商品</span></div>
+      <div class="stat"><b id="low">0</b><span>库存预警</span></div>
+      <div class="stat"><b id="price">0</b><span>被压价</span></div>
+    </div>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P14-015">
+    <div class="collapse-header" id="aiHeader_P14-015" onclick="toggleAI('P14-015')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P14-015" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P14-015">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P14-015" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P14-015')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P14-015" style="display:none;margin-top:10px">
+        <div id="aiMessages_P14-015" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P14-015" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P14-015')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📋 监控看板</b>
+    <p id="empty" style="font-size:13px;color:var(--muted);margin:6px 0 0">还没有商品。</p>
+    <div id="log"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.nxcode.io/zh/resources/news/micro-saas-ideas-2026" target="_blank" style="color:var(--coral)">库存警报系统 / 竞争对手价格监测器</a>
+  </div>
+
+<script>
+const KEY="P14-015";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+const $=id=>document.getElementById(id);
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function add(){
+  if(!pname.value.trim())return;
+  items.push({pname:pname.value.trim(),stock:+stock.value||0,thr:+thr.value||0,myp:+myp.value||0,cp:+cp.value||0});
+  pname.value="";save();
+}
+function del(i){items.splice(i,1);save();}
+function render(){
+  cnt.textContent=items.length;
+  low.textContent=items.filter(x=>x.stock<=x.thr).length;
+  price.textContent=items.filter(x=>x.cp<x.myp).length;
+  if(items.length)empty.style.display="none";else empty.style.display="block";
+  log.innerHTML=items.slice().reverse().map(x=>{
+    const idx=items.indexOf(x);
+    const lowW=x.stock<=x.thr;
+    const priceW=x.cp<x.myp;
+    return `<div class="prod"><span style="float:right;color:var(--coral);cursor:pointer" data-i="${idx}">✕</span>
+      <b>${esc(x.pname)}</b><br>
+      <span style="font-size:12px;color:#666">库存 ${x.stock} / 阈值 ${x.thr}　|　我 ¥${x.myp} · 竞品 ¥${x.cp}</span><br>
+      ${lowW?'<span class="warn">⚠️ 库存告急，快补货！</span> ':''}
+      ${priceW?'<span class="warn">⚠️ 竞品更低 ¥'+(x.myp-x.cp)+' ，考虑调价</span>':''}
+      ${!lowW&&!priceW?'<span style="color:var(--ok)">✅ 健康</span>':''}</div>`;
+  }).join("");
+  document.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>del(+b.dataset.i));
+}
+function esc(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+const cnt=document.getElementById("cnt"),low=document.getElementById("low"),price=document.getElementById("price");
+add.onclick=add;
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

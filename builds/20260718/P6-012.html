@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>小基数女性温和减脂</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.result{background:#FFF0F0;border-radius:10px;padding:12px;font-size:14px;margin-top:8px}
+.timer{font-size:34px;font-weight:700;text-align:center;color:var(--coral);margin:6px 0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">food</span><span class="tag">small_base_women_fasting</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">小基数女性温和减脂</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Gentle fat-loss + intermittent-fasting for small-base women</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">"小基数"减肥人群（每天仅 200 千卡左右小缺口）是明确细分，需要精准但不严苛的工具。大基数减脂 App 不适合小基数/女性（目标被推向亚健康低体重、提醒像被家长唠叨）。机会：面向小基数女性的温和减脂+轻断食，强调"吃的明白比吃什么重要"、避免身材焦虑。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:var(--muted);margin:6px 0 0">输入身高/体重/年龄 → 算基础代谢(BMR)与温和每日目标（缺口≤200kcal，保底不低于健康线）；记录每日饮食热量；附 16:8 轻断食计时。</p>
+    <label>身高(cm)</label><input id="h" type="number" value="162">
+    <label>体重(kg)</label><input id="w" type="number" value="50">
+    <label>年龄</label><input id="age" type="number" value="28">
+    <button class="btn" onclick="calc()">🧮 算温和目标</button>
+    <div class="result" id="res"></div>
+
+    <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px">
+      <b style="color:var(--coral)">⏱ 16:8 轻断食</b>
+      <label>进食窗口开始</label><input id="eatStart" type="time" value="11:00">
+      <button class="btn" onclick="startFast()">▶ 开始计时</button>
+      <div class="timer" id="fastTimer">--:--</div>
+      <p id="fastTxt" style="font-size:13px;color:var(--muted);text-align:center;margin:0"></p>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>🍽 今日饮食记录</b>
+    <div id="foodList"></div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.yeyulingfeng.com/212002.html" target="_blank" style="color:var(--coral)">柠檬轻断食·薄荷健康·食卡卡 榜单</a>
+  </div>
+
+<script>
+const KEY="P6-012";
+let items = JSON.parse(localStorage.getItem(KEY) || "[]");
+let ftick=null;
+function calc(){
+  const h=parseFloat(document.getElementById('h').value), w=parseFloat(document.getElementById('w').value), age=parseFloat(document.getElementById('age').value);
+  if(isNaN(h)||isNaN(w)||isNaN(age)){alert('请完整填写');return;}
+  // Mifflin-St Jeor 女性
+  const bmr=10*w+6.25*h-5*age-161;
+  const maint=Math.round(bmr*1.375);
+  let target=maint-200; if(target<1200)target=1200; // 温和保底
+  document.getElementById('res').innerHTML=
+    `基础代谢 BMR ≈ <b>${Math.round(bmr)}</b> kcal<br>维持热量 ≈ <b>${maint}</b> kcal<br>温和目标（缺口≤200，保底1200）≈ <b style="color:var(--coral)">${target}</b> kcal/天<br><span style="font-size:12px;color:var(--muted)">吃的明白比吃什么重要，慢慢来～</span>`;
+}
+function addFoodPrompt(){
+  const n=prompt('食物名称'); const k=parseFloat(prompt('热量kcal'));
+  if(!n||isNaN(k))return;
+  items.unshift({name:n,kcal:Math.round(k),t:Date.now()});save();
+}
+function del(i){ items.splice(i,1); save(); }
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+function fmt(t){return new Date(t).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function render(){
+  const el=document.getElementById('foodList');
+  const sum=items.reduce((a,b)=>a+b.kcal,0);
+  let html=sum?`<div style="font-size:14px;font-weight:700;color:var(--coral);margin-bottom:6px">今日合计：${sum} kcal</div>`:'';
+  if(!items.length){html+='<p style="font-size:13px;color:var(--muted)">用"记录饮食"按钮添加（演示用浏览器提示框）。</p>';}
+  html+='<button class="btn" onclick="addFoodPrompt()">＋ 记录饮食</button>';
+  if(items.length) html+=items.map((x,i)=>`<div class="item"><span>🍴 ${x.name}<br><span style="font-size:11px;color:var(--muted)">${fmt(x.t)}</span></span><b>${x.kcal}</b><button onclick="del(${i})" style="border:none;background:#FFF0F0;color:var(--coral);border-radius:8px;padding:4px 10px;margin-left:6px">删</button></div>`).join('');
+  el.innerHTML=html;
+}
+function startFast(){
+  const s=document.getElementById('eatStart').value, len=8;
+  const [h,m]=s.split(':').map(Number);
+  const eatMins=h*60+m, endMins=(eatMins+len*60)%1440;
+  clearInterval(ftick);
+  const upd=()=>{
+    const cur=new Date(); const curM=cur.getHours()*60+cur.getMinutes();
+    let remain; const inWindow=curM>=eatMins&&curM<endMins;
+    if(inWindow)remain=endMins-curM; else if(curM<eatMins)remain=eatMins-curM; else remain=(1440-curM)+eatMins;
+    const hh=String(Math.floor(remain/60)).padStart(2,'0'),mm=String(remain%60).padStart(2,'0');
+    document.getElementById('fastTimer').textContent=hh+':'+mm;
+    document.getElementById('fastTxt').textContent=inWindow?'✅ 进食窗口中':'🌙 fasting 中，距进食 '+hh+':'+mm;
+  };
+  upd(); ftick=setInterval(upd,1000*30);
+}
+render();
+</script>
+</body>
+</html>

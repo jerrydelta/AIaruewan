@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>学生专属记账</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.mini{font-size:14px;margin:14px 0 4px;font-weight:600;color:var(--ink);
+  border-left:4px solid var(--coral);padding-left:8px}
+.item{background:#FBFBFB;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.del{color:var(--coral);float:right;font-size:13px;cursor:pointer}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.cats{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.cats button{padding:7px 10px;border:1px solid var(--line);background:#fff;border-radius:99px;font-size:13px;cursor:pointer}
+.cats button.on{background:var(--coral);color:#fff;border-color:var(--coral)}
+.warn{color:#E85555;font-weight:600}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">student</span><span class="tag">student_budgeting</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">学生专属记账</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Student budgeting (semester bills + category budgets + saving)</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">大学生消费管理是稳定刚需：随手记把多场景账本列为生活管理类必备。痛点：学生收入单一、暴饮暴食式消费、教材/社交/食堂预算失控。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <div class="mini">💰 记一笔</div>
+    <label>金额(元)</label><input id="amt" type="number" placeholder="如 25">
+    <label>分类</label>
+    <div class="cats" id="cats">
+      <button class="on" data-c="食堂" onclick="pick(this)">🍚食堂</button>
+      <button data-c="教材" onclick="pick(this)">📚教材</button>
+      <button data-c="社交" onclick="pick(this)">🎉社交</button>
+      <button data-c="交通" onclick="pick(this)">🚌交通</button>
+      <button data-c="其他" onclick="pick(this)">✨其他</button>
+    </div>
+    <label>备注</label><input id="note" placeholder="如 中午麻辣烫">
+    <button class="btn" onclick="add()">记账</button>
+
+    <div class="mini">🎯 学期/月度预算</div>
+    <div class="row">
+      <div><label>周期</label><select id="cyc"><option>本月</option><option>本学期</option></select></div>
+      <div><label>预算(元)</label><input id="bud" type="number" placeholder="1500"></div>
+    </div>
+    <button class="btn" onclick="setBud()">设预算</button>
+    <p id="stat" style="font-size:14px;margin:8px 0 0"></p>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P12-008">
+    <div class="collapse-header" id="aiHeader_P12-008" onclick="toggleAI('P12-008')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P12-008" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P12-008">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P12-008" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P12-008')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P12-008" style="display:none;margin-top:10px">
+        <div id="aiMessages_P12-008" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P12-008" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P12-008')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"><b>📋 账单 & 分类分析</b><div id="box"></div></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://www.toutiao.com/article/7621437353907487272" target="_blank" style="color:var(--coral)">随手记 · 口袋记账</a>
+  </div>
+
+<script>
+const K="P12-008_bills",KB="P12-008_budget";
+let items=JSON.parse(localStorage.getItem(K)||"[]");
+let B=JSON.parse(localStorage.getItem(KB)||"{}");
+let cur="食堂";
+function pick(el){document.querySelectorAll("#cats button").forEach(b=>b.classList.remove("on"));el.classList.add("on");cur=el.dataset.c;}
+function add(){const a=parseFloat(document.getElementById("amt").value),n=document.getElementById("note").value.trim();
+  if(isNaN(a)){alert("填金额");return;}items.push({a,c:cur,n,t:new Date().toLocaleDateString()});localStorage.setItem(K,JSON.stringify(items));render();}
+function setBud(){const c=document.getElementById("cyc").value,b=parseFloat(document.getElementById("bud").value);if(isNaN(b)){alert("填预算");return;}B[c]=b;localStorage.setItem(KB,JSON.stringify(B));render();}
+function del(i){items.splice(i,1);localStorage.setItem(K,JSON.stringify(items));render();}
+function render(){
+  const sum=items.reduce((s,x)=>s+x.a,0);
+  let h=`<p style="font-size:13px">总支出 <b>¥${sum.toFixed(0)}</b> · ${items.length} 笔</p>`;
+  ["本月","本学期"].forEach(c=>{if(B[c]){const over=sum>B[c];h+=`<p style="font-size:13px">${c}预算 ¥${B[c]} · ${over?`<span class="warn">超支 ¥${(sum-B[c]).toFixed(0)}</span>`:`<span style="color:var(--ok)">剩 ¥${(B[c]-sum).toFixed(0)}</span>`}</p>`;}});
+  const byc={};items.forEach(x=>byc[x.c]=(byc[x.c]||0)+x.a);
+  h+=`<div style="font-size:13px;color:var(--muted);margin-top:6px">分类占比</div>`+Object.keys(byc).map(c=>`<div style="font-size:13px;margin-top:3px">${c}：¥${byc[c].toFixed(0)}（${Math.round(byc[c]/sum*100||0)}%）</div>`).join("");
+  h+=items.slice().reverse().map((x,i)=>`<div class="item"><span class="del" onclick="del(${items.length-1-i})">删</span>${x.t} · [${x.c}] ${x.n} · <b>¥${x.a}</b></div>`).join("");
+  document.getElementById("box").innerHTML=h||"<p style='font-size:13px;color:var(--muted)'>还没有账单。</p>";
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

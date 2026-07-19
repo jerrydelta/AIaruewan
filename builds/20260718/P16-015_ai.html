@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>中国成熟记账本地化·稳定同步无广告</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.res{font-size:14px;margin-top:8px;padding:10px;border-radius:10px;background:#FFF7F7}
+.res b{color:var(--coral)}
+li{list-style:none;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+ul{padding:0;margin:6px 0 0}
+.del{color:var(--muted);font-size:12px;border:none;background:none;cursor:pointer;float:right}
+.pill{font-size:11px;padding:1px 7px;border-radius:999px;background:#FFF0F0;color:var(--coral);margin-right:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">finance</span><span class="tag">china_budget_app_to_jk</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">中国记账·本地化搬日韩</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Localize a mature CN budget app: stable sync + no-ads</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">中国记账 App 成熟度远高于日韩：钱迹 10+ 年、1000 万+ 下载、无广告、多端同步、买断制。而日本 Zaim/MF 天天连携故障、韩国预算 App 资产整合弱。机会：把中国成熟记账产品本地化搬入日韩，填补体验洼地。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具</b>
+    <p style="font-size:13px;color:#777;margin:6px 0 0">多账户（现金/银行卡/支付宝/微信）记账 + 细分分类 + 一键导出 CSV（买断无广告体验）。</p>
+    <label>账户</label>
+    <select id="acc"><option>现金</option><option>银行卡</option><option>支付宝</option><option>微信</option><option>其他</option></select>
+    <label>类型</label>
+    <select id="type"><option value="支出">支出</option><option value="收入">收入</option><option value="转账">转账</option></select>
+    <label>分类</label>
+    <input type="text" id="cat" placeholder="餐饮/交通/工资/理财...">
+    <div class="row">
+      <div><label>金额</label><input type="number" id="amt" placeholder="50" inputmode="numeric" step="any"></div>
+      <div><label>日期</label><input type="date" id="date"></div>
+    </div>
+    <button class="btn" onclick="add()">＋ 记一笔</button>
+    <button class="btn" style="background:#fff;color:var(--coral);border:1px solid var(--coral)" onclick="exportCSV()">⬇ 导出 CSV</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P16-015">
+    <div class="collapse-header" id="aiHeader_P16-015" onclick="toggleAI('P16-015')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P16-015" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P16-015">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P16-015" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P16-015')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P16-015" style="display:none;margin-top:10px">
+        <div id="aiMessages_P16-015" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P16-015" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P16-015')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list">
+    <b>📒 多账户台账</b>
+    <div class="res" id="res"></div>
+    <ul id="ul"></ul>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://global.v2ex.co/t/1162182" target="_blank" style="color:var(--coral)">钱迹(Qianji) / 一木记账 / 咔皮记账</a>
+  </div>
+
+<script>
+const KEY="P16-015";
+let items=JSON.parse(localStorage.getItem(KEY)||"[]");
+function fmt(n){return (n||0).toLocaleString(undefined,{maximumFractionDigits:2})+"";
+}
+function add(){
+  const acc=document.getElementById("acc").value;
+  const type=document.getElementById("type").value;
+  const cat=document.getElementById("cat").value.trim()||"其他";
+  const amt=parseFloat(document.getElementById("amt").value);
+  const date=document.getElementById("date").value||new Date().toISOString().slice(0,10);
+  if(!amt||amt<=0){alert("请输入金额");return;}
+  items.unshift({acc,type,cat,amt,date,t:Date.now()});
+  document.getElementById("cat").value="";document.getElementById("amt").value="";
+  save();
+}
+function del(t){items=items.filter(x=>x.t!==t);save();}
+function exportCSV(){
+  if(!items.length){alert("暂无数据");return;}
+  let csv="日期,账户,类型,分类,金额\n";
+  items.forEach(x=>{csv+=`${x.date},${x.acc},${x.type},${x.cat},${x.amt}\n`;});
+  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="budget_export.csv";a.click();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
+function render(){
+  const ul=document.getElementById("ul");ul.innerHTML="";
+  let exp=0,inc=0;const accs={};
+  items.forEach(x=>{
+    if(x.type==="支出")exp+=x.amt; else if(x.type==="收入")inc+=x.amt;
+    if(x.type!=="转账")accs[x.acc]=(accs[x.acc]||0)+(x.type==="收入"?x.amt:-x.amt);
+    const li=document.createElement("li");
+    li.innerHTML=`<button class="del" onclick="del(${x.t})">删除</button>
+      <span class="pill">${x.acc}</span>${x.date} · ${x.type} · ${x.cat} · ${fmt(x.amt)}`;
+    ul.appendChild(li);
+  });
+  let accHtml="账户净额：";
+  Object.keys(accs).forEach(a=>accHtml+=` ${a} ${fmt(accs[a])} ｜`);
+  document.getElementById("res").innerHTML=
+    `本月结余 <b>${fmt(inc-exp)}</b>（收 ${fmt(inc)} / 支 ${fmt(exp)}）<br>${accHtml.slice(0,-1)}`;
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>

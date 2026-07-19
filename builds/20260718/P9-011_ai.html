@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>隐私安全优先的独行女性轻守护</title>
+<style>
+:root{
+  --coral:#FF6B6B;--coral-dark:#E85555;--ink:#2D2D2D;--muted:#8A8A8A;
+  --bg:#F7F7F7;--card:#FFFFFF;--line:#ECECEC;--ok:#3FB984;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  line-height:1.6;padding:16px;max-width:480px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.h-coral{color:var(--coral)}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--coral);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:active{background:var(--coral-dark)}
+.tag{display:inline-block;font-size:11px;color:var(--coral);
+  background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);
+  border-radius:10px;font-size:15px;margin-top:6px;background:#fff;color:var(--ink)}
+label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:10px 0;font-size:14px}
+.item:first-child{border-top:none}
+.del{background:none;border:none;color:var(--coral);font-size:13px;cursor:pointer;float:right;margin-top:-2px}
+.switch{display:flex;align-items:center;justify-content:space-between;font-size:14px;margin-top:10px}
+.switch input{width:auto}
+.badge{display:inline-block;font-size:11px;background:#EAF7F0;color:var(--ok);border-radius:6px;padding:1px 6px;margin-left:4px}
+.badge.off{background:#EEE;color:#999}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div><span class="tag">creative</span><span class="tag ai">AI增强</span><span class="tag">travel</span><span class="tag">china_solo_female_safety</span></div>
+    <h1 style="font-size:20px;margin:8px 0 4px">隐私优先的独行女性守护</h1>
+    <p class="h-coral" style="font-size:13px;margin:0">Privacy-first lightweight safety guardian</p>
+  </div>
+
+  <div class="card">
+    <b>💡 痛点</b>
+    <p style="font-size:14px;color:#555;margin:6px 0 0">现有安全 App 重"警示"轻"真实守护"，隐私设置反成风险放大器（默认持续位置广播下车后仍可追踪）。需隐私默认关、加密报备 + 双定位 + 紧急链路的轻守护。</p>
+  </div>
+
+  <div class="card">
+    <b>🛠 工具 · 行程报备 + 双定位打卡 + 隐私开关</b>
+    <p style="font-size:13px;color:#555;margin:6px 0 0">加密报备行程，每 2 小时手动打卡留痕（双定位模拟），隐私广播默认关闭，紧急联系人直连。</p>
+    <div class="row">
+      <div><label>报备目的地</label><input id="to" placeholder="如 纳木错"></div>
+      <div><label>计划时间</label><input id="when" placeholder="如 18:00"></div>
+    </div>
+    <button class="btn" onclick="addTrip()">＋ 加密报备</button>
+    <button class="btn" onclick="checkin()" style="background:#FFF0F0;color:var(--coral);border:1px solid #FFD9D9">📍 立即双定位打卡</button>
+    <div class="switch">隐私：位置广播默认关闭<input type="checkbox" id="broadcast"><span id="bcState" class="badge off">关闭</span></div>
+    <hr style="border:none;border-top:1px solid var(--line);margin:14px 0">
+    <div class="row">
+      <div><label>紧急联系人</label><input id="eName" placeholder="如 家人"></div>
+      <div><label>电话</label><input id="eTel" placeholder="如 139xxxx"></div>
+    </div>
+    <button class="btn" onclick="saveEmergency()">保存紧急链路</button>
+  </div>
+
+  
+  <!-- AI助手模块 -->
+  <div class="card ai" id="aiCard_P9-011">
+    <div class="collapse-header" id="aiHeader_P9-011" onclick="toggleAI('P9-011')" style="font-size:15px;font-weight:600;color:var(--ai-border)">
+      🤖 AI 助手（用户自带Key · 零成本）
+    </div>
+    <div class="collapse-body collapsed" id="aiBody_P9-011" style="max-height:500px;margin-top:10px">
+      <div id="aiKeySection_P9-011">
+        <label>Hy3 API Key（填写你自己的Key，零成本使用AI）</label>
+        <input id="apiKey_P9-011" type="password" placeholder="输入你的 Hy3 API Key" style="margin-bottom:8px">
+        <button class="btn ai" onclick="saveKey('P9-011')">保存 Key</button>
+        <p style="font-size:11px;color:var(--muted);margin:6px 0 0">Key 仅存储在你的浏览器本地，不会上传到任何服务器。没有Key？<a href="#" style="color:var(--ai-border)">点此免费获取</a>。</p>
+      </div>
+      <div id="aiChatSection_P9-011" style="display:none;margin-top:10px">
+        <div id="aiMessages_P9-011" style="max-height:300px;overflow-y:auto"></div>
+        <textarea id="aiInput_P9-011" placeholder="向AI提问..." style="margin-top:8px;height:60px"></textarea>
+        <button class="btn ai" onclick="aiChat('P9-011')" style="margin-top:4px">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="list"></div>
+
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <b>来源参考</b><br>
+    <a href="https://guokr.com/article/461692" target="_blank" style="color:var(--coral)">360手机卫士 · iPhone紧急联络（对照参考）</a>
+  </div>
+
+<script>
+const KEY="P9-011";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"trips":[],"checks":[],"emergency":null,"broadcast":false}');
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function now(){const d=new Date();return d.toLocaleString("zh-CN",{hour12:false});}
+function addTrip(){
+  const to=document.getElementById("to").value.trim(), when=document.getElementById("when").value.trim();
+  if(!to){alert("请输入目的地");return;}
+  data.trips.push({to,when});document.getElementById("to").value="";document.getElementById("when").value="";save();
+}
+function checkin(){
+  data.checks.push(now());
+  if(data.checks.length>20)data.checks.shift();
+  save();
+}
+function saveEmergency(){
+  const n=document.getElementById("eName").value.trim(), t=document.getElementById("eTel").value.trim();
+  if(!n){alert("请输入联系人");return;}
+  data.emergency={n,t};document.getElementById("eName").value="";document.getElementById("eTel").value="";save();
+}
+document.getElementById("broadcast").addEventListener("change",function(){
+  data.broadcast=this.checked;
+  document.getElementById("bcState").textContent=this.checked?"开启":"关闭";
+  document.getElementById("bcState").className=this.checked?"badge":"badge off";
+  save();
+});
+function del(k,i){data[k].splice(i,1);save();}
+function render(){
+  document.getElementById("broadcast").checked=data.broadcast;
+  document.getElementById("bcState").textContent=data.broadcast?"开启":"关闭";
+  document.getElementById("bcState").className=data.broadcast?"badge":"badge off";
+  let t="<b style='font-size:14px'>📝 加密行程报备（"+data.trips.length+"）</b>";
+  data.trips.forEach((x,i)=>{t+=`<div class='item'><button class='del' onclick='del("trips",${i})'>删除</button><b>${x.to}</b> <span class='tag'>${x.when||"未设时间"}</span></div>`;});
+  let c="<b style='font-size:14px'>📍 双定位打卡（"+data.checks.length+"）</b>";
+  data.checks.slice().reverse().forEach((x,i)=>{const idx=data.checks.length-1-i;c+=`<div class='item'><button class='del' onclick='del("checks",${idx})'>删除</button><span style='font-size:13px;color:#555'>${x}</span></div>`;});
+  let e="<b style='font-size:14px'>🚨 紧急链路</b>";
+  e+=data.emergency?`<div class='item'><b>${data.emergency.n}</b> <span class='tag'>${data.emergency.t||"无电话"}</span></div>`:`<div class='item' style='color:#999;font-size:13px'>未设置</div>`;
+  document.getElementById("list").innerHTML=t+c+e;
+}
+render();
+
+// === AI助手模块（用户自带Key模式）===
+let aiKey = localStorage.getItem("HY3_API_KEY") || "";
+let aiHistory = [];
+
+function toggleAI(id){
+  const body = document.getElementById("aiBody_" + id);
+  const header = document.getElementById("aiHeader_" + id);
+  if(body.classList.contains("collapsed")){
+    body.classList.remove("collapsed");
+    header.classList.remove("collapsed");
+  } else {
+    body.classList.add("collapsed");
+    header.classList.add("collapsed");
+  }
+}
+
+function saveKey(id){
+  const key = document.getElementById("apiKey_" + id).value.trim();
+  if(!key){alert("请输入Key");return;}
+  localStorage.setItem("HY3_API_KEY", key);
+  aiKey = key;
+  document.getElementById("aiKeySection_" + id).style.display="none";
+  document.getElementById("aiChatSection_" + id).style.display="block";
+}
+
+async function callHy3(messages, id){
+  if(!aiKey){alert("请先填写 API Key");return null;}
+  const loading = document.createElement("div");
+  loading.className = "ai-msg";
+  loading.innerHTML = `<div class="role">🤖 AI</div><div class="content"><span class="loading">思考中...</span></div>`;
+  document.getElementById("aiMessages_" + id).appendChild(loading);
+  
+  try {
+    const res = await fetch("https://tokenhub.tencentmaas.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + aiKey
+      },
+      body: JSON.stringify({
+        model: "hy3",
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+    const data = await res.json();
+    loading.remove();
+    if(data.error){alert("API错误："+data.error.message);return null;}
+    return data.choices[0].message.content;
+  } catch(e){
+    loading.remove();
+    alert("调用失败："+e.message);
+    return null;
+  }
+}
+
+function addMsg(role, content, id){
+  const box = document.getElementById("aiMessages_" + id);
+  if(!box)return;
+  const div = document.createElement("div");
+  div.className = "ai-msg";
+  div.innerHTML = `<div class="role">${role==="user"?"🙋 你":"🤖 AI"}</div><div class="content">${content.replace(/\n/g,"<br>")}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function aiChat(id){
+  const input = document.getElementById("aiInput_" + id).value.trim();
+  if(!input){return;}
+  document.getElementById("aiInput_" + id).value = "";
+  addMsg("user", input, id);
+  const msgs = [
+    {role:"system",content:"你是这个工具的AI助手，帮助用户更好地使用本工具，提供专业建议和优化方案。用中文简洁回答。"},
+    {role:"user",content:input}
+  ];
+  const reply = await callHy3(msgs, id);
+  if(reply) addMsg("assistant", reply, id);
+}
+
+</script>
+</body>
+</html>
