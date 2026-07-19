@@ -36,33 +36,47 @@ def main():
     if not date:
         raise SystemExit("builds/ 下没有产物目录")
 
-    plan_path = os.path.join(ROOT, f"build_plan_{date}.json")
-    if not os.path.exists(plan_path):
-        raise SystemExit(f"找不到 build_plan_{date}.json，请先跑 build_factory.py")
-    plan = json.load(open(plan_path, encoding="utf-8"))
-
     html_dir = os.path.join(ROOT, "builds", date)
     existing = {os.path.splitext(os.path.basename(f))[0]
                 for f in glob.glob(os.path.join(html_dir, "*.html"))}
 
+    # 汇总线索：优先从 agent_run<date>_P*.json 的 clues 读取（源数据最全）
+    leads_raw = []
+    for af in sorted(glob.glob(os.path.join(ROOT, f"agent_run{date}_P*.json"))):
+        try:
+            ad = json.load(open(af, encoding="utf-8"))
+        except Exception:
+            continue
+        clues = ad.get("clues", []) if isinstance(ad, dict) else []
+        leads_raw.extend(clues)
+
+    # 兜底：若没有 agent_run 文件，则从 build_plan 读取
+    if not leads_raw:
+        plan_path = os.path.join(ROOT, f"build_plan_{date}.json")
+        if os.path.exists(plan_path):
+            plan = json.load(open(plan_path, encoding="utf-8"))
+            for agent in plan.get("agents", {}).values():
+                leads_raw.extend(agent.get("leads", []))
+
     # 汇总所有 lead
     leads = []
-    for agent_key, agent in plan.get("agents", {}).items():
-        for lead in agent.get("leads", []):
-            nid = norm(lead.get("id", ""))
-            # 匹配实际文件：精确 / 前缀（带后缀情况）
-            fname = nid if nid in existing else next(
-                (b for b in existing if b.startswith(nid)), None)
-            leads.append({
-                "id": lead.get("id"),
-                "category": lead.get("category"),
-                "subcategory": lead.get("subcategory"),
-                "direction": lead.get("direction"),
-                "direction_en": lead.get("direction_en"),
-                "tags": lead.get("tags", []),
-                "html": f"{fname}.html" if fname else None,
-                "built": fname is not None,
-            })
+    for lead in leads_raw:
+        nid = norm(lead.get("id", ""))
+        # 匹配实际文件：精确 / 前缀（带后缀情况）
+        fname = nid if nid in existing else next(
+            (b for b in existing if b.startswith(nid)), None)
+        ai_html = f"{fname}_ai.html" if (fname and f"{fname}_ai" in existing) else None
+        leads.append({
+            "id": lead.get("id"),
+            "category": lead.get("category"),
+            "subcategory": lead.get("subcategory"),
+            "direction": lead.get("direction"),
+            "direction_en": lead.get("direction_en"),
+            "tags": lead.get("tags", []),
+            "html": f"{fname}.html" if fname else None,
+            "ai_html": ai_html,
+            "built": fname is not None,
+        })
 
     built = sum(1 for l in leads if l["built"])
     missing = [l["id"] for l in leads if not l["built"]]
@@ -82,18 +96,30 @@ def main():
         if not l["built"]:
             continue
         tag_html = "".join(f'<span class="tag">{t}</span>' for t in (l["tags"] or [])[:4])
+        ai_btn = ""
+        if l["ai_html"]:
+            ai_btn = f'<a class="btn ai" href="{l["ai_html"]}" target="_blank">🤖 AI付费版 →</a>'
+        badge = '<span class="badge">含AI</span>' if l["ai_html"] else ""
         cards.append(f'''
-    <a class="card" href="{l['html']}" target="_blank">
-      <div class="meta"><span class="cat">{l['category']}</span></div>
+    <div class="card">
+      <div class="meta"><span class="cat">{l['category']}</span>{badge}</div>
       <div class="title">{l['direction']}</div>
       <div class="en">{l['direction_en']}</div>
       <div class="tags">{tag_html}</div>
-    </a>''')
+      <div class="btns">
+        <a class="btn base" href="{l['html']}" target="_blank">免费基础版 →</a>
+        {ai_btn}
+      </div>
+    </div>''')
+
+    ai_count = sum(1 for l in leads if l["ai_html"])
 
     cat_btns = "".join(
         f'<button class="chip" data-cat="{c}" onclick="filterCat(\'{c}\')">{c}</button>'
         for c in cats)
-    cat_btns = '<button class="chip active" data-cat="*" onclick="filterCat(\'*\')">全部</button>' + cat_btns
+    cat_btns = '<button class="chip active" data-cat="*" onclick="filterCat(\'*\')">全部</button>' \
+               + '<button class="chip" data-cat="__ai__" onclick="filterCat(\'__ai__\')">🤖 含AI版</button>' \
+               + cat_btns
 
     html = f'''<!DOCTYPE html>
 <html lang="zh"><head><meta charset="utf-8">
@@ -109,22 +135,30 @@ h1{{font-size:22px;margin:10px 0}}
 .chip{{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer}}
 .chip.active{{background:var(--coral);color:#fff;border-color:var(--coral)}}
 .grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}}
-.card{{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;transition:.15s}}
+.card{{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;transition:.15s}}
 .card:hover{{box-shadow:0 4px 16px rgba(255,107,107,.15);transform:translateY(-2px)}}
+.meta{{display:flex;align-items:center;gap:6px}}
 .cat{{font-size:11px;color:var(--coral);background:#FFF0F0;padding:2px 8px;border-radius:999px}}
+.badge{{font-size:10px;color:#fff;background:#7C3AED;padding:2px 7px;border-radius:999px}}
 .title{{font-size:15px;font-weight:600;margin:8px 0 2px}}
 .en{{font-size:12px;color:var(--muted);margin-bottom:8px}}
 .tags .tag{{font-size:10px;color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9;border-radius:999px;padding:1px 7px;margin:2px 3px 0 0;display:inline-block}}
+.btns{{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}}
+.btn{{flex:1;text-align:center;text-decoration:none;font-size:13px;font-weight:600;padding:8px 10px;border-radius:10px;min-width:120px}}
+.btn.base{{color:var(--coral);background:#FFF0F0;border:1px solid #FFD9D9}}
+.btn.ai{{color:#fff;background:linear-gradient(135deg,#7C3AED,#FF6B6B);border:1px solid transparent}}
 </style></head><body>
 <h1>🏭 手搓应用工厂 · 产品目录</h1>
-<div>批次 <span class="stat">{date}</span> ｜ 产品 <span class="stat">{built}</span> / {len(leads)} 条线索已建成可运行单文件 HTML</div>
+<div>批次 <span class="stat">{date}</span> ｜ 产品 <span class="stat">{built}</span> / {len(leads)} ｜ 🤖 含AI付费版 <span class="stat">{ai_count}</span></div>
 <div class="chips">{cat_btns}</div>
 <div class="grid" id="grid">{''.join(cards)}</div>
 <script>
 function filterCat(cat){{
   document.querySelectorAll('.chip').forEach(b=>b.classList.toggle('active',b.dataset.cat===cat));
   document.querySelectorAll('.card').forEach(c=>{{
-    const show = cat==='*' || c.querySelector('.cat').textContent===cat;
+    if(cat==='*'){{c.style.display='';return;}}
+    if(cat==='__ai__'){{c.style.display = c.querySelector('.badge') ? '' : 'none';return;}}
+    const show = c.querySelector('.cat').textContent===cat;
     c.style.display = show ? '' : 'none';
   }});
 }}
@@ -150,7 +184,7 @@ h1{{color:#FF6B6B}}li{{margin:8px 0}}a{{color:#FF6B6B}}</style></head>
     with open(os.path.join(ROOT, "builds", "index.html"), "w", encoding="utf-8") as fp:
         fp.write(global_html)
 
-    print(f"批次 {date}: 线索 {len(leads)} / 已建成 {built} / 缺失 {len(missing)}")
+    print(f"批次 {date}: 线索 {len(leads)} / 已建成 {built} / 含AI付费版 {ai_count} / 缺失 {len(missing)}")
     if missing:
         print("缺失:", missing)
     print(f"目录 -> builds/{date}/index.html | 全局 -> builds/index.html")
